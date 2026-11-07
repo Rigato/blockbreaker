@@ -73,6 +73,7 @@ async function start(): Promise<void> {
     root: uiRoot,
     platform,
     game,
+    controller: game,
     boot,
     debug: options.debug,
   });

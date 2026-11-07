@@ -1,4 +1,9 @@
-import type { PlatformSource, Unsubscribe } from './contracts';
+import type {
+  HudSnapshot,
+  PlatformSource,
+  SimTuning,
+  Unsubscribe,
+} from './contracts';
 
 /**
  * Application-wide typed events.
@@ -21,6 +26,8 @@ export interface GameEventMap {
   'platform:pause-changed': { paused: boolean };
   'platform:audio-changed': { enabled: boolean };
   'save:reset': { keys: readonly string[] };
+  'hud:changed': HudSnapshot;
+  'tuning:changed': SimTuning;
 }
 
 export class TypedEventBus<T extends object> {

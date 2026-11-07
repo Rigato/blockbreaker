@@ -1,28 +1,45 @@
 import Phaser from 'phaser';
+import { BLOCK_TOP, FIELD_WIDTH, type World } from '../sim/World';
+import { BLOCK_TYPES } from '../sim/blocks';
+
+export interface GameSceneOptions {
+  world: World;
+  onFrame: (deltaMs: number) => void;
+  onReady: () => void;
+}
 
 /**
- * M0 placeholder scene. It paints the portrait field background; gameplay
- * objects arrive in M1. The scene reports readiness so the boot flow can send
- * `game_ready` only once the menu is interactive.
+ * Placeholder M1 renderer. Everything is drawn with Phaser Graphics from the
+ * pure world state; no gameplay logic lives here.
  */
 export class GameScene extends Phaser.Scene {
+  private readonly world: World;
+  private readonly onFrame: (deltaMs: number) => void;
   private readonly onReady: () => void;
   private backdrop?: Phaser.GameObjects.Graphics;
+  private field?: Phaser.GameObjects.Graphics;
 
-  constructor(onReady: () => void) {
+  constructor(options: GameSceneOptions) {
     super({ key: 'GameScene' });
-    this.onReady = onReady;
+    this.world = options.world;
+    this.onFrame = options.onFrame;
+    this.onReady = options.onReady;
   }
 
   create(): void {
     this.cameras.main.setBackgroundColor('#080b16');
-    this.backdrop = this.add.graphics();
+    this.backdrop = this.add.graphics().setDepth(-10);
+    this.field = this.add.graphics().setDepth(0);
     this.drawBackdrop();
 
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
-
     this.onReady();
+  }
+
+  update(_time: number, delta: number): void {
+    this.onFrame(delta);
+    this.drawWorld();
   }
 
   private handleResize(): void {
@@ -37,42 +54,133 @@ export class GameScene extends Phaser.Scene {
     const graphics = this.backdrop;
     if (!graphics) return;
 
-    const width = Math.max(1, this.scale.width);
-    const height = Math.max(1, this.scale.height);
+    const width = FIELD_WIDTH;
+    const height = this.world.height;
     graphics.clear();
 
-    graphics.fillGradientStyle(0x060912, 0x070b16, 0x0d1b38, 0x091226, 1);
+    graphics.fillGradientStyle(0x070b16, 0x070b16, 0x0b1730, 0x091226, 1);
     graphics.fillRect(0, 0, width, height);
 
-    // Soft arcane glows, kept behind the DOM menu.
-    graphics.fillStyle(0x0f6b83, 0.09);
-    graphics.fillCircle(width * 0.5, height * 0.22, width * 0.55);
-    graphics.fillStyle(0x3a1d63, 0.2);
-    graphics.fillCircle(width * 0.5, height * 1.04, width * 0.8);
+    // Field glow behind the block area.
+    graphics.fillStyle(0x0f6b83, 0.08);
+    graphics.fillCircle(width / 2, height * 0.32, width * 0.62);
+    graphics.fillStyle(0x3a1d63, 0.14);
+    graphics.fillCircle(width / 2, height * 1.02, width * 0.8);
 
-    // Faint crystal silhouette.
-    const centerX = width * 0.5;
-    const centerY = height * 0.44;
-    const size = Math.min(width, height) * 0.17;
-    graphics.fillStyle(0x7ee7ff, 0.04);
-    graphics.beginPath();
-    graphics.moveTo(centerX, centerY - size);
-    graphics.lineTo(centerX + size * 0.58, centerY - size * 0.18);
-    graphics.lineTo(centerX + size * 0.3, centerY + size);
-    graphics.lineTo(centerX - size * 0.34, centerY + size * 0.82);
-    graphics.lineTo(centerX - size * 0.58, centerY - size * 0.22);
-    graphics.closePath();
-    graphics.fillPath();
+    // Playfield walls.
+    graphics.lineStyle(3, 0x2f6f9a, 0.9);
+    graphics.lineBetween(1.5, 0, 1.5, height);
+    graphics.lineBetween(width - 1.5, 0, width - 1.5, height);
+    graphics.lineBetween(0, 1.5, width, 1.5);
 
-    // Dot lattice to make canvas resizing obvious during QA.
-    const spacing = Math.max(26, Math.round(width / 11));
-    graphics.fillStyle(0x24406f, 0.32);
-    for (let y = spacing; y < height; y += spacing) {
-      for (let x = spacing; x < width; x += spacing) {
-        graphics.fillRect(x, y, 2, 2);
+    // Faint guide above the paddle.
+    const guideY = this.world.paddle.y + this.world.paddle.height / 2 + 40;
+    graphics.lineStyle(1, 0x64e7ff, 0.1);
+    graphics.lineBetween(0, guideY, width, guideY);
+
+    graphics.setDepth(-10);
+  }
+
+  private drawWorld(): void {
+    const graphics = this.field;
+    if (!graphics) return;
+    graphics.clear();
+
+    const world = this.world;
+
+    // Lane markers behind the blocks.
+    graphics.fillStyle(0x10233f, 0.35);
+    for (let row = 0; row < 3; row += 1) {
+      const y = BLOCK_TOP + row * 100;
+      graphics.fillRect(0, y, FIELD_WIDTH, 1);
+    }
+
+    for (const block of world.blocks) {
+      const type = BLOCK_TYPES[block.type];
+      const flash = block.flashMs > 0;
+      const baseColor = flash ? 0xffffff : type.color;
+      const alpha = block.type === 'obsidian' ? 0.9 : 0.82;
+
+      graphics.fillStyle(0x03060d, 0.55);
+      graphics.fillRoundedRect(block.left + 3, block.top + 4, block.width, block.height, 6);
+      graphics.fillStyle(baseColor, alpha);
+      graphics.fillRoundedRect(block.left, block.top, block.width, block.height, 6);
+
+      graphics.lineStyle(2, 0x0a1220, 0.7);
+      graphics.strokeRoundedRect(block.left, block.top, block.width, block.height, 6);
+      if (block.type === 'stone' || block.type === 'obsidian') {
+        graphics.lineStyle(1, 0xffffff, 0.28);
+        graphics.strokeRoundedRect(block.left + 3, block.top + 3, block.width - 6, block.height - 6, 4);
+      }
+
+      // HP pips: one per remaining hit point.
+      const pipSize = Math.max(3, Math.round(block.width * 0.055));
+      const pipY = block.top + block.height - pipSize - 7;
+      for (let pip = 0; pip < block.hp; pip += 1) {
+        graphics.fillStyle(0x050912, 0.7);
+        graphics.fillRect(block.left + 8 + pip * (pipSize + 4), pipY, pipSize, pipSize);
+        graphics.fillStyle(0xffffff, 0.65);
+        graphics.fillRect(block.left + 8 + pip * (pipSize + 4) + 1, pipY + 1, pipSize - 2, pipSize - 2);
+      }
+
+      // Cracks communicate damage without relying on colour.
+      const damage = block.maxHp - block.hp;
+      if (damage > 0) {
+        graphics.lineStyle(2, 0x050912, 0.65);
+        const stepX = block.width / (damage + 1);
+        for (let crack = 0; crack < damage; crack += 1) {
+          const x = block.left + stepX * (crack + 1);
+          graphics.lineBetween(x - 6, block.top + 8, x + 7, block.top + block.height * 0.55);
+          graphics.lineBetween(x + 7, block.top + block.height * 0.55, x - 4, block.top + block.height - 8);
+        }
       }
     }
 
-    graphics.setDepth(-10);
+    // Paddle, projectiles and balls are only shown once the run has started.
+    // The menu keeps the wave preview but hides the resting paddle bar behind
+    // the Play button.
+    if (!world.isRunning) {
+      graphics.setDepth(0);
+      return;
+    }
+
+    // Paddle.
+    const paddle = world.paddle;
+    const paddleLeft = paddle.x - paddle.width / 2;
+    const paddleTop = paddle.y - paddle.height / 2;
+    graphics.fillStyle(0x0a1a2c, 0.9);
+    graphics.fillRoundedRect(paddleLeft - 2, paddleTop - 2, paddle.width + 4, paddle.height + 4, 8);
+    graphics.fillStyle(0x64e7ff, 0.95);
+    graphics.fillRoundedRect(paddleLeft, paddleTop, paddle.width, paddle.height, 7);
+    graphics.fillStyle(0xb6f7ff, 0.9);
+    graphics.fillRoundedRect(paddleLeft + 6, paddleTop + 3, paddle.width - 12, 4, 2);
+    graphics.fillStyle(0x2f6f9a, 0.9);
+    graphics.fillRect(paddle.x - 1, paddleTop + 6, 2, paddle.height - 9);
+
+    // Projectiles.
+    for (const projectile of world.projectiles) {
+      graphics.fillStyle(0xffd479, 0.28);
+      graphics.fillCircle(projectile.x, projectile.y, projectile.radius * 2.4);
+      graphics.fillStyle(0xfff2c4, 1);
+      graphics.fillRoundedRect(
+        projectile.x - projectile.radius / 2,
+        projectile.y - projectile.radius * 2,
+        projectile.radius,
+        projectile.radius * 4,
+        2,
+      );
+    }
+
+    // Balls.
+    for (const ball of world.balls) {
+      graphics.fillStyle(0x64e7ff, 0.18);
+      graphics.fillCircle(ball.x, ball.y, ball.radius * 1.8);
+      graphics.fillStyle(0xf2fbff, 1);
+      graphics.fillCircle(ball.x, ball.y, ball.radius);
+      graphics.fillStyle(0x9fdcff, 0.9);
+      graphics.fillCircle(ball.x - ball.radius * 0.28, ball.y - ball.radius * 0.3, ball.radius * 0.42);
+    }
+
+    graphics.setDepth(0);
   }
 }

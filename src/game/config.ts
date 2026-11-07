@@ -1,3 +1,5 @@
+import type { SimTuning } from '../game/contracts';
+
 /**
  * Frozen M0 tuning defaults.
  *
@@ -53,3 +55,23 @@ export const GAME_CONFIG = {
 } as const;
 
 export const FIXED_STEP_SECONDS = 1 / GAME_CONFIG.fixedStepHz;
+
+/** M1 default feel values; the debug panel starts from these. */
+export const SIM_TUNING_DEFAULTS: SimTuning = {
+  ballSpeedScale: 1,
+  paddleWidth: GAME_CONFIG.paddle.width,
+  paddleMaxSpeed: GAME_CONFIG.paddle.maxSpeed,
+  ballRadius: GAME_CONFIG.ball.radius,
+  paddleMaxAngleDeg: 60,
+  fixedStepHz: GAME_CONFIG.fixedStepHz,
+};
+
+/** Bounds used by the debug sliders. */
+export const SIM_TUNING_LIMITS = {
+  ballSpeedScale: { min: 0.5, max: 2, step: 0.05 },
+  paddleWidth: { min: 80, max: 240, step: 2 },
+  paddleMaxSpeed: { min: 800, max: 4000, step: 50 },
+  ballRadius: { min: 5, max: 16, step: 0.5 },
+  paddleMaxAngleDeg: { min: 30, max: 75, step: 1 },
+  fixedStepHz: { min: 60, max: 240, step: 60 },
+} as const;

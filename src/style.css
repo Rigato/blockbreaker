@@ -132,8 +132,6 @@ button {
 
 #canvas-host canvas {
   display: block;
-  width: 100% !important;
-  height: 100% !important;
   image-rendering: pixelated;
 }
 
@@ -154,7 +152,14 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: clamp(14px, 5cqw, 26px) clamp(12px, 5cqw, 26px) clamp(12px, 4cqw, 22px);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(7, 12, 24, 0.18), rgba(5, 9, 18, 0.72) 62%),
+    linear-gradient(180deg, rgba(5, 9, 18, 0.5), rgba(5, 9, 18, 0.84));
   text-align: center;
+}
+
+.menu[hidden] {
+  display: none;
 }
 
 .menu__top {
@@ -423,8 +428,316 @@ button {
   line-height: 1.5;
 }
 
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(8px, 3cqw, 14px);
+  pointer-events: none;
+}
+
+.hud[hidden] {
+  display: none;
+}
+
+.hud__bar {
+  display: flex;
+  gap: clamp(6px, 2cqw, 10px);
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(8, 18, 36, 0.92), rgba(8, 18, 36, 0.68));
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(4px);
+}
+
+.hud__wave {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.hud__wave-kicker {
+  color: var(--dim);
+  font-size: clamp(7px, 1.7cqw, 9px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.hud__wave-text {
+  overflow: hidden;
+  color: var(--cyan-bright);
+  font-size: clamp(9px, 2.6cqw, 12px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hud__stats {
+  display: flex;
+  flex: 0 0 auto;
+  gap: clamp(6px, 2cqw, 12px);
+  align-items: center;
+}
+
+.hud__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  align-items: flex-end;
+}
+
+.hud__stat-label {
+  color: var(--dim);
+  font-size: clamp(7px, 1.7cqw, 9px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hud__stat-value {
+  color: var(--ink);
+  font-size: clamp(10px, 2.8cqw, 13px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.hud__stat--score .hud__stat-value {
+  color: var(--gold);
+}
+
+.hud__balls {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  min-height: 8px;
+}
+
+.hud__ball {
+  width: 5px;
+  height: 5px;
+  border: 1px solid rgba(100, 231, 255, 0.4);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.hud__ball.is-on {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  box-shadow: 0 0 6px rgba(100, 231, 255, 0.7);
+}
+
+.hud__pause {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(126, 231, 255, 0.45);
+  border-radius: 6px;
+  background: rgba(12, 30, 56, 0.85);
+  color: var(--cyan-bright);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.hud__pause:hover {
+  border-color: var(--cyan);
+  background: rgba(20, 48, 84, 0.9);
+}
+
+.hud__pause:focus-visible {
+  outline: 2px solid var(--cyan-bright);
+  outline-offset: 2px;
+}
+
+.hud__pause-icon {
+  width: 11px;
+  height: 13px;
+  border-right: 3px solid currentColor;
+  border-left: 3px solid currentColor;
+}
+
+.hud__hint {
+  align-self: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(4, 8, 18, 0.72);
+  color: var(--muted);
+  font-size: clamp(9px, 2.4cqw, 12px);
+  letter-spacing: 0.03em;
+  line-height: 1.35;
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(14px, 5cqw, 26px);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(38, 132, 160, 0.16), transparent 52%),
+    rgba(4, 7, 15, 0.74);
+  backdrop-filter: blur(5px);
+  pointer-events: auto;
+}
+
+.overlay[hidden] {
+  display: none;
+}
+
+.overlay__panel {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 3cqw, 16px);
+  width: 100%;
+  max-width: 320px;
+  max-height: 100%;
+  padding: clamp(18px, 6cqw, 28px) clamp(14px, 5cqw, 24px);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(16, 34, 62, 0.96), rgba(6, 12, 26, 0.98)),
+    var(--bg-stage);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 34px rgba(80, 220, 255, 0.12),
+    0 24px 60px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.overlay__title {
+  margin: 0;
+  color: #f2fbff;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 9cqw, 40px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-shadow:
+    0 0 22px rgba(100, 231, 255, 0.24),
+    0 8px 26px rgba(0, 0, 0, 0.5);
+}
+
+.overlay__body {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(10px, 2.6cqw, 13px);
+  line-height: 1.45;
+}
+
+.overlay__score {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: center;
+  margin: 0;
+}
+
+.overlay__score-label {
+  color: var(--dim);
+  font-size: clamp(9px, 2.2cqw, 11px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.overlay__score-value {
+  color: var(--gold);
+  font-size: clamp(22px, 7cqw, 30px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.overlay__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overlay__button {
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid rgba(126, 231, 255, 0.35);
+  border-radius: 6px;
+  background: rgba(10, 24, 44, 0.9);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: clamp(11px, 2.8cqw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.overlay__button:hover {
+  border-color: var(--line-strong);
+  background: rgba(18, 42, 72, 0.95);
+}
+
+.overlay__button:active {
+  transform: translateY(1px);
+}
+
+.overlay__button:focus-visible {
+  outline: 2px solid var(--cyan-bright);
+  outline-offset: 3px;
+}
+
+.overlay__button--primary {
+  border-color: rgba(126, 231, 255, 0.6);
+  background:
+    linear-gradient(180deg, rgba(54, 196, 230, 0.28), rgba(22, 78, 112, 0.38)),
+    rgba(8, 18, 36, 0.9);
+  color: #eaffff;
+}
+
+.overlay__button--primary:hover {
+  border-color: var(--cyan);
+  background:
+    linear-gradient(180deg, rgba(74, 216, 250, 0.36), rgba(28, 94, 132, 0.44)),
+    rgba(8, 18, 36, 0.9);
+}
+
 html[data-debug='1'] .menu__top {
   visibility: hidden;
+}
+
+/* The debug strip owns the top edge in debug mode; the HUD bar would collide. */
+html[data-debug='1'] .hud__bar {
+  display: none;
+}
+
+html[data-debug='1'] .hud {
+  justify-content: flex-end;
 }
 
 .debug {
@@ -433,10 +746,12 @@ html[data-debug='1'] .menu__top {
   bottom: auto;
   left: 50%;
   z-index: 6;
+  display: flex;
+  flex-direction: column;
   width: min(300px, calc(100% - 16px));
-  max-height: 38%;
+  max-height: 44%;
   padding: 8px 9px;
-  overflow: auto;
+  overflow: hidden;
   border: 1px solid rgba(126, 231, 255, 0.25);
   border-radius: 6px;
   background: rgba(4, 8, 18, 0.94);
@@ -447,22 +762,199 @@ html[data-debug='1'] .menu__top {
   font-size: 10px;
   line-height: 1.28;
   pointer-events: auto;
-  scrollbar-width: none;
   transform: translateX(-50%);
   backdrop-filter: blur(6px);
 }
 
-.debug::-webkit-scrollbar {
+.debug__head {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.debug__toggle {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid rgba(126, 231, 255, 0.28);
+  border-radius: 4px;
+  background: rgba(12, 30, 56, 0.7);
+  color: var(--cyan-bright);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+}
+
+.debug__toggle:hover {
+  border-color: var(--line-strong);
+}
+
+.debug__toggle:focus-visible {
+  outline: 2px solid var(--cyan-bright);
+  outline-offset: 2px;
+}
+
+.debug__compact {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  margin: 5px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.debug__compact:hover {
+  color: var(--cyan-bright);
+}
+
+.debug__compact:focus-visible {
+  outline: 2px solid var(--cyan-bright);
+  outline-offset: 2px;
+}
+
+.debug--collapsed {
+  width: auto;
+  max-width: calc(100% - 16px);
+  padding: 6px 9px;
+}
+
+.debug--collapsed .debug__head {
   display: none;
 }
 
+.debug--collapsed .debug__compact {
+  margin: 0;
+  padding: 4px 0;
+}
+
+.debug__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+  margin-top: 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.debug__body[hidden] {
+  display: none;
+}
+
+.debug__body::-webkit-scrollbar {
+  display: none;
+}
+
+.debug__section {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 5px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(126, 231, 255, 0.12);
+}
+
+.debug__section-title {
+  margin: 0;
+  color: var(--cyan);
+  font-family: var(--font-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.debug__control {
+  display: grid;
+  gap: 2px;
+}
+
+.debug__control-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.debug__range {
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--cyan);
+  touch-action: manipulation;
+}
+
+.debug__select {
+  width: 100%;
+  min-height: 28px;
+  padding: 0 6px;
+  border: 1px solid rgba(126, 231, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(8, 18, 36, 0.95);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  touch-action: manipulation;
+}
+
+.debug__button {
+  width: 100%;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid rgba(126, 231, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(12, 30, 56, 0.75);
+  color: var(--cyan-bright);
+  cursor: pointer;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+}
+
+.debug__button:hover {
+  border-color: var(--line-strong);
+  background: rgba(20, 48, 84, 0.85);
+}
+
+.debug__button--accent {
+  border-color: rgba(100, 231, 255, 0.55);
+  background:
+    linear-gradient(180deg, rgba(54, 196, 230, 0.24), rgba(22, 78, 112, 0.34)),
+    rgba(8, 18, 36, 0.9);
+}
+
+.debug__button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .debug__title {
-  margin: 0 0 6px;
+  margin: 0;
   color: var(--cyan);
   font-family: var(--font-ui);
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
+}
+
+/* Debug stays out of the way while a modal overlay is open. */
+.overlay:not([hidden]) ~ .debug {
+  display: none;
 }
 
 .debug__rows {

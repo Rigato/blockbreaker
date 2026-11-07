@@ -97,3 +97,70 @@ export interface RunModifiers {
   safetyNetCharges: number;
   explosiveEvery: number | null;
 }
+
+// ---------------------------------------------------------------------------
+// M1 — playable core contracts
+// ---------------------------------------------------------------------------
+
+/** Runtime phase of the M1 test run. */
+export type HudPhase = 'menu' | 'playing' | 'paused' | 'cleared' | 'defeat';
+
+/** Minimal state required by the DOM HUD. Emitted only when it changes. */
+export interface HudSnapshot {
+  phase: HudPhase;
+  waveId: string;
+  waveName: string;
+  /** 1-based index within the provisional M1 test wave set. */
+  waveIndex: number;
+  waveCount: number;
+  ballsActive: number;
+  blocksRemaining: number;
+  score: number;
+  /** True while the ball is attached to the paddle waiting for launch. */
+  ballStuck: boolean;
+}
+
+/** Mutable feel values exposed by the ?debug=1 panel. */
+export interface SimTuning {
+  /** Multiplier applied to the wave base speed. 1 = normal. */
+  ballSpeedScale: number;
+  paddleWidth: number;
+  paddleMaxSpeed: number;
+  ballRadius: number;
+  paddleMaxAngleDeg: number;
+  fixedStepHz: number;
+}
+
+export interface TestWaveInfo {
+  id: string;
+  name: string;
+}
+
+/**
+ * Commands the DOM UI may send to the game. Implemented by BlockBreakerGame.
+ * The UI never mutates simulation state directly.
+ */
+export interface GameCommands {
+  /** Starts the currently selected test wave from the menu. */
+  startRun(): void;
+  pause(): void;
+  resume(): void;
+  togglePause(): void;
+  /** Restarts the current wave with a fresh paddle/ball state. */
+  restartWave(): void;
+  /**
+   * Selects a provisional test wave and resets to the menu with that wave
+   * loaded. The caller starts it with startRun().
+   */
+  setTestWave(waveId: string): void;
+  getTestWaves(): readonly TestWaveInfo[];
+  getHudState(): HudSnapshot;
+  getTuning(): SimTuning;
+  /** Applies and clamps the provided values, then emits tuning:changed. */
+  setTuning(patch: Partial<SimTuning>): void;
+  resetTuning(): void;
+  /** Debug-only: adds one ball, respecting the 8-ball cap. */
+  spawnBall(): void;
+  /** Debug-only: fires one projectile for collision/feel testing. */
+  fireTestProjectile(): void;
+}
