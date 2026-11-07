@@ -425,7 +425,8 @@ button {
 
 .debug {
   position: absolute;
-  bottom: 8px;
+  top: 8px;
+  bottom: auto;
   left: 50%;
   z-index: 6;
   width: min(300px, calc(100% - 16px));
