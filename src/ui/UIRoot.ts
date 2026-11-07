@@ -1,12 +1,19 @@
-import type { GameCommands, HudSnapshot, PlatformService } from '../game/contracts';
+import type {
+  GameCommands,
+  HudSnapshot,
+  PhaseSelectInfo,
+  PlatformService,
+} from '../game/contracts';
 import type { BootResult } from '../boot/bridgeBoot';
 import type { BlockBreakerGame } from '../game/Game';
 import { gameEvents } from '../game/events';
-import { en } from '../i18n/en';
 import { DebugPanel } from './DebugPanel';
 import { Hud } from './Hud';
 import { LevelUpOverlay } from './LevelUpOverlay';
+import type { MenuBest } from './Menu';
+import { Menu } from './Menu';
 import { HudOverlay } from './Overlay';
+import { PhaseSelect } from './PhaseSelect';
 
 export interface UIRootOptions {
   root: HTMLElement;
@@ -41,71 +48,34 @@ function nextPaint(): Promise<void> {
 }
 
 export function mountUI(options: UIRootOptions): UIRootHandle {
-  const menu = document.createElement('section');
-  menu.className = 'menu';
-  menu.setAttribute('aria-label', en.appTitle);
+  const controller = options.controller;
+  let phaseInfo: readonly PhaseSelectInfo[] = readPhaseInfo();
+  let selectedPhaseId: string | null = null;
+  let lastSnapshot: HudSnapshot = controller.getHudState();
 
-  const top = document.createElement('header');
-  top.className = 'menu__top';
+  const menu = new Menu({
+    root: options.root,
+    controller,
+    onPlay: handlePlay,
+    onPhases: handlePhases,
+  });
 
-  const kicker = document.createElement('span');
-  kicker.className = 'menu__kicker';
-  kicker.textContent = en.menuKicker;
+  const phaseSelect = new PhaseSelect({
+    root: options.root,
+    onStart: (phaseId) => {
+      selectedPhaseId = phaseId;
+      phaseSelect.close();
+      controller.startPhase(phaseId);
+    },
+    onBack: () => {
+      phaseSelect.close();
+      menu.focusPlay();
+    },
+  });
 
-  const sigil = document.createElement('span');
-  sigil.className = 'menu__sigil';
-  sigil.setAttribute('aria-hidden', 'true');
-
-  top.append(kicker, sigil);
-
-  const hero = document.createElement('div');
-  hero.className = 'menu__hero';
-
-  const title = document.createElement('h1');
-  title.className = 'menu__title';
-  title.textContent = en.appTitle;
-
-  const subtitle = document.createElement('p');
-  subtitle.className = 'menu__subtitle';
-  subtitle.textContent = en.appSubtitle;
-
-  hero.append(title, subtitle);
-
-  const actions = document.createElement('div');
-  actions.className = 'menu__actions';
-
-  const playButton = document.createElement('button');
-  playButton.type = 'button';
-  playButton.id = 'play-button';
-  playButton.className = 'menu__play';
-  playButton.textContent = en.play;
-
-  const note = document.createElement('p');
-  note.id = 'menu-note';
-  note.className = 'menu__note';
-  note.setAttribute('role', 'status');
-  note.textContent = en.playNote;
-
-  const handlePlay = (): void => {
-    note.classList.add('menu__note--active');
-    menu.classList.add('menu--acknowledged');
-    options.controller.startRun();
-    playButton.blur();
-  };
-  playButton.addEventListener('click', handlePlay);
-
-  actions.append(playButton, note);
-
-  const footer = document.createElement('p');
-  footer.className = 'menu__footer';
-  footer.textContent = en.footer;
-
-  menu.append(top, hero, actions, footer);
-  options.root.append(menu);
-
-  const hud = new Hud({ root: options.root, controller: options.controller });
-  const overlay = new HudOverlay({ root: options.root, controller: options.controller });
-  const levelUp = new LevelUpOverlay({ root: options.root, controller: options.controller });
+  const hud = new Hud({ root: options.root, controller });
+  const overlay = new HudOverlay({ root: options.root, controller });
+  const levelUp = new LevelUpOverlay({ root: options.root, controller });
 
   const debugPanel = options.debug
     ? new DebugPanel({
@@ -114,6 +84,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
         game: options.game,
         controller: options.controller,
         boot: options.boot,
+        onSaveReset: refreshPhaseInfo,
       })
     : null;
 
@@ -121,27 +92,119 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     document.documentElement.dataset.debug = '1';
   }
 
-  let menuDismissed = false;
   let debugAutoCollapsed = false;
 
+  function readPhaseInfo(): readonly PhaseSelectInfo[] {
+    try {
+      return [...controller.getPhaseSelectInfo()];
+    } catch (error) {
+      console.warn('[ui] could not read phase select info', error);
+      return [];
+    }
+  }
+
+  function refreshPhaseInfo(): void {
+    phaseInfo = readPhaseInfo();
+    const best = bestFor(lastSnapshot);
+    menu.update(lastSnapshot, best);
+    if (phaseSelect.isOpen) phaseSelect.refresh(phaseInfo, selectedPhaseId);
+  }
+
+  function mostAdvancedUnlocked(): PhaseSelectInfo | null {
+    let best: PhaseSelectInfo | null = null;
+    for (const phase of phaseInfo) {
+      if (!phase.unlocked) continue;
+      if (!best || phase.index >= best.index) best = phase;
+    }
+    return best;
+  }
+
+  function playablePhase(): PhaseSelectInfo | null {
+    if (selectedPhaseId !== null) {
+      const selected = phaseInfo.find((phase) => phase.id === selectedPhaseId);
+      if (selected?.unlocked) return selected;
+    }
+    return mostAdvancedUnlocked();
+  }
+
+  function bestFor(snapshot: HudSnapshot): MenuBest {
+    const selected =
+      selectedPhaseId !== null
+        ? phaseInfo.find((phase) => phase.id === selectedPhaseId) ?? null
+        : null;
+    const target =
+      selected ??
+      phaseInfo.find((phase) => phase.id === snapshot.phaseId) ??
+      mostAdvancedUnlocked();
+
+    return {
+      phaseName:
+        target?.name ??
+        (snapshot.bestScore !== null || snapshot.bestTimeMs !== null ? snapshot.phaseName : null),
+      bestScore: target?.bestScore ?? (target ? null : snapshot.bestScore),
+      bestTimeMs: target?.bestTimeMs ?? (target ? null : snapshot.bestTimeMs),
+    };
+  }
+
+  function handlePlay(): void {
+    phaseSelect.close();
+    phaseInfo = readPhaseInfo();
+    const target = playablePhase();
+    if (target) {
+      selectedPhaseId = target.id;
+      controller.startPhase(target.id);
+      return;
+    }
+
+    // Stub or no phase data yet: keep the M2 entry point working.
+    controller.startRun();
+  }
+
+  function handlePhases(): void {
+    phaseInfo = readPhaseInfo();
+    phaseSelect.open(phaseInfo, selectedPhaseId);
+  }
+
   const applySnapshot = (snapshot: HudSnapshot): void => {
-    if (snapshot.phase !== 'menu') menuDismissed = true;
+    const previousPhase = lastSnapshot.phase;
+    lastSnapshot = snapshot;
+
+    if (snapshot.phase !== 'menu' && phaseSelect.isOpen) {
+      phaseSelect.close();
+    }
+
+    if (snapshot.phase === 'menu') {
+      phaseInfo = readPhaseInfo();
+    }
 
     if (debugPanel && !debugAutoCollapsed && snapshot.phase === 'playing') {
       debugPanel.collapse();
       debugAutoCollapsed = true;
     }
 
-    menu.hidden = menuDismissed || snapshot.phase !== 'menu';
+    menu.setHidden(snapshot.phase !== 'menu');
+    menu.update(snapshot, bestFor(snapshot));
+    if (
+      snapshot.phase === 'menu' &&
+      (previousPhase === 'run-complete' || previousPhase === 'defeat')
+    ) {
+      menu.focusPlay();
+    }
+    if (phaseSelect.isOpen) phaseSelect.refresh(phaseInfo, selectedPhaseId);
 
     hud.update(snapshot);
-    hud.setVisible(snapshot.phase === 'playing' || snapshot.phase === 'paused');
+    hud.setVisible(
+      snapshot.phase !== 'menu' &&
+        snapshot.phase !== 'run-complete' &&
+        snapshot.phase !== 'defeat',
+    );
     overlay.update(snapshot);
     levelUp.update(snapshot);
   };
 
   const unsubscribeHud = gameEvents.on('hud:changed', applySnapshot);
-  applySnapshot(options.controller.getHudState());
+  const unsubscribeReset = gameEvents.on('save:reset', refreshPhaseInfo);
+  applySnapshot(lastSnapshot);
 
   return {
     ready: nextPaint,
@@ -150,11 +213,12 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     },
     dispose(): void {
       unsubscribeHud();
-      playButton.removeEventListener('click', handlePlay);
+      unsubscribeReset();
+      menu.dispose();
+      phaseSelect.dispose();
       hud.dispose();
       overlay.dispose();
       levelUp.dispose();
-      menu.remove();
       debugPanel?.dispose();
       delete document.documentElement.dataset.debug;
     },

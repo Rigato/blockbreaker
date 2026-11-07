@@ -1,253 +1,256 @@
-import type { GameCommands, HudSnapshot, PerkState } from '../game/contracts';
+import type {
+  GameCommands,
+  HudSnapshot,
+  PerkState,
+  PhaseResult,
+} from '../game/contracts';
 import { en } from '../i18n/en';
+import { formatScore, formatTime } from './format';
 
 export interface OverlayOptions {
   root: HTMLElement;
   controller: GameCommands;
 }
 
-type OverlayKind = 'paused' | 'cleared' | 'complete' | 'defeat';
-
-interface OverlayParts {
-  root: HTMLElement;
-  primary: HTMLButtonElement;
-  primaryLabel: HTMLElement;
-  secondary: HTMLButtonElement | null;
-  secondaryLabel: HTMLElement | null;
-  title: HTMLElement;
-  body: HTMLElement;
-  scoreValue: HTMLElement | null;
-  levelValue: HTMLElement | null;
-  waveValue: HTMLElement | null;
-  perksList: HTMLElement | null;
+interface SummaryRow {
+  value: HTMLElement;
 }
 
-interface OverlayButton {
-  label: string;
-  handler: () => void;
+function buildSummaryRow(summary: HTMLElement, label: string): SummaryRow {
+  const term = document.createElement('dt');
+  term.className = 'overlay__summary-label';
+  term.textContent = label;
+
+  const value = document.createElement('dd');
+  value.className = 'overlay__summary-value';
+
+  summary.append(term, value);
+  return { value };
 }
 
-function buildOverlay(
-  kind: OverlayKind,
-  titleText: string,
-  bodyText: string,
-  primary: OverlayButton,
-  secondary: OverlayButton | null = null,
-  withSummary = false,
-): OverlayParts {
-  const root = document.createElement('section');
-  root.className = 'overlay';
-  root.dataset.kind = kind;
-  root.hidden = true;
+function buildPanel(titleId: string, className: string): {
+  section: HTMLElement;
+  panel: HTMLElement;
+} {
+  const section = document.createElement('section');
+  section.className = `overlay ${className}`;
+  section.hidden = true;
 
   const panel = document.createElement('div');
   panel.className = 'overlay__panel';
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-labelledby', titleId);
 
-  const title = document.createElement('h2');
-  title.className = 'overlay__title';
-  title.id = `overlay-${kind}-title`;
-  title.textContent = titleText;
-  panel.setAttribute('aria-labelledby', title.id);
+  section.append(panel);
+  return { section, panel };
+}
 
-  const body = document.createElement('p');
-  body.className = 'overlay__body';
-  body.textContent = bodyText;
+function buildAction(label: string, modifier: string, handler: () => void): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `overlay__button ${modifier}`;
 
-  panel.append(title, body);
+  const text = document.createElement('span');
+  text.textContent = label;
 
-  let scoreValue: HTMLElement | null = null;
-  let levelValue: HTMLElement | null = null;
-  let waveValue: HTMLElement | null = null;
-  let perksList: HTMLElement | null = null;
+  button.append(text);
+  button.addEventListener('click', () => {
+    handler();
+    button.blur();
+  });
+  return button;
+}
 
-  if (withSummary) {
+/**
+ * Pause dialog plus the phase results screen.
+ *
+ * Wave clears deliberately have no dialog: the game advances automatically
+ * after a short transition and the HUD stays visible. Results only open for
+ * `run-complete` / `defeat`, driven by `HudSnapshot.result`.
+ */
+export class HudOverlay {
+  private readonly pauseSection: HTMLElement;
+  private readonly resumeButton: HTMLButtonElement;
+  private readonly restartButton: HTMLButtonElement;
+
+  private readonly resultsSection: HTMLElement;
+  private readonly resultsPanel: HTMLElement;
+  private readonly resultsKicker: HTMLElement;
+  private readonly resultsTitle: HTMLElement;
+  private readonly resultsPhase: HTMLElement;
+  private readonly resultsScore: HTMLElement;
+  private readonly resultsTime: HTMLElement;
+  private readonly resultsBestScore: HTMLElement;
+  private readonly resultsBestTime: HTMLElement;
+  private readonly resultsLevel: HTMLElement;
+  private readonly resultsPerks: HTMLElement;
+  private readonly retryButton: HTMLButtonElement;
+  private readonly nextButton: HTMLButtonElement;
+  private readonly menuButton: HTMLButtonElement;
+
+  private pauseVisible = false;
+  private resultsVisible = false;
+  private lastResultPhase: string | null = null;
+  private perksSignature = '__unset__';
+  private readonly unsubscribeKeydown: () => void;
+
+  constructor(options: OverlayOptions) {
+    const controller = options.controller;
+
+    const pause = buildPanel('overlay-pause-title', 'overlay--pause');
+    this.pauseSection = pause.section;
+
+    const pauseTitle = document.createElement('h2');
+    pauseTitle.className = 'overlay__title';
+    pauseTitle.id = 'overlay-pause-title';
+    pauseTitle.textContent = en.pauseTitle;
+
+    const pauseBody = document.createElement('p');
+    pauseBody.className = 'overlay__body';
+    pauseBody.textContent = en.pauseBody;
+
+    const pauseActions = document.createElement('div');
+    pauseActions.className = 'overlay__actions';
+
+    this.resumeButton = buildAction(en.resume, 'overlay__button--primary', () => controller.resume());
+    this.restartButton = buildAction(en.restartWave, 'overlay__button--secondary', () =>
+      controller.restartWave(),
+    );
+    pauseActions.append(this.resumeButton, this.restartButton);
+    pause.panel.append(pauseTitle, pauseBody, pauseActions);
+
+    const results = buildPanel('overlay-results-title', 'overlay--results');
+    this.resultsSection = results.section;
+    this.resultsPanel = results.panel;
+
+    this.resultsKicker = document.createElement('p');
+    this.resultsKicker.className = 'overlay__kicker';
+    this.resultsKicker.id = 'overlay-results-kicker';
+
+    this.resultsTitle = document.createElement('h2');
+    this.resultsTitle.className = 'overlay__title';
+    this.resultsTitle.id = 'overlay-results-title';
+
+    this.resultsPhase = document.createElement('p');
+    this.resultsPhase.className = 'overlay__phase';
+
     const summary = document.createElement('dl');
     summary.className = 'overlay__summary';
 
-    const row = (label: string): HTMLElement => {
-      const term = document.createElement('dt');
-      term.className = 'overlay__summary-label';
-      term.textContent = label;
-
-      const value = document.createElement('dd');
-      value.className = 'overlay__summary-value';
-      summary.append(term, value);
-      return value;
-    };
-
-    scoreValue = row(en.overlayScore);
-    levelValue = row(en.overlayLevel);
-    waveValue = row(en.overlayWave);
-    panel.append(summary);
+    this.resultsScore = buildSummaryRow(summary, en.overlayScore).value;
+    this.resultsTime = buildSummaryRow(summary, en.overlayTime).value;
+    this.resultsBestScore = buildSummaryRow(summary, en.overlayBestScore).value;
+    this.resultsBestTime = buildSummaryRow(summary, en.overlayBestTime).value;
+    this.resultsLevel = buildSummaryRow(summary, en.overlayLevel).value;
 
     const perksTitle = document.createElement('h3');
     perksTitle.className = 'overlay__perks-title';
     perksTitle.textContent = en.overlayPerks;
 
-    perksList = document.createElement('ul');
-    perksList.className = 'overlay__perks-list';
+    this.resultsPerks = document.createElement('ul');
+    this.resultsPerks.className = 'overlay__perks-list';
 
-    panel.append(perksTitle, perksList);
-  }
+    const resultsActions = document.createElement('div');
+    resultsActions.className = 'overlay__actions';
 
-  const actions = document.createElement('div');
-  actions.className = 'overlay__actions';
+    this.retryButton = buildAction(en.retry, 'overlay__button--primary', () =>
+      controller.restartPhase(),
+    );
+    this.nextButton = buildAction(en.overlayNextPhase, 'overlay__button--secondary', () =>
+      controller.nextPhase(),
+    );
+    this.menuButton = buildAction(en.overlayMenu, 'overlay__button--ghost', () =>
+      controller.returnToMenu(),
+    );
+    resultsActions.append(this.retryButton, this.nextButton, this.menuButton);
 
-  const primaryButton = document.createElement('button');
-  primaryButton.type = 'button';
-  primaryButton.className = 'overlay__button overlay__button--primary';
-
-  const primaryLabel = document.createElement('span');
-  primaryLabel.textContent = primary.label;
-  primaryButton.append(primaryLabel);
-  primaryButton.addEventListener('click', () => {
-    primary.handler();
-    primaryButton.blur();
-  });
-  actions.append(primaryButton);
-
-  let secondaryButton: HTMLButtonElement | null = null;
-  let secondaryLabel: HTMLElement | null = null;
-  if (secondary) {
-    secondaryButton = document.createElement('button');
-    secondaryButton.type = 'button';
-    secondaryButton.className = 'overlay__button overlay__button--secondary';
-
-    secondaryLabel = document.createElement('span');
-    secondaryLabel.textContent = secondary.label;
-    secondaryButton.append(secondaryLabel);
-    secondaryButton.addEventListener('click', () => {
-      secondary.handler();
-      secondaryButton?.blur();
-    });
-    actions.append(secondaryButton);
-  }
-
-  panel.append(actions);
-  root.append(panel);
-
-  return {
-    root,
-    primary: primaryButton,
-    primaryLabel,
-    secondary: secondaryButton,
-    secondaryLabel,
-    title,
-    body,
-    scoreValue,
-    levelValue,
-    waveValue,
-    perksList,
-  };
-}
-
-/**
- * Pause, wave-cleared, run-complete and defeat dialogs. Only one is visible at
- * a time. The menu is never reopened from here: clears and defeats always offer
- * progress or a full-run restart.
- *
- * Pause restart intentionally restarts the current wave (`restartWave`); the
- * full-run reset lives on the results dialogs as "Restart run"/"Play again".
- */
-export class HudOverlay {
-  private readonly paused: OverlayParts;
-  private readonly cleared: OverlayParts;
-  private readonly complete: OverlayParts;
-  private readonly defeat: OverlayParts;
-  private current: OverlayKind | null = null;
-  private perksSignature = '__unset__';
-
-  constructor(options: OverlayOptions) {
-    const controller = options.controller;
-
-    this.paused = buildOverlay(
-      'paused',
-      en.pauseTitle,
-      en.pauseBody,
-      { label: en.resume, handler: () => controller.resume() },
-      { label: en.restartWave, handler: () => controller.restartWave() },
+    this.resultsPanel.append(
+      this.resultsKicker,
+      this.resultsTitle,
+      this.resultsPhase,
+      summary,
+      perksTitle,
+      this.resultsPerks,
+      resultsActions,
     );
 
-    this.cleared = buildOverlay(
-      'cleared',
-      en.clearedTitle,
-      en.clearedBody,
-      { label: en.nextWave, handler: () => controller.nextWave() },
-      { label: en.restartRun, handler: () => controller.restartRun() },
-      true,
-    );
+    options.root.append(this.pauseSection, this.resultsSection);
 
-    this.complete = buildOverlay(
-      'complete',
-      en.runCompleteTitle,
-      en.runCompleteBody,
-      { label: en.playAgain, handler: () => controller.restartRun() },
-      null,
-      true,
-    );
-
-    this.defeat = buildOverlay(
-      'defeat',
-      en.defeatTitle,
-      en.defeatBody,
-      { label: en.retry, handler: () => controller.restartRun() },
-      null,
-      true,
-    );
-
-    options.root.append(
-      this.paused.root,
-      this.cleared.root,
-      this.complete.root,
-      this.defeat.root,
-    );
+    this.unsubscribeKeydown = this.listenKeys();
   }
 
   update(snapshot: HudSnapshot): void {
-    const kind = this.kindFor(snapshot);
-    this.updateResults(snapshot);
-    this.show(kind);
+    const pause = snapshot.phase === 'paused';
+    if (pause) this.showPause();
+    else this.hidePause();
+
+    const result = this.resultFor(snapshot);
+    if (result) {
+      this.renderResult(result);
+      this.showResults(result);
+    } else {
+      this.hideResults();
+    }
   }
 
   dispose(): void {
-    this.paused.root.remove();
-    this.cleared.root.remove();
-    this.complete.root.remove();
-    this.defeat.root.remove();
-    this.current = null;
+    this.unsubscribeKeydown();
+    this.pauseSection.remove();
+    this.resultsSection.remove();
   }
 
-  private kindFor(snapshot: HudSnapshot): OverlayKind | null {
-    switch (snapshot.phase) {
-      case 'paused':
-        return 'paused';
-      case 'cleared':
-        // The last wave of the run reads as a completed run, not a wave clear.
-        return snapshot.waveIndex < snapshot.waveCount ? 'cleared' : 'complete';
-      case 'run-complete':
-        return 'complete';
-      case 'defeat':
-        return 'defeat';
-      default:
-        return null;
-    }
+  private resultFor(snapshot: HudSnapshot): PhaseResult | null {
+    if (snapshot.phase !== 'run-complete' && snapshot.phase !== 'defeat') return null;
+    if (snapshot.result) return snapshot.result;
+
+    // Defensive fallback for an integration that has not populated `result`
+    // yet. The real M3 flow always supplies it.
+    const victory = snapshot.phase === 'run-complete';
+    return {
+      phaseId: snapshot.phaseId,
+      phaseName: snapshot.phaseName,
+      phaseIndex: snapshot.phaseIndex,
+      phaseCount: snapshot.phaseCount,
+      victory,
+      score: snapshot.score,
+      timeMs: snapshot.elapsedMs,
+      level: snapshot.level,
+      perks: snapshot.perks,
+      bestScore: snapshot.bestScore,
+      bestTimeMs: snapshot.bestTimeMs,
+      nextPhaseId:
+        victory && snapshot.phaseIndex < snapshot.phaseCount ? snapshot.phaseId : null,
+    };
   }
 
-  private updateResults(snapshot: HudSnapshot): void {
-    for (const parts of [this.cleared, this.complete, this.defeat]) {
-      if (parts.scoreValue) parts.scoreValue.textContent = snapshot.score.toLocaleString('en-US');
-      if (parts.levelValue) parts.levelValue.textContent = String(snapshot.level);
-      if (parts.waveValue) {
-        parts.waveValue.textContent = `${Math.max(1, snapshot.waveIndex)}/${snapshot.waveCount}`;
-      }
-    }
+  private renderResult(result: PhaseResult): void {
+    this.resultsKicker.textContent = result.victory ? en.resultVictory : en.resultDefeat;
+    this.resultsKicker.dataset.kind = result.victory ? 'victory' : 'defeat';
+    this.resultsTitle.textContent = result.phaseName;
+    this.resultsPhase.textContent = `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
+      1,
+      result.phaseCount,
+    )}`;
 
-    this.updatePerks(snapshot.perks);
+    this.resultsScore.textContent = formatScore(result.score);
+    this.resultsTime.textContent = formatTime(result.timeMs);
+    this.resultsBestScore.textContent = formatScore(result.bestScore);
+    this.resultsBestTime.textContent = formatTime(result.bestTimeMs);
+    this.resultsLevel.textContent = String(result.level);
+
+    const showNext = result.victory && result.nextPhaseId !== null;
+    this.nextButton.hidden = !showNext;
+
+    this.renderPerks(result.perks);
+
+    this.resultsPanel.setAttribute(
+      'aria-label',
+      `${result.victory ? en.resultVictory : en.resultDefeat} · ${result.phaseName}`,
+    );
   }
 
-  private updatePerks(perks: readonly PerkState[]): void {
+  private renderPerks(perks: readonly PerkState[]): void {
     const signature = perks.map((perk) => `${perk.id}:${perk.level}`).join('|');
     if (signature === this.perksSignature) return;
     this.perksSignature = signature;
@@ -256,7 +259,8 @@ export class HudOverlay {
       ? perks.map((perk) => {
           const item = document.createElement('li');
           item.className = 'overlay__perk';
-          item.textContent = perk.maxLevel > 1 ? `${perk.name} · ${en.hudPerkLevel} ${perk.level}` : perk.name;
+          item.textContent =
+            perk.maxLevel > 1 ? `${perk.name} · ${en.hudPerkLevel} ${perk.level}` : perk.name;
           return item;
         })
       : [
@@ -268,31 +272,85 @@ export class HudOverlay {
           })(),
         ];
 
-    for (const parts of [this.cleared, this.complete, this.defeat]) {
-      parts.perksList?.replaceChildren(...items.map((item) => item.cloneNode(true)));
-    }
+    this.resultsPerks.replaceChildren(...items);
   }
 
-  private show(kind: OverlayKind | null): void {
-    const changed = kind !== this.current;
-    this.paused.root.hidden = kind !== 'paused';
-    this.cleared.root.hidden = kind !== 'cleared';
-    this.complete.root.hidden = kind !== 'complete';
-    this.defeat.root.hidden = kind !== 'defeat';
-    this.current = kind;
-
-    if (changed && kind !== null) {
-      const parts = this.partsFor(kind);
-      window.requestAnimationFrame(() => {
-        if (!parts.root.hidden) parts.primary.focus({ preventScroll: true });
-      });
-    }
+  private showPause(): void {
+    if (this.pauseVisible) return;
+    this.pauseVisible = true;
+    this.pauseSection.hidden = false;
+    this.focusFirst(this.pauseSection, this.resumeButton);
   }
 
-  private partsFor(kind: OverlayKind): OverlayParts {
-    if (kind === 'paused') return this.paused;
-    if (kind === 'cleared') return this.cleared;
-    if (kind === 'complete') return this.complete;
-    return this.defeat;
+  private hidePause(): void {
+    if (!this.pauseVisible) return;
+    this.pauseVisible = false;
+    this.pauseSection.hidden = true;
+  }
+
+  private showResults(result: PhaseResult): void {
+    const changed = this.lastResultPhase !== result.phaseId;
+    this.lastResultPhase = result.phaseId;
+    if (this.resultsVisible) return;
+
+    this.resultsVisible = true;
+    this.resultsSection.hidden = false;
+    this.focusFirst(this.resultsSection, this.retryButton);
+
+    if (changed) this.resultsSection.dataset.phaseId = result.phaseId;
+  }
+
+  private hideResults(): void {
+    if (!this.resultsVisible) return;
+    this.resultsVisible = false;
+    this.resultsSection.hidden = true;
+    this.lastResultPhase = null;
+  }
+
+  private focusFirst(section: HTMLElement, button: HTMLButtonElement): void {
+    window.requestAnimationFrame(() => {
+      if (section.hidden) return;
+      button.focus({ preventScroll: true });
+    });
+  }
+
+  private listenKeys(): () => void {
+    const handler = (event: KeyboardEvent): void => {
+      if (this.resultsVisible) {
+        this.trapTab(event, this.resultsSection);
+        if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+          // Modal owns gameplay keys while it is open.
+          event.stopPropagation();
+        }
+        return;
+      }
+
+      if (!this.pauseVisible) return;
+      this.trapTab(event, this.pauseSection);
+      if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+        event.stopPropagation();
+      }
+    };
+
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }
+
+  private trapTab(event: KeyboardEvent, section: HTMLElement): void {
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(
+      section.querySelectorAll<HTMLButtonElement>('button:not(:disabled):not([hidden])'),
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0]!;
+    const last = focusable[focusable.length - 1]!;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus({ preventScroll: true });
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus({ preventScroll: true });
+    }
   }
 }

@@ -1,9 +1,10 @@
 # Block Breaker Roguelite
 
 Portrait HTML5 block breaker with roguelite progression. The repository is in the
-**M2 — XP, level up and perks** stage: a full three-wave provisional run has XP,
-level-up choices, ten perks and the M1 playable core. The final three-phase
-content and save system arrive in M3.
+**M3 — phases, waves, progression and persistence** stage: three phases with
+three handcrafted waves each, phase unlocking, best score/time tracking, a versioned
+save and the M2 XP/perk core. The content starts at Crystal Grove and ends at the
+Arcane Depths.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -30,9 +31,29 @@ Validation commands:
 ```bash
 npm run typecheck
 npm test
+npm run validate:content
 npm run build
 npm run preview   # serves dist/ locally
 ```
+
+## M3 — Phases, progression and persistence
+
+- Three phases with three waves each: **Crystal Grove** (520/560/600),
+  **Ruined Halls** (560/600/640) and **Arcane Depths** (580/620/660).
+- ASCII-authored layouts with crystal (1 HP), stone (2 HP) and obsidian (3 HP)
+  blocks; corridors and gaps keep every wave clearable.
+- Phase select with locks, best score/time, attempts and clears; victory unlocks
+  the next phase and the menu Play button starts the most advanced unlocked one.
+- Results screen with score, time, bests, level and acquired perks; Retry,
+  Next Phase and Menu actions.
+- Versioned save (`bb.save`) and settings (`bb.settings`) through the platform
+  storage adapter: safe parsing, defaults and no direct `localStorage` use.
+- Waves advance automatically **1.2 s** after a clear, with no intermediate
+  popup. Results appear only at the end of a phase.
+- Initial launch receives a seeded 2.5–5° side bias so a perfectly straight tap
+  cannot clear a column. Prism Laser hits only the first block in its beam.
+- `npm run validate:content` checks the nine waves (ids, legend, grid width,
+  paddle zone, speeds and difficulty curve) and fails CI on invalid content.
 
 ## M2 — Progression
 
@@ -46,10 +67,8 @@ npm run preview   # serves dist/ locally
   panel can force individual perks and grant XP.
 - Contextual laser button plus E on desktop; sticky release by tap/timer;
   Safety Net protects the last ball and reloads each wave.
-- Three provisional waves with rising ball speed: **First Light** (520),
-  **Dense Hall** (560) and **Obsidian Gate** (600), reaching 4+ level ups.
-- HUD XP bar, acquired-perks list and live run score; wave-clear, run-complete
-  and defeat dialogs with immediate progress/restart.
+- HUD XP bar, acquired-perks list and live run score; phase results with
+  immediate retry.
 - Paddle base width reduced to **100** units; Wide Paddle adds 12% per level.
 
 ### Controls
@@ -61,6 +80,7 @@ npm run preview   # serves dist/ locally
 | Pause | Pause button | Pause button / P |
 | Laser | Laser button | Laser button / E |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
+| Menu / phases | Pause → Menu | Pause → Menu |
 
 ## Platform boot
 
@@ -76,19 +96,19 @@ npm run preview   # serves dist/ locally
 ### Debug
 
 Open `?debug=1` for FPS, platform, Bridge/storage source, canvas and stage sizes,
-save reset, live feel tuning, test-wave selection, force-perk, add-XP, add-ball
-and test projectile. `?resetSave=1` resets storage on boot. The full panel
-collapses to a compact FPS/platform strip while playing.
+save reset, live feel tuning, phase/wave info, force-perk, add-XP, add-ball and
+test projectile. `?resetSave=1` resets storage on boot. The full panel collapses
+to a compact FPS/platform strip while playing.
 
 ## Project structure
 
 ```text
 src/
   boot/bridgeBoot.ts       Bridge timeout + fallback selection
-  content/perks.ts         M2 perk catalog
+  content/                 Phase/wave definitions, validator and M2 perk catalog
   game/                    Game orchestration, contracts, events and config
   sim/                     Pure fixed-step simulation and collision
-  progression/             XP curve, offers and derived run modifiers
+  progression/             XP curve, perks, phase save/stats and run modifiers
   input/                   Touch, mouse and keyboard input
   platform/                PlatformService + Bridge/Fallback adapters
   render/                  Phaser scene and placeholder field rendering
@@ -108,5 +128,6 @@ public/                    Bridge config, favicon and static assets
 
 ## Deployment
 
-Every push to `main` runs typecheck, tests and build in CI. The `deploy`
-workflow publishes `dist/` to GitHub Pages using the GitHub Actions source.
+Every push to `main` runs typecheck, tests, content validation and build in CI.
+The `deploy` workflow publishes `dist/` to GitHub Pages using the GitHub Actions
+source.

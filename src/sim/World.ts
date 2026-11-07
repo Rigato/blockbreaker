@@ -183,7 +183,7 @@ export class World {
   private readonly explosionFx: ExplosionFx[] = [];
   private destroyedBlocks = 0;
   private explosionDepth = 0;
-  private readonly rng: () => number;
+  private rng: () => number;
   private readonly eventLog: SimEvent[] = [];
   private readonly eventHistory: SimEvent[] = [];
   private readonly blockCooldowns = new Map<number, Map<string, number>>();
@@ -224,6 +224,11 @@ export class World {
 
   get tuningState(): SimTuning {
     return { ...this.tuning };
+  }
+
+  /** Re-seeds the deterministic launch/multiball RNG for a new run or wave. */
+  setSeed(seed: number): void {
+    this.rng = createRng((seed >>> 0) || 1);
   }
 
   /** Current derived run modifiers (perk hooks). */
@@ -516,6 +521,13 @@ export class World {
       (block) => block.left < x + half && block.left + block.width > x - half,
     );
 
+    // The M3 laser is intentionally precise: it hits only the first block in
+    // the beam (closest to the paddle), not every block in the column.
+    const target = targets.reduce<Block | null>(
+      (lowest, block) => (!lowest || block.top > lowest.top ? block : lowest),
+      null,
+    );
+
     this.laserCooldownLeftMs = cooldown;
     this.laserBeamFx = {
       x,
@@ -527,12 +539,11 @@ export class World {
       type: 'laser:fired',
       x,
       width: LASER_BEAM_WIDTH,
-      hits: targets.length,
+      hits: target ? 1 : 0,
     });
 
-    const damage = GAME_CONFIG.perks.laserDamage;
-    for (const block of targets) {
-      this.applyDamage(block, damage, -1);
+    if (target) {
+      this.applyDamage(target, GAME_CONFIG.perks.laserDamage, -1);
     }
     return true;
   }
@@ -708,8 +719,20 @@ export class World {
 
   private launchBall(ball: Ball): void {
     const speed = this.ballSpeed;
+    const isStickyRelease = ball.sticky;
     const offset = Math.max(-1, Math.min(1, (this.paddle.x - FIELD_WIDTH / 2) / (FIELD_WIDTH / 2)));
-    const angle = (offset * 50 * Math.PI) / 180;
+    let angle = (offset * 50 * Math.PI) / 180;
+
+    // A perfectly straight launch lets a player tap once and clear a whole
+    // column without aiming. The initial launch gets a small random side bias;
+    // sticky releases keep the player's chosen angle.
+    if (!isStickyRelease) {
+      const magnitude = (2.5 + this.rng() * 2.5) * (this.rng() < 0.5 ? -1 : 1);
+      angle += (magnitude * Math.PI) / 180;
+      const maxAngle = (50 * Math.PI) / 180;
+      angle = Math.max(-maxAngle, Math.min(maxAngle, angle));
+    }
+
     ball.vx = Math.sin(angle) * speed;
     ball.vy = -Math.cos(angle) * speed;
     ball.stuck = false;

@@ -30,6 +30,8 @@ describe('launch and run outcome', () => {
     expect(ball.stuck).toBe(false);
     expect(Math.hypot(ball.vx, ball.vy)).toBeCloseTo(TEST_WAVES[0]!.ballSpeed, 5);
     expect(ball.vy).toBeLessThan(0);
+    // A centered initial launch must not travel perfectly straight.
+    expect(Math.abs(ball.vx)).toBeGreaterThan(1);
   });
 
   it('enters defeat when the last ball is lost', () => {

@@ -84,6 +84,19 @@ export interface SettingsV1 {
   sound: boolean;
 }
 
+export interface SaveSnapshot {
+  save: SaveV1;
+  settings: SettingsV1;
+}
+
+/** Persistence boundary used by the M3 game; backed by PlatformService storage. */
+export interface SaveRepository {
+  load(): Promise<SaveSnapshot>;
+  save(save: SaveV1): Promise<void>;
+  saveSettings(settings: SettingsV1): Promise<void>;
+  reset(): Promise<void>;
+}
+
 /** Derived modifier values consumed by gameplay. Base tuning is never mutated. */
 export interface RunModifiers {
   paddleWidthMultiplier: number;
@@ -146,12 +159,44 @@ export interface LaserHudState {
   remainingMs: number;
 }
 
+/** Read-only phase card data for the phase select screen. */
+export interface PhaseSelectInfo {
+  id: string;
+  name: string;
+  index: number;
+  unlocked: boolean;
+  bestTimeMs: number | null;
+  bestScore: number | null;
+  attempts: number;
+  clears: number;
+}
+
+/** Final summary shown after a phase victory or defeat. */
+export interface PhaseResult {
+  phaseId: string;
+  phaseName: string;
+  phaseIndex: number;
+  phaseCount: number;
+  victory: boolean;
+  score: number;
+  timeMs: number;
+  level: number;
+  perks: readonly PerkState[];
+  bestScore: number | null;
+  bestTimeMs: number | null;
+  nextPhaseId: string | null;
+}
+
 /** Minimal state required by the DOM HUD. Emitted only when it changes. */
 export interface HudSnapshot {
   phase: HudPhase;
+  phaseId: string;
+  phaseName: string;
+  phaseIndex: number;
+  phaseCount: number;
   waveId: string;
   waveName: string;
-  /** 1-based index within the provisional test wave set. */
+  /** 1-based index within the current phase. */
   waveIndex: number;
   waveCount: number;
   ballsActive: number;
@@ -166,6 +211,12 @@ export interface HudSnapshot {
   /** Null until Prism Laser is acquired. */
   laser: LaserHudState | null;
   seed: number;
+  elapsedMs: number;
+  bestScore: number | null;
+  bestTimeMs: number | null;
+  soundEnabled: boolean;
+  /** Non-null only while the results screen is open. */
+  result: PhaseResult | null;
 }
 
 /** Result of one XP grant, including overflow and queued level ups. */
@@ -269,4 +320,18 @@ export interface GameCommands {
   debugGrantPerk(perkId: string): void;
   /** Debug-only: grants XP, triggering queued level ups. */
   debugAddXp(amount: number): void;
+
+  // M3 — phases, save and results
+  /** Starts a specific content phase from its first wave. */
+  startPhase(phaseId: string): void;
+  /** Retries the current phase from wave 1 (results screen). */
+  restartPhase(): void;
+  /** Moves from a victory result to the next unlocked phase. */
+  nextPhase(): void;
+  /** Returns to the menu/phase selection state. */
+  returnToMenu(): void;
+  getPhaseSelectInfo(): readonly PhaseSelectInfo[];
+  setSound(enabled: boolean): void;
+  /** Debug-only: clears the persisted save and resets unlock progress. */
+  resetSave(): Promise<void>;
 }

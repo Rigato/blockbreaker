@@ -4,7 +4,6 @@ import type { BlockBreakerGame } from '../game/Game';
 import { GAME_CONFIG, SIM_TUNING_LIMITS } from '../game/config';
 import { gameEvents } from '../game/events';
 import { en } from '../i18n/en';
-import { resetSave } from '../platform/saveReset';
 
 export interface DebugPanelOptions {
   root: HTMLElement;
@@ -12,6 +11,7 @@ export interface DebugPanelOptions {
   game: BlockBreakerGame;
   controller: GameCommands;
   boot: BootResult;
+  onSaveReset?: () => void;
 }
 
 type NumericTuningKey = Exclude<keyof SimTuning, 'fixedStepHz'>;
@@ -64,6 +64,7 @@ export class DebugPanel {
   private readonly game: BlockBreakerGame;
   private readonly controller: GameCommands;
   private readonly boot: BootResult;
+  private readonly onSaveReset: (() => void) | null;
   private readonly panel: HTMLElement;
   private readonly body: HTMLElement;
   private readonly compact: HTMLButtonElement;
@@ -78,6 +79,8 @@ export class DebugPanel {
   private readonly tuningControls: TuningControl[] = [];
   private seedValue!: HTMLElement;
   private levelXpValue!: HTMLElement;
+  private phaseValue!: HTMLElement;
+  private waveValue!: HTMLElement;
   private readonly timer: ReturnType<typeof setInterval>;
   private readonly unsubscribeTuning: () => void;
   private readonly unsubscribeHud: () => void;
@@ -88,6 +91,7 @@ export class DebugPanel {
     this.game = options.game;
     this.controller = options.controller;
     this.boot = options.boot;
+    this.onSaveReset = options.onSaveReset ?? null;
 
     const panel = document.createElement('section');
     this.panel = panel;
@@ -170,7 +174,7 @@ export class DebugPanel {
     rows.append(readyRow.row);
 
     body.append(this.buildTuningSection());
-    body.append(this.buildWaveSection());
+    body.append(this.buildPhaseSection());
     body.append(this.buildActionSection());
     body.append(this.buildProgressionSection());
 
@@ -305,34 +309,16 @@ export class DebugPanel {
     return section;
   }
 
-  private buildWaveSection(): HTMLElement {
+  private buildPhaseSection(): HTMLElement {
     const section = makeSection(en.debugTestWave);
 
-    const select = document.createElement('select');
-    select.id = 'debug-wave';
-    select.className = 'debug__select';
-    section.append(select);
+    const phaseRow = makeRow(en.phaseLabel, 'debug-phase');
+    this.phaseValue = phaseRow.value;
+    section.append(phaseRow.row);
 
-    const load = makeButton(en.debugLoadWave, 'debug__button debug__button--accent');
-    load.addEventListener('click', () => {
-      const waveId = select.value;
-      if (!waveId) return;
-      this.controller.setTestWave(waveId);
-      this.controller.startRun();
-    });
-    section.append(load);
-
-    const waves = this.controller.getTestWaves();
-    for (const wave of waves) {
-      const option = document.createElement('option');
-      option.value = wave.id;
-      option.textContent = wave.name;
-      select.append(option);
-    }
-    if (waves.length === 0) {
-      select.disabled = true;
-      load.disabled = true;
-    }
+    const waveRow = makeRow(en.overlayWave, 'debug-wave-info');
+    this.waveValue = waveRow.value;
+    section.append(waveRow.row);
 
     return section;
   }
@@ -417,6 +403,11 @@ export class DebugPanel {
   private applyProgression(snapshot: HudSnapshot): void {
     this.seedValue.textContent = String(snapshot.seed);
     this.levelXpValue.textContent = `${snapshot.level} · ${snapshot.xp}/${snapshot.xpToNext}`;
+    this.phaseValue.textContent = `${snapshot.phaseName} (${snapshot.phaseIndex}/${Math.max(
+      1,
+      snapshot.phaseCount,
+    )})`;
+    this.waveValue.textContent = `${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
   }
 
   private readonly handleHudChanged = (snapshot: HudSnapshot): void => {
@@ -476,7 +467,8 @@ export class DebugPanel {
     this.resetButton.disabled = true;
     this.status.textContent = '';
     try {
-      await resetSave(this.platform.storage);
+      await this.controller.resetSave();
+      this.onSaveReset?.();
       this.status.textContent = en.debugResetDone;
     } catch (error) {
       console.warn('[debug] save reset failed', error);

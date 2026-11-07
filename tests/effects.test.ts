@@ -153,7 +153,7 @@ describe('safety net', () => {
 });
 
 describe('prism laser', () => {
-  it('damages every block in the paddle column and runs the cooldown', () => {
+  it('damages the first block in the paddle column and runs the cooldown', () => {
     const world = createWorld();
     world.blocks.push(keeperBlock());
     world.applyRunModifiers(withMods({ laserCooldown: GAME_CONFIG.perks.laserCooldownMs }));
@@ -164,7 +164,7 @@ describe('prism laser', () => {
 
     expect(world.laserReady).toBe(true);
     expect(world.fireLaser()).toBe(true);
-    expect(world.blocks).not.toContain(first);
+    expect(world.blocks).toContain(first);
     expect(world.blocks).not.toContain(second);
     expect(world.laserBeam).not.toBeNull();
     expect(world.events.some((event) => event.type === 'laser:fired')).toBe(true);
@@ -243,6 +243,15 @@ describe('arcane turret', () => {
 });
 
 describe('explosive core', () => {
+  function fireLaserWave(world: World, shots: number): void {
+    for (let shot = 0; shot < shots; shot += 1) {
+      expect(world.fireLaser()).toBe(true);
+      for (let second = 0; second < 8; second += 1) {
+        world.step(NO_INPUT, 1000);
+      }
+    }
+  }
+
   it('explodes in a Chebyshev radius of 1 every eight kills', () => {
     const world = createWorld();
     world.applyRunModifiers(
@@ -266,18 +275,23 @@ describe('explosive core', () => {
         }),
       );
     }
+    // The eighth sequential laser kill is the top block, so put the neighbour
+    // in that block's 1-cell blast ring.
     const neighbour = addBlock(world, {
       left: 390,
-      top: 200 + 7 * 50,
+      top: 200,
       width: 40,
       height: 40,
       type: 'stone',
       hp: 2,
       maxHp: 2,
-      row: 7,
+      row: 0,
       col: 1,
     });
 
+    // Seven cooldown cycles, then the eighth shot immediately before the check
+    // so the explosion visual is still alive.
+    fireLaserWave(world, 7);
     expect(world.fireLaser()).toBe(true);
     for (const block of targets) expect(world.blocks).not.toContain(block);
     expect(world.destroyedBlockCount).toBe(8);
@@ -297,7 +311,7 @@ describe('explosive core', () => {
       addBlock(world, { left: 340, top: 200 + row * 50, width: 40, height: 40, row, col: 0 });
     }
 
-    world.fireLaser();
+    fireLaserWave(world, 8);
 
     expect(world.destroyedBlockCount).toBe(8);
     expect(world.explosions).toHaveLength(0);

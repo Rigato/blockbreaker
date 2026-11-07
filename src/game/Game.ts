@@ -4,17 +4,33 @@ import type {
   HudPhase,
   HudSnapshot,
   PerkSummary,
+  PhaseResult,
+  PhaseSelectInfo,
+  PlatformService,
+  SaveRepository,
+  SaveSnapshot,
+  SaveV1,
+  SettingsV1,
   SimTuning,
   TestWaveInfo,
 } from './contracts';
 import { GAME_CONFIG, SIM_TUNING_DEFAULTS, SIM_TUNING_LIMITS } from './config';
 import { gameEvents } from './events';
+import { PHASES } from '../content/phases';
+import type { PhaseDef } from '../content/types';
 import { InputController } from '../input/Input';
-import { GameScene } from '../render/GameScene';
+import { MemoryStorage } from '../platform/MemoryStorage';
+import {
+  StorageSaveRepository,
+  applyPhaseResult,
+  createDefaultSave,
+  createDefaultSettings,
+  getPhaseStats,
+} from '../progression/Save';
 import { RunState } from '../progression/RunState';
+import { GameScene } from '../render/GameScene';
 import { FixedStepClock } from '../sim/fixedStep';
 import { FIELD_WIDTH, World, type SimEvent } from '../sim/World';
-import { getTestWave, getTestWaves, TEST_WAVES } from '../sim/testWaves';
 
 export interface CanvasMetrics {
   readonly cssWidth: number;
@@ -26,6 +42,7 @@ export interface CanvasMetrics {
 }
 
 const MAX_SUBSTEPS = GAME_CONFIG.maxStepsPerFrame;
+const WAVE_TRANSITION_MS = 1200;
 
 function clampWorldHeight(cssWidth: number, cssHeight: number): number {
   if (cssWidth <= 0 || cssHeight <= 0) return GAME_CONFIG.worldHeight.min;
@@ -37,36 +54,51 @@ function clampWorldHeight(cssWidth: number, cssHeight: number): number {
 }
 
 /**
- * Owns the Phaser instance, the pure simulation, the progression state and the
+ * Owns the Phaser instance, the pure simulation, M3 phase/save flow and the
  * GameCommands seam used by the DOM UI.
  */
 export class BlockBreakerGame implements GameCommands {
   readonly phaser: Phaser.Game;
   readonly ready: Promise<void>;
+  readonly saveReady: Promise<void>;
 
   private tuning: SimTuning = { ...SIM_TUNING_DEFAULTS };
   private readonly world: World;
   private readonly input: InputController;
   private readonly runState = new RunState();
+  private readonly saveRepository: SaveRepository;
   private readonly unsubscribePause: () => void;
   private phase: HudPhase = 'menu';
-  private selectedWaveId: string = TEST_WAVES[0]!.id;
+  private currentPhase: PhaseDef | null = null;
   private currentWaveIndex = 0;
+  private phaseElapsedMs = 0;
+  private phaseResult: PhaseResult | null = null;
   private runScore = 0;
   private waveScoreAtStart = 0;
   private pendingPerkBalls = 0;
   private runCount = 0;
+  private runSeed = 1;
+  private nextWaveAt = 0;
+  private save: SaveV1 = createDefaultSave();
+  private settings: SettingsV1 = createDefaultSettings();
   private readonly clock = new FixedStepClock();
   private pendingLaunch = false;
   private lastHud = '';
 
-  constructor(parent: HTMLElement) {
+  constructor(parent: HTMLElement, platform?: PlatformService) {
     let resolveReady: () => void = () => {
       // Replaced synchronously below.
     };
     this.ready = new Promise<void>((resolve) => {
       resolveReady = resolve;
     });
+
+    this.saveRepository = new StorageSaveRepository(
+      platform?.storage ?? new MemoryStorage(),
+    );
+
+    const preview = PHASES[0]?.waves[0];
+    if (!preview) throw new Error('No M3 phase content available');
 
     const cssWidth = Math.max(1, Math.round(parent.clientWidth || FIELD_WIDTH));
     const cssHeight = Math.max(
@@ -76,7 +108,7 @@ export class BlockBreakerGame implements GameCommands {
     const worldHeight = clampWorldHeight(cssWidth, cssHeight);
 
     this.world = new World({
-      wave: getTestWave(this.selectedWaveId),
+      wave: preview,
       height: worldHeight,
       tuning: this.tuning,
       seed: 1,
@@ -127,6 +159,8 @@ export class BlockBreakerGame implements GameCommands {
     this.runState.startRun(1);
     this.world.applyRunModifiers(this.runState.modifiers);
     this.syncHud(true);
+
+    this.saveReady = this.loadPersistedState();
   }
 
   get fps(): number {
@@ -165,22 +199,35 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   // -------------------------------------------------------------------------
-  // GameCommands
+  // GameCommands — phase/menu/save
   // -------------------------------------------------------------------------
 
   startRun(): void {
-    this.startRunInternal(this.selectedWaveId);
+    const target =
+      [...this.getPhaseSelectInfo()].reverse().find((phase) => phase.unlocked) ??
+      this.getPhaseSelectInfo()[0];
+    if (target) this.startPhase(target.id);
   }
 
   restartRun(): void {
-    this.startRunInternal(this.selectedWaveId);
+    this.restartPhase();
   }
 
-  restartWave(): void {
-    if (this.phase === 'menu') return;
-    this.runScore = this.waveScoreAtStart;
+  startPhase(phaseId: string): void {
+    const phase = PHASES.find((candidate) => candidate.id === phaseId);
+    if (!phase || phase.index > this.save.unlockedPhase) return;
+
+    this.currentPhase = phase;
+    this.currentWaveIndex = 0;
+    this.phaseElapsedMs = 0;
+    this.phaseResult = null;
+    this.runScore = 0;
+    this.waveScoreAtStart = 0;
     this.pendingPerkBalls = 0;
-    this.loadCurrentWaveForRun();
+    this.nextWaveAt = 0;
+    this.runSeed = this.nextSeed();
+    this.runState.startRun(this.runSeed);
+    this.loadPhaseWave(0);
     this.phase = 'playing';
     this.clock.reset();
     this.pendingLaunch = false;
@@ -188,40 +235,95 @@ export class BlockBreakerGame implements GameCommands {
     this.syncHud(true);
   }
 
-  nextWave(): void {
-    if (this.phase !== 'cleared') return;
-    if (this.currentWaveIndex + 1 >= TEST_WAVES.length) {
-      this.phase = 'run-complete';
-      this.syncHud(true);
-      return;
+  restartPhase(): void {
+    if (this.currentPhase) {
+      this.startPhase(this.currentPhase.id);
+    } else {
+      this.returnToMenu();
     }
-
-    this.currentWaveIndex += 1;
-    this.waveScoreAtStart = this.runScore;
-    this.pendingPerkBalls = 0;
-    this.loadCurrentWaveForRun();
-    this.phase = 'playing';
-    this.clock.reset();
-    this.pendingLaunch = false;
-    this.input.resetTarget();
-    this.syncHud(true);
   }
 
-  setTestWave(waveId: string): void {
-    const index = TEST_WAVES.findIndex((wave) => wave.id === waveId);
-    if (index < 0) return;
+  nextPhase(): void {
+    if (this.phase !== 'run-complete') return;
+    const nextId = this.phaseResult?.nextPhaseId ?? null;
+    if (!nextId) return;
+    this.startPhase(nextId);
+  }
 
-    this.selectedWaveId = waveId;
-    this.currentWaveIndex = index;
-    this.world.loadWave(getTestWave(waveId));
-    this.world.applyRunModifiers(this.runState.modifiers);
-    this.world.setSafetyCharges(this.runState.modifiers.safetyNetCharges);
+  returnToMenu(): void {
     this.phase = 'menu';
+    this.currentPhase = null;
+    this.currentWaveIndex = 0;
+    this.phaseElapsedMs = 0;
+    this.phaseResult = null;
+    this.runScore = 0;
+    this.waveScoreAtStart = 0;
+    this.pendingPerkBalls = 0;
+    this.nextWaveAt = 0;
+    this.runState.reset();
+    const preview = PHASES[0]?.waves[0];
+    if (preview) {
+      this.world.loadWave(preview);
+      this.world.applyRunModifiers(this.runState.modifiers);
+    }
     this.clock.reset();
     this.pendingLaunch = false;
     this.input.resetTarget();
     this.syncHud(true);
   }
+
+  getPhaseSelectInfo(): readonly PhaseSelectInfo[] {
+    return PHASES.map((phase) => {
+      const stats = getPhaseStats(this.save, phase.id);
+      return {
+        id: phase.id,
+        name: phase.name,
+        index: phase.index,
+        unlocked: phase.index <= this.save.unlockedPhase,
+        bestTimeMs: stats.bestTimeMs,
+        bestScore: stats.bestScore,
+        attempts: stats.attempts,
+        clears: stats.clears,
+      };
+    });
+  }
+
+  setSound(enabled: boolean): void {
+    this.settings = { version: 1, sound: enabled };
+    void this.saveRepository.saveSettings(this.settings).catch((error: unknown) => {
+      console.warn('[save] could not persist settings', error);
+    });
+    this.syncHud(true);
+  }
+
+  async resetSave(): Promise<void> {
+    try {
+      await this.saveRepository.reset();
+    } catch (error) {
+      console.warn('[save] could not clear storage', error);
+    }
+    this.save = createDefaultSave();
+    this.settings = createDefaultSettings();
+    this.currentPhase = null;
+    this.currentWaveIndex = 0;
+    this.phaseElapsedMs = 0;
+    this.phaseResult = null;
+    this.runScore = 0;
+    this.phase = 'menu';
+    const preview = PHASES[0]?.waves[0];
+    if (preview) {
+      this.world.loadWave(preview);
+      this.world.applyRunModifiers(this.runState.modifiers);
+    }
+    this.syncHud(true);
+    gameEvents.emit('save:reset', {
+      keys: [GAME_CONFIG.storage.saveKey, GAME_CONFIG.storage.settingsKey],
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // GameCommands — run flow
+  // -------------------------------------------------------------------------
 
   pause(): void {
     if (this.phase !== 'playing') return;
@@ -242,8 +344,44 @@ export class BlockBreakerGame implements GameCommands {
     else if (this.phase === 'paused') this.resume();
   }
 
+  restartWave(): void {
+    if (!this.currentPhase || this.phase === 'menu') return;
+    this.runScore = this.waveScoreAtStart;
+    this.pendingPerkBalls = 0;
+    this.nextWaveAt = 0;
+    this.loadPhaseWave(this.currentWaveIndex);
+    this.phase = 'playing';
+    this.clock.reset();
+    this.pendingLaunch = false;
+    this.input.resetTarget();
+    this.syncHud(true);
+  }
+
+  nextWave(): void {
+    if (this.phase !== 'cleared' || !this.currentPhase) return;
+    if (this.currentWaveIndex + 1 >= this.currentPhase.waves.length) {
+      this.finishPhase(true);
+      return;
+    }
+
+    this.currentWaveIndex += 1;
+    this.waveScoreAtStart = this.runScore;
+    this.pendingPerkBalls = 0;
+    this.nextWaveAt = 0;
+    this.loadPhaseWave(this.currentWaveIndex);
+    this.phase = 'playing';
+    this.clock.reset();
+    this.pendingLaunch = false;
+    this.input.resetTarget();
+    this.syncHud(true);
+  }
+
+  setTestWave(_waveId: string): void {
+    // M3 uses phase selection; kept for contract stability.
+  }
+
   getTestWaves(): readonly TestWaveInfo[] {
-    return getTestWaves();
+    return [];
   }
 
   getHudState(): HudSnapshot {
@@ -377,29 +515,30 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   // -------------------------------------------------------------------------
-  // Run flow
+  // Phase flow
   // -------------------------------------------------------------------------
 
-  private startRunInternal(startWaveId: string): void {
-    const index = Math.max(
-      0,
-      TEST_WAVES.findIndex((wave) => wave.id === startWaveId),
-    );
-    this.currentWaveIndex = index;
-    this.runState.startRun(this.nextSeed());
-    this.runScore = 0;
-    this.waveScoreAtStart = 0;
-    this.pendingPerkBalls = 0;
-    this.loadCurrentWaveForRun();
-    this.phase = 'playing';
-    this.clock.reset();
-    this.pendingLaunch = false;
-    this.input.resetTarget();
+  private async loadPersistedState(): Promise<void> {
+    try {
+      const snapshot: SaveSnapshot = await this.saveRepository.load();
+      this.save = snapshot.save;
+      this.settings = snapshot.settings;
+    } catch (error) {
+      console.warn('[save] could not load save; using defaults', error);
+      this.save = createDefaultSave();
+      this.settings = createDefaultSettings();
+    }
     this.syncHud(true);
   }
 
-  private loadCurrentWaveForRun(): void {
-    const wave = TEST_WAVES[this.currentWaveIndex] ?? TEST_WAVES[0]!;
+  private loadPhaseWave(index: number): void {
+    const phase = this.currentPhase;
+    if (!phase) return;
+    const wave = phase.waves[index];
+    if (!wave) return;
+    this.world.setSeed(
+      (this.runSeed ^ ((index + 1) * 0x9e3779b9)) >>> 0,
+    );
     this.world.loadWave(wave);
     this.world.applyRunModifiers(this.runState.modifiers);
     this.world.setSafetyCharges(this.runState.modifiers.safetyNetCharges);
@@ -441,29 +580,69 @@ export class BlockBreakerGame implements GameCommands {
       return;
     }
     if (this.world.outcome === 'defeat') {
-      this.finishDefeat();
+      this.finishPhase(false);
       return;
     }
     this.syncHud(true);
   }
 
   private finishWave(): void {
-    this.phase =
-      this.currentWaveIndex + 1 >= TEST_WAVES.length
-        ? 'run-complete'
-        : 'cleared';
+    if (!this.currentPhase) return;
+    if (this.currentWaveIndex + 1 >= this.currentPhase.waves.length) {
+      this.finishPhase(true);
+      return;
+    }
+
+    this.phase = 'cleared';
+    this.nextWaveAt = performance.now() + WAVE_TRANSITION_MS;
     this.clock.reset();
     this.pendingLaunch = false;
     this.pendingPerkBalls = 0;
     this.syncHud(true);
   }
 
-  private finishDefeat(): void {
-    this.phase = 'defeat';
+  private finishPhase(victory: boolean): void {
+    const phase = this.currentPhase;
+    if (!phase) return;
+    if (this.phase === 'run-complete' || this.phase === 'defeat') return;
+
+    const nextPhase = victory
+      ? PHASES.find((candidate) => candidate.index === phase.index + 1) ?? null
+      : null;
+
+    const provisional: PhaseResult = {
+      phaseId: phase.id,
+      phaseName: phase.name,
+      phaseIndex: phase.index,
+      phaseCount: PHASES.length,
+      victory,
+      score: this.runScore,
+      timeMs: Math.max(0, Math.round(this.phaseElapsedMs)),
+      level: this.runState.level,
+      perks: this.runState.perks,
+      bestScore: null,
+      bestTimeMs: null,
+      nextPhaseId: nextPhase?.id ?? null,
+    };
+
+    const updated = applyPhaseResult(this.save, provisional);
+    this.save = updated;
+    const stats = getPhaseStats(updated, phase.id);
+    this.phaseResult = {
+      ...provisional,
+      bestScore: stats.bestScore,
+      bestTimeMs: stats.bestTimeMs,
+    };
+    this.phase = victory ? 'run-complete' : 'defeat';
+    this.nextWaveAt = 0;
     this.clock.reset();
     this.pendingLaunch = false;
     this.pendingPerkBalls = 0;
     this.syncHud(true);
+
+    void this.saveRepository.save(updated).catch((error: unknown) => {
+      console.warn('[save] could not persist phase result', error);
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -471,6 +650,16 @@ export class BlockBreakerGame implements GameCommands {
   // -------------------------------------------------------------------------
 
   private frame(deltaMs: number): void {
+    if (
+      this.phase === 'cleared' &&
+      this.nextWaveAt > 0 &&
+      performance.now() >= this.nextWaveAt
+    ) {
+      this.nextWaveAt = 0;
+      this.nextWave();
+      return;
+    }
+
     const actions = this.input.consumeActions();
     if (actions.togglePause) this.togglePause();
     if (actions.laser) this.fireLaser();
@@ -481,6 +670,8 @@ export class BlockBreakerGame implements GameCommands {
       this.syncHud();
       return;
     }
+
+    this.phaseElapsedMs += Math.max(0, Math.min(deltaMs, 250));
 
     if (actions.launch) this.pendingLaunch = true;
 
@@ -508,7 +699,7 @@ export class BlockBreakerGame implements GameCommands {
     }
 
     if (this.world.outcome === 'defeat') {
-      this.finishDefeat();
+      this.finishPhase(false);
       return;
     }
     if (leveledUp) {
@@ -545,6 +736,9 @@ export class BlockBreakerGame implements GameCommands {
 
   private buildHud(): HudSnapshot {
     const modifiers = this.runState.modifiers;
+    const phase = this.currentPhase;
+    const wave = phase?.waves[this.currentWaveIndex] ?? null;
+    const stats = phase ? getPhaseStats(this.save, phase.id) : null;
     const laser =
       modifiers.laserCooldown !== null
         ? {
@@ -560,10 +754,14 @@ export class BlockBreakerGame implements GameCommands {
 
     return {
       phase: this.phase,
-      waveId: this.world.waveId,
-      waveName: this.world.waveName,
-      waveIndex: this.currentWaveIndex + 1,
-      waveCount: TEST_WAVES.length,
+      phaseId: phase?.id ?? '',
+      phaseName: phase?.name ?? '',
+      phaseIndex: phase?.index ?? 0,
+      phaseCount: PHASES.length,
+      waveId: wave?.id ?? '',
+      waveName: wave?.name ?? '',
+      waveIndex: phase ? this.currentWaveIndex + 1 : 0,
+      waveCount: phase?.waves.length ?? 0,
       ballsActive: this.world.balls.length,
       blocksRemaining: this.world.blocks.length,
       score: this.runScore,
@@ -574,6 +772,14 @@ export class BlockBreakerGame implements GameCommands {
       perks: this.runState.perks,
       laser,
       seed: this.runState.seed,
+      elapsedMs: Math.floor(this.phaseElapsedMs / 1000) * 1000,
+      bestScore: stats?.bestScore ?? null,
+      bestTimeMs: stats?.bestTimeMs ?? null,
+      soundEnabled: this.settings.sound,
+      result:
+        this.phase === 'run-complete' || this.phase === 'defeat'
+          ? this.phaseResult
+          : null,
     };
   }
 

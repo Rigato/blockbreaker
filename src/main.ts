@@ -64,9 +64,12 @@ async function start(): Promise<void> {
   });
 
   const { BlockBreakerGame: GameClass } = await import('./game/Game');
-  game = new GameClass(canvasHost);
+  game = new GameClass(canvasHost, platform);
   game.resize(layout.size.width, layout.size.height);
   await game.ready;
+
+  setBootStatus(en.bootSave);
+  await game.saveReady;
 
   setBootStatus(en.bootMenu);
   const ui = mountUI({

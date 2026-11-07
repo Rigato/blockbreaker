@@ -17,6 +17,7 @@ export interface HudOptions {
 export class Hud {
   private readonly controller: GameCommands;
   private readonly section: HTMLElement;
+  private readonly waveKicker: HTMLElement;
   private readonly waveText: HTMLElement;
   private readonly xpLine: HTMLElement;
   private readonly xpTrack: HTMLElement;
@@ -62,6 +63,7 @@ export class Hud {
     wave.className = 'hud__wave';
 
     const waveKicker = document.createElement('span');
+    this.waveKicker = waveKicker;
     waveKicker.className = 'hud__wave-kicker';
     waveKicker.textContent = en.hudWave;
 
@@ -235,8 +237,11 @@ export class Hud {
   }
 
   update(snapshot: HudSnapshot): void {
-    this.waveText.textContent = `${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
-
+    this.waveKicker.textContent = `${en.phaseLabel} ${snapshot.phaseIndex}/${Math.max(
+      1,
+      snapshot.phaseCount,
+    )} · ${snapshot.waveName}`;
+    this.waveText.textContent = `${snapshot.phaseName} · ${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount}`;
     const active = Math.max(0, Math.min(snapshot.ballsActive, this.dots.length));
     this.dots.forEach((dot, index) => {
       dot.classList.toggle('is-on', index < active);
@@ -245,7 +250,12 @@ export class Hud {
 
     this.blocksValue.textContent = String(Math.max(0, snapshot.blocksRemaining));
     this.scoreValue.textContent = snapshot.score.toLocaleString('en-US');
-    this.hint.textContent = snapshot.ballStuck ? en.hudLaunchHint : en.hudControlsHint;
+    this.hint.textContent =
+      snapshot.phase === 'cleared'
+        ? en.hudWaveTransition
+        : snapshot.ballStuck
+          ? en.hudLaunchHint
+          : en.hudControlsHint;
 
     const xpToNext = Math.max(1, snapshot.xpToNext);
     const ratio = Math.max(0, Math.min(1, snapshot.xp / xpToNext));
