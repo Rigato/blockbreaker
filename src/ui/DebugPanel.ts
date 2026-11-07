@@ -1,4 +1,4 @@
-import type { GameCommands, PlatformService, SimTuning } from '../game/contracts';
+import type { GameCommands, HudSnapshot, PlatformService, SimTuning } from '../game/contracts';
 import type { BootResult } from '../boot/bridgeBoot';
 import type { BlockBreakerGame } from '../game/Game';
 import { GAME_CONFIG, SIM_TUNING_LIMITS } from '../game/config';
@@ -76,8 +76,11 @@ export class DebugPanel {
   private readonly resetButton: HTMLButtonElement;
   private readonly fixedStepSelect: HTMLSelectElement;
   private readonly tuningControls: TuningControl[] = [];
+  private seedValue!: HTMLElement;
+  private levelXpValue!: HTMLElement;
   private readonly timer: ReturnType<typeof setInterval>;
   private readonly unsubscribeTuning: () => void;
+  private readonly unsubscribeHud: () => void;
   private collapsed = false;
 
   constructor(options: DebugPanelOptions) {
@@ -169,6 +172,7 @@ export class DebugPanel {
     body.append(this.buildTuningSection());
     body.append(this.buildWaveSection());
     body.append(this.buildActionSection());
+    body.append(this.buildProgressionSection());
 
     this.resetButton = makeButton(en.debugResetSave, 'debug__reset');
     this.resetButton.addEventListener('click', this.handleReset);
@@ -189,6 +193,8 @@ export class DebugPanel {
     this.refreshFps();
 
     this.unsubscribeTuning = gameEvents.on('tuning:changed', this.handleTuningChanged);
+    this.unsubscribeHud = gameEvents.on('hud:changed', this.handleHudChanged);
+    this.applyProgression(this.controller.getHudState());
 
     this.timer = setInterval(() => {
       this.refreshFps();
@@ -208,6 +214,7 @@ export class DebugPanel {
   dispose(): void {
     clearInterval(this.timer);
     this.unsubscribeTuning();
+    this.unsubscribeHud();
     this.toggleButton.removeEventListener('click', this.handleToggle);
     this.compact.removeEventListener('click', this.handleCompactExpand);
     this.resetButton.removeEventListener('click', this.handleReset);
@@ -345,6 +352,76 @@ export class DebugPanel {
     section.append(restart, addBall, projectile);
     return section;
   }
+
+  private buildProgressionSection(): HTMLElement {
+    const section = makeSection(en.debugProgression);
+
+    const seedRow = makeRow(en.debugSeed, 'debug-seed');
+    this.seedValue = seedRow.value;
+    section.append(seedRow.row);
+
+    const levelRow = makeRow(en.debugLevelXp, 'debug-level-xp');
+    this.levelXpValue = levelRow.value;
+    section.append(levelRow.row);
+
+    const xpActions = document.createElement('div');
+    xpActions.className = 'debug__button-row';
+
+    const addXp20 = makeButton(`${en.debugAddXp} +20`, 'debug__button');
+    addXp20.addEventListener('click', () => this.controller.debugAddXp(20));
+
+    const addXp100 = makeButton(`${en.debugAddXp} +100`, 'debug__button');
+    addXp100.addEventListener('click', () => this.controller.debugAddXp(100));
+
+    xpActions.append(addXp20, addXp100);
+    section.append(xpActions);
+
+    const perkLabel = document.createElement('span');
+    perkLabel.className = 'debug__label';
+    perkLabel.textContent = en.debugForcePerk;
+    section.append(perkLabel);
+
+    const perkSelect = document.createElement('select');
+    perkSelect.id = 'debug-perk';
+    perkSelect.className = 'debug__select';
+
+    const catalog = this.controller.getPerkCatalog();
+    if (catalog.length === 0) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = en.debugNoPerkCatalog;
+      perkSelect.append(option);
+      perkSelect.disabled = true;
+    } else {
+      for (const perk of catalog) {
+        const option = document.createElement('option');
+        option.value = perk.id;
+        option.textContent = `${perk.name} (${perk.kind} · ${en.debugMaxShort} ${perk.maxLevel})`;
+        perkSelect.append(option);
+      }
+    }
+    section.append(perkSelect);
+
+    const grant = makeButton(en.debugGrantPerk, 'debug__button');
+    grant.disabled = catalog.length === 0;
+    grant.addEventListener('click', () => {
+      const perkId = perkSelect.value;
+      if (!perkId) return;
+      this.controller.debugGrantPerk(perkId);
+    });
+    section.append(grant);
+
+    return section;
+  }
+
+  private applyProgression(snapshot: HudSnapshot): void {
+    this.seedValue.textContent = String(snapshot.seed);
+    this.levelXpValue.textContent = `${snapshot.level} · ${snapshot.xp}/${snapshot.xpToNext}`;
+  }
+
+  private readonly handleHudChanged = (snapshot: HudSnapshot): void => {
+    this.applyProgression(snapshot);
+  };
 
   private buildFixedStepSelect(): HTMLSelectElement {
     const select = this.panel.querySelector<HTMLSelectElement>('#tune-fixed-step') as HTMLSelectElement;

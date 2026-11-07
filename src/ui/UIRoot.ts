@@ -5,6 +5,7 @@ import { gameEvents } from '../game/events';
 import { en } from '../i18n/en';
 import { DebugPanel } from './DebugPanel';
 import { Hud } from './Hud';
+import { LevelUpOverlay } from './LevelUpOverlay';
 import { HudOverlay } from './Overlay';
 
 export interface UIRootOptions {
@@ -104,6 +105,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
 
   const hud = new Hud({ root: options.root, controller: options.controller });
   const overlay = new HudOverlay({ root: options.root, controller: options.controller });
+  const levelUp = new LevelUpOverlay({ root: options.root, controller: options.controller });
 
   const debugPanel = options.debug
     ? new DebugPanel({
@@ -135,6 +137,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     hud.update(snapshot);
     hud.setVisible(snapshot.phase === 'playing' || snapshot.phase === 'paused');
     overlay.update(snapshot);
+    levelUp.update(snapshot);
   };
 
   const unsubscribeHud = gameEvents.on('hud:changed', applySnapshot);
@@ -150,6 +153,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       playButton.removeEventListener('click', handlePlay);
       hud.dispose();
       overlay.dispose();
+      levelUp.dispose();
       menu.remove();
       debugPanel?.dispose();
       delete document.documentElement.dataset.debug;

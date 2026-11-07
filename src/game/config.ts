@@ -1,4 +1,4 @@
-import type { SimTuning } from '../game/contracts';
+import type { RunModifiers, SimTuning } from '../game/contracts';
 
 /**
  * Frozen M0 tuning defaults.
@@ -17,7 +17,7 @@ export const GAME_CONFIG = {
   maxStepsPerFrame: 5,
 
   paddle: {
-    width: 120,
+    width: 100,
     height: 18,
     maxSpeed: 2600,
   },
@@ -49,12 +49,46 @@ export const GAME_CONFIG = {
     settingsKey: 'bb.settings',
   },
 
+  progression: {
+    baseXpToNext: 20,
+    xpStepPerLevel: 10,
+  },
+
+  perks: {
+    widePaddleStep: 0.12,
+    giantBallStep: 0.15,
+    quickStudyStep: 0.2,
+    turretBaseMs: 3200,
+    turretStepMs: 400,
+    turretMinMs: 1200,
+    laserCooldownMs: 8000,
+    laserDamage: 1,
+    stickyHoldMs: 2500,
+    safetyCharges: 1,
+    explosiveEvery: 8,
+    fallbackXpStep: 0.1,
+  },
+
   debug: {
     sampleMs: 500,
   },
 } as const;
 
 export const FIXED_STEP_SECONDS = 1 / GAME_CONFIG.fixedStepHz;
+
+/** Neutral modifiers used before any perk is acquired. */
+export const BASE_RUN_MODIFIERS: RunModifiers = {
+  paddleWidthMultiplier: 1,
+  ballRadiusMultiplier: 1,
+  ballDamage: 1,
+  xpMultiplier: 1,
+  maxBalls: GAME_CONFIG.ball.maxBalls,
+  turretInterval: null,
+  stickyPaddle: false,
+  laserCooldown: null,
+  safetyNetCharges: 0,
+  explosiveEvery: null,
+};
 
 /** M1 default feel values; the debug panel starts from these. */
 export const SIM_TUNING_DEFAULTS: SimTuning = {

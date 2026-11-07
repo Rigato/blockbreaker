@@ -1,9 +1,9 @@
 # Block Breaker Roguelite
 
 Portrait HTML5 block breaker with roguelite progression. The repository is in the
-**M1 — Playable core** stage: one test wave is playable with paddle, ball,
-blocks, pause, defeat and wave-complete states. XP, perks, phase content and
-final presentation arrive in later milestones.
+**M2 — XP, level up and perks** stage: a full three-wave provisional run has XP,
+level-up choices, ten perks and the M1 playable core. The final three-phase
+content and save system arrive in M3.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -12,7 +12,7 @@ final presentation arrive in later milestones.
 
 - [Phaser 3.90](https://phaser.io/) for scenes, rendering and input
 - TypeScript (strict) + [Vite 8](https://vite.dev/)
-- [Vitest](https://vitest.dev/) for simulation, collision and progression tests
+- [Vitest](https://vitest.dev/) for simulation, progression and offer tests
 - [Playgama Bridge 2.4](https://github.com/Playgama/bridge) for platform services
 - One build for itch.io, GameFlare, Playgama and CrazyGames Basic Launch
 
@@ -34,19 +34,23 @@ npm run build
 npm run preview   # serves dist/ locally
 ```
 
-## M1 — Playable core
+## M2 — Progression
 
-- Fixed 120 Hz simulation, swept circle-vs-AABB collisions and anti-stall.
-- Paddle, launch, multiple balls (up to 8), blocks with 1–3 HP, projectiles and
-  wave-clear/defeat outcomes.
-- Touch relative drag, mouse absolute movement, arrows/A-D with acceleration,
-  Space to launch and P to pause.
-- Minimal DOM HUD with wave, active balls, remaining blocks, score and pause.
-- Pause, wave-cleared and defeat overlays with immediate restart.
-- Two provisional test waves (`First Light` and `Dense Hall`) used only for M1
-  QA; the real phase content arrives in M3.
-- Portrait stage centered on desktop with a decorative frame, safe-area padding
-  and no page scrollbar.
+- XP per destroyed block (`XP = max HP`), curve `20 + 10 × (level − 1)`,
+  overflow and a queued multi-level-up flow.
+- Automatic pause on level up, three distinct perk cards, selection by tap/click
+  or keys 1/2/3, no reroll.
+- Ten perks: Multiball, Wide Paddle, Power Ball, Quick Study, Arcane Turret,
+  Giant Ball, Sticky Paddle, Safety Net, Prism Laser and Explosive Core.
+- Multipliers and effects are derived from perks and applied live; the debug
+  panel can force individual perks and grant XP.
+- Contextual laser button plus E on desktop; sticky release by tap/timer;
+  Safety Net protects the last ball and reloads each wave.
+- Three provisional waves with rising ball speed: **First Light** (520),
+  **Dense Hall** (560) and **Obsidian Gate** (600), reaching 4+ level ups.
+- HUD XP bar, acquired-perks list and live run score; wave-clear, run-complete
+  and defeat dialogs with immediate progress/restart.
+- Paddle base width reduced to **100** units; Wide Paddle adds 12% per level.
 
 ### Controls
 
@@ -55,7 +59,8 @@ npm run preview   # serves dist/ locally
 | Move paddle | Relative 1:1 drag | Mouse absolute / arrows / A-D |
 | Launch | Tap the field | Click / Space |
 | Pause | Pause button | Pause button / P |
-| Restart | Overlay button | Overlay button |
+| Laser | Laser button | Laser button / E |
+| Perk choice | Tap a card | Click a card / 1-2-3 |
 
 ## Platform boot
 
@@ -71,22 +76,23 @@ npm run preview   # serves dist/ locally
 ### Debug
 
 Open `?debug=1` for FPS, platform, Bridge/storage source, canvas and stage sizes,
-save reset, live feel tuning (ball speed, paddle width/speed, ball radius, bounce
-angle, fixed step), test-wave selection, add ball and test projectile.
-`?resetSave=1` resets storage on boot. The full debug panel collapses to a
-compact FPS/platform strip while playing.
+save reset, live feel tuning, test-wave selection, force-perk, add-XP, add-ball
+and test projectile. `?resetSave=1` resets storage on boot. The full panel
+collapses to a compact FPS/platform strip while playing.
 
 ## Project structure
 
 ```text
 src/
   boot/bridgeBoot.ts       Bridge timeout + fallback selection
+  content/perks.ts         M2 perk catalog
   game/                    Game orchestration, contracts, events and config
   sim/                     Pure fixed-step simulation and collision
+  progression/             XP curve, offers and derived run modifiers
   input/                   Touch, mouse and keyboard input
   platform/                PlatformService + Bridge/Fallback adapters
   render/                  Phaser scene and placeholder field rendering
-  ui/                      Menu shell, HUD, overlays and debug panel
+  ui/                      Menu, HUD, level-up, overlays and debug panel
   i18n/                    English strings
 tests/                     Unit tests
 docs/                      GDD, technical spec and implementation plan

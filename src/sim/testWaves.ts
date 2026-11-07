@@ -26,10 +26,27 @@ export const TEST_WAVES: readonly WaveDef[] = [
   {
     id: 'm1-dense',
     name: 'Dense Hall',
-    // Denser QA fixture: 7 columns, five rows, mixed resistances.
-    rows: ['1111111', '1222221', '1233321', '1222221', '1111111'],
+    // Denser QA fixture: 7 columns, seven rows, mixed resistances, enough
+    // HP for 4+ level ups across the M2 run.
+    rows: [
+      '1111111',
+      '1222221',
+      '1233321',
+      '1222221',
+      '1111111',
+      '1123211',
+      '1233321',
+    ],
     legend: { '1': 'crystal', '2': 'stone', '3': 'obsidian' },
     ballSpeed: 560,
+  },
+  {
+    id: 'm2-obsidian-gate',
+    name: 'Obsidian Gate',
+    // Final M2 QA fixture; faster ball and a closed obsidian core.
+    rows: ['1.1.1.1', '1222221', '1233321', '1222221', '1.1.1.1'],
+    legend: { '1': 'crystal', '2': 'stone', '3': 'obsidian' },
+    ballSpeed: 600,
   },
 ];
 

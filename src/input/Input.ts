@@ -8,6 +8,7 @@ export interface SampledInput {
 export interface InputActions {
   launch: boolean;
   togglePause: boolean;
+  laser: boolean;
 }
 
 function isUiElement(target: EventTarget | null): boolean {
@@ -31,6 +32,7 @@ export class InputController {
   private direction = 0;
   private launchRequested = false;
   private pauseRequested = false;
+  private laserRequested = false;
   private activePointerId: number | null = null;
   private lastClientX = 0;
   private readonly keys = new Set<string>();
@@ -68,9 +70,14 @@ export class InputController {
   }
 
   consumeActions(): InputActions {
-    const actions = { launch: this.launchRequested, togglePause: this.pauseRequested };
+    const actions = {
+      launch: this.launchRequested,
+      togglePause: this.pauseRequested,
+      laser: this.laserRequested,
+    };
     this.launchRequested = false;
     this.pauseRequested = false;
+    this.laserRequested = false;
     return actions;
   }
 
@@ -152,6 +159,10 @@ export class InputController {
         break;
       case 'KeyP':
         if (!event.repeat) this.pauseRequested = true;
+        event.preventDefault();
+        break;
+      case 'KeyE':
+        if (!event.repeat) this.laserRequested = true;
         event.preventDefault();
         break;
       default:

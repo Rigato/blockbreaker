@@ -157,6 +157,18 @@ export class GameScene extends Phaser.Scene {
     graphics.fillStyle(0x2f6f9a, 0.9);
     graphics.fillRect(paddle.x - 1, paddleTop + 6, 2, paddle.height - 9);
 
+    // Prism Laser beam (vertical column above the paddle).
+    const beam = world.laserBeam;
+    if (beam) {
+      const alpha = Math.max(0, beam.remainingMs / beam.durationMs);
+      graphics.fillStyle(0xffe08a, 0.18 * alpha);
+      graphics.fillRect(beam.x - beam.width / 2 - 8, 0, beam.width + 16, paddleTop);
+      graphics.fillStyle(0xfff6cf, 0.85 * alpha);
+      graphics.fillRect(beam.x - beam.width / 2, 0, beam.width, paddleTop);
+      graphics.fillStyle(0xffffff, 0.95 * alpha);
+      graphics.fillRect(beam.x - 2, 0, 4, paddleTop);
+    }
+
     // Projectiles.
     for (const projectile of world.projectiles) {
       graphics.fillStyle(0xffd479, 0.28);
@@ -179,6 +191,25 @@ export class GameScene extends Phaser.Scene {
       graphics.fillCircle(ball.x, ball.y, ball.radius);
       graphics.fillStyle(0x9fdcff, 0.9);
       graphics.fillCircle(ball.x - ball.radius * 0.28, ball.y - ball.radius * 0.3, ball.radius * 0.42);
+
+      // Sticky Paddle: a warm ring plus a tether shows the ball is caught.
+      if (ball.stuck && ball.sticky) {
+        const pulse = 0.55 + 0.35 * Math.sin(world.timeMs / 90);
+        graphics.lineStyle(2, 0xffc46b, pulse);
+        graphics.strokeCircle(ball.x, ball.y, ball.radius + 5);
+        graphics.lineStyle(2, 0xffc46b, 0.35);
+        graphics.lineBetween(ball.x, ball.y + ball.radius, ball.x, paddle.y);
+      }
+    }
+
+    // Explosive Core blasts.
+    for (const fx of world.explosions) {
+      const progress = 1 - fx.remainingMs / fx.durationMs;
+      const alpha = Math.max(0, 1 - progress);
+      graphics.fillStyle(0xffb347, 0.35 * alpha);
+      graphics.fillCircle(fx.x, fx.y, fx.radius * (0.45 + progress * 0.75));
+      graphics.lineStyle(3, 0xffe6a3, 0.85 * alpha);
+      graphics.strokeCircle(fx.x, fx.y, fx.radius * (0.55 + progress * 0.9));
     }
 
     graphics.setDepth(0);

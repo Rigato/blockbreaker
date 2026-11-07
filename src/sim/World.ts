@@ -1,5 +1,5 @@
-import type { SimTuning } from '../game/contracts';
-import { GAME_CONFIG } from '../game/config';
+import type { RunModifiers, SimTuning } from '../game/contracts';
+import { BASE_RUN_MODIFIERS, GAME_CONFIG } from '../game/config';
 import { BLOCK_TYPES, type BlockTypeId } from './blocks';
 import {
   aabbFromRect,
@@ -19,6 +19,14 @@ export const LOSS_MARGIN = 40;
 export const BALL_SPAWN_GRACE_MS = 400;
 export const MAX_BALLS = GAME_CONFIG.ball.maxBalls;
 
+/** Prism Laser beam width in logical units and its on-screen flash duration. */
+export const LASER_BEAM_WIDTH = 24;
+export const LASER_BEAM_MS = 180;
+/** Explosion visual duration. */
+export const EXPLOSION_FX_MS = 260;
+/** Hard cap so a turret can never flood the projectile list. */
+export const MAX_PROJECTILES = 16;
+
 /** Anti-stall thresholds from the implementation plan (§4.4). */
 export const ANTI_STALL = {
   nudgeMs: 6000,
@@ -37,6 +45,10 @@ export interface Ball {
   vy: number;
   radius: number;
   stuck: boolean;
+  /** True when the ball was caught by the Sticky Paddle perk. */
+  sticky: boolean;
+  /** Milliseconds before a sticky ball releases itself; 0 when not sticky. */
+  stickyHoldRemainingMs: number;
   spawnGraceMs: number;
   /** Milliseconds since the last block/paddle impact. */
   sinceInteractionMs: number;
@@ -77,6 +89,23 @@ export interface Projectile {
   radius: number;
 }
 
+/** Transient laser beam state read by the renderer. */
+export interface LaserBeamFx {
+  x: number;
+  width: number;
+  remainingMs: number;
+  durationMs: number;
+}
+
+/** Transient explosion state read by the renderer. */
+export interface ExplosionFx {
+  x: number;
+  y: number;
+  radius: number;
+  remainingMs: number;
+  durationMs: number;
+}
+
 export type WorldOutcome = 'playing' | 'cleared' | 'defeat';
 
 export interface SimInput {
@@ -91,11 +120,21 @@ export interface SimInput {
 export type SimEvent =
   | { type: 'ball:launched'; ballId: number }
   | { type: 'ball:lost'; ballId: number }
-  | { type: 'block:hit'; blockId: string; ballId: number; hp: number }
-  | { type: 'block:destroyed'; blockId: string; ballId: number; score: number }
+  | { type: 'block:hit'; blockId: string; ballId: number; hp: number; damage: number }
+  | {
+      type: 'block:destroyed';
+      blockId: string;
+      ballId: number;
+      score: number;
+      maxHp: number;
+      xp: number;
+    }
   | { type: 'paddle:hit'; ballId: number }
   | { type: 'projectile:fired'; projectileId: number }
   | { type: 'projectile:hit'; projectileId: number; blockId: string }
+  | { type: 'laser:fired'; x: number; width: number; hits: number }
+  | { type: 'explosion'; x: number; y: number; radius: number; blockIds: readonly string[] }
+  | { type: 'safety-net'; ballId: number; charges: number }
   | { type: 'wave:cleared'; score: number }
   | { type: 'run:defeat' }
   | {
@@ -136,6 +175,14 @@ export class World {
 
   private wave: WaveDef;
   private tuning: SimTuning;
+  private modifiersValue: RunModifiers = { ...BASE_RUN_MODIFIERS };
+  private safetyChargesValue = 0;
+  private turretTimerMs = 0;
+  private laserCooldownLeftMs = 0;
+  private laserBeamFx: LaserBeamFx | null = null;
+  private readonly explosionFx: ExplosionFx[] = [];
+  private destroyedBlocks = 0;
+  private explosionDepth = 0;
   private readonly rng: () => number;
   private readonly eventLog: SimEvent[] = [];
   private readonly eventHistory: SimEvent[] = [];
@@ -179,6 +226,49 @@ export class World {
     return { ...this.tuning };
   }
 
+  /** Current derived run modifiers (perk hooks). */
+  get modifiers(): RunModifiers {
+    return { ...this.modifiersValue };
+  }
+
+  /** Maximum simultaneous balls allowed by the current modifiers. */
+  get maxBalls(): number {
+    return Math.min(MAX_BALLS, Math.max(1, Math.floor(this.modifiersValue.maxBalls)));
+  }
+
+  get safetyCharges(): number {
+    return this.safetyChargesValue;
+  }
+
+  get laserCooldownRemainingMs(): number {
+    return this.laserCooldownLeftMs;
+  }
+
+  /** Alias used by HUD wiring for the cooldown countdown. */
+  get laserRemainingMs(): number {
+    return this.laserCooldownLeftMs;
+  }
+
+  get laserCooldownMs(): number | null {
+    return this.modifiersValue.laserCooldown;
+  }
+
+  get laserReady(): boolean {
+    return this.modifiersValue.laserCooldown !== null && this.laserCooldownLeftMs <= 0;
+  }
+
+  get laserBeam(): LaserBeamFx | null {
+    return this.laserBeamFx;
+  }
+
+  get explosions(): readonly ExplosionFx[] {
+    return this.explosionFx;
+  }
+
+  get destroyedBlockCount(): number {
+    return this.destroyedBlocks;
+  }
+
   get isRunning(): boolean {
     return this.running;
   }
@@ -190,6 +280,18 @@ export class World {
   /** Rolling log of recent events, useful for the debug panel. */
   get history(): readonly SimEvent[] {
     return this.eventHistory;
+  }
+
+  /**
+   * Returns and clears the per-step event log. The game loop drains events
+   * after every step and after out-of-step commands such as the laser, so no
+   * score/XP event is consumed twice.
+   */
+  drainEvents(): readonly SimEvent[] {
+    if (this.eventLog.length === 0) return [];
+    const events = [...this.eventLog];
+    this.eventLog.length = 0;
+    return events;
   }
 
   /** Loads a wave's block grid and clears every transient entity. */
@@ -205,6 +307,7 @@ export class World {
     this.running = false;
     this.paddle.x = FIELD_WIDTH / 2;
     this.paddle.vx = 0;
+    this.resetEffectState();
     this.buildBlocks(wave);
   }
 
@@ -219,9 +322,20 @@ export class World {
     this.running = true;
     this.paddle.x = FIELD_WIDTH / 2;
     this.paddle.vx = 0;
+    this.resetEffectState();
     this.blocks.length = 0;
     this.buildBlocks(this.wave);
     this.spawnStuckBall();
+  }
+
+  private resetEffectState(): void {
+    this.turretTimerMs = 0;
+    this.laserCooldownLeftMs = 0;
+    this.laserBeamFx = null;
+    this.explosionFx.length = 0;
+    this.destroyedBlocks = 0;
+    this.explosionDepth = 0;
+    this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
   }
 
   resize(height: number): void {
@@ -235,20 +349,75 @@ export class World {
 
   applyTuning(tuning: SimTuning): void {
     this.tuning = { ...tuning };
-    this.paddle.width = tuning.paddleWidth;
-    this.clampPaddle();
+    this.applyEffectiveSize();
     const targetSpeed = this.ballSpeed;
     for (const ball of this.balls) {
-      ball.radius = tuning.ballRadius;
-      if (ball.stuck) {
-        this.parkBall(ball);
-        continue;
-      }
+      if (ball.stuck) continue;
       const speed = Math.hypot(ball.vx, ball.vy);
       if (speed > 0) {
         ball.vx = (ball.vx / speed) * targetSpeed;
         ball.vy = (ball.vy / speed) * targetSpeed;
       }
+    }
+  }
+
+  /**
+   * Applies derived perk modifiers live. Base tuning (and the debug panel
+   * values) are never mutated: multipliers are applied on top of them.
+   */
+  applyRunModifiers(modifiers: RunModifiers): void {
+    this.modifiersValue = {
+      ...modifiers,
+      paddleWidthMultiplier: Math.max(0.1, modifiers.paddleWidthMultiplier),
+      ballRadiusMultiplier: Math.max(0.1, modifiers.ballRadiusMultiplier),
+      xpMultiplier: Math.max(0, modifiers.xpMultiplier),
+      ballDamage: Math.max(1, Math.floor(modifiers.ballDamage)),
+      maxBalls: Math.max(1, Math.min(MAX_BALLS, Math.floor(modifiers.maxBalls))),
+      turretInterval:
+        modifiers.turretInterval !== null && modifiers.turretInterval > 0
+          ? modifiers.turretInterval
+          : null,
+      laserCooldown:
+        modifiers.laserCooldown !== null && modifiers.laserCooldown > 0
+          ? modifiers.laserCooldown
+          : null,
+      safetyNetCharges: Math.max(0, Math.floor(modifiers.safetyNetCharges)),
+      explosiveEvery:
+        modifiers.explosiveEvery !== null && modifiers.explosiveEvery > 0
+          ? Math.floor(modifiers.explosiveEvery)
+          : null,
+    };
+
+    this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
+    this.turretTimerMs = 0;
+    this.laserCooldownLeftMs = 0;
+    this.laserBeamFx = null;
+    this.applyEffectiveSize();
+  }
+
+  /** Reloads Safety Net charges at the start of a wave. */
+  setSafetyCharges(charges: number): void {
+    this.safetyChargesValue = Number.isFinite(charges)
+      ? Math.max(0, Math.floor(charges))
+      : 0;
+  }
+
+  private effectiveBallRadius(): number {
+    return Math.max(1, this.tuning.ballRadius * this.modifiersValue.ballRadiusMultiplier);
+  }
+
+  private applyEffectiveSize(): void {
+    const width = Math.max(
+      20,
+      Math.min(FIELD_WIDTH, this.tuning.paddleWidth * this.modifiersValue.paddleWidthMultiplier),
+    );
+    this.paddle.width = width;
+    this.clampPaddle();
+
+    const radius = this.effectiveBallRadius();
+    for (const ball of this.balls) {
+      ball.radius = radius;
+      if (ball.stuck) this.parkBall(ball);
     }
   }
 
@@ -259,8 +428,10 @@ export class World {
       y: this.paddle.y,
       vx: 0,
       vy: 0,
-      radius: this.tuning.ballRadius,
+      radius: this.effectiveBallRadius(),
       stuck: true,
+      sticky: false,
+      stickyHoldRemainingMs: 0,
       spawnGraceMs: BALL_SPAWN_GRACE_MS,
       sinceInteractionMs: 0,
       horizontalMs: 0,
@@ -273,18 +444,20 @@ export class World {
 
   /** Debug/Future multiball: adds one in-play ball, respecting the cap. */
   spawnBall(): Ball | null {
-    if (this.balls.length >= MAX_BALLS) return null;
+    if (this.balls.length >= this.maxBalls) return null;
     const speed = this.ballSpeed;
     const sign = this.rng() < 0.5 ? -1 : 1;
     const angle = (18 * Math.PI) / 180 * sign;
     const ball: Ball = {
       id: this.nextId++,
       x: this.paddle.x,
-      y: this.paddle.y - this.paddle.height / 2 - this.tuning.ballRadius - 2,
+      y: this.paddle.y - this.paddle.height / 2 - this.effectiveBallRadius() - 2,
       vx: Math.sin(angle) * speed,
       vy: -Math.cos(angle) * speed,
-      radius: this.tuning.ballRadius,
+      radius: this.effectiveBallRadius(),
       stuck: false,
+      sticky: false,
+      stickyHoldRemainingMs: 0,
       spawnGraceMs: BALL_SPAWN_GRACE_MS,
       sinceInteractionMs: 0,
       horizontalMs: 0,
@@ -294,7 +467,78 @@ export class World {
     return ball;
   }
 
+  /**
+   * Multiball perk hook: adds `count` live balls from the paddle using the
+   * plan's ±18°/±36° spread. Returns how many were actually created.
+   */
+  spawnPerkBalls(count: number): number {
+    const angles = [18, -18, 36, -36];
+    const total = Math.max(0, Math.floor(count));
+    let created = 0;
+    for (let index = 0; index < total; index += 1) {
+      if (this.balls.length >= this.maxBalls) break;
+      const angle = ((angles[index % angles.length] ?? 18) * Math.PI) / 180;
+      const speed = this.ballSpeed;
+      const radius = this.effectiveBallRadius();
+      const ball: Ball = {
+        id: this.nextId++,
+        x: this.paddle.x,
+        y: this.paddle.y - this.paddle.height / 2 - radius - 2,
+        vx: Math.sin(angle) * speed,
+        vy: -Math.cos(angle) * speed,
+        radius,
+        stuck: false,
+        sticky: false,
+        stickyHoldRemainingMs: 0,
+        spawnGraceMs: BALL_SPAWN_GRACE_MS,
+        sinceInteractionMs: 0,
+        horizontalMs: 0,
+        aboveBlocksMs: 0,
+      };
+      this.balls.push(ball);
+      created += 1;
+    }
+    return created;
+  }
+
+  /**
+   * Prism Laser: vertical beam at the paddle column. Only usable when the perk
+   * is owned (`laserCooldown != null`) and the cooldown has fully elapsed.
+   */
+  fireLaser(): boolean {
+    const cooldown = this.modifiersValue.laserCooldown;
+    if (cooldown === null || this.laserCooldownLeftMs > 0) return false;
+    if (this.outcome !== 'playing' || !this.running) return false;
+
+    const x = this.paddle.x;
+    const half = LASER_BEAM_WIDTH / 2;
+    const targets = this.blocks.filter(
+      (block) => block.left < x + half && block.left + block.width > x - half,
+    );
+
+    this.laserCooldownLeftMs = cooldown;
+    this.laserBeamFx = {
+      x,
+      width: LASER_BEAM_WIDTH,
+      remainingMs: LASER_BEAM_MS,
+      durationMs: LASER_BEAM_MS,
+    };
+    this.pushEvent({
+      type: 'laser:fired',
+      x,
+      width: LASER_BEAM_WIDTH,
+      hits: targets.length,
+    });
+
+    const damage = GAME_CONFIG.perks.laserDamage;
+    for (const block of targets) {
+      this.applyDamage(block, damage, -1);
+    }
+    return true;
+  }
+
   fireProjectile(): Projectile | null {
+    if (this.projectiles.length >= MAX_PROJECTILES) return null;
     const projectile: Projectile = {
       id: this.nextId++,
       x: this.paddle.x,
@@ -317,16 +561,47 @@ export class World {
 
     this.updatePaddle(input, dt);
     if (input.launch) this.launchStuckBalls();
+    this.updateTimers(dtMs);
 
     for (const block of this.blocks) {
       if (block.flashMs > 0) block.flashMs = Math.max(0, block.flashMs - dtMs);
     }
 
     this.updateBalls(dt, dtMs);
+    this.updateTurret(dtMs);
     this.updateProjectiles(dt);
     this.updateOutcome();
 
     return this.eventLog;
+  }
+
+  private updateTimers(dtMs: number): void {
+    if (this.laserCooldownLeftMs > 0) {
+      this.laserCooldownLeftMs = Math.max(0, this.laserCooldownLeftMs - dtMs);
+    }
+    if (this.laserBeamFx) {
+      this.laserBeamFx.remainingMs -= dtMs;
+      if (this.laserBeamFx.remainingMs <= 0) this.laserBeamFx = null;
+    }
+    for (let index = this.explosionFx.length - 1; index >= 0; index -= 1) {
+      const fx = this.explosionFx[index]!;
+      fx.remainingMs -= dtMs;
+      if (fx.remainingMs <= 0) this.explosionFx.splice(index, 1);
+    }
+  }
+
+  /** Arcane Turret perk: fires a projectile every `turretInterval` ms. */
+  private updateTurret(dtMs: number): void {
+    const interval = this.modifiersValue.turretInterval;
+    if (interval === null) return;
+    this.turretTimerMs += dtMs;
+    let shots = 0;
+    while (this.turretTimerMs >= interval && shots < 4) {
+      this.turretTimerMs -= interval;
+      this.fireProjectile();
+      shots += 1;
+    }
+    if (this.turretTimerMs >= interval) this.turretTimerMs = interval - 1;
   }
 
   // -------------------------------------------------------------------------
@@ -425,18 +700,24 @@ export class World {
   }
 
   private launchStuckBalls(): void {
-    const speed = this.ballSpeed;
     for (const ball of this.balls) {
       if (!ball.stuck) continue;
-      const offset = Math.max(-1, Math.min(1, (this.paddle.x - FIELD_WIDTH / 2) / (FIELD_WIDTH / 2)));
-      const angle = (offset * 50 * Math.PI) / 180;
-      ball.vx = Math.sin(angle) * speed;
-      ball.vy = -Math.cos(angle) * speed;
-      ball.stuck = false;
-      ball.spawnGraceMs = BALL_SPAWN_GRACE_MS;
-      ball.sinceInteractionMs = 0;
-      this.pushEvent({ type: 'ball:launched', ballId: ball.id });
+      this.launchBall(ball);
     }
+  }
+
+  private launchBall(ball: Ball): void {
+    const speed = this.ballSpeed;
+    const offset = Math.max(-1, Math.min(1, (this.paddle.x - FIELD_WIDTH / 2) / (FIELD_WIDTH / 2)));
+    const angle = (offset * 50 * Math.PI) / 180;
+    ball.vx = Math.sin(angle) * speed;
+    ball.vy = -Math.cos(angle) * speed;
+    ball.stuck = false;
+    ball.sticky = false;
+    ball.stickyHoldRemainingMs = 0;
+    ball.spawnGraceMs = BALL_SPAWN_GRACE_MS;
+    ball.sinceInteractionMs = 0;
+    this.pushEvent({ type: 'ball:launched', ballId: ball.id });
   }
 
   // -------------------------------------------------------------------------
@@ -446,7 +727,15 @@ export class World {
   private updateBalls(dt: number, dtMs: number): void {
     for (const ball of this.balls) {
       ball.spawnGraceMs = Math.max(0, ball.spawnGraceMs - dtMs);
-      if (ball.stuck) continue;
+      if (ball.stuck) {
+        // Only balls caught by Sticky Paddle auto-release; the initial ball
+        // stays attached until the player launches it.
+        if (ball.sticky && ball.stickyHoldRemainingMs > 0) {
+          ball.stickyHoldRemainingMs = Math.max(0, ball.stickyHoldRemainingMs - dtMs);
+          if (ball.stickyHoldRemainingMs <= 0) this.launchBall(ball);
+        }
+        continue;
+      }
 
       this.moveBall(ball, dt);
       if (ball.y - ball.radius > this.height + LOSS_MARGIN) {
@@ -492,6 +781,7 @@ export class World {
 
       if (collider.kind === 'paddle') {
         this.handlePaddleHit(ball, hit.nx, hit.ny);
+        if (ball.stuck) break;
       } else if (collider.kind === 'block' && collider.block) {
         this.handleBlockHit(ball, collider.block);
         reflectVelocity(ball, hit.nx, hit.ny);
@@ -570,6 +860,17 @@ export class World {
     ball.vx = vx;
     ball.vy = vy;
 
+    // Sticky Paddle catches the ball; it releases on input or after the hold.
+    if (this.modifiersValue.stickyPaddle) {
+      ball.stuck = true;
+      ball.sticky = true;
+      ball.stickyHoldRemainingMs = GAME_CONFIG.perks.stickyHoldMs;
+      ball.vx = 0;
+      ball.vy = 0;
+      this.parkBall(ball);
+      return;
+    }
+
     // Keep the ball above the paddle so the same contact cannot repeat.
     ball.y = this.paddle.y - this.paddle.height / 2 - ball.radius - 0.02;
   }
@@ -585,21 +886,89 @@ export class World {
     ball.sinceInteractionMs = 0;
     ball.horizontalMs = 0;
     ball.aboveBlocksMs = 0;
+    this.applyDamage(block, this.modifiersValue.ballDamage, ball.id);
+  }
+
+  /**
+   * Central damage path shared by balls, laser, projectiles and explosions.
+   * Emits `block:hit`, then `block:destroyed` with the XP payload.
+   */
+  private applyDamage(block: Block, damage: number, sourceBallId: number): boolean {
+    if (damage <= 0 || !this.blocks.includes(block)) return false;
     block.flashMs = 80;
-    block.hp -= 1;
-    this.pushEvent({ type: 'block:hit', blockId: block.id, ballId: ball.id, hp: block.hp });
+    block.hp -= damage;
+    this.pushEvent({
+      type: 'block:hit',
+      blockId: block.id,
+      ballId: sourceBallId,
+      hp: block.hp,
+      damage,
+    });
+    if (block.hp > 0) return false;
+    this.destroyBlock(block, sourceBallId);
+    return true;
+  }
 
-    if (block.hp > 0) return;
-
+  private destroyBlock(block: Block, sourceBallId: number): void {
     const index = this.blocks.indexOf(block);
-    if (index >= 0) this.blocks.splice(index, 1);
-    this.score += block.maxHp * 10;
+    if (index < 0) return;
+    this.blocks.splice(index, 1);
+    const score = block.maxHp * 10;
+    this.score += score;
+    this.destroyedBlocks += 1;
     this.pushEvent({
       type: 'block:destroyed',
       blockId: block.id,
-      ballId: ball.id,
-      score: block.maxHp * 10,
+      ballId: sourceBallId,
+      score,
+      maxHp: block.maxHp,
+      xp: block.maxHp,
     });
+    this.maybeExplode(block, sourceBallId);
+  }
+
+  /** Explosive Core: every `explosiveEvery` kills, blast the 1-cell ring. */
+  private maybeExplode(block: Block, sourceBallId: number): void {
+    const every = this.modifiersValue.explosiveEvery;
+    if (every === null) return;
+    if (this.destroyedBlocks % every !== 0) return;
+    if (this.explosionDepth >= 3) return;
+
+    const radius = this.cellSize();
+    const centerX = block.left + block.width / 2;
+    const centerY = block.top + block.height / 2;
+    const targets = this.blocks.filter(
+      (candidate) =>
+        Math.abs(candidate.row - block.row) <= 1 &&
+        Math.abs(candidate.col - block.col) <= 1,
+    );
+
+    this.explosionFx.push({
+      x: centerX,
+      y: centerY,
+      radius,
+      remainingMs: EXPLOSION_FX_MS,
+      durationMs: EXPLOSION_FX_MS,
+    });
+    this.pushEvent({
+      type: 'explosion',
+      x: centerX,
+      y: centerY,
+      radius,
+      blockIds: targets.map((candidate) => candidate.id),
+    });
+
+    this.explosionDepth += 1;
+    try {
+      for (const target of targets) this.applyDamage(target, 1, sourceBallId);
+    } finally {
+      this.explosionDepth -= 1;
+    }
+  }
+
+  private cellSize(): number {
+    const columns = this.wave.rows[0]?.length ?? 0;
+    return columns > 0 ? FIELD_WIDTH / columns : 60;
   }
 
   private removeBall(ball: Ball): void {
@@ -713,23 +1082,33 @@ export class World {
   }
 
   private damageBlockByProjectile(block: Block, projectile: Projectile): void {
-    block.flashMs = 80;
-    block.hp -= 1;
     this.pushEvent({
       type: 'projectile:hit',
       projectileId: projectile.id,
       blockId: block.id,
     });
-    if (block.hp > 0) return;
-    const index = this.blocks.indexOf(block);
-    if (index >= 0) this.blocks.splice(index, 1);
-    this.score += block.maxHp * 10;
-    this.pushEvent({
-      type: 'block:destroyed',
-      blockId: block.id,
-      ballId: -projectile.id,
-      score: block.maxHp * 10,
-    });
+    this.applyDamage(block, 1, -projectile.id);
+  }
+
+  private spawnSafetyBall(): Ball {
+    const radius = this.effectiveBallRadius();
+    const ball: Ball = {
+      id: this.nextId++,
+      x: this.paddle.x,
+      y: this.paddle.y - this.paddle.height / 2 - radius - 30,
+      vx: 0,
+      vy: -this.ballSpeed,
+      radius,
+      stuck: false,
+      sticky: false,
+      stickyHoldRemainingMs: 0,
+      spawnGraceMs: BALL_SPAWN_GRACE_MS,
+      sinceInteractionMs: 0,
+      horizontalMs: 0,
+      aboveBlocksMs: 0,
+    };
+    this.balls.push(ball);
+    return ball;
   }
 
   private updateOutcome(): void {
@@ -741,6 +1120,16 @@ export class World {
       return;
     }
     if (this.balls.length === 0) {
+      if (this.safetyChargesValue > 0) {
+        this.safetyChargesValue -= 1;
+        const ball = this.spawnSafetyBall();
+        this.pushEvent({
+          type: 'safety-net',
+          ballId: ball.id,
+          charges: this.safetyChargesValue,
+        });
+        return;
+      }
       this.outcome = 'defeat';
       this.pushEvent({ type: 'run:defeat' });
     }

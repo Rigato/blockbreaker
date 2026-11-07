@@ -69,6 +69,8 @@ export function addBall(world: World, options: Partial<Ball> & { x: number; y: n
     vy: options.vy ?? 0,
     radius: options.radius ?? SIM_TUNING_DEFAULTS.ballRadius,
     stuck: options.stuck ?? false,
+    sticky: options.sticky ?? false,
+    stickyHoldRemainingMs: options.stickyHoldRemainingMs ?? 0,
     spawnGraceMs: options.spawnGraceMs ?? 0,
     sinceInteractionMs: options.sinceInteractionMs ?? 0,
     horizontalMs: options.horizontalMs ?? 0,

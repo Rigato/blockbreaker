@@ -91,8 +91,10 @@ export interface RunModifiers {
   ballDamage: number;
   xpMultiplier: number;
   maxBalls: number;
+  /** Milliseconds between automatic turret shots; null when not acquired. */
   turretInterval: number | null;
   stickyPaddle: boolean;
+  /** Laser cooldown in milliseconds; null when not acquired. */
   laserCooldown: number | null;
   safetyNetCharges: number;
   explosiveEvery: number | null;
@@ -102,15 +104,54 @@ export interface RunModifiers {
 // M1 — playable core contracts
 // ---------------------------------------------------------------------------
 
-/** Runtime phase of the M1 test run. */
-export type HudPhase = 'menu' | 'playing' | 'paused' | 'cleared' | 'defeat';
+/** Runtime phase of the run. */
+export type HudPhase =
+  | 'menu'
+  | 'playing'
+  | 'paused'
+  | 'levelup'
+  | 'cleared'
+  | 'run-complete'
+  | 'defeat';
+
+export type PerkKind = 'repeatable' | 'unique';
+
+/** Catalog entry shown by the debug force-perk control. */
+export interface PerkSummary {
+  id: string;
+  name: string;
+  description: string;
+  maxLevel: number;
+  kind: PerkKind;
+}
+
+/** One of the three cards presented at level up. */
+export interface PerkOffer extends PerkSummary {
+  currentLevel: number;
+  nextLevel: number;
+}
+
+/** An acquired perk, used by the HUD. */
+export interface PerkState {
+  id: string;
+  name: string;
+  level: number;
+  maxLevel: number;
+}
+
+export interface LaserHudState {
+  acquired: boolean;
+  ready: boolean;
+  cooldownMs: number;
+  remainingMs: number;
+}
 
 /** Minimal state required by the DOM HUD. Emitted only when it changes. */
 export interface HudSnapshot {
   phase: HudPhase;
   waveId: string;
   waveName: string;
-  /** 1-based index within the provisional M1 test wave set. */
+  /** 1-based index within the provisional test wave set. */
   waveIndex: number;
   waveCount: number;
   ballsActive: number;
@@ -118,6 +159,59 @@ export interface HudSnapshot {
   score: number;
   /** True while the ball is attached to the paddle waiting for launch. */
   ballStuck: boolean;
+  level: number;
+  xp: number;
+  xpToNext: number;
+  perks: readonly PerkState[];
+  /** Null until Prism Laser is acquired. */
+  laser: LaserHudState | null;
+  seed: number;
+}
+
+/** Result of one XP grant, including overflow and queued level ups. */
+export interface XpGain {
+  baseAmount: number;
+  gained: number;
+  level: number;
+  xp: number;
+  xpToNext: number;
+  levelsGained: number;
+  pendingLevelUps: number;
+}
+
+/** Result of choosing or force-granting a perk. */
+export interface PerkChoice {
+  perk: PerkState;
+  modifiers: RunModifiers;
+  pendingLevelUps: number;
+  /** Extra balls to spawn when gameplay resumes (Multiball). */
+  spawnedBalls: number;
+}
+
+/**
+ * Pure progression contract implemented by S2. The game owns when XP is
+ * granted and when the level-up overlay is shown; this service owns the curve,
+ * offers, choices and derived modifiers.
+ */
+export interface ProgressionService {
+  readonly seed: number;
+  readonly level: number;
+  readonly xp: number;
+  readonly xpToNext: number;
+  readonly pendingLevelUps: number;
+  readonly modifiers: RunModifiers;
+  readonly perks: readonly PerkState[];
+
+  startRun(seed: number): void;
+  reset(): void;
+  /** Applies the Quick Study multiplier and queues level ups. */
+  addXp(baseAmount: number): XpGain;
+  /** Generates the next three-card offer; call only when pendingLevelUps > 0. */
+  takeOffers(): readonly PerkOffer[];
+  choosePerk(perkId: string): PerkChoice;
+  /** Debug-only: grants one level without consuming a queued level up. */
+  grantPerk(perkId: string): PerkChoice;
+  getCatalog(): readonly PerkSummary[];
 }
 
 /** Mutable feel values exposed by the ?debug=1 panel. */
@@ -141,20 +235,28 @@ export interface TestWaveInfo {
  * The UI never mutates simulation state directly.
  */
 export interface GameCommands {
-  /** Starts the currently selected test wave from the menu. */
+  /** Starts the run at the selected test wave, or wave 1. */
   startRun(): void;
   pause(): void;
   resume(): void;
   togglePause(): void;
   /** Restarts the current wave with a fresh paddle/ball state. */
   restartWave(): void;
+  /** Restarts the whole run from wave 1 with reset XP/perks. */
+  restartRun(): void;
+  /** Advances from a cleared wave to the next one. */
+  nextWave(): void;
   /**
-   * Selects a provisional test wave and resets to the menu with that wave
-   * loaded. The caller starts it with startRun().
+   * Selects a provisional starting wave and resets to the menu with it
+   * loaded. The caller starts the run with startRun().
    */
   setTestWave(waveId: string): void;
   getTestWaves(): readonly TestWaveInfo[];
   getHudState(): HudSnapshot;
+  /** Chooses a card from the current level-up offer. */
+  choosePerk(perkId: string): void;
+  fireLaser(): void;
+  getPerkCatalog(): readonly PerkSummary[];
   getTuning(): SimTuning;
   /** Applies and clamps the provided values, then emits tuning:changed. */
   setTuning(patch: Partial<SimTuning>): void;
@@ -163,4 +265,8 @@ export interface GameCommands {
   spawnBall(): void;
   /** Debug-only: fires one projectile for collision/feel testing. */
   fireTestProjectile(): void;
+  /** Debug-only: grants one perk level and applies its effect immediately. */
+  debugGrantPerk(perkId: string): void;
+  /** Debug-only: grants XP, triggering queued level ups. */
+  debugAddXp(amount: number): void;
 }

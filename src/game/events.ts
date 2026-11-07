@@ -1,5 +1,6 @@
 import type {
   HudSnapshot,
+  PerkOffer,
   PlatformSource,
   SimTuning,
   Unsubscribe,
@@ -28,6 +29,8 @@ export interface GameEventMap {
   'save:reset': { keys: readonly string[] };
   'hud:changed': HudSnapshot;
   'tuning:changed': SimTuning;
+  'levelup:offered': { offers: readonly PerkOffer[]; level: number };
+  'levelup:closed': { level: number };
 }
 
 export class TypedEventBus<T extends object> {
