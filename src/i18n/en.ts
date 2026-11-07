@@ -1,0 +1,36 @@
+/** English is the only UI language in the MVP. */
+export const en = {
+  appTitle: 'Block Breaker',
+  appSubtitle: 'Roguelite',
+
+  bootPlatform: 'Preparing the platform…',
+  bootRenderer: 'Summoning the field…',
+  bootMenu: 'Preparing the menu…',
+  bootErrorTitle: 'The foundation could not start',
+  bootErrorBody: 'Reload the page. If the problem persists, check the console.',
+
+  menuKicker: 'Foundation build · M0',
+  play: 'Play',
+  playNote: 'Core gameplay arrives in M1.',
+  playClicked: 'The foundation is ready. Gameplay lands in M1.',
+  footer: 'Portrait · Touch · Mouse · Keyboard',
+
+  debugTitle: 'Debug',
+  debugFps: 'FPS',
+  debugPlatform: 'Platform',
+  debugStorage: 'Storage',
+  debugBridgeInit: 'Bridge init',
+  debugLanguage: 'Language',
+  debugCanvas: 'Canvas',
+  debugStage: 'Stage',
+  debugDpr: 'DPR (device / canvas)',
+  debugGameReady: 'game_ready',
+  debugResetSave: 'Reset save',
+  debugResetDone: 'Save reset.',
+  debugResetFailed: 'Reset failed.',
+  debugPending: 'pending',
+  debugSent: 'sent',
+  debugFailed: 'failed',
+  debugNoBridge: 'no SDK',
+  debugTimeout: 'timeout',
+} as const;

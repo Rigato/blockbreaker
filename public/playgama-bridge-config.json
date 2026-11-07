@@ -1,0 +1,26 @@
+{
+  "loadingScreenType": "none",
+  "showFullLoadingLogo": false,
+  "showLoadingText": true,
+  "sendAnalyticsEvents": false,
+  "game": {
+    "adaptToSafeArea": true
+  },
+  "advertisement": {
+    "minimumDelayBetweenInterstitial": 60,
+    "initialInterstitialDelay": 0,
+    "interstitial": {
+      "placementFallback": "level_completed"
+    },
+    "rewarded": {
+      "placementFallback": "extra_life"
+    }
+  },
+  "platforms": {
+    "mock": {
+      "sendAnalyticsEvents": false,
+      "showFullLoadingLogo": false,
+      "loadingScreenType": "none"
+    }
+  }
+}

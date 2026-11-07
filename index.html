@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="theme-color" content="#060912" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Block Breaker Roguelite — a portrait HTML5 arcade roguelite."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Block Breaker Roguelite</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #05070f;
+      }
+    </style>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" aria-busy="true">
+      <div id="stage-area">
+        <div id="game-shell">
+          <div id="canvas-host" aria-hidden="true"></div>
+          <div id="ui-root"></div>
+
+          <div id="boot-screen" class="boot" role="status" aria-live="polite">
+            <div class="boot__inner">
+              <span class="boot__kicker">Portrait arcade · Roguelite</span>
+              <h1 class="boot__title">Block Breaker</h1>
+              <p class="boot__subtitle">Roguelite</p>
+              <div class="boot__bar" aria-hidden="true"><span></span></div>
+              <p class="boot__status" id="boot-status">Preparing the foundation…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

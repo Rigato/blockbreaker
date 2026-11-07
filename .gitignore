@@ -6,6 +6,7 @@ dist/
 release/
 coverage/
 *.local
+*.tsbuildinfo
 
 # Test artifacts
 playwright-report/
