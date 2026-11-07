@@ -423,6 +423,10 @@ button {
   line-height: 1.5;
 }
 
+html[data-debug='1'] .menu__top {
+  visibility: hidden;
+}
+
 .debug {
   position: absolute;
   top: 8px;
