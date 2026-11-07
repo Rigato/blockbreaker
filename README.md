@@ -39,6 +39,9 @@ npm run preview   # serves dist/ locally
 - Minimal DOM menu placeholder and a Phaser canvas that fills the stage.
 - Bridge boot: CDN script first in `<head>`, local file fallback, 10 s
   initialization timeout and an in-memory fallback adapter.
+- The Bridge loading screen is disabled in `playgama-bridge-config.json`
+  (`loadingScreenType: "none"`) so no Bridge branding is shown; the game uses
+  its own boot screen and progress bar.
 - `game_ready` is sent only after the placeholder menu is rendered and
   interactive.
 - No direct `localStorage` access in game code; storage always goes through
