@@ -80,7 +80,7 @@ npm run preview   # serves dist/ locally
 | Pause | Pause button | Pause button / P |
 | Laser | Laser button | Laser button / E |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
-| Menu / phases | Pause → Menu | Pause → Menu |
+| Menu / phases | Results → Menu | Results → Menu |
 
 ## Platform boot
 
