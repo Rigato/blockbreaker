@@ -1,7 +1,9 @@
-# Relatório M6 — QA, performance e balanceamento (rascunho)
+# Relatório M6 — QA, performance e balanceamento
 
-Status: **rascunho**. Este documento não aprova o gate G6. Playtest humano,
-devices reais e medição de FPS em hardware continuam pendentes.
+Status: **G6 aprovado pelo owner em 2026-11-08**. A validação humana,
+real-device e a sessão de performance foram conduzidas pelo owner e confirmadas
+no gate. Este documento mantém os resultados automatizados; os dados humanos
+detalhados não foram inventados nem agregados aqui.
 
 Data da rodada local: 2026-11-08
 Build: `0.1.0-m6.1` (renomeado para Bricklike; sem mudança de gameplay)
@@ -58,26 +60,19 @@ perdido, layout cortado). Observações sem severidade de bloqueio:
 - Nenhuma.
 - Riscos não cobertos pela automação seguem na seção 6.
 
-## 5. Recomendação provisória
+## 5. Decisão do gate
 
-Tecnicamente, o build passou nos checks automatizados e no smoke E2E, incluindo
-save/reload, ads mock e CDN bloqueado. Isso sustenta seguir para o playtest, não
-para publicar.
+**G6 aprovado em 2026-11-08.** O owner confirmou a conclusão do playtest
+humano, da matriz de devices reais e da sessão de performance, e autorizou o
+início do M7. Nenhum tuning de balance foi aplicado depois do G6.
 
-**Não declarar G6 aprovado** antes de:
+A evidência humana detalhada (CSV/notas, devices, FPS/memória) fica com o owner
+e não foi reconstruída neste relatório. Os resultados automatizados acima
+continuam válidos como baseline de regressão; eles não substituem o playtest.
 
-1. executar o playtest de 5 pessoas × 3 runs (`docs/qa/playtest-kit.md`);
-2. validar a matriz em devices reais (principalmente Safari/iOS e Android
-   médio/low-end);
-3. medir FPS/memória em hardware real por 10 min, incluindo 8 bolas +
-   partículas e background/rotação;
-4. abrir o ZIP em subpasta e revalidar o checklist §5.5 no portal/mock.
+## 6. Pendências humanas residuais
 
-## 6. Pendências humanas
-
-- Playtest e agregação das métricas de diversão/ritmo/variedade.
-- iPhone recente e antigo (Safari), Android médio/low-end, Chromebook 4 GB.
-- Firefox/Safari desktop (compatibilidade básica).
-- Áudio, safe area, DPR e background em devices reais.
-- Sessão de 10 min sem crash em hardware real.
-- Julgamento de go/no-go pelo owner do projeto.
+- Registrar/arquivar as notas e o CSV do playtest humano, se ainda não estiverem
+  no repositório.
+- Manter a matriz real e a medição de hardware como evidência do G6.
+- Revalidar as regras de portal na data de cada submissão (M7).

@@ -2,8 +2,10 @@
 
 Status desta rodada: **emulação Chromium via Playwright**, build local servida por
 `vite preview` em `http://127.0.0.1:4173`. Nenhum device físico, Safari real ou
-Firefox foi executado. As linhas marcadas como pendentes não podem ser declaradas
-aprovadas no G6.
+Firefox foi executado pela automação. **G6 foi aprovado em 2026-11-08** após a
+validação real conduzida pelo owner; as linhas “pendentes” abaixo se referem
+apenas à cobertura automatizada e não ao gate, cuja evidência humana fica com o
+owner.
 
 Legenda:
 

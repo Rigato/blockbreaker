@@ -1,5 +1,9 @@
 # Performance e tamanho — M6
 
+> **G6 aprovado em 2026-11-08.** O owner confirmou a sessão de 10 min e a medição
+> em hardware real. Este relatório mantém o baseline headless; os números de
+> hardware real ficam arquivados com o owner.
+
 ## Build e ZIP
 
 Rodada local em 2026-11-08, `npm run build && npm run package`:
