@@ -139,9 +139,9 @@ describe('M3 content pacing', () => {
 
   it('prints a concise report for the CLI', () => {
     const report = formatContentReport();
-    expect(report).toContain('Phase 1 - Crystal Grove');
-    expect(report).toContain('Phase 3 - Arcane Depths');
-    expect(report).toContain('Totals: phases=3 waves=9');
+    expect(report).toContain('Level 1 - Crystal Grove');
+    expect(report).toContain('Level 3 - Arcane Depths');
+    expect(report).toContain('Totals: levels=3 waves=9');
   });
 });
 

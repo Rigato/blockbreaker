@@ -351,7 +351,7 @@ export function formatContentReport(phases: readonly PhaseDef[] = PHASES): strin
   }
 
   lines.push(
-    `Totals: phases=${phases.length} waves=${totalWaves} blocks=${totalBlocks} xp=${totalXp}`,
+    `Totals: levels=${phases.length} waves=${totalWaves} blocks=${totalBlocks} xp=${totalXp}`,
   );
   return lines.join('\n');
 }

@@ -199,8 +199,8 @@ function drawCrystal(
   const coreY = top + height * (0.42 + hashUnit(hash, 2) * 0.1);
   const coldRim = blend(accent, CRYSTAL_LIGHT, 0.55);
 
-  // Deep inner geode panel.
-  graphics.fillStyle(blend(base, 0x031018, 0.55), 0.7);
+  // Inner geode panel, slightly darker than the body but still luminous.
+  graphics.fillStyle(blend(base, 0x031018, 0.35), 0.55);
   graphics.fillPoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 4), true);
 
   // Three crystal shards: shorter flanking spires behind a tall central one.
@@ -248,10 +248,9 @@ function drawCrystal(
     graphics.fillRect(Math.round(apex.x) - 1, Math.round(apex.y), 2, 2);
   }
 
-  // Horizontal cleavage lines across the crystal cluster.
-  graphics.lineStyle(1, 0x0a3f4b, 0.45);
-  graphics.lineBetween(left + width * 0.24, top + height * 0.62, left + width * 0.76, top + height * 0.58);
-  graphics.lineBetween(left + width * 0.3, top + height * 0.78, left + width * 0.72, top + height * 0.76);
+  // Faint cleavage seams; damage cracks are separate and much darker.
+  graphics.lineStyle(1, 0x0a3f4b, 0.18);
+  graphics.lineBetween(left + width * 0.3, top + height * 0.72, left + width * 0.72, top + height * 0.7);
 
   // Luminous core between the shards.
   graphics.fillStyle(blend(CRYSTAL_LIGHT, accent, 0.35), 0.75);
@@ -338,13 +337,6 @@ function drawStone(
         graphics.fillRect(brickRight - 3, rowTop, 3, 2);
         graphics.fillRect(brickLeft, rowBottom - 2, 2, 2);
       }
-      if (shade < 0.24) {
-        // A hairline fracture through one brick.
-        const fx = brickLeft + Math.round(brickWidth * 0.55);
-        graphics.lineStyle(1, 0x05030c, 0.62);
-        graphics.lineBetween(fx, rowTop + 1, fx + 3, rowTop + 4);
-        graphics.lineBetween(fx + 3, rowTop + 4, fx + 1, rowBottom - 1);
-      }
     }
   }
 
@@ -361,11 +353,6 @@ function drawStone(
   // Accent wash on the upper row keeps stone tied to the phase palette.
   graphics.fillStyle(accent, 0.06);
   graphics.fillRect(innerLeft, innerTop, innerWidth, Math.round(rowHeight));
-  // Long hairline fracture across the masonry.
-  const crackX = innerLeft + innerWidth * (0.2 + hashUnit(hash, 7) * 0.55);
-  graphics.lineStyle(1, 0x07050e, 0.55);
-  graphics.lineBetween(Math.round(crackX), innerTop + 2, Math.round(crackX + 5), innerTop + rowHeight);
-  graphics.lineBetween(Math.round(crackX + 5), innerTop + rowHeight, Math.round(crackX + 3), innerTop + rowHeight + 7);
 }
 
 function drawObsidian(

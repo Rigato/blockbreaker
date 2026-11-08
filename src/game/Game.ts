@@ -424,6 +424,7 @@ export class BlockBreakerGame implements GameCommands {
     this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
     this.audio.setSuspended(false);
     this.phase = 'playing';
+    this.focusGameplay();
     this.clock.reset();
     this.pendingLaunch = false;
     this.input.resetTarget();
@@ -447,6 +448,7 @@ export class BlockBreakerGame implements GameCommands {
     this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
     this.audio.setSuspended(false);
     this.phase = 'playing';
+    this.focusGameplay();
     this.clock.reset();
     this.pendingLaunch = false;
     this.input.resetTarget();

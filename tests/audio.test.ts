@@ -311,6 +311,15 @@ describe('AudioService lifecycle', () => {
 });
 
 describe('AudioService playback rules', () => {
+  it('synthesizes the metallic block-damage ricochet', () => {
+    installDocument();
+    const { service, context } = createService();
+    service.unlock();
+
+    expect(playCount(context, service, 'block-damage')).toBeGreaterThan(0);
+    service.dispose();
+  });
+
   it('does not schedule SFX while muted or in background', () => {
     installDocument();
     const { service, context } = createService();

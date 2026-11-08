@@ -60,6 +60,18 @@ npm run preview   # serves dist/ locally
 - See [docs/build-release.md](docs/build-release.md) for the build, ZIP and
   portal checklist.
 
+### M5.1 — review polish
+
+- UI terminology uses **Levels** throughout (menu, HUD, select, results).
+- The first perk arrives faster: the first level costs **8 XP**, then the curve
+  continues at 20/26/33/39…
+- Launching with **Space** works on the first shot: gameplay focus returns to
+  the canvas after Play, Phase/Level select, pause resume and perk choice.
+- Hitting a multi-HP block without breaking it plays a distinct, quieter
+  metallic ricochet instead of the break crack.
+- Block art was refined with stepped pixel corners, richer crystal/stone/
+  obsidian materials, phase-accent rim lights and gem-like HP pips.
+
 ## M4 — Presentation, feedback and mobile polish
 
 - Three procedural pixel-art level themes: **Crystal Grove**, **Ruined Halls**
