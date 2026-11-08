@@ -50,7 +50,7 @@ npm run preview   # serves dist/ locally
 - `store/screenshots/` has five real production-build captures at 390×844:
   menu, opening gameplay, laser + multiball, level-up and victory. Debug chrome
   is hidden in every shot.
-- `store/video/bricklike-preview.mp4` is a 42 s, 1280×720 gameplay preview with
+- `store/video/bricklike-preview.mp4` is a 30,6 s, 1280×720 gameplay preview with
   the portrait run composed over the game's cover art. It is silent; the capture
   script and limitations are documented in `store/video/README.md`.
 - `docs/release/portal-metadata.md` contains English title, short and long
@@ -59,8 +59,9 @@ npm run preview   # serves dist/ locally
 - `docs/release/submission-checklist.md` lists every manual field, asset and
   step per portal, all marked **pending human review**.
 - `docs/release/g7-review.md` inventories the package and defines the review
-  checklist. **G7 has not been approved**, no tag, GitHub Release or portal
-  upload was created by this milestone, and the user performs all submissions.
+  checklist. The package is versioned `0.1.0-mvp`; **G7 has not been approved**,
+  no tag, GitHub Release or portal upload was created by this milestone, and the
+  user performs all submissions.
 
 ## M6 — QA, performance and balance
 

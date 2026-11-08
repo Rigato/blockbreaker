@@ -1,9 +1,8 @@
 # Validação técnica de release — M7
 
 Data: 2026-11-08
-Branch: `agent/s6/m7-platform`
-Base: `c0d8928` (`feat(brand): rename the game to Bricklike`)
-Worktree: `.worktrees/m7-s6`
+Branch: `main`
+Base: `c0d8928` + merges de S8/S6; versão `0.1.0-mvp`
 
 Escopo: validar a engenharia de release do build aprovado no G6 e preparar o
 runbook de tag/GitHub Release. **Nenhuma tag, push ou release foi criada**, e
@@ -45,7 +44,7 @@ O probe de subpasta foi um script descartável em `.qa/probe.mjs`, usando
   files:        13
   size:         490.5 KiB (502321 bytes)
   paths <=      240 chars
-  sha256:       cd809581e656337f28c8ef8a8c5a646f5054b0733ae5b35a3cca0f79ed74188e
+  sha256:       e35893177fb7df1a34397a65e913927017816f4265043419551b19d6ff5dbd23
   root entries: index.html, playgama-bridge-config.json
 ```
 
@@ -215,11 +214,9 @@ Não executar o fallback junto com o workflow para não duplicar a release.
 
 ## Riscos e pendências
 
-1. **Versão divergente (bloqueio antes da tag).** `package.json` está em
-   `0.1.0-m6.1`, então `manifest.json` sai com essa versão, enquanto a tag
-   planejada é `v0.1.0-mvp`. O agente principal precisa decidir: bumpar
-   `package.json` para `0.1.0-mvp` antes do package, ou taguear
-   `v0.1.0-m6.1`. O escopo do S6 proíbe alterar versão.
+1. **Versão alinhada.** `package.json` e `release/manifest.json` estão em
+   `0.1.0-mvp`, a mesma versão da tag planejada `v0.1.0-mvp`. O package final foi
+   regerado após o bump; o SHA-256 acima corresponde a esse ZIP.
 2. **E2E fora do release.yml.** O workflow de release não instala Playwright nem
    roda E2E. Pré-requisito: CI verde no commit da tag. Rodar `npm run test:e2e`
    localmente no commit exato da tag se houver qualquer alteração desde o
@@ -240,4 +237,4 @@ Não executar o fallback junto com o workflow para não duplicar a release.
 O pacote está tecnicamente pronto para publicação: ZIP íntegro, na estrutura
 exigida, com caminhos relativos, sem dependências externas além do CDN do
 Bridge e com fallback local funcional. A tag e o GitHub Release ficam
-**retidos até o G7** e dependem da decisão de versão acima.
+**retidos até o G7**.

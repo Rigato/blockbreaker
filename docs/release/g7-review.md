@@ -1,5 +1,6 @@
 # G7 review — pacote de publicação
 
+**Versão:** `0.1.0-mvp` (tag planejada `v0.1.0-mvp`, ainda não criada).  
 **Status:** pronto para revisão humana. **G7 NÃO está aprovado.**  
 Este documento inventaria o que foi preparado, o que precisa de revisão e o que
 ainda depende do usuário ou do agente principal.
@@ -41,12 +42,12 @@ removem `data-debug` e escondem o painel antes de cada captura. Veja
 
 | Arquivo | Spec |
 |---|---|
-| `bricklike-preview.mp4` | 1280×720, 42 s, H.264, ~1,8 MB, sem áudio |
+| `bricklike-preview.mp4` | 1280×720, 30,6 s, H.264, ~1,6 MB, sem áudio |
 | `capture-preview.mjs` | grava gameplay real e compõe o MP4 com ffmpeg |
 
-O vídeo mostra o gameplay portrait real centralizado sobre uma composição com a
-arte de capa desfocada. O painel de debug fica oculto. O áudio não é capturado
-pelo Playwright; o MP4 é silencioso.
+O vídeo é montado em quatro trechos reais do build — menu, gameplay, level-up e
+results da mesma run — centralizados sobre a arte de capa desfocada. O painel de
+debug fica oculto. O áudio não é capturado pelo Playwright; o MP4 é silencioso.
 
 ### Metadata — `docs/release/portal-metadata.md`
 
@@ -64,7 +65,7 @@ Checklist por portal, com requisitos, campos, assets, passos manuais e status
 1. **Capas:** aprovar composição, legibilidade do título, consistência entre
    16:9, 2:3 e 1:1 e ausência de texto/logos indevidos.
 2. **Screenshots:** confirmar que representam o jogo e que não há UI de debug.
-3. **Vídeo:** assistir aos 42 s, confirmar que o gameplay é legível no player do
+3. **Vídeo:** assistir aos 30,6 s, confirmar que o gameplay é legível no player do
    portal e que a ausência de áudio é aceitável.
 4. **Descrição:** validar o inglês e remover qualquer promessa que não exista no
    build.
@@ -77,11 +78,11 @@ Checklist por portal, com requisitos, campos, assets, passos manuais e status
 
 ## Pendências
 
-- Revisão humana das capas e do vídeo. O refino final de arte é do agente
-  principal.
+- Revisão humana das capas e do vídeo. O refino final de arte é humano,
+  conforme §5.7 do plano.
 - Aprovação dos textos em inglês.
-- ZIP/tag/release pública: responsabilidade do S6/agente principal; este
-  worktree não cria tag, GitHub Release nem faz push.
+- Tag e GitHub Release ficam **retidos até o G7**; o agente principal executa a
+  tag somente após a aprovação.
 - Teste do vídeo e dos assets nos players reais dos portais.
 - Revalidação das regras de CrazyGames Basic, Playgama, itch.io e GameFlare.
 - O vídeo é silencioso; se o portal exigir áudio, regravar com captura de áudio.

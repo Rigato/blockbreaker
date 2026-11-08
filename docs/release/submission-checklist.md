@@ -1,5 +1,6 @@
 # Submission checklist — Bricklike MVP
 
+**Versão:** `0.1.0-mvp`.  
 **Status global:** pendente de revisão humana.  
 **Quem submete:** o usuário, manualmente, em cada portal. Nenhum upload, tag ou
 release pública foi feito por este trabalho.
@@ -19,7 +20,7 @@ frequência. O checklist abaixo registra o pacote preparado no M7.
       humana.**
 - [ ] Cinco screenshots revisados em `store/screenshots/`. **Pendente de revisão
       humana.**
-- [ ] Preview de 42 s revisado em `store/video/bricklike-preview.mp4`.
+- [ ] Preview de 30,6 s revisado em `store/video/bricklike-preview.mp4`.
       **Pendente de revisão humana.**
 - [ ] Nome **Bricklike** consistente em todos os portais. **Pendente de revisão
       humana.**
@@ -37,7 +38,7 @@ frequência. O checklist abaixo registra o pacote preparado no M7.
 | Laser + multiball | `store/screenshots/03-gameplay-laser-multiball-390x844.png` | 390×844 PNG | pendente de revisão humana |
 | Level-up | `store/screenshots/04-levelup-three-cards-390x844.png` | 390×844 PNG | pendente de revisão humana |
 | Victory/results | `store/screenshots/05-results-victory-390x844.png` | 390×844 PNG | pendente de revisão humana |
-| Preview video | `store/video/bricklike-preview.mp4` | 1280×720, 42 s, H.264 | pendente de revisão humana |
+| Preview video | `store/video/bricklike-preview.mp4` | 1280×720, 30,6 s, H.264 | pendente de revisão humana |
 
 ## itch.io
 

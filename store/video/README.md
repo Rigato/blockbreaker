@@ -3,27 +3,35 @@
 ## Resultado
 
 - `bricklike-preview.mp4`
-- 1280×720, 42 s, H.264, ~1,8 MB
+- 1280×720, **30,6 s**, H.264, ~1,6 MB
 - Gameplay portrait real (390×844) centralizado sobre a arte de capa desfocada
 - Sem UI de debug, sem DevTools
 - **Sem áudio** — o Playwright não captura áudio
+
+O vídeo é montado em quatro trechos reais do build:
+
+1. menu/título;
+2. run ativa com movimento do paddle, Prism Laser, projéteis e multiball;
+3. level-up com três cards;
+4. vitória/results da mesma run do trecho 2 (score/tempo coerentes).
 
 ## Como regravar
 
 ```bash
 npm run build
 npx vite preview --port 4180 --strictPort
-node store/video/capture-preview.mjs --url=http://localhost:4180 --seconds=42
+node store/video/capture-preview.mjs --url=http://localhost:4180
 ```
 
-`--seconds` aceita de 30 a 60. O script:
+O script:
 
 1. abre o build de produção em 390×844;
 2. esconde o painel de debug e remove `data-debug` (HUD normal visível);
-3. joga uma run assistida por ~42 s, concedendo Multiball, Prism Laser e Wide
-   Paddle, movendo o paddle, disparando laser e escolhendo perks;
-4. grava o WebM via Playwright;
-5. compõe o MP4 com `ffmpeg` (backdrop desfocado + card portrait com borda).
+3. grava quatro clipes via Playwright: menu, gameplay assistido, level-up e
+   results da mesma run;
+4. compõe cada clipe em 1280×720 com `ffmpeg` (backdrop desfocado + card
+   portrait com borda);
+5. concatena os trechos e aplica fade in/out.
 
 Requisitos: `ffmpeg` no PATH e Chromium do Playwright instalado.
 

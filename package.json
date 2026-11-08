@@ -1,6 +1,6 @@
 {
   "name": "blockbreaker",
-  "version": "0.1.0-m6.1",
+  "version": "0.1.0-mvp",
   "private": true,
   "type": "module",
   "description": "Bricklike — portrait HTML5 MVP",

@@ -151,7 +151,7 @@ Resultado em 2026-11-08:
 | Conteúdo descompactado | 1.859.569 bytes (1,77 MiB) |
 | Arquivos | 13 |
 | Maior path | 38 caracteres (`assets/Silkscreen-Regular-W9-u5Upq.ttf`) |
-| SHA-256 | `cd809581e656337f28c8ef8a8c5a646f5054b0733ae5b35a3cca0f79ed74188e` |
+| SHA-256 | `e35893177fb7df1a34397a65e913927017816f4265043419551b19d6ff5dbd23` |
 | `unzip -t` | “No errors detected in compressed data” |
 | Raiz do ZIP | `index.html` + `playgama-bridge-config.json` presentes |
 
@@ -198,9 +198,8 @@ Pré-requisitos:
 1. CI verde no commit que receberá a tag (`ci.yml`); o `release.yml` não roda
    E2E, então o smoke E2E deve ter passado no mesmo commit.
 2. `npm run package` local limpo, com `unzip -t` OK.
-3. `package.json` e `release/manifest.json` com a mesma versão da tag. A versão
-   atual do pacote é `0.1.0-m6.1`; a tag planejada é `v0.1.0-mvp`, portanto o
-   bump de versão precisa ser decidido antes da tag.
+3. `package.json` e `release/manifest.json` com a mesma versão da tag. O pacote
+   desta rodada está em `0.1.0-mvp`, alinhado à tag planejada `v0.1.0-mvp`.
 
 Comandos exatos:
 
@@ -255,7 +254,7 @@ alteração no workflow.
 - [x] `npm run test:e2e` — 16 testes passando.
 - [x] `release.yml` revisado: tag `v*`, nome Bricklike, dois anexos,
       `contents: write`.
-- [ ] Bump de versão alinhado à tag (decisão do agente principal antes do G7).
+- [x] Bump de versão alinhado à tag (`0.1.0-mvp`).
 - [ ] Tag, push e GitHub Release executados **somente após o G7**.
 - [ ] Upload/submissão nos portais feito manualmente pelo responsável.
 

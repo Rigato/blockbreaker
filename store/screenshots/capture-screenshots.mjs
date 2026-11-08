@@ -65,6 +65,12 @@ async function shot(page, name) {
   console.log(`captured ${name}`);
 }
 
+async function movePaddle(page, elapsed) {
+  const x = 36 + ((Math.sin(elapsed * 1.45) + 1) / 2) * 318;
+  const box = await page.locator('canvas').boundingBox();
+  if (box) await page.mouse.move(box.x + x, box.y + box.height * 0.9);
+}
+
 await mkdir(outDir, { recursive: true });
 const browser = await chromium.launch();
 const context = await browser.newContext({
@@ -117,9 +123,49 @@ for (let i = 0; i < 8; i += 1) {
   await page.waitForTimeout(350);
 }
 
-// 5. Victory / results.
-await clickDebug(page, 'Force victory');
-await page.locator('.overlay--results').waitFor({ state: 'visible' });
+// 5. Victory / results. Play long enough that the summary shows a plausible
+// score/time instead of the 2 s / 20 points from an immediate forced victory.
+await grantPerk(page, 'wide_paddle');
+await grantPerk(page, 'safety_net');
+await page.evaluate(() => {
+  const input = document.querySelector('#tune-ballSpeedScale');
+  if (!(input instanceof HTMLInputElement)) return;
+  input.value = '0.85';
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+});
+
+const results = page.locator('.overlay--results');
+const started = Date.now();
+let step = 0;
+while (Date.now() - started < 45_000) {
+  await movePaddle(page, (Date.now() - started) / 1000);
+  if (step % 2 === 0) await clickDebug(page, 'Fire projectile');
+  if (step % 7 === 0) await clickDebug(page, 'Add ball');
+  if (step % 16 === 0) await clickDebug(page, 'Add XP +20');
+  for (let i = 0; i < 4; i += 1) {
+    const open = await page.locator('.levelup:not([hidden])').isVisible().catch(() => false);
+    if (!open) break;
+    await page.keyboard.press('1');
+    await page.waitForTimeout(300);
+  }
+  if (await results.isVisible().catch(() => false)) {
+    const kicker = (await page.locator('#overlay-results-kicker').textContent()) ?? '';
+    if (/victory/i.test(kicker)) break;
+    const retry = results.getByRole('button', { name: /retry/i });
+    if (await retry.isVisible().catch(() => false)) {
+      await retry.click();
+      await page.waitForTimeout(800);
+      await page.keyboard.press('v');
+    }
+  }
+  await page.waitForTimeout(230);
+  step += 1;
+}
+
+if (!(await results.isVisible().catch(() => false))) {
+  await clickDebug(page, 'Force victory');
+}
+await results.waitFor({ state: 'visible' });
 await page.waitForTimeout(650);
 await shot(page, '05-results-victory-390x844.png');
 
