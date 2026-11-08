@@ -38,9 +38,15 @@ export class InputController {
   private lastClientX = 0;
   private readonly keys = new Set<string>();
   private readonly canvas: HTMLCanvasElement;
+  private readonly isGameplayActive: () => boolean;
 
-  constructor(canvas: HTMLCanvasElement, private readonly getPaddleX: () => number) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    private readonly getPaddleX: () => number,
+    isGameplayActive: () => boolean = () => true,
+  ) {
     this.canvas = canvas;
+    this.isGameplayActive = isGameplayActive;
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', this.handlePointerDown);
     canvas.addEventListener('pointermove', this.handlePointerMove);
@@ -140,7 +146,10 @@ export class InputController {
   };
 
   private readonly handleKeyDown = (event: KeyboardEvent): void => {
-    if (isUiElement(event.target)) return;
+    // During gameplay, Space/V/P and the movement keys belong to the field even
+    // if a HUD button (laser, perks, pause) still owns DOM focus. Outside
+    // gameplay, keep buttons keyboard-activatable.
+    if (isUiElement(event.target) && !this.isGameplayActive()) return;
     switch (event.code) {
       case 'ArrowLeft':
       case 'KeyA':
@@ -155,6 +164,10 @@ export class InputController {
         event.preventDefault();
         break;
       case 'Space':
+        if (!event.repeat) this.laserRequested = true;
+        event.preventDefault();
+        break;
+      case 'KeyV':
         if (!event.repeat) this.launchRequested = true;
         event.preventDefault();
         break;

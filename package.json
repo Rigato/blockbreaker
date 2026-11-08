@@ -1,6 +1,6 @@
 {
   "name": "blockbreaker",
-  "version": "0.1.0-m5.1",
+  "version": "0.1.0-m5.2",
   "private": true,
   "type": "module",
   "description": "Block Breaker Roguelite — portrait HTML5 MVP",

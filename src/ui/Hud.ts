@@ -305,7 +305,9 @@ export class Hud {
         ? en.hudWaveTransition
         : snapshot.ballStuck
           ? en.hudLaunchHint
-          : en.hudControlsHint;
+          : snapshot.laser
+            ? en.hudLaserHint
+            : en.hudControlsHint;
 
     const xpToNext = Math.max(1, snapshot.xpToNext);
     const ratio = Math.max(0, Math.min(1, snapshot.xp / xpToNext));

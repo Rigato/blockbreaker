@@ -65,8 +65,10 @@ npm run preview   # serves dist/ locally
 - UI terminology uses **Levels** throughout (menu, HUD, select, results).
 - The first perk arrives faster: the first level costs **8 XP**, then the curve
   continues at 20/26/33/39…
-- Launching with **Space** works on the first shot: gameplay focus returns to
-  the canvas after Play, Phase/Level select, pause resume and perk choice.
+- Launching with **V** (or tap/click) works on the first shot: gameplay focus
+  returns to the canvas after Play, Level select, pause resume and perk choice.
+  **Space** and **E** fire the Prism Laser during gameplay, even when a HUD
+  button still owns focus.
 - Hitting a multi-HP block without breaking it plays a distinct, quieter
   metallic ricochet instead of the break crack.
 - Block art was refined with stepped pixel corners, richer crystal/stone/
@@ -156,9 +158,9 @@ npm run preview   # serves dist/ locally
 | Action | Touch | Desktop |
 |---|---|---|
 | Move paddle | Relative 1:1 drag | Mouse absolute / arrows / A-D |
-| Launch | Tap the field | Click / Space |
+| Launch | Tap the field | Click / V |
 | Pause | Pause button → Resume/Restart/Sound/Menu | Pause button / P → Resume/Restart/Sound/Menu |
-| Laser | Laser button | Laser button / E |
+| Laser | Laser button | Laser button / Space / E |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
 | Menu / levels | Pause → Menu, Results → Menu | Pause → Menu, Results → Menu |
 | Rotate device | Portrait only (landscape guard) | — |

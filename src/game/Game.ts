@@ -184,7 +184,11 @@ export class BlockBreakerGame implements GameCommands {
     this.phaser.canvas.tabIndex = -1;
     this.phaser.canvas.style.outline = 'none';
 
-    this.input = new InputController(this.phaser.canvas, () => this.world.paddle.x);
+    this.input = new InputController(
+      this.phaser.canvas,
+      () => this.world.paddle.x,
+      () => this.phase === 'playing',
+    );
     this.unsubscribePause = gameEvents.on('platform:pause-changed', ({ paused }) => {
       if (paused) this.pause();
     });
