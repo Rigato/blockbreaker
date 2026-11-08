@@ -17,6 +17,8 @@ export const en = {
   menuSound: 'Sound',
   soundOn: 'On',
   soundOff: 'Off',
+  adKicker: 'ADVERTISEMENT',
+  adLoading: 'Loading ad…',
   menuBest: 'Best result',
   menuBestScore: 'Best score',
   menuBestTime: 'Best time',

@@ -65,8 +65,13 @@ export class BridgeAdapter implements PlatformService {
       delete: (keys) => this.deleteFromStorage(keys),
     };
 
+    const sdk = this.bridge;
     this.ads = {
-      isInterstitialSupported: this.bridge.advertisement.isInterstitialSupported,
+      // Read live so a platform that enables/disables ads after boot is
+      // reflected without rebuilding the adapter.
+      get isInterstitialSupported(): boolean {
+        return sdk.advertisement.isInterstitialSupported;
+      },
       showInterstitial: (placement) => this.showInterstitial(placement),
     };
   }
@@ -217,11 +222,21 @@ export class BridgeAdapter implements PlatformService {
         if (settled) return;
         settled = true;
         if (timer !== undefined) clearTimeout(timer);
-        this.bridge.off('interstitial_state_changed', onState);
+        try {
+          this.bridge.off('interstitial_state_changed', onState);
+        } catch {
+          // The SDK may already be gone; the promise must still settle.
+        }
         resolve(result);
       };
 
-      this.bridge.on('interstitial_state_changed', onState);
+      try {
+        this.bridge.on('interstitial_state_changed', onState);
+      } catch {
+        resolve('failed');
+        return;
+      }
+
       timer = setTimeout(() => finish('failed'), INTERSTITIAL_TIMEOUT_MS);
 
       try {
@@ -255,7 +270,11 @@ export async function createBridgeService(
 
   if (!bridge.isInitialized) return null;
 
-  return new BridgeAdapter(bridge, {
-    initDurationMs: Math.round(performance.now() - startedAt),
-  });
+  try {
+    return new BridgeAdapter(bridge, {
+      initDurationMs: Math.round(performance.now() - startedAt),
+    });
+  } catch {
+    return null;
+  }
 }

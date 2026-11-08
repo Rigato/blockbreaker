@@ -7,6 +7,7 @@ import type {
 import type { BootResult } from '../boot/bridgeBoot';
 import type { BlockBreakerGame } from '../game/Game';
 import { gameEvents } from '../game/events';
+import { AdOverlay } from './AdOverlay';
 import { DebugPanel } from './DebugPanel';
 import { Hud } from './Hud';
 import { LevelUpOverlay } from './LevelUpOverlay';
@@ -78,6 +79,9 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   const overlay = new HudOverlay({ root: options.root, controller });
   const levelUp = new LevelUpOverlay({ root: options.root, controller });
   const orientation = new Orientation({ controller });
+  const adOverlay = new AdOverlay({
+    fallbackFocus: () => overlay.resultsFocusTarget(),
+  });
 
   const debugPanel = options.debug
     ? new DebugPanel({
@@ -222,6 +226,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       overlay.dispose();
       levelUp.dispose();
       orientation.dispose();
+      adOverlay.dispose();
       debugPanel?.dispose();
       delete document.documentElement.dataset.debug;
     },

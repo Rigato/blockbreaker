@@ -1,5 +1,7 @@
 import type {
+  AdState,
   HudSnapshot,
+  InterstitialResult,
   PerkOffer,
   PlatformSource,
   SimTuning,
@@ -26,6 +28,7 @@ export interface GameEventMap {
   };
   'platform:pause-changed': { paused: boolean };
   'platform:audio-changed': { enabled: boolean };
+  'ad:state': { state: AdState; result?: InterstitialResult };
   'save:reset': { keys: readonly string[] };
   'hud:changed': HudSnapshot;
   'tuning:changed': SimTuning;

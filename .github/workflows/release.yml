@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Validate content
+        run: npm run validate:content
+
+      - name: Validate Bridge config
+        run: node scripts/validate-bridge-config.mjs
+
+      - name: Build
+        run: npm run build
+
+      - name: Package web ZIP
+        run: npm run package
+
+      - name: Upload web ZIP artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: blockbreaker-web
+          path: release/blockbreaker-web.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Block Breaker ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            release/blockbreaker-web.zip
+            release/manifest.json

@@ -1,6 +1,6 @@
 {
   "name": "blockbreaker",
-  "version": "0.1.0-m4.1",
+  "version": "0.1.0-m5",
   "private": true,
   "type": "module",
   "description": "Block Breaker Roguelite — portrait HTML5 MVP",
@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "validate:content": "tsx scripts/validate-content.ts",
+    "package": "node scripts/package.mjs",
     "preview": "vite preview --host"
   },
   "dependencies": {

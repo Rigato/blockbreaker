@@ -39,13 +39,27 @@ jobs:
       - name: Validate content
         run: npm run validate:content
 
+      - name: Validate Bridge config
+        run: node scripts/validate-bridge-config.mjs
+
       - name: Build
         run: npm run build
+
+      - name: Package web build
+        run: npm run package
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v7
         with:
           name: blockbreaker-dist
           path: dist
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload web ZIP artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: blockbreaker-web
+          path: release/blockbreaker-web.zip
           if-no-files-found: error
           retention-days: 7

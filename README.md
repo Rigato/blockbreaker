@@ -1,10 +1,10 @@
 # Block Breaker Roguelite
 
 Portrait HTML5 block breaker with roguelite progression. The repository is in the
-**M4 — presentation, feedback and mobile polish** stage: procedural pixel-art
-phase backdrops, distinct block materials, pooled particles and screen feedback,
-synthesized WebAudio SFX/ambience, bundled pixel font, mobile orientation guard
-and the complete M3 phase/save flow.
+**M5 — Bridge, build and distribution readiness** stage: the full three-phase
+game, presentation and save flow, plus final platform lifecycle, results
+interstitial, ZIP packaging and CI/release automation. The build is ready for
+the G5 review; portal submission remains M7.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -32,9 +32,33 @@ Validation commands:
 npm run typecheck
 npm test
 npm run validate:content
+node scripts/validate-bridge-config.mjs
 npm run build
+npm run package   # release/blockbreaker-web.zip + manifest
 npm run preview   # serves dist/ locally
 ```
+
+## M5 — Bridge, build and distribution readiness
+
+- Final `PlatformService`: Bridge + fallback, storage with timeout/degradation,
+  pause/audio lifecycle and ads. No direct `localStorage`, no analytics.
+- `game_ready` once after the menu is interactive; `level_started`,
+  `level_paused`, `level_resumed`, `level_completed` and `level_failed` sent to
+  the platform at the correct moments.
+- **Interstitial only on Results exit** (Next/Retry): the game pauses and hard
+  mutes audio, shows a blocking loading overlay, and continues on
+  `closed`/`failed`/15 s timeout. No rewarded UI, banners or own frequency logic.
+- Validated Bridge 2.4.1 config: no Bridge loading logo, no analytics,
+  safe-area adaptation and interstitial placement.
+- `npm run package` builds `release/blockbreaker-web.zip` with `index.html` at
+  the root, relative paths, manifest with SHA-256 and portal limits enforced
+  (≤ 1.000 files, ≤ 250 MB, paths ≤ 240 chars).
+- CI uploads `dist` and the ZIP; a `v*` tag workflow creates a GitHub Release
+  with the ZIP and manifest. GitHub Pages remains the review build.
+- Tested in a subfolder, with the Bridge CDN blocked/fallback, mock/no-ads,
+  failed/timed-out interstitial and no external requests to `api.playgama.com`.
+- See [docs/build-release.md](docs/build-release.md) for the build, ZIP and
+  portal checklist.
 
 ## M4 — Presentation, feedback and mobile polish
 
@@ -134,6 +158,9 @@ npm run preview   # serves dist/ locally
   (`loadingScreenType: "none"`) so no Bridge branding is shown; the game uses
   its own boot screen and progress bar.
 - `game_ready` is sent only after the menu is rendered and interactive.
+- Ads are interstitial-only on the Results exit; unsupported platforms skip
+  without UI breakage. The player setting and platform audio state both mute
+  the audio service.
 - No direct `localStorage` access in game code; storage always goes through
   `PlatformService`.
 
@@ -171,8 +198,10 @@ src/
   ui/                      Menu, HUD, level-up, overlays, orientation and debug
   i18n/                    English strings
 tests/                     Unit tests
-docs/                      GDD, technical spec and implementation plan
+scripts/                   Content validator, Bridge config validator and packager
+docs/                      GDD, technical spec, build/release and plan
 public/                    Bridge config, favicon, licenses and static assets
+release/                   Generated ZIP + manifest (not committed)
 ```
 
 ## Docs
@@ -184,6 +213,8 @@ public/                    Bridge config, favicon, licenses and static assets
 
 ## Deployment
 
-Every push to `main` runs typecheck, tests, content validation and build in CI.
-The `deploy` workflow publishes `dist/` to GitHub Pages using the GitHub Actions
-source.
+Every push to `main` runs typecheck, tests, content validation, Bridge config
+validation, build and package in CI; the ZIP is uploaded as an artifact. The
+`deploy` workflow publishes `dist/` to GitHub Pages for review. A `v*` tag runs
+`.github/workflows/release.yml` and creates a GitHub Release with the web ZIP
+and manifest. Portal submission is M7.

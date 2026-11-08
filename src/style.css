@@ -918,6 +918,96 @@ button {
 }
 
 /* --------------------------------------------------------------------------
+   Results interstitial transition
+   -------------------------------------------------------------------------- */
+
+/* Lives on <body> so it also covers the orientation guard (z-index 1000). */
+.ad-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    calc(var(--safe-top) + 20px)
+    calc(var(--safe-right) + 20px)
+    calc(var(--safe-bottom) + 20px)
+    calc(var(--safe-left) + 20px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(38, 132, 160, 0.2), transparent 58%),
+    rgba(3, 6, 14, 0.88);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  text-align: center;
+  touch-action: none;
+}
+
+.ad-overlay[hidden] {
+  display: none;
+}
+
+.ad-overlay:focus {
+  outline: none;
+}
+
+.ad-overlay__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 320px);
+  padding: clamp(18px, 5vmin, 28px) clamp(16px, 5vmin, 24px);
+  border: 1px solid rgba(126, 231, 255, 0.26);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(16, 34, 62, 0.9), rgba(6, 12, 26, 0.96)),
+    var(--bg-stage);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 30px rgba(80, 220, 255, 0.12),
+    0 24px 60px rgba(0, 0, 0, 0.62);
+}
+
+.ad-overlay__spinner {
+  width: clamp(28px, 9vmin, 38px);
+  aspect-ratio: 1;
+  margin-bottom: clamp(12px, 4vmin, 18px);
+  border: 3px solid rgba(100, 231, 255, 0.22);
+  border-top-color: var(--cyan);
+  border-right-color: var(--violet);
+  border-radius: 50%;
+  box-shadow:
+    0 0 18px rgba(100, 231, 255, 0.22),
+    inset 0 0 10px rgba(179, 136, 255, 0.16);
+  animation: ad-overlay-spin 900ms linear infinite;
+}
+
+.ad-overlay__kicker {
+  margin: 0 0 6px;
+  color: var(--cyan);
+  font-family: var(--font-pixel);
+  font-size: clamp(9px, 2.2vmin, 11px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.ad-overlay__title {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-pixel);
+  font-size: clamp(13px, 3.6vmin, 16px);
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+@keyframes ad-overlay-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
    Orientation guard (mobile landscape)
    -------------------------------------------------------------------------- */
 
@@ -2809,5 +2899,14 @@ html[data-debug='1'] .hud__top {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Static indicator instead of an endless spin. */
+  .ad-overlay__spinner {
+    animation: none !important;
+    opacity: 0.9;
+    border-top-color: var(--cyan);
+    border-right-color: var(--violet);
+    transform: rotate(45deg);
   }
 }

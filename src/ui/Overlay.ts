@@ -242,6 +242,12 @@ export class HudOverlay {
     }
   }
 
+  /** Primary action of the results dialog, used to restore focus after an ad. */
+  resultsFocusTarget(): HTMLElement | null {
+    if (!this.resultsVisible || this.resultsSection.hidden) return null;
+    return this.retryButton.hidden ? this.nextButton : this.retryButton;
+  }
+
   dispose(): void {
     this.unsubscribeKeydown();
     this.pauseSection.remove();

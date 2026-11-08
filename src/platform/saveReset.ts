@@ -3,8 +3,8 @@ import { gameEvents } from '../game/events';
 import { GAME_CONFIG } from '../game/config';
 
 /**
- * Deletes only game-owned keys. There is no direct localStorage access: the
- * call goes through whichever PlatformService storage is active.
+ * Deletes only game-owned keys. Persistence always goes through the active
+ * PlatformService storage; the game never touches browser storage directly.
  */
 export async function resetSave(storage: StorageService): Promise<void> {
   const keys = [GAME_CONFIG.storage.saveKey, GAME_CONFIG.storage.settingsKey] as const;

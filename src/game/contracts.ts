@@ -21,6 +21,9 @@ export interface StorageService {
 
 export type InterstitialResult = 'shown' | 'skipped' | 'failed';
 
+/** UI state emitted while a results interstitial is requested/finished. */
+export type AdState = 'requested' | 'finished';
+
 export interface AdsService {
   readonly isInterstitialSupported: boolean;
   showInterstitial(placement: string): Promise<InterstitialResult>;

@@ -1,11 +1,15 @@
 import Phaser from 'phaser';
 import type {
+  AdsService,
   GameCommands,
   HudPhase,
   HudSnapshot,
+  InterstitialResult,
   PerkSummary,
   PhaseResult,
   PhaseSelectInfo,
+  PlatformMessage,
+  PlatformMessagePayload,
   PlatformService,
   SaveRepository,
   SaveSnapshot,
@@ -46,6 +50,14 @@ const MAX_SUBSTEPS = GAME_CONFIG.maxStepsPerFrame;
 const WAVE_TRANSITION_MS = 1200;
 const LEVEL_UP_REVEAL_MS = 450;
 const BALL_RESPAWN_MS = GAME_CONFIG.ball.respawnMs;
+const INTERSTITIAL_PLACEMENT = 'phase_completed';
+
+const NO_ADS: AdsService = {
+  isInterstitialSupported: false,
+  async showInterstitial(): Promise<InterstitialResult> {
+    return 'skipped';
+  },
+};
 
 function clampWorldHeight(cssWidth: number, cssHeight: number): number {
   if (cssWidth <= 0 || cssHeight <= 0) return GAME_CONFIG.worldHeight.min;
@@ -70,6 +82,8 @@ export class BlockBreakerGame implements GameCommands {
   private readonly input: InputController;
   private readonly scene: GameScene;
   private readonly audio: AudioService;
+  private readonly platform: PlatformService | null;
+  private readonly ads: AdsService;
   private readonly runState = new RunState();
   private readonly saveRepository: SaveRepository;
   private readonly unsubscribePause: () => void;
@@ -87,6 +101,7 @@ export class BlockBreakerGame implements GameCommands {
   private nextWaveAt = 0;
   private levelUpRevealAt = 0;
   private ballRespawnLeftMs = 0;
+  private adBusy = false;
   private save: SaveV1 = createDefaultSave();
   private settings: SettingsV1 = createDefaultSettings();
   private readonly clock = new FixedStepClock();
@@ -104,6 +119,8 @@ export class BlockBreakerGame implements GameCommands {
     this.saveRepository = new StorageSaveRepository(
       platform?.storage ?? new MemoryStorage(),
     );
+    this.platform = platform ?? null;
+    this.ads = platform?.ads ?? NO_ADS;
     this.audio = new AudioService({
       enabled: true,
       platformEnabled: platform?.isAudioEnabled ?? true,
@@ -250,6 +267,10 @@ export class BlockBreakerGame implements GameCommands {
     this.scene.setPhase(phase.id, phase.index);
     this.audio.setSuspended(false);
     this.phase = 'playing';
+    this.sendPlatform('level_started', {
+      world: phase.id,
+      level: phase.index,
+    });
     this.clock.reset();
     this.pendingLaunch = false;
     this.input.resetTarget();
@@ -257,6 +278,14 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   restartPhase(): void {
+    if (this.phase === 'run-complete' || this.phase === 'defeat') {
+      void this.runResultsAction(() => {
+        if (this.currentPhase) this.startPhase(this.currentPhase.id);
+        else this.returnToMenu();
+      });
+      return;
+    }
+
     if (this.currentPhase) {
       this.startPhase(this.currentPhase.id);
     } else {
@@ -268,7 +297,7 @@ export class BlockBreakerGame implements GameCommands {
     if (this.phase !== 'run-complete') return;
     const nextId = this.phaseResult?.nextPhaseId ?? null;
     if (!nextId) return;
-    this.startPhase(nextId);
+    void this.runResultsAction(() => this.startPhase(nextId));
   }
 
   returnToMenu(): void {
@@ -360,6 +389,7 @@ export class BlockBreakerGame implements GameCommands {
     if (this.phase !== 'playing') return;
     this.phase = 'paused';
     this.audio.setSuspended(true);
+    this.sendLevelMessage('level_paused');
     this.clock.reset();
     this.syncHud(true);
   }
@@ -368,6 +398,7 @@ export class BlockBreakerGame implements GameCommands {
     if (this.phase !== 'paused') return;
     this.phase = 'playing';
     this.audio.setSuspended(false);
+    this.sendLevelMessage('level_resumed');
     this.clock.reset();
     this.syncHud(true);
   }
@@ -603,6 +634,7 @@ export class BlockBreakerGame implements GameCommands {
     this.audio.play('level-up');
     this.audio.setSuspended(true);
     this.scene.celebrate();
+    this.sendLevelMessage('level_paused');
     this.levelUpRevealAt = performance.now() + LEVEL_UP_REVEAL_MS;
 
     this.syncHud(true);
@@ -623,6 +655,7 @@ export class BlockBreakerGame implements GameCommands {
     this.phase = 'playing';
     this.levelUpRevealAt = 0;
     this.audio.setSuspended(false);
+    this.sendLevelMessage('level_resumed');
     this.clock.reset();
 
     if (this.pendingPerkBalls > 0) {
@@ -702,10 +735,61 @@ export class BlockBreakerGame implements GameCommands {
     this.audio.setSuspended(false);
     this.audio.play(victory ? 'victory' : 'defeat');
     if (victory) this.scene.celebrate();
+    this.sendPlatform(victory ? 'level_completed' : 'level_failed', {
+      world: phase.id,
+      level: phase.index,
+    });
     this.syncHud(true);
 
     void this.saveRepository.save(updated).catch((error: unknown) => {
       console.warn('[save] could not persist phase result', error);
+    });
+  }
+
+  /** Pauses audio, blocks the results UI and shows at most one interstitial. */
+  private async runResultsAction(action: () => void): Promise<void> {
+    if (this.adBusy) return;
+
+    if (!this.ads.isInterstitialSupported) {
+      action();
+      return;
+    }
+
+    const phaseAtStart = this.phase;
+    this.adBusy = true;
+    this.audio.setBackground(true);
+    gameEvents.emit('ad:state', { state: 'requested' });
+
+    let result: InterstitialResult = 'failed';
+    try {
+      result = await this.ads.showInterstitial(INTERSTITIAL_PLACEMENT);
+    } catch (error) {
+      console.warn('[ads] interstitial failed', error);
+      result = 'failed';
+    }
+
+    this.audio.setBackground(false);
+    this.adBusy = false;
+    gameEvents.emit('ad:state', { state: 'finished', result });
+
+    // A menu/pause action may have won the race while the ad was open.
+    if (this.phase !== phaseAtStart) return;
+    action();
+  }
+
+  private sendLevelMessage(message: 'level_paused' | 'level_resumed'): void {
+    const phase = this.currentPhase;
+    if (!phase) return;
+    this.sendPlatform(message, { world: phase.id, level: phase.index });
+  }
+
+  private sendPlatform(
+    message: PlatformMessage,
+    payload?: PlatformMessagePayload,
+  ): void {
+    if (!this.platform) return;
+    void this.platform.sendMessage(message, payload).catch((error: unknown) => {
+      console.warn('[platform] message was not accepted', message, error);
     });
   }
 
