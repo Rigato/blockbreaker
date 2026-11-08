@@ -14,7 +14,7 @@ export function createMockAds(mode: MockAdMode): AdsService {
     async showInterstitial(placement: string): Promise<InterstitialResult> {
       console.info(`[ads:mock] ${mode} (${placement})`);
       await new Promise<void>((resolve) => {
-        window.setTimeout(resolve, mode === 'show' ? 1400 : 700);
+        window.setTimeout(resolve, mode === 'show' ? 1400 : 1500);
       });
       return mode === 'show' ? 'shown' : 'failed';
     },

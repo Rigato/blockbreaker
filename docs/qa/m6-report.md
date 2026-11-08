@@ -19,7 +19,7 @@ produção servida por `vite preview`.
 | Pacote/ZIP | `npm run package` | ✅ 490.5 KiB, 13 arquivos |
 | E2E | `npm run test:e2e` | ✅ 16 testes, ~2.0 min local; CI configurado |
 
-O E2E usa o botão debug **Force defeat** para resultados determinísticos; ele não existe fora de `?debug=1`. O teste cobre: boot/menu, ausência de chamadas a `api.playgama.com`, controles
+O E2E usa os botões debug **Force defeat/Force victory** para resultados determinísticos; eles não existem fora de `?debug=1`. A limpeza real da fase 1 (três ondas) é coberta pelos 10 runs do baseline. O teste cobre: boot/menu, ausência de chamadas a `api.playgama.com`, controles
 (Space não lança / V lança), pause/resume, som persistido, Level Up com 3 cards e
 escolha por teclado, vitória da fase 1, summary, Next level, fase 2 após reload,
 Level Select com fase 2 desbloqueada, AdMock `show`/`fail`, CDN bloqueado com

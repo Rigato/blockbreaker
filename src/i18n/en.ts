@@ -134,6 +134,7 @@ export const en = {
   debugAddBall: 'Add ball',
   debugFireProjectile: 'Fire projectile',
   debugForceDefeat: 'Force defeat',
+  debugForceVictory: 'Force victory',
   debugProgression: 'Progression',
   debugSeed: 'Seed',
   debugLevelXp: 'Level / XP',

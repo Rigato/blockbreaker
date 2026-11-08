@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test';
 import {
   LAUNCH_HINT,
   MENU_READY,
-  clearPhaseOne,
   clickDebugAction,
   expandDebugPanel,
   forceDefeat,
+  forceVictory,
   monitorPage,
   readResults,
   resolveLevelUps,
@@ -90,12 +90,11 @@ test.describe('smoke', () => {
   });
 
   test('results: phase 1 victory unlocks and starts phase 2 across reloads', async ({ page }) => {
-    test.setTimeout(360_000);
+    test.setTimeout(120_000);
     await page.goto('/?debug=1&resetSave=1');
     await waitForMenu(page);
-
-    const { levelUps } = await clearPhaseOne(page);
-    expect(levelUps).toBeGreaterThan(0);
+    await startPlay(page);
+    await forceVictory(page);
 
     const results = await readResults(page);
     expect(results.kicker).toBe('Victory');

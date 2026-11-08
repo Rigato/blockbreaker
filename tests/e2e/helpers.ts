@@ -127,6 +127,14 @@ export async function forceDefeat(page: Page): Promise<void> {
   await page.locator('.overlay--results').waitFor({ state: 'visible', timeout: 15_000 });
 }
 
+/** Deterministic phase victory shortcut for results/unlock E2E. */
+export async function forceVictory(page: Page): Promise<void> {
+  await expandDebugPanel(page);
+  const clicked = await clickDebugAction(page, 'Force victory');
+  if (!clicked) throw new Error('Force victory debug action is unavailable');
+  await page.locator('.overlay--results').waitFor({ state: 'visible', timeout: 15_000 });
+}
+
 export interface ResultsSnapshot {
   readonly kicker: string;
   readonly title: string;

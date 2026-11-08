@@ -333,6 +333,8 @@ export interface GameCommands {
   debugAddXp(amount: number): void;
   /** Debug-only: ends the current run in defeat immediately. */
   debugDefeat(): void;
+  /** Debug-only: ends the current phase in victory immediately. */
+  debugVictory(): void;
 
   // M3 — phases, save and results
   /** Starts a specific content phase from its first wave. */
