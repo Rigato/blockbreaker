@@ -15,13 +15,11 @@ import {
   type PerkDefinition,
 } from '../content/perks';
 import { createRng } from '../sim/rng';
+import { xpCostForLevel } from './xp';
 
 /** XP required to advance from `level` (1-based) to the next level. */
 export function xpToNextForLevel(level: number): number {
-  return (
-    GAME_CONFIG.progression.baseXpToNext +
-    GAME_CONFIG.progression.xpStepPerLevel * (Math.max(1, level) - 1)
-  );
+  return xpCostForLevel(level);
 }
 
 /** Alias matching the curve named in the plan. */
@@ -233,6 +231,8 @@ export class RunState implements ProgressionService {
     const quickStudy = this.levelOf('quick_study');
     const fallback = this.levelOf(FALLBACK_PERK.id);
     const turret = this.levelOf('auto_turret');
+    const laserLevel = this.levelOf('prism_laser');
+    const multiballLevel = this.levelOf('multiball');
 
     modifiers.paddleWidthMultiplier = 1 + widePaddleStep * widePaddle;
     modifiers.ballRadiusMultiplier = 1 + giantBallStep * giantBall;
@@ -245,12 +245,14 @@ export class RunState implements ProgressionService {
         ? Math.max(turretMinMs, turretBaseMs - turretStepMs * (turret - 1))
         : null;
     modifiers.stickyPaddle = this.levelOf('sticky_paddle') > 0;
-    modifiers.laserCooldown =
-      this.levelOf('prism_laser') > 0 ? laserCooldownMs : null;
+    modifiers.laserCooldown = laserLevel > 0 ? laserCooldownMs : null;
+    modifiers.laserLevel = laserLevel;
     modifiers.safetyNetCharges =
       this.levelOf('safety_net') > 0 ? safetyCharges : 0;
     modifiers.explosiveEvery =
       this.levelOf('explosive_core') > 0 ? explosiveEvery : null;
+    modifiers.multiballLevel = multiballLevel;
+    modifiers.trajectoryGuide = this.levelOf('foresight') > 0;
 
     return modifiers;
   }

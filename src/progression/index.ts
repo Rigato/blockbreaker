@@ -1,4 +1,5 @@
 export { RunState, xpToNext, xpToNextForLevel } from './RunState';
+export { xpCostForLevel } from './xp';
 export {
   MAX_PHASE,
   StorageSaveRepository,

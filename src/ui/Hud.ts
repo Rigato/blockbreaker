@@ -24,6 +24,7 @@ export class Hud {
   private readonly xpTrack: HTMLElement;
   private readonly xpFill: HTMLElement;
   private readonly ballDots: HTMLElement;
+  private readonly respawn: HTMLElement;
   private readonly blocksValue: HTMLElement;
   private readonly scoreValue: HTMLElement;
   private readonly timeValue: HTMLElement;
@@ -45,6 +46,9 @@ export class Hud {
   private laserCooldownMs = 0;
   private laserTimer: ReturnType<typeof setInterval> | null = null;
   private pulseTimer: ReturnType<typeof setTimeout> | null = null;
+  private levelUpTimer: ReturnType<typeof setTimeout> | null = null;
+  private levelUpPhase = false;
+  private respawnSeconds = -1;
   private lastWaveId: string | null = null;
   private visible = false;
 
@@ -103,7 +107,15 @@ export class Hud {
       this.dots.push(dot);
     }
 
-    balls.append(ballsLabel, ballDots);
+    const respawn = document.createElement('span');
+    this.respawn = respawn;
+    respawn.className = 'hud__respawn';
+    respawn.hidden = true;
+    respawn.setAttribute('role', 'status');
+    respawn.setAttribute('aria-live', 'polite');
+    respawn.setAttribute('aria-atomic', 'true');
+
+    balls.append(ballsLabel, ballDots, respawn);
 
     const blocks = document.createElement('span');
     blocks.className = 'hud__stat';
@@ -175,7 +187,12 @@ export class Hud {
     xpTrack.append(xpFill);
     bar.append(xpTrack);
 
-    top.append(bar);
+    const levelUpBadge = document.createElement('span');
+    levelUpBadge.className = 'hud__levelup';
+    levelUpBadge.textContent = en.hudLevelUp;
+    levelUpBadge.setAttribute('aria-hidden', 'true');
+
+    top.append(bar, levelUpBadge);
 
     const footer = document.createElement('div');
     footer.className = 'hud__footer';
@@ -254,6 +271,16 @@ export class Hud {
   }
 
   update(snapshot: HudSnapshot): void {
+    if (snapshot.phase === 'levelup') {
+      if (!this.levelUpPhase) {
+        this.levelUpPhase = true;
+        this.playLevelUp();
+      }
+    } else if (this.levelUpPhase) {
+      this.levelUpPhase = false;
+      this.stopLevelUp();
+    }
+
     this.waveKicker.textContent = `${en.phaseLabel} ${snapshot.phaseIndex}/${Math.max(
       1,
       snapshot.phaseCount,
@@ -268,6 +295,7 @@ export class Hud {
       dot.classList.toggle('is-on', index < active);
     });
     this.ballDots.setAttribute('aria-label', `${en.hudBalls}: ${snapshot.ballsActive}`);
+    this.updateRespawn(snapshot.ballRespawnMs);
 
     this.blocksValue.textContent = String(Math.max(0, snapshot.blocksRemaining));
     this.scoreValue.textContent = snapshot.score.toLocaleString('en-US');
@@ -305,6 +333,8 @@ export class Hud {
   dispose(): void {
     this.stopLaserTimer();
     if (this.pulseTimer !== null) clearTimeout(this.pulseTimer);
+    this.stopLevelUp();
+    this.levelUpPhase = false;
     document.removeEventListener('keydown', this.handleKeydown);
     this.pauseButton.removeEventListener('click', this.handlePause);
     this.perksButton.removeEventListener('click', this.handlePerksToggle);
@@ -322,6 +352,42 @@ export class Hud {
       this.pulseTimer = null;
       this.section.classList.remove('is-wave-pulse');
     }, 700);
+  }
+
+  /** Short, immediate XP-bar flash that fires when the level-up phase begins. */
+  private playLevelUp(): void {
+    if (this.levelUpTimer !== null) clearTimeout(this.levelUpTimer);
+    this.section.classList.remove('is-levelup');
+    void this.section.offsetWidth;
+    this.section.classList.add('is-levelup');
+    this.levelUpTimer = setTimeout(() => {
+      this.levelUpTimer = null;
+      this.section.classList.remove('is-levelup');
+    }, 650);
+  }
+
+  private stopLevelUp(): void {
+    if (this.levelUpTimer !== null) {
+      clearTimeout(this.levelUpTimer);
+      this.levelUpTimer = null;
+    }
+    this.section.classList.remove('is-levelup');
+  }
+
+  private updateRespawn(ballRespawnMs: number | null): void {
+    const remaining = ballRespawnMs === null ? 0 : Math.max(0, Math.round(ballRespawnMs));
+    if (remaining <= 0) {
+      this.respawn.hidden = true;
+      this.respawnSeconds = -1;
+      this.respawn.textContent = '';
+      return;
+    }
+
+    const seconds = Math.max(1, Math.ceil(remaining / 1000));
+    this.respawn.hidden = false;
+    if (seconds === this.respawnSeconds) return;
+    this.respawnSeconds = seconds;
+    this.respawn.textContent = `${en.hudExtraBall} ${seconds}s`;
   }
 
   private updatePerks(perks: readonly PerkState[]): void {

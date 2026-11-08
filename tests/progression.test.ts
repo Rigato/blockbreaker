@@ -8,35 +8,35 @@ function progressed(seed = 7): RunState {
   return run;
 }
 
-describe('M2 XP curve', () => {
-  it('uses 20/30/40 XP thresholds and starts at level 1', () => {
+describe('G4 XP curve', () => {
+  it('uses 13/20/26 XP thresholds and starts at level 1', () => {
     const run = progressed();
     expect(run.level).toBe(1);
-    expect(run.xpToNext).toBe(20);
-    expect(xpToNextForLevel(1)).toBe(20);
-    expect(xpToNextForLevel(2)).toBe(30);
-    expect(xpToNextForLevel(3)).toBe(40);
+    expect(run.xpToNext).toBe(13);
+    expect(xpToNextForLevel(1)).toBe(13);
+    expect(xpToNextForLevel(2)).toBe(20);
+    expect(xpToNextForLevel(3)).toBe(26);
 
-    expect(run.addXp(20)).toMatchObject({
-      baseAmount: 20,
-      gained: 20,
+    expect(run.addXp(13)).toMatchObject({
+      baseAmount: 13,
+      gained: 13,
       level: 2,
       xp: 0,
-      xpToNext: 30,
+      xpToNext: 20,
       levelsGained: 1,
       pendingLevelUps: 1,
     });
-    run.addXp(30);
+    run.addXp(20);
     expect(run.level).toBe(3);
-    expect(run.xpToNext).toBe(40);
+    expect(run.xpToNext).toBe(26);
   });
 
   it('carries overflow XP into the next level', () => {
     const run = progressed();
     const gain = run.addXp(25);
     expect(gain.level).toBe(2);
-    expect(gain.xp).toBe(5);
-    expect(gain.xpToNext).toBe(30);
+    expect(gain.xp).toBe(12);
+    expect(gain.xpToNext).toBe(20);
     expect(gain.levelsGained).toBe(1);
   });
 
@@ -44,8 +44,8 @@ describe('M2 XP curve', () => {
     const run = progressed();
     const gain = run.addXp(55);
     expect(gain.level).toBe(3);
-    expect(gain.xp).toBe(5);
-    expect(gain.xpToNext).toBe(40);
+    expect(gain.xp).toBe(22);
+    expect(gain.xpToNext).toBe(26);
     expect(gain.levelsGained).toBe(2);
     expect(gain.pendingLevelUps).toBe(2);
   });
@@ -113,6 +113,29 @@ describe('M2 perk stacking', () => {
     expect(run.perks.filter((perk) => perk.id === 'sticky_paddle')).toHaveLength(1);
   });
 
+  it('scales Prism Laser, Multiball slots and Foresight modifiers', () => {
+    const run = progressed();
+
+    run.grantPerk('prism_laser');
+    expect(run.modifiers.laserLevel).toBe(1);
+    run.grantPerk('prism_laser');
+    expect(run.modifiers.laserLevel).toBe(2);
+    run.grantPerk('prism_laser');
+    const maxedLaser = run.grantPerk('prism_laser');
+    expect(maxedLaser.perk.level).toBe(3);
+    expect(run.modifiers.laserLevel).toBe(3);
+
+    run.grantPerk('multiball');
+    expect(run.modifiers.multiballLevel).toBe(1);
+    run.grantPerk('multiball');
+    expect(run.modifiers.multiballLevel).toBe(2);
+
+    run.grantPerk('foresight');
+    expect(run.modifiers.trajectoryGuide).toBe(true);
+    const maxedForesight = run.grantPerk('foresight');
+    expect(maxedForesight.perk.level).toBe(1);
+  });
+
   it('spawns one extra ball for Multiball without raising the cap', () => {
     const run = progressed();
     const choice = run.grantPerk('multiball');
@@ -144,8 +167,11 @@ describe('M2 derived modifiers', () => {
     expect(modifiers.turretInterval).toBeCloseTo(3200);
     expect(modifiers.stickyPaddle).toBe(true);
     expect(modifiers.laserCooldown).toBe(8000);
+    expect(modifiers.laserLevel).toBe(1);
     expect(modifiers.safetyNetCharges).toBe(1);
     expect(modifiers.explosiveEvery).toBe(8);
+    expect(modifiers.multiballLevel).toBe(0);
+    expect(modifiers.trajectoryGuide).toBe(false);
 
     expect(BASE_RUN_MODIFIERS).toEqual({
       paddleWidthMultiplier: 1,
@@ -156,8 +182,11 @@ describe('M2 derived modifiers', () => {
       turretInterval: null,
       stickyPaddle: false,
       laserCooldown: null,
+      laserLevel: 0,
       safetyNetCharges: 0,
       explosiveEvery: null,
+      multiballLevel: 0,
+      trajectoryGuide: false,
     });
   });
 
@@ -194,7 +223,7 @@ describe('M2 run lifecycle', () => {
     expect(run.seed).toBe(99);
     expect(run.level).toBe(1);
     expect(run.xp).toBe(0);
-    expect(run.xpToNext).toBe(20);
+    expect(run.xpToNext).toBe(13);
     expect(run.pendingLevelUps).toBe(0);
     expect(run.perks).toEqual([]);
     expect(run.takeOffers()).toEqual([]);
@@ -211,10 +240,10 @@ describe('M2 run lifecycle', () => {
     expect(run.perks).toEqual([]);
   });
 
-  it('returns the ten catalog perks without the fallback', () => {
+  it('returns the eleven catalog perks without the fallback', () => {
     const run = progressed();
     const catalog = run.getCatalog();
-    expect(catalog).toHaveLength(10);
+    expect(catalog).toHaveLength(11);
     expect(catalog.map((perk) => perk.id)).not.toContain('xp_fallback');
     expect(catalog.map((perk) => perk.id)).toEqual([
       'multiball',
@@ -226,6 +255,7 @@ describe('M2 run lifecycle', () => {
       'sticky_paddle',
       'safety_net',
       'prism_laser',
+      'foresight',
       'explosive_core',
     ]);
   });

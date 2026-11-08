@@ -153,22 +153,93 @@ describe('safety net', () => {
 });
 
 describe('prism laser', () => {
-  it('damages the first block in the paddle column and runs the cooldown', () => {
+  /** Five stacked blocks in the paddle column plus one block outside the beam. */
+  function buildColumn(world: World, hp = 4): { column: ReturnType<typeof addBlock>[]; outside: ReturnType<typeof addBlock> } {
+    const column: ReturnType<typeof addBlock>[] = [];
+    for (let index = 0; index < 5; index += 1) {
+      column.push(
+        addBlock(world, {
+          left: 340,
+          top: 600 + index * 50,
+          width: 40,
+          height: 40,
+          hp,
+          maxHp: hp,
+          row: index,
+          col: 3,
+        }),
+      );
+    }
+    const outside = addBlock(world, {
+      left: 100,
+      top: 600,
+      width: 40,
+      height: 40,
+      hp,
+      maxHp: hp,
+      row: 0,
+      col: 0,
+    });
+    return { column, outside };
+  }
+
+  function prepare(level: number): World {
     const world = createWorld();
     world.blocks.push(keeperBlock());
-    world.applyRunModifiers(withMods({ laserCooldown: GAME_CONFIG.perks.laserCooldownMs }));
+    world.applyRunModifiers(
+      withMods({
+        laserCooldown: GAME_CONFIG.perks.laserCooldownMs,
+        laserLevel: level,
+      }),
+    );
     keepAlive(world);
+    return world;
+  }
 
-    const first = addBlock(world, { left: 340, top: 600, width: 40, height: 50, row: 1, col: 3 });
-    const second = addBlock(world, { left: 340, top: 700, width: 40, height: 50, row: 2, col: 3 });
+  it('level 1 hits the 3 nearest blocks for 1 damage each', () => {
+    const world = prepare(1);
+    const { column, outside } = buildColumn(world);
 
     expect(world.laserReady).toBe(true);
     expect(world.fireLaser()).toBe(true);
-    expect(world.blocks).toContain(first);
-    expect(world.blocks).not.toContain(second);
-    expect(world.laserBeam).not.toBeNull();
-    expect(world.events.some((event) => event.type === 'laser:fired')).toBe(true);
 
+    // Targets are ordered by `top`: the three nearest the paddle take damage.
+    expect(column.map((block) => block.hp)).toEqual([4, 4, 3, 3, 3]);
+    expect(outside.hp).toBe(4);
+    expect(world.laserBeam).not.toBeNull();
+    const fired = world.events.find((event) => event.type === 'laser:fired');
+    expect(fired && fired.type === 'laser:fired' ? fired.hits : null).toBe(3);
+  });
+
+  it('level 2 hits 4 blocks for 2 damage each', () => {
+    const world = prepare(2);
+    const { column, outside } = buildColumn(world);
+
+    expect(world.fireLaser()).toBe(true);
+
+    expect(column.map((block) => block.hp)).toEqual([4, 2, 2, 2, 2]);
+    expect(outside.hp).toBe(4);
+    const fired = world.events.find((event) => event.type === 'laser:fired');
+    expect(fired && fired.type === 'laser:fired' ? fired.hits : null).toBe(4);
+  });
+
+  it('level 3 hits 5 blocks for 3 damage each', () => {
+    const world = prepare(3);
+    const { column, outside } = buildColumn(world);
+
+    expect(world.fireLaser()).toBe(true);
+
+    expect(column.map((block) => block.hp)).toEqual([1, 1, 1, 1, 1]);
+    expect(outside.hp).toBe(4);
+    const fired = world.events.find((event) => event.type === 'laser:fired');
+    expect(fired && fired.type === 'laser:fired' ? fired.hits : null).toBe(5);
+  });
+
+  it('runs the 8 s cooldown', () => {
+    const world = prepare(1);
+    buildColumn(world);
+
+    expect(world.fireLaser()).toBe(true);
     // A second shot is refused while the 8 s cooldown runs.
     expect(world.fireLaser()).toBe(false);
     expect(world.laserCooldownRemainingMs).toBe(GAME_CONFIG.perks.laserCooldownMs);
@@ -188,13 +259,18 @@ describe('prism laser', () => {
     expect(world.laserReady).toBe(true);
   });
 
-  it('does nothing without the laser modifier', () => {
+  it('does nothing without the laser modifier or at level 0', () => {
     const world = createWorld();
     world.blocks.push(keeperBlock());
     keepAlive(world);
 
     expect(world.fireLaser()).toBe(false);
     expect(world.laserReady).toBe(false);
+
+    // A cooldown alone (level 0) is not enough to own the laser.
+    world.applyRunModifiers(withMods({ laserCooldown: GAME_CONFIG.perks.laserCooldownMs }));
+    expect(world.laserReady).toBe(false);
+    expect(world.fireLaser()).toBe(false);
   });
 });
 
@@ -257,6 +333,7 @@ describe('explosive core', () => {
     world.applyRunModifiers(
       withMods({
         laserCooldown: GAME_CONFIG.perks.laserCooldownMs,
+        laserLevel: 1,
         explosiveEvery: GAME_CONFIG.perks.explosiveEvery,
       }),
     );
@@ -289,9 +366,9 @@ describe('explosive core', () => {
       col: 1,
     });
 
-    // Seven cooldown cycles, then the eighth shot immediately before the check
-    // so the explosion visual is still alive.
-    fireLaserWave(world, 7);
+    // Level 1 hits 3 blocks per shot, so 8 kills land on the third shot
+    // (3 + 3 + 2). Fire it last so the explosion visual is still alive.
+    fireLaserWave(world, 2);
     expect(world.fireLaser()).toBe(true);
     for (const block of targets) expect(world.blocks).not.toContain(block);
     expect(world.destroyedBlockCount).toBe(8);
@@ -304,14 +381,16 @@ describe('explosive core', () => {
 
   it('does not explode without the modifier', () => {
     const world = createWorld();
-    world.applyRunModifiers(withMods({ laserCooldown: GAME_CONFIG.perks.laserCooldownMs }));
+    world.applyRunModifiers(
+      withMods({ laserCooldown: GAME_CONFIG.perks.laserCooldownMs, laserLevel: 1 }),
+    );
     keepAlive(world);
 
     for (let row = 0; row < 8; row += 1) {
       addBlock(world, { left: 340, top: 200 + row * 50, width: 40, height: 40, row, col: 0 });
     }
 
-    fireLaserWave(world, 8);
+    fireLaserWave(world, 3);
 
     expect(world.destroyedBlockCount).toBe(8);
     expect(world.explosions).toHaveLength(0);

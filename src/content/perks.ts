@@ -70,7 +70,15 @@ export const PERK_CATALOG: readonly PerkDefinition[] = [
   {
     id: 'prism_laser',
     name: 'Prism Laser',
-    description: 'Unlocks a manual vertical laser with a cooldown.',
+    description:
+      'Fires a column beam that damages the first 3 blocks; upgrades add damage and reach.',
+    maxLevel: 3,
+    kind: 'repeatable',
+  },
+  {
+    id: 'foresight',
+    name: 'Foresight',
+    description: 'Shows a short dotted prediction of each ball path.',
     maxLevel: 1,
     kind: 'unique',
   },

@@ -1180,6 +1180,21 @@ button {
   box-shadow: 0 0 6px rgba(100, 231, 255, 0.7);
 }
 
+.hud__respawn {
+  color: var(--gold);
+  font-size: clamp(5px, 1.4cqw, 7px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.hud__respawn[hidden] {
+  display: none;
+}
+
 .hud__pause {
   display: grid;
   flex: 0 0 auto;
@@ -1233,9 +1248,40 @@ button {
 }
 
 .hud__top {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.hud__levelup {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 2;
+  margin-top: 3px;
+  padding: 2px 9px;
+  border: 1px solid rgba(179, 136, 255, 0.75);
+  border-radius: 999px;
+  background: rgba(24, 14, 44, 0.94);
+  box-shadow: 0 0 16px rgba(179, 136, 255, 0.45);
+  color: #f1e6ff;
+  font-size: clamp(8px, 2.2cqw, 10px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-transform: uppercase;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.hud.is-levelup .hud__levelup {
+  opacity: 1;
+  visibility: visible;
+  animation: hud-levelup-badge 650ms ease-out both;
 }
 
 .hud__xp-line {
@@ -1268,6 +1314,33 @@ button {
   background: linear-gradient(90deg, var(--cyan), var(--violet));
   box-shadow: 0 0 8px rgba(179, 136, 255, 0.7);
   transition: width 160ms ease;
+}
+
+.hud__xp-track::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8ff4ff, #f1e6ff, var(--violet));
+  content: '';
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.hud.is-levelup .hud__xp-track {
+  box-shadow:
+    0 0 10px rgba(179, 136, 255, 0.9),
+    0 0 18px rgba(100, 231, 255, 0.5);
+}
+
+.hud.is-levelup .hud__xp-track::after {
+  animation: hud-levelup-sweep 650ms ease-out both;
+}
+
+.hud.is-levelup .hud__xp-fill {
+  filter: brightness(1.55);
+  animation: hud-levelup-fill 650ms ease-out both;
 }
 
 .hud__footer {
@@ -2181,6 +2254,52 @@ button {
   }
 }
 
+@keyframes hud-levelup-sweep {
+  0% {
+    opacity: 0.9;
+    transform: scaleX(0);
+  }
+  55% {
+    opacity: 0.85;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hud-levelup-fill {
+  0% {
+    filter: brightness(1);
+  }
+  30% {
+    filter: brightness(2.1);
+  }
+  100% {
+    filter: brightness(1.55);
+  }
+}
+
+@keyframes hud-levelup-badge {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-2px) scale(0.92);
+  }
+  18% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1.05);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
 @keyframes hud-wave-text {
   0% {
     transform: translateY(1px);
@@ -2566,6 +2685,17 @@ html[data-debug='1'] .hud__top {
 
   .hud__xp-line {
     font-size: 6px;
+  }
+
+  .hud__levelup {
+    margin-top: 2px;
+    padding: 2px 7px;
+    font-size: 7px;
+  }
+
+  .hud__respawn {
+    font-size: 5px;
+    letter-spacing: 0.02em;
   }
 
   .hud__hint {

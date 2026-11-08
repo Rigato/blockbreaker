@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { Effects } from '../src/render/effects';
 import {
+  predictBallPath,
+  TRAJECTORY_STEPS,
+  type TrajectoryPoint,
+} from '../src/render/trajectory';
+import {
   clampParticleRequest,
   FX_COUNTS,
   PARTICLE_BUDGET,
@@ -71,6 +76,72 @@ describe('particle budget', () => {
     expect(scaleFxCount(9, false)).toBe(9);
     expect(scaleFxCount(9, true)).toBe(4);
     expect(scaleFxCount(1, true)).toBe(1);
+  });
+});
+
+describe('foresight trajectory', () => {
+  const width = 720;
+  const height = 1280;
+  const radius = 8;
+  const lookAheadMs = 400;
+
+  function ball(overrides: Partial<Parameters<typeof predictBallPath>[0]>): Parameters<typeof predictBallPath>[0] {
+    return { x: width / 2, y: height / 2, vx: 0, vy: -800, radius, ...overrides };
+  }
+
+  it('returns the requested number of points ahead of the ball', () => {
+    const points = predictBallPath(ball({}), width, height, lookAheadMs, TRAJECTORY_STEPS);
+    expect(points).toHaveLength(TRAJECTORY_STEPS);
+    expect(points[0]!.y).toBeLessThan(height / 2);
+    expect(points.at(-1)!.y).toBeLessThan(points[0]!.y);
+  });
+
+  it('reflects off the side walls and stays inside the field', () => {
+    const points = predictBallPath(
+      ball({ x: width - radius - 2, vx: 900, vy: 0 }),
+      width,
+      height,
+      lookAheadMs,
+    );
+    for (const point of points) {
+      expect(point.x).toBeGreaterThanOrEqual(radius);
+      expect(point.x).toBeLessThanOrEqual(width - radius);
+    }
+    // The ball was moving right; after the bounce the later samples move left.
+    expect(points.some((point) => point.x < width - radius - 2)).toBe(true);
+  });
+
+  it('reflects off the ceiling', () => {
+    const points = predictBallPath(
+      ball({ y: radius + 4, vx: 0, vy: -900 }),
+      width,
+      height,
+      lookAheadMs,
+    );
+    for (const point of points) expect(point.y).toBeGreaterThanOrEqual(radius);
+    expect(points.some((point) => point.y > radius + 4)).toBe(true);
+  });
+
+  it('clips samples that fall below the field', () => {
+    const points = predictBallPath(
+      ball({ y: height - 60, vx: 0, vy: 900 }),
+      width,
+      height,
+      lookAheadMs,
+    );
+    expect(points.length).toBeLessThan(TRAJECTORY_STEPS);
+    expect(points.length).toBeGreaterThan(0);
+    for (const point of points) expect(point.y).toBeLessThanOrEqual(height);
+  });
+
+  it('reuses the caller array and returns nothing for a zero horizon', () => {
+    const out: TrajectoryPoint[] = [];
+    const first = predictBallPath(ball({}), width, height, lookAheadMs, TRAJECTORY_STEPS, out);
+    const second = predictBallPath(ball({}), width, height, lookAheadMs, TRAJECTORY_STEPS, out);
+    expect(second).toBe(out);
+    expect(second[0]).toBe(first[0]);
+
+    expect(predictBallPath(ball({}), width, height, 0)).toHaveLength(0);
   });
 });
 

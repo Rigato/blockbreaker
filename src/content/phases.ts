@@ -1,6 +1,7 @@
 import { GAME_CONFIG } from '../game/config';
 import { BLOCK_TYPES, isBlockTypeId } from '../sim/blocks';
 import { BLOCK_TOP, PADDLE_BOTTOM_OFFSET } from '../sim/World';
+import { xpCostForLevel } from '../progression/xp';
 import type { PhaseDef, WaveDef } from './types';
 import { PHASE_1_WAVES, PHASE_2_WAVES, PHASE_3_WAVES } from './waves';
 
@@ -35,7 +36,7 @@ export const PADDLE_ZONE_TOP =
   CONTENT_EVALUATION_HEIGHT - PADDLE_BOTTOM_OFFSET - GAME_CONFIG.paddle.height / 2;
 
 export const BALL_SPEED_MIN = 500;
-export const BALL_SPEED_MAX = 700;
+export const BALL_SPEED_MAX = 780;
 /** Slack for the monotonic difficulty check across wave boundaries. */
 export const DIFFICULTY_TOLERANCE = 0.05;
 
@@ -71,14 +72,6 @@ export interface PhaseStats {
 export interface ContentIssue {
   readonly path: string;
   readonly message: string;
-}
-
-/** XP required to advance from `level` (1-based) to the next level. */
-export function xpCostForLevel(level: number): number {
-  return (
-    GAME_CONFIG.progression.baseXpToNext +
-    GAME_CONFIG.progression.xpStepPerLevel * (Math.max(1, level) - 1)
-  );
 }
 
 /** How many level ups a wave/phase XP pool can produce. */
@@ -283,8 +276,8 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     });
 
     const stats = phaseStats(phase);
-    if (stats.levelUps < 3 || stats.levelUps > 5) {
-      push(phasePath, `expected 3-5 level ups, found ${stats.levelUps}`);
+    if (stats.levelUps < 4 || stats.levelUps > 8) {
+      push(phasePath, `expected 4-8 level ups, found ${stats.levelUps}`);
     }
   });
 

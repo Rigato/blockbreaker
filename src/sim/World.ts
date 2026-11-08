@@ -259,7 +259,11 @@ export class World {
   }
 
   get laserReady(): boolean {
-    return this.modifiersValue.laserCooldown !== null && this.laserCooldownLeftMs <= 0;
+    return (
+      this.modifiersValue.laserCooldown !== null &&
+      this.modifiersValue.laserLevel > 0 &&
+      this.laserCooldownLeftMs <= 0
+    );
   }
 
   get laserBeam(): LaserBeamFx | null {
@@ -386,6 +390,7 @@ export class World {
         modifiers.laserCooldown !== null && modifiers.laserCooldown > 0
           ? modifiers.laserCooldown
           : null,
+      laserLevel: Math.max(0, Math.min(3, Math.floor(modifiers.laserLevel))),
       safetyNetCharges: Math.max(0, Math.floor(modifiers.safetyNetCharges)),
       explosiveEvery:
         modifiers.explosiveEvery !== null && modifiers.explosiveEvery > 0
@@ -507,26 +512,29 @@ export class World {
   }
 
   /**
-   * Prism Laser: vertical beam at the paddle column. Only usable when the perk
-   * is owned (`laserCooldown != null`) and the cooldown has fully elapsed.
+   * Prism Laser: vertical beam at the paddle column. Level L deals L damage to
+   * the first `laserTargetsBase + (L - 1) * laserTargetsPerLevel` blocks in the
+   * beam, ordered from the one nearest the paddle upwards. Only usable when the
+   * perk is owned (`laserCooldown != null`), levelled and off cooldown.
    */
   fireLaser(): boolean {
     const cooldown = this.modifiersValue.laserCooldown;
-    if (cooldown === null || this.laserCooldownLeftMs > 0) return false;
+    const level = this.modifiersValue.laserLevel;
+    if (cooldown === null || level <= 0 || this.laserCooldownLeftMs > 0) return false;
     if (this.outcome !== 'playing' || !this.running) return false;
 
     const x = this.paddle.x;
     const half = LASER_BEAM_WIDTH / 2;
-    const targets = this.blocks.filter(
-      (block) => block.left < x + half && block.left + block.width > x - half,
-    );
+    const targets = this.blocks
+      .filter((block) => block.left < x + half && block.left + block.width > x - half)
+      .sort((a, b) => b.top - a.top);
 
-    // The M3 laser is intentionally precise: it hits only the first block in
-    // the beam (closest to the paddle), not every block in the column.
-    const target = targets.reduce<Block | null>(
-      (lowest, block) => (!lowest || block.top > lowest.top ? block : lowest),
-      null,
+    const targetCount = Math.max(
+      1,
+      GAME_CONFIG.perks.laserTargetsBase +
+        (level - 1) * GAME_CONFIG.perks.laserTargetsPerLevel,
     );
+    const hitTargets = targets.slice(0, targetCount);
 
     this.laserCooldownLeftMs = cooldown;
     this.laserBeamFx = {
@@ -539,12 +547,12 @@ export class World {
       type: 'laser:fired',
       x,
       width: LASER_BEAM_WIDTH,
-      hits: target ? 1 : 0,
+      hits: hitTargets.length,
     });
 
-    if (target) {
-      this.applyDamage(target, GAME_CONFIG.perks.laserDamage, -1);
-    }
+    // applyDamage validates membership, so blocks destroyed by a chained
+    // explosion mid-loop are safely skipped.
+    for (const target of hitTargets) this.applyDamage(target, level, -1);
     return true;
   }
 

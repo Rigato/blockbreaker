@@ -109,8 +109,14 @@ export interface RunModifiers {
   stickyPaddle: boolean;
   /** Laser cooldown in milliseconds; null when not acquired. */
   laserCooldown: number | null;
+  /** Prism Laser level (0–3): damage per beam and extra targets scale with it. */
+  laserLevel: number;
   safetyNetCharges: number;
   explosiveEvery: number | null;
+  /** Number of extra Multiball slots that can respawn after a loss. */
+  multiballLevel: number;
+  /** Foresight: draw a short dotted prediction ahead of each ball. */
+  trajectoryGuide: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -200,6 +206,8 @@ export interface HudSnapshot {
   waveIndex: number;
   waveCount: number;
   ballsActive: number;
+  /** Milliseconds until a lost Multiball extra respawns; null when none. */
+  ballRespawnMs: number | null;
   blocksRemaining: number;
   score: number;
   /** True while the ball is attached to the paddle waiting for launch. */

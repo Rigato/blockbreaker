@@ -44,6 +44,8 @@ export interface CanvasMetrics {
 
 const MAX_SUBSTEPS = GAME_CONFIG.maxStepsPerFrame;
 const WAVE_TRANSITION_MS = 1200;
+const LEVEL_UP_REVEAL_MS = 450;
+const BALL_RESPAWN_MS = GAME_CONFIG.ball.respawnMs;
 
 function clampWorldHeight(cssWidth: number, cssHeight: number): number {
   if (cssWidth <= 0 || cssHeight <= 0) return GAME_CONFIG.worldHeight.min;
@@ -83,6 +85,8 @@ export class BlockBreakerGame implements GameCommands {
   private runCount = 0;
   private runSeed = 1;
   private nextWaveAt = 0;
+  private levelUpRevealAt = 0;
+  private ballRespawnLeftMs = 0;
   private save: SaveV1 = createDefaultSave();
   private settings: SettingsV1 = createDefaultSettings();
   private readonly clock = new FixedStepClock();
@@ -238,6 +242,8 @@ export class BlockBreakerGame implements GameCommands {
     this.waveScoreAtStart = 0;
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
     this.runSeed = this.nextSeed();
     this.runState.startRun(this.runSeed);
     this.loadPhaseWave(0);
@@ -275,6 +281,8 @@ export class BlockBreakerGame implements GameCommands {
     this.waveScoreAtStart = 0;
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
     this.runState.reset();
     const preview = PHASES[0]?.waves[0];
     if (preview) {
@@ -328,6 +336,8 @@ export class BlockBreakerGame implements GameCommands {
     this.phaseResult = null;
     this.runScore = 0;
     this.phase = 'menu';
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
     const preview = PHASES[0]?.waves[0];
     if (preview) {
       this.world.loadWave(preview);
@@ -372,6 +382,8 @@ export class BlockBreakerGame implements GameCommands {
     this.runScore = this.waveScoreAtStart;
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
     this.loadPhaseWave(this.currentWaveIndex);
     this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
     this.audio.setSuspended(false);
@@ -393,6 +405,8 @@ export class BlockBreakerGame implements GameCommands {
     this.waveScoreAtStart = this.runScore;
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
     this.loadPhaseWave(this.currentWaveIndex);
     this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
     this.audio.setSuspended(false);
@@ -589,9 +603,16 @@ export class BlockBreakerGame implements GameCommands {
     this.audio.play('level-up');
     this.audio.setSuspended(true);
     this.scene.celebrate();
+    this.levelUpRevealAt = performance.now() + LEVEL_UP_REVEAL_MS;
 
-    const offers = this.runState.takeOffers();
     this.syncHud(true);
+  }
+
+  /** Shows the perk cards after the XP bar flash has had time to read. */
+  private revealLevelUp(): void {
+    if (this.phase !== 'levelup' || this.levelUpRevealAt <= 0) return;
+    this.levelUpRevealAt = 0;
+    const offers = this.runState.takeOffers();
     gameEvents.emit('levelup:offered', {
       offers,
       level: this.runState.level,
@@ -600,6 +621,7 @@ export class BlockBreakerGame implements GameCommands {
 
   private finishLevelUp(): void {
     this.phase = 'playing';
+    this.levelUpRevealAt = 0;
     this.audio.setSuspended(false);
     this.clock.reset();
 
@@ -630,6 +652,8 @@ export class BlockBreakerGame implements GameCommands {
 
     this.phase = 'cleared';
     this.nextWaveAt = performance.now() + WAVE_TRANSITION_MS;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
     this.clock.reset();
     this.pendingLaunch = false;
     this.pendingPerkBalls = 0;
@@ -670,6 +694,8 @@ export class BlockBreakerGame implements GameCommands {
     };
     this.phase = victory ? 'run-complete' : 'defeat';
     this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
     this.clock.reset();
     this.pendingLaunch = false;
     this.pendingPerkBalls = 0;
@@ -688,6 +714,15 @@ export class BlockBreakerGame implements GameCommands {
   // -------------------------------------------------------------------------
 
   private frame(deltaMs: number): void {
+    if (
+      this.phase === 'levelup' &&
+      this.levelUpRevealAt > 0 &&
+      performance.now() >= this.levelUpRevealAt
+    ) {
+      this.revealLevelUp();
+      return;
+    }
+
     if (
       this.phase === 'cleared' &&
       this.nextWaveAt > 0 &&
@@ -710,6 +745,7 @@ export class BlockBreakerGame implements GameCommands {
     }
 
     this.phaseElapsedMs += Math.max(0, Math.min(deltaMs, 250));
+    this.tickBallRespawn(deltaMs);
 
     if (actions.launch) this.pendingLaunch = true;
 
@@ -774,6 +810,7 @@ export class BlockBreakerGame implements GameCommands {
           break;
         case 'ball:lost':
           this.audio.play('ball-lost');
+          this.scheduleBallRespawn();
           break;
         case 'laser:fired':
           this.audio.play('laser');
@@ -798,6 +835,43 @@ export class BlockBreakerGame implements GameCommands {
     this.audio.setBackground(document.hidden);
     if (document.hidden) this.pause();
   };
+
+  /**
+   * Schedules one lost Multiball extra to come back after a long cooldown.
+   * The timer is pause-aware and refills one ball at a time.
+   */
+  private scheduleBallRespawn(): void {
+    if (this.phase !== 'playing' || this.world.outcome !== 'playing') return;
+    const multiballLevel = this.runState.modifiers.multiballLevel;
+    if (multiballLevel <= 0) return;
+    const target = 1 + multiballLevel;
+    if (this.world.balls.length >= target) return;
+    if (this.ballRespawnLeftMs <= 0) this.ballRespawnLeftMs = BALL_RESPAWN_MS;
+  }
+
+  private tickBallRespawn(deltaMs: number): void {
+    if (this.ballRespawnLeftMs <= 0) return;
+    this.ballRespawnLeftMs = Math.max(
+      0,
+      this.ballRespawnLeftMs - Math.max(0, Math.min(deltaMs, 250)),
+    );
+    if (this.ballRespawnLeftMs > 0) return;
+
+    const target = 1 + this.runState.modifiers.multiballLevel;
+    if (this.world.outcome === 'playing' && this.world.balls.length < target) {
+      this.world.spawnBall();
+    }
+
+    if (
+      this.world.outcome === 'playing' &&
+      this.world.balls.length < target
+    ) {
+      this.ballRespawnLeftMs = BALL_RESPAWN_MS;
+    } else {
+      this.ballRespawnLeftMs = 0;
+    }
+    this.syncHud(true);
+  }
 
   // -------------------------------------------------------------------------
   // HUD
@@ -832,6 +906,10 @@ export class BlockBreakerGame implements GameCommands {
       waveIndex: phase ? this.currentWaveIndex + 1 : 0,
       waveCount: phase?.waves.length ?? 0,
       ballsActive: this.world.balls.length,
+      ballRespawnMs:
+        this.ballRespawnLeftMs > 0
+          ? Math.ceil(this.ballRespawnLeftMs / 1000) * 1000
+          : null,
       blocksRemaining: this.world.blocks.length,
       score: this.runScore,
       ballStuck: this.world.balls.some((ball) => ball.stuck),

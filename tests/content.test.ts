@@ -124,17 +124,17 @@ describe('M3 content pacing', () => {
     }
   });
 
-  it('offers roughly 3-5 level ups per phase on the 20/30/40/50 curve', () => {
+  it('offers roughly 4-8 level ups per phase on the G4 13/20/26 curve', () => {
     for (const phase of PHASES) {
       const stats = phaseStats(phase);
-      expect(stats.levelUps).toBeGreaterThanOrEqual(3);
-      expect(stats.levelUps).toBeLessThanOrEqual(5);
+      expect(stats.levelUps).toBeGreaterThanOrEqual(4);
+      expect(stats.levelUps).toBeLessThanOrEqual(8);
       expect(stats.levelUps).toBe(levelUpsForXp(stats.hp));
     }
     expect(levelUpsForXp(20)).toBe(1);
     expect(levelUpsForXp(90)).toBe(3);
-    expect(levelUpsForXp(140)).toBe(4);
-    expect(levelUpsForXp(200)).toBe(5);
+    expect(levelUpsForXp(140)).toBe(5);
+    expect(levelUpsForXp(200)).toBe(6);
   });
 
   it('prints a concise report for the CLI', () => {

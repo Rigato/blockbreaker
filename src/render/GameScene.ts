@@ -1,10 +1,16 @@
 import Phaser from 'phaser';
+import { GAME_CONFIG } from '../game/config';
 import type { ScenePresentation } from '../game/presentation';
 import type { Block, SimEvent, World } from '../sim/World';
 import { BLOCK_TOP, FIELD_WIDTH } from '../sim/World';
 import { BLOCK_TYPES } from '../sim/blocks';
 import { drawBlock } from './blockArt';
 import { Effects } from './effects';
+import {
+  predictBallPath,
+  TRAJECTORY_STEPS,
+  type TrajectoryPoint,
+} from './trajectory';
 import {
   FX_COUNTS,
   hexToCss,
@@ -68,6 +74,7 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   private backdrop?: Phaser.GameObjects.Graphics;
   private motesGraphics?: Phaser.GameObjects.Graphics;
   private fieldGraphics?: Phaser.GameObjects.Graphics;
+  private trajectoryGraphics?: Phaser.GameObjects.Graphics;
   private entityGraphics?: Phaser.GameObjects.Graphics;
   private effectsGraphics?: Phaser.GameObjects.Graphics;
   private overlayGraphics?: Phaser.GameObjects.Graphics;
@@ -79,6 +86,7 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   private readonly ballCache = new Map<number, BallSnapshot>();
   private readonly seenBallIds = new Set<number>();
   private readonly motes: Mote[] = [];
+  private readonly trajectoryPoints: TrajectoryPoint[] = [];
 
   private reducedMotion = false;
   private motionQuery?: MediaQueryList;
@@ -175,6 +183,9 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     this.backdrop = this.add.graphics().setDepth(-50);
     this.motesGraphics = this.add.graphics().setDepth(-40);
     this.fieldGraphics = this.add.graphics().setDepth(0);
+    // Same layer as the entities but added first, so the dotted guide sits
+    // behind the balls while staying above the backdrop.
+    this.trajectoryGraphics = this.add.graphics().setDepth(1);
     this.entityGraphics = this.add.graphics().setDepth(1);
     this.effectsGraphics = this.add.graphics().setDepth(2);
     this.overlayGraphics = this.add.graphics().setDepth(4);
@@ -916,7 +927,41 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
 
   private drawWorld(time: number): void {
     this.drawBlocks();
+    this.drawTrajectory();
     this.drawEntities(time);
+  }
+
+  /** Foresight: a short, fading dotted preview ahead of every live ball. */
+  private drawTrajectory(): void {
+    const graphics = this.trajectoryGraphics;
+    if (!graphics) return;
+    graphics.clear();
+    const world = this.world;
+    if (!world.isRunning) return;
+
+    const modifiers = world.modifiers;
+    if (!modifiers.trajectoryGuide) return;
+
+    const lookAheadMs = GAME_CONFIG.perks.foresightLookAheadMs;
+    const color = this.theme.accent;
+    for (const ball of world.balls) {
+      if (ball.stuck) continue;
+      const points = predictBallPath(
+        ball,
+        FIELD_WIDTH,
+        world.height,
+        lookAheadMs,
+        TRAJECTORY_STEPS,
+        this.trajectoryPoints,
+      );
+      const last = Math.max(1, points.length - 1);
+      for (let index = 0; index < points.length; index += 1) {
+        const point = points[index]!;
+        const t = index / last;
+        graphics.fillStyle(color, 0.35 - t * 0.3);
+        graphics.fillCircle(point.x, point.y, 2.1 - t * 0.9);
+      }
+    }
   }
 
   private drawBlocks(): void {

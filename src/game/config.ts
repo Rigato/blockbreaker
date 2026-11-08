@@ -19,15 +19,17 @@ export const GAME_CONFIG = {
   paddle: {
     width: 100,
     height: 18,
-    maxSpeed: 2600,
+    maxSpeed: 2808,
   },
 
   ball: {
     radius: 9,
     baseSpeed: 520,
     speedPerWave: 40,
-    maxSpeed: 700,
+    maxSpeed: 780,
     maxBalls: 8,
+    /** Long cooldown before a lost Multiball extra respawns. */
+    respawnMs: 10_000,
   },
 
   stage: {
@@ -52,6 +54,8 @@ export const GAME_CONFIG = {
   progression: {
     baseXpToNext: 20,
     xpStepPerLevel: 10,
+    /** Global -35% tuning applied to the XP curve at the G4 review. */
+    xpCurveMultiplier: 0.65,
   },
 
   perks: {
@@ -63,6 +67,9 @@ export const GAME_CONFIG = {
     turretMinMs: 1200,
     laserCooldownMs: 8000,
     laserDamage: 1,
+    laserTargetsBase: 3,
+    laserTargetsPerLevel: 1,
+    foresightLookAheadMs: 400,
     stickyHoldMs: 2500,
     safetyCharges: 1,
     explosiveEvery: 8,
@@ -86,8 +93,11 @@ export const BASE_RUN_MODIFIERS: RunModifiers = {
   turretInterval: null,
   stickyPaddle: false,
   laserCooldown: null,
+  laserLevel: 0,
   safetyNetCharges: 0,
   explosiveEvery: null,
+  multiballLevel: 0,
+  trajectoryGuide: false,
 };
 
 /** M1 default feel values; the debug panel starts from these. */

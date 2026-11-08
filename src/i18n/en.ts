@@ -54,6 +54,8 @@ export const en = {
   hudLaunchHint: 'Tap / click / Space to launch',
   hudControlsHint: 'Drag / mouse / arrows to move · P to pause',
   hudWaveTransition: 'Wave cleared · next wave incoming',
+  hudLevelUp: 'Level up!',
+  hudExtraBall: 'Extra ball',
 
   pauseTitle: 'Paused',
   pauseBody: 'The field is frozen. Resume when you are ready.',

@@ -62,10 +62,25 @@ npm run preview   # serves dist/ locally
 - Responsive and scroll-free at 320×568, 390×844, 430×932 and desktop, with
   safe-area handling for notch devices.
 
+### G4.1 — gameplay tuning and feel
+
+- Level up now pauses immediately and flashes/pulses the XP bar before the perk
+  popup appears (~450 ms), making the level gain readable.
+- **Prism Laser** is repeatable up to level 3: level L deals L damage to the
+  first **L+2** blocks in its column (1/3, 2/4, 3/5).
+- Paddle max speed increased from 2600 to **2808** (+8%).
+- Ball speeds increased by **10%**: 572/616/660, 616/660/704 and 638/682/726.
+- XP curve reduced by **35%**: 13/20/26/33/39/46…, yielding roughly 4/6/7 level
+  ups across the three phases.
+- Lost Multiball extras respawn after a **10 s** pause-aware cooldown, one at a
+  time; the HUD shows the countdown and the timer resets per wave/phase.
+- New unique perk **Foresight**: a subtle dotted line predicts each ball’s short
+  path with wall reflections.
+
 ## M3 — Phases, progression and persistence
 
-- Three phases with three waves each: **Crystal Grove** (520/560/600),
-  **Ruined Halls** (560/600/640) and **Arcane Depths** (580/620/660).
+- Three phases with three waves each: **Crystal Grove** (572/616/660),
+  **Ruined Halls** (616/660/704) and **Arcane Depths** (638/682/726).
 - ASCII-authored layouts with crystal (1 HP), stone (2 HP) and obsidian (3 HP)
   blocks; corridors and gaps keep every wave clearable.
 - Phase select with locks, best score/time, attempts and clears; victory unlocks
@@ -77,24 +92,26 @@ npm run preview   # serves dist/ locally
 - Waves advance automatically **1.2 s** after a clear, with no intermediate
   popup. Results appear only at the end of a phase.
 - Initial launch receives a seeded 2.5–5° side bias so a perfectly straight tap
-  cannot clear a column. Prism Laser hits only the first block in its beam.
+  cannot clear a column.
 - `npm run validate:content` checks the nine waves (ids, legend, grid width,
   paddle zone, speeds and difficulty curve) and fails CI on invalid content.
 
 ## M2 — Progression
 
-- XP per destroyed block (`XP = max HP`), curve `20 + 10 × (level − 1)`,
-  overflow and a queued multi-level-up flow.
-- Automatic pause on level up, three distinct perk cards, selection by tap/click
-  or keys 1/2/3, no reroll.
-- Ten perks: Multiball, Wide Paddle, Power Ball, Quick Study, Arcane Turret,
-  Giant Ball, Sticky Paddle, Safety Net, Prism Laser and Explosive Core.
+- XP per destroyed block (`XP = max HP`), base curve `20 + 10 × (level − 1)`
+  with the G4.1 **−35%** multiplier (13/20/26/33/39…), overflow and a queued
+  multi-level-up flow.
+- Automatic pause on level up, XP-bar flash, three distinct perk cards,
+  selection by tap/click or keys 1/2/3, no reroll.
+- Eleven perks: Multiball, Wide Paddle, Power Ball, Quick Study, Arcane Turret,
+  Giant Ball, Sticky Paddle, Safety Net, Prism Laser (3 levels), Foresight and
+  Explosive Core.
 - Multipliers and effects are derived from perks and applied live; the debug
   panel can force individual perks and grant XP.
 - Contextual laser button plus E on desktop; sticky release by tap/timer;
   Safety Net protects the last ball and reloads each wave.
-- HUD XP bar, acquired-perks list and live run score; phase results with
-  immediate retry.
+- HUD XP bar, acquired-perks list, Multiball respawn countdown and live run
+  score; phase results with immediate retry.
 - Paddle base width reduced to **100** units; Wide Paddle adds 12% per level.
 
 ### Controls
