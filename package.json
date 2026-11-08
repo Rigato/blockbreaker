@@ -12,6 +12,8 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "qa:runs": "node scripts/qa-runs.mjs",
     "validate:content": "tsx scripts/validate-content.ts",
     "package": "node scripts/package.mjs",
     "preview": "vite preview --host"
@@ -21,6 +23,7 @@
     "phaser": "3.90.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@types/node": "24.19.2",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
