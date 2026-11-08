@@ -80,17 +80,18 @@ anúncio real e o Bridge DevTools exigem um ambiente/portal da Playgama.
 
 ## Teste em subpasta
 
-O build usa `base: './'`, então deve funcionar em qualquer subpasta:
+O build usa `base: './'`, então deve funcionar em qualquer subpasta. Use uma
+pasta descartável dentro do worktree (`.qa/`), removida antes do commit:
 
 ```bash
-rm -rf /tmp/opencode/m5-subfolder
-mkdir -p /tmp/opencode/m5-subfolder/sub
-cp -r dist/. /tmp/opencode/m5-subfolder/sub/
-cd /tmp/opencode/m5-subfolder
-python3 -m http.server 8765
+rm -rf .qa
+mkdir -p .qa/sub
+unzip -q release/blockbreaker-web.zip -d .qa/sub
+cd .qa
+python3 -m http.server 4181 --bind 127.0.0.1
 ```
 
-Abra `http://localhost:8765/sub/` e confirme que o menu carrega, os assets
+Abra `http://127.0.0.1:4181/sub/` e confirme que o menu carrega, os assets
 aparecem no Network e não há erro de path 404. Também é possível validar o ZIP
 sem extrair:
 
@@ -130,8 +131,137 @@ unzip -t release/blockbreaker-web.zip
 - [ ] ZIP ≤ 250 MB, ≤ 1.000 arquivos, paths ≤ 240 caracteres.
 - [ ] Sem logo do Bridge no mock; modo mock sem analytics.
 
+## Validação do pacote de release (M7)
+
+Executado no worktree `m7-s6` a partir de `c0d8928`, com build limpo:
+
+```bash
+rm -rf dist release
+npm run build
+npm run package
+unzip -t release/blockbreaker-web.zip
+```
+
+Resultado em 2026-11-08:
+
+| Item | Valor |
+|---|---|
+| ZIP | `release/blockbreaker-web.zip` |
+| Tamanho | 502.321 bytes (490,5 KiB / 0,48 MiB) |
+| Conteúdo descompactado | 1.859.569 bytes (1,77 MiB) |
+| Arquivos | 13 |
+| Maior path | 38 caracteres (`assets/Silkscreen-Regular-W9-u5Upq.ttf`) |
+| SHA-256 | `cd809581e656337f28c8ef8a8c5a646f5054b0733ae5b35a3cca0f79ed74188e` |
+| `unzip -t` | “No errors detected in compressed data” |
+| Raiz do ZIP | `index.html` + `playgama-bridge-config.json` presentes |
+
+Todos os limites ficam muito abaixo do teto: 13/1.000 arquivos, 0,48/250 MiB,
+38/240 caracteres. O `scripts/package.mjs` também confirmou ausência de paths
+absolutos e de URLs externas fora da allowlist (`bridge.playgama.com`,
+`www.w3.org`, `phaser.io`).
+
+### Teste em subpasta do ZIP (M7)
+
+O ZIP foi extraído em `.qa/sub/` (somente os bytes do pacote, sem `dist/`) e
+servido em `http://127.0.0.1:4181/sub/`:
+
+```bash
+rm -rf .qa && mkdir -p .qa/sub
+unzip -q release/blockbreaker-web.zip -d .qa/sub
+cd .qa && python3 -m http.server 4181 --bind 127.0.0.1
+```
+
+- Menu carrega com título **Bricklike**; `Play` inicia o HUD e o canvas.
+- Todas as respostas foram 2xx; nenhum 404 e nenhum request com falha.
+- Hosts observados: `127.0.0.1` e `bridge.playgama.com` (CDN do Bridge). Nenhum
+  outro host externo, nenhum request para `api.playgama.com`.
+- Console e `pageerror` limpos no cenário com CDN disponível.
+- Com `bridge.playgama.com` bloqueado, o fallback local `./playgama-bridge.js`
+  é servido, o jogo entra em modo `mock`, abre o menu e inicia a partida.
+- Com o CDN bloqueado, o save (`bb.save`) foi gravado e, após reload, a fase 2
+  permaneceu desbloqueada. Os únicos erros de console são os dois
+  `Failed to load resource: net::ERR_FAILED` esperados do CDN bloqueado; não há
+  `pageerror`.
+
+O relatório completo, com comandos e evidências, está em
+[`docs/release/technical-validation.md`](release/technical-validation.md).
+
+## Release por tag — somente após o G7
+
+**Não execute estes comandos antes da aprovação explícita do G7.** A submissão
+em itch.io, GameFlare, Playgama e CrazyGames é **manual** e continua sendo feita
+pelo responsável do projeto; o workflow apenas publica o ZIP e o manifesto como
+artefatos de release.
+
+Pré-requisitos:
+
+1. CI verde no commit que receberá a tag (`ci.yml`); o `release.yml` não roda
+   E2E, então o smoke E2E deve ter passado no mesmo commit.
+2. `npm run package` local limpo, com `unzip -t` OK.
+3. `package.json` e `release/manifest.json` com a mesma versão da tag. A versão
+   atual do pacote é `0.1.0-m6.1`; a tag planejada é `v0.1.0-mvp`, portanto o
+   bump de versão precisa ser decidido antes da tag.
+
+Comandos exatos:
+
+```bash
+# 1. A partir de main já aprovada e sincronizada
+git switch main
+git pull --ff-only
+git status                      # deve estar limpo
+
+# 2. Tag anotada (dispara .github/workflows/release.yml no push)
+git tag -a v0.1.0-mvp -m "Bricklike v0.1.0-mvp"
+git push origin v0.1.0-mvp
+```
+
+O workflow `Release` roda typecheck, testes, validação de conteúdo, validação do
+config do Bridge, build e package; depois cria automaticamente o GitHub Release
+`Bricklike v0.1.0-mvp` com `blockbreaker-web.zip` e `manifest.json`.
+
+Conferência:
+
+```bash
+gh run list --workflow Release --limit 1
+gh release view v0.1.0-mvp --json name,assets,url
+```
+
+Fallback manual **somente** se o workflow falhar depois de o build ter passado
+localmente (não rode junto com o passo automático, para não duplicar a release):
+
+```bash
+npm run build && npm run package
+gh release create v0.1.0-mvp \
+  release/blockbreaker-web.zip release/manifest.json \
+  --title "Bricklike v0.1.0-mvp" \
+  --generate-notes
+```
+
+O `release.yml` usa `permissions: contents: write`, `concurrency` sem cancelar
+release em andamento e `softprops/action-gh-release@v2` com
+`fail_on_unmatched_files: true`. Para o escopo do MVP não é necessária
+alteração no workflow.
+
+## Checklist final de release (M7)
+
+- [x] `npm run build` e `npm run package` limpos no worktree.
+- [x] `index.html` e `playgama-bridge-config.json` na raiz do ZIP.
+- [x] `unzip -t` sem erros.
+- [x] 13 arquivos, 0,48 MiB, maior path com 38 caracteres.
+- [x] Sem paths absolutos e sem URLs externas fora da allowlist.
+- [x] ZIP extraído em subpasta abre, inicia e carrega assets sem 404.
+- [x] Somente `bridge.playgama.com` como host externo no boot.
+- [x] CDN do Bridge bloqueado: fallback local, modo mock e save/reload OK.
+- [x] `npm run test:e2e` — 16 testes passando.
+- [x] `release.yml` revisado: tag `v*`, nome Bricklike, dois anexos,
+      `contents: write`.
+- [ ] Bump de versão alinhado à tag (decisão do agente principal antes do G7).
+- [ ] Tag, push e GitHub Release executados **somente após o G7**.
+- [ ] Upload/submissão nos portais feito manualmente pelo responsável.
+
 ## Fora do escopo deste milestone
 
 A submissão a portais, capas, vídeo, descrição e criação da release pública de
-loja são do **M7**. Este trabalho entrega build, ZIP, config, CI e release
-técnica por tag; não publica em nenhum portal.
+loja continuam **manuais** e dependem do G7. Este trabalho entrega build, ZIP,
+config, CI e release técnica por tag; não publica em nenhum portal e não cria
+tag, push nem GitHub Release.

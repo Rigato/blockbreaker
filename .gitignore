@@ -2,8 +2,8 @@
 node_modules/
 
 # Builds and local artifacts
-dist/
-release/
+/dist/
+/release/
 coverage/
 *.local
 *.tsbuildinfo
