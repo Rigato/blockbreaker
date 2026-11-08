@@ -1,11 +1,12 @@
 # Bricklike
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
-live URL and ZIP keep the technical slug `blockbreaker`. The repository is in the
-**M6 — QA, performance and balance** stage: the full three-level game is built
-and distributed via Pages/ZIP, with Playwright E2E, an automated 10-run
-baseline, device-matrix and performance reports. Human playtest and real-device
-validation remain before any G6 go/no-go; portal submission remains M7.
+live URL and ZIP keep the technical slug `blockbreaker`. G6 is approved. The
+repository is in the **M7 — release and publication package** stage: the full
+three-level game, QA evidence and technical release are complete, and the store
+package (covers, screenshots, preview video, English metadata and submission
+checklist) is ready for human review. Portal submission is manual and remains
+with the user; G7 is **not** approved yet.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -40,6 +41,26 @@ npm run test:e2e  # Playwright smoke/layout (build first)
 npm run qa:runs -- --runs=10   # automated baseline, not human playtest
 npm run preview   # serves dist/ locally
 ```
+
+## M7 — release and publication package
+
+- `store/covers/` has the three required cover sizes (1920×1080, 800×1200,
+  800×800), a contact sheet and editable SVG sources. Visual language is
+  consistent across all three; the only text is **BRICKLIKE**.
+- `store/screenshots/` has five real production-build captures at 390×844:
+  menu, opening gameplay, laser + multiball, level-up and victory. Debug chrome
+  is hidden in every shot.
+- `store/video/bricklike-preview.mp4` is a 42 s, 1280×720 gameplay preview with
+  the portrait run composed over the game's cover art. It is silent; the capture
+  script and limitations are documented in `store/video/README.md`.
+- `docs/release/portal-metadata.md` contains English title, short and long
+  descriptions (≥ 100 words), controls, tags and portal-specific drafts for
+  itch.io, GameFlare, Playgama and CrazyGames Basic.
+- `docs/release/submission-checklist.md` lists every manual field, asset and
+  step per portal, all marked **pending human review**.
+- `docs/release/g7-review.md` inventories the package and defines the review
+  checklist. **G7 has not been approved**, no tag, GitHub Release or portal
+  upload was created by this milestone, and the user performs all submissions.
 
 ## M6 — QA, performance and balance
 
