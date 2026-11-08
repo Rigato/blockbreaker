@@ -1,8 +1,10 @@
 import { bootPlatform } from './boot/bridgeBoot';
 import { readBootOptions } from './boot/query';
 import type { BlockBreakerGame } from './game/Game';
+import type { PlatformService } from './game/contracts';
 import { gameEvents } from './game/events';
 import { en } from './i18n/en';
+import { createMockAds, type MockAdMode } from './platform/MockAds';
 import { resetSave } from './platform/saveReset';
 import { mountStageLayout } from './ui/layout';
 import { mountUI } from './ui/UIRoot';
@@ -16,6 +18,24 @@ function requireElement<T extends HTMLElement>(id: string): T {
 function setBootStatus(text: string): void {
   const status = document.getElementById('boot-status');
   if (status) status.textContent = text;
+}
+
+/**
+ * Debug-only platform proxy that swaps the ads service while preserving the
+ * real storage, lifecycle and platform messages.
+ */
+function createMockPlatform(
+  platform: PlatformService,
+  mode: MockAdMode,
+): PlatformService {
+  const ads = createMockAds(mode);
+  return new Proxy(platform, {
+    get(target, property) {
+      if (property === 'ads') return ads;
+      const value = Reflect.get(target, property, target) as unknown;
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
 }
 
 function showFatalError(error: unknown): void {
@@ -63,8 +83,13 @@ async function start(): Promise<void> {
     game?.resize(size.width, size.height);
   });
 
+  const gamePlatform =
+    options.debug && options.adMock
+      ? createMockPlatform(platform, options.adMock)
+      : platform;
+
   const { BlockBreakerGame: GameClass } = await import('./game/Game');
-  game = new GameClass(canvasHost, platform);
+  game = new GameClass(canvasHost, gamePlatform);
   game.resize(layout.size.width, layout.size.height);
   await game.ready;
 

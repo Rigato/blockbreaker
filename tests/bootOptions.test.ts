@@ -6,18 +6,42 @@ describe('readBootOptions', () => {
     expect(readBootOptions('?debug=1&resetSave=1')).toEqual({
       debug: true,
       resetSave: true,
+      adMock: null,
     });
   });
 
+  it('accepts only the two interstitial simulator modes', () => {
+    expect(readBootOptions('?debug=1&adMock=show')).toEqual({
+      debug: true,
+      resetSave: false,
+      adMock: 'show',
+    });
+    expect(readBootOptions('?debug=1&adMock=fail')).toEqual({
+      debug: true,
+      resetSave: false,
+      adMock: 'fail',
+    });
+    expect(readBootOptions('?debug=1&adMock=1').adMock).toBeNull();
+  });
+
   it('does not enable debug for arbitrary values', () => {
-    expect(readBootOptions('?debug=true')).toEqual({ debug: false, resetSave: false });
+    expect(readBootOptions('?debug=true')).toEqual({
+      debug: false,
+      resetSave: false,
+      adMock: null,
+    });
     expect(readBootOptions('?debug=0&resetSave=yes')).toEqual({
       debug: false,
       resetSave: false,
+      adMock: null,
     });
   });
 
   it('returns both flags off for an empty query', () => {
-    expect(readBootOptions('')).toEqual({ debug: false, resetSave: false });
+    expect(readBootOptions('')).toEqual({
+      debug: false,
+      resetSave: false,
+      adMock: null,
+    });
   });
 });

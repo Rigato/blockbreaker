@@ -68,6 +68,16 @@ O jogo não implementa frequência própria de ads; o Bridge controla o interval
 mínimo. Em Basic Launch do CrazyGames os ads ficam desligados e o fluxo de
 `showInterstitial` retorna `skipped`/`failed` sem bloquear a navegação.
 
+## Ads sem portal (QA)
+
+Para validar a UI e o fluxo do interstitial sem subir para a Playgama:
+
+- `?debug=1&adMock=show` — simula um anúncio de 1,4 s e retorna `shown`;
+- `?debug=1&adMock=fail` — simula falha após 0,7 s e retorna `failed`.
+
+O proxy é debug-only: storage, lifecycle, mensagens e config continuam reais. O
+anúncio real e o Bridge DevTools exigem um ambiente/portal da Playgama.
+
 ## Teste em subpasta
 
 O build usa `base: './'`, então deve funcionar em qualquer subpasta:

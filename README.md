@@ -173,6 +173,11 @@ to a compact FPS/platform strip while playing. For audio QA,
 `document.documentElement.dataset.audioState` reports
 `locked`/`running`/`suspended`/`muted`/`background`.
 
+For the results interstitial without a portal, use **`?debug=1&adMock=show`**
+to simulate a 1.4 s successful ad (spinner, mute, continuation) or
+**`?debug=1&adMock=fail`** to simulate a failed ad. This flag never runs outside
+debug.
+
 ## Assets and licenses
 
 - All in-game art, particles and audio are generated procedurally at runtime;
