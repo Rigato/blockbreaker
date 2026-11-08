@@ -72,7 +72,7 @@ function defaultContextFactory(): (() => AudioContext) | undefined {
 }
 
 /**
- * Synthesized audio for Block Breaker.
+ * Synthesized audio for Bricklike.
  *
  * Everything is generated with WebAudio oscillators and noise buffers, so the
  * bundle ships zero audio files and no licensed samples. The service is

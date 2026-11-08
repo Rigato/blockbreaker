@@ -1,6 +1,7 @@
-# Block Breaker Roguelite
+# Bricklike
 
-Portrait HTML5 block breaker with roguelite progression. The repository is in the
+Portrait HTML5 block breaker with roguelite progression. The repository, package,
+live URL and ZIP keep the technical slug `blockbreaker`. The repository is in the
 **M6 — QA, performance and balance** stage: the full three-level game is built
 and distributed via Pages/ZIP, with Playwright E2E, an automated 10-run
 baseline, device-matrix and performance reports. Human playtest and real-device
@@ -243,7 +244,7 @@ release/                   Generated ZIP + manifest (not committed)
 
 ## Docs
 
-- [GDD](docs/GDD_Block_Breaker_Roguelite.md)
+- [GDD](docs/GDD_Bricklike.md)
 - [Technical publishing spec](docs/spec-tecnica-publicacao.md)
 - [Low-friction publishing plan](docs/plano-baixa-fricao.md)
 - [MVP implementation plan](docs/plano-implementacao-mvp.md)

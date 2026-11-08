@@ -4,7 +4,7 @@ Status: **rascunho**. Este documento não aprova o gate G6. Playtest humano,
 devices reais e medição de FPS em hardware continuam pendentes.
 
 Data da rodada local: 2026-11-08
-Build: `0.1.0-m6` (main `a9bc623` + docs)
+Build: `0.1.0-m6.1` (renomeado para Bricklike; sem mudança de gameplay)
 Ambiente: Linux, Node 24.20.0, Chromium 158 headless (SwiftShader), build de
 produção servida por `vite preview`.
 

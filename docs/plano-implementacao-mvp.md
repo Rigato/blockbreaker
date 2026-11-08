@@ -1,7 +1,7 @@
-# Plano de implementação — MVP Block Breaker Roguelite
+# Plano de implementação — MVP Bricklike
 
 **Repositório:** <https://github.com/Rigato/blockbreaker>  
-**Documento de design:** `GDD_Block_Breaker_Roguelite.md` (v1.0, 7 nov 2026)  
+**Documento de design:** `GDD_Bricklike.md` (v1.0, 7 nov 2026)  
 **Restrições de distribuição:** `spec-tecnica-publicacao.md` e `plano-baixa-fricao.md`  
 **Data do plano:** 7 de novembro de 2026  
 **Estado do repositório:** vazio na data do plano; o M0 cria o scaffold.  
@@ -335,7 +335,7 @@ PlatformService (Bridge): lifecycle, storage, ads, pause/audio
 │       ├── deploy.yml
 │       └── release.yml
 ├── docs/
-│   ├── GDD_Block_Breaker_Roguelite.md
+│   ├── GDD_Bricklike.md
 │   ├── spec-tecnica-publicacao.md
 │   ├── plano-baixa-fricao.md
 │   └── plano-implementacao-mvp.md
@@ -762,7 +762,7 @@ Todo subagente recebe um prompt neste formato:
 Você é o subagente <ID>, rodando com DeepSeek V4.1 Flash, esforço low.
 
 Repositório: https://github.com/Rigato/blockbreaker
-Leia primeiro: docs/GDD_Block_Breaker_Roguelite.md,
+Leia primeiro: docs/GDD_Bricklike.md,
 docs/spec-tecnica-publicacao.md, docs/plano-implementacao-mvp.md.
 Milestone: <Mx> — <nome>
 Branch/worktree: <branch> em /tmp/opencode/<slug>

@@ -21,7 +21,7 @@ test.describe('smoke', () => {
 
     await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Levels', exact: true })).toBeVisible();
-    await expect(page.locator('.menu__title')).toHaveText('Block Breaker');
+    await expect(page.locator('.menu__title')).toHaveText('Bricklike');
 
     expect(monitor.consoleErrors).toEqual([]);
     expect(monitor.pageErrors).toEqual([]);

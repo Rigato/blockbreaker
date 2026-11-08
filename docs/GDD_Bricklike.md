@@ -1,5 +1,7 @@
-# GDD Block Breaker Roguelite
+# GDD Bricklike
 
+**Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
+técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar o MVP e a expansão do jogo**  
 **Versão:** 1.0  
 **Data:** 7 de novembro de 2026  

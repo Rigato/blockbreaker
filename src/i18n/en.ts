@@ -1,6 +1,6 @@
 /** English is the only UI language in the MVP. */
 export const en = {
-  appTitle: 'Block Breaker',
+  appTitle: 'Bricklike',
   appSubtitle: 'Roguelite',
 
   bootPlatform: 'Preparing the platform…',
