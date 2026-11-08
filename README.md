@@ -73,10 +73,11 @@ npm run preview   # serves dist/ locally
   debug-projectile baseline for duration/levels/perks regression, explicitly
   **not** a human playtest.
 - `docs/qa/` contains the device matrix, 10-run log, playtest kit, performance
-  and size report, and the M6 report draft.
-- No P0/P1 was found by the automated suite. Human playtest (5 people × 3 runs),
-  real iOS/Android/Chromebook devices and a 10-minute hardware session are still
-  required for G6. No M6 tuning was applied without human data.
+  and size report, and the M6 report.
+- No P0/P1 was found by the automated suite. G6 was approved on 2026-11-08 after
+  the owner completed the human playtest, real-device matrix and 10-minute
+  hardware session. No M6 tuning was applied without human data; the detailed
+  human evidence remains with the owner.
 
 ## M5 — Bridge, build and distribution readiness
 
@@ -270,6 +271,7 @@ release/                   Generated ZIP + manifest (not committed)
 - [Technical publishing spec](docs/spec-tecnica-publicacao.md)
 - [Low-friction publishing plan](docs/plano-baixa-fricao.md)
 - [MVP implementation plan](docs/plano-implementacao-mvp.md)
+- [Post-MVP handoff](docs/handoff-proxima-fase.md)
 
 ## Deployment
 
@@ -277,4 +279,4 @@ Every push to `main` runs typecheck, tests, content validation, Bridge config
 validation, build and package in CI; the ZIP is uploaded as an artifact. The
 `deploy` workflow publishes `dist/` to GitHub Pages for review. A `v*` tag runs
 `.github/workflows/release.yml` and creates a GitHub Release with the web ZIP
-and manifest. Portal submission is M7.
+and manifest. The tag/Release wait for G7, and portal submission is manual.
