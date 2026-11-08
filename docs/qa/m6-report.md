@@ -19,7 +19,7 @@ produção servida por `vite preview`.
 | Pacote/ZIP | `npm run package` | ✅ 490.5 KiB, 13 arquivos |
 | E2E | `npm run test:e2e` | ✅ 16 testes, ~2.0 min local; CI configurado |
 
-E2E cobre: boot/menu, ausência de chamadas a `api.playgama.com`, controles
+O E2E usa o botão debug **Force defeat** para resultados determinísticos; ele não existe fora de `?debug=1`. O teste cobre: boot/menu, ausência de chamadas a `api.playgama.com`, controles
 (Space não lança / V lança), pause/resume, som persistido, Level Up com 3 cards e
 escolha por teclado, vitória da fase 1, summary, Next level, fase 2 após reload,
 Level Select com fase 2 desbloqueada, AdMock `show`/`fail`, CDN bloqueado com

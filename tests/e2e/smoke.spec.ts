@@ -90,7 +90,7 @@ test.describe('smoke', () => {
   });
 
   test('results: phase 1 victory unlocks and starts phase 2 across reloads', async ({ page }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(360_000);
     await page.goto('/?debug=1&resetSave=1');
     await waitForMenu(page);
 

@@ -116,23 +116,15 @@ export async function clearPhaseOne(page: Page): Promise<{ levelUps: number }> {
 }
 
 /**
- * Ends the current run quickly: max ball speed, launch from the middle and
- * move the paddle to the far left so the ball cannot be caught.
+ * Ends the current run deterministically through the debug-only Force defeat
+ * button. The old ball-speed/paddle trick depended on headless frame rate and
+ * made CI flaky; the debug action is a QA shortcut, not a gameplay feature.
  */
 export async function forceDefeat(page: Page): Promise<void> {
   await expandDebugPanel(page);
-  await page.evaluate(() => {
-    const input = document.querySelector<HTMLInputElement>('#tune-ballSpeedScale');
-    if (!input) return;
-    input.value = input.max;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-
-  const box = await page.locator('canvas').first().boundingBox();
-  if (!box) throw new Error('canvas has no bounding box');
-  await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.9);
-  await page.keyboard.press('v');
-  await page.mouse.move(box.x + box.width * 0.02, box.y + box.height * 0.9);
+  const clicked = await clickDebugAction(page, 'Force defeat');
+  if (!clicked) throw new Error('Force defeat debug action is unavailable');
+  await page.locator('.overlay--results').waitFor({ state: 'visible', timeout: 15_000 });
 }
 
 export interface ResultsSnapshot {

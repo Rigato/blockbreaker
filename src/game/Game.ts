@@ -590,6 +590,15 @@ export class BlockBreakerGame implements GameCommands {
     }
   }
 
+  /** Debug-only deterministic defeat for E2E/layout QA. */
+  debugDefeat(): void {
+    if (this.phase === 'menu' || this.phase === 'run-complete' || this.phase === 'defeat') {
+      return;
+    }
+    this.world.balls.length = 0;
+    this.finishPhase(false);
+  }
+
   destroy(): void {
     document.removeEventListener('visibilitychange', this.handleVisibility);
     this.unsubscribePause();

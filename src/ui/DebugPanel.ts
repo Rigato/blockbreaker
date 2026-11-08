@@ -335,7 +335,10 @@ export class DebugPanel {
     const projectile = makeButton(en.debugFireProjectile, 'debug__button');
     projectile.addEventListener('click', () => this.controller.fireTestProjectile());
 
-    section.append(restart, addBall, projectile);
+    const defeat = makeButton(en.debugForceDefeat, 'debug__button');
+    defeat.addEventListener('click', () => this.controller.debugDefeat());
+
+    section.append(restart, addBall, projectile, defeat);
     return section;
   }
 

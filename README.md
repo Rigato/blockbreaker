@@ -199,8 +199,8 @@ npm run preview   # serves dist/ locally
 ### Debug
 
 Open `?debug=1` for FPS, platform, Bridge/storage source, canvas and stage sizes,
-save reset, live feel tuning, level/wave info, force-perk, add-XP, add-ball and
-test projectile. `?resetSave=1` resets storage on boot. The full panel collapses
+save reset, live feel tuning, level/wave info, force-perk, add-XP, add-ball,
+test projectile and a debug-only Force defeat shortcut. `?resetSave=1` resets storage on boot. The full panel collapses
 to a compact FPS/platform strip while playing. For audio QA,
 `document.documentElement.dataset.audioState` reports
 `locked`/`running`/`suspended`/`muted`/`background`.

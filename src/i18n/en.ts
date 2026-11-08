@@ -133,6 +133,7 @@ export const en = {
   debugRestartWave: 'Restart wave',
   debugAddBall: 'Add ball',
   debugFireProjectile: 'Fire projectile',
+  debugForceDefeat: 'Force defeat',
   debugProgression: 'Progression',
   debugSeed: 'Seed',
   debugLevelXp: 'Level / XP',

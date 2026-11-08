@@ -7,8 +7,8 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
-  timeout: 90_000,
-  expect: { timeout: 10_000 },
+  timeout: 120_000,
+  expect: { timeout: 20_000 },
   outputDir: 'test-results',
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {

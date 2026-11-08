@@ -331,6 +331,8 @@ export interface GameCommands {
   debugGrantPerk(perkId: string): void;
   /** Debug-only: grants XP, triggering queued level ups. */
   debugAddXp(amount: number): void;
+  /** Debug-only: ends the current run in defeat immediately. */
+  debugDefeat(): void;
 
   // M3 — phases, save and results
   /** Starts a specific content phase from its first wave. */
