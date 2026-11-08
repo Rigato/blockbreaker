@@ -4,7 +4,7 @@ Status: **rascunho**. Este documento não aprova o gate G6. Playtest humano,
 devices reais e medição de FPS em hardware continuam pendentes.
 
 Data da rodada local: 2026-11-08
-Build: `0.1.0-m6` (branch `m6/integration`)
+Build: `0.1.0-m6` (main `a9bc623` + docs)
 Ambiente: Linux, Node 24.20.0, Chromium 158 headless (SwiftShader), build de
 produção servida por `vite preview`.
 
@@ -17,7 +17,7 @@ produção servida por `vite preview`.
 | Conteúdo | `npm run validate:content` | ✅ |
 | Build | `npm run build` | ✅ |
 | Pacote/ZIP | `npm run package` | ✅ 490.5 KiB, 13 arquivos |
-| E2E | `npm run test:e2e` | ✅ 16 testes, ~2.0 min local; CI configurado |
+| E2E | `npm run test:e2e` | ✅ 16 testes, ~49 s local; CI verde (run 42506004562) |
 
 O E2E usa os botões debug **Force defeat/Force victory** para resultados determinísticos; eles não existem fora de `?debug=1`. A limpeza real da fase 1 (três ondas) é coberta pelos 10 runs do baseline. O teste cobre: boot/menu, ausência de chamadas a `api.playgama.com`, controles
 (Space não lança / V lança), pause/resume, som persistido, Level Up com 3 cards e
