@@ -175,6 +175,11 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     const previousPhase = lastSnapshot.phase;
     lastSnapshot = snapshot;
 
+    if (snapshot.phase === 'playing' && previousPhase !== 'playing') {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active.closest('#ui-root')) active.blur();
+    }
+
     if (snapshot.phase !== 'menu' && phaseSelect.isOpen) {
       phaseSelect.close();
     }

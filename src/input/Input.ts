@@ -13,6 +13,7 @@ export interface InputActions {
 
 function isUiElement(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
+  if (!target.isConnected || target.getClientRects().length === 0) return false;
   return (
     target instanceof HTMLButtonElement ||
     target instanceof HTMLInputElement ||

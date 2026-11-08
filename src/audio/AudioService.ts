@@ -413,6 +413,33 @@ export class AudioService implements AudioController {
         });
         return thud;
       }
+      case 'block-damage': {
+        // Surviving a hit on a multi-HP block: a bright, quiet metallic ping
+        // that is clearly different from the break crack.
+        const ping = this.tone({
+          type: 'triangle',
+          frequency: 1480 * rateVariation,
+          endFrequency: 1180 * rateVariation,
+          duration: 0.055 / rate,
+          gain: 0.1 * volume,
+          detune: 14,
+        });
+        this.tone({
+          type: 'sine',
+          frequency: 2360 * rateVariation,
+          duration: 0.045 / rate,
+          gain: 0.045 * volume,
+          delay: 0.006,
+        });
+        this.noise({
+          duration: 0.035 / rate,
+          gain: 0.025 * volume,
+          filterType: 'highpass',
+          filterFrequency: 3200 * rate,
+          q: 0.6,
+        });
+        return ping;
+      }
       case 'block-break': {
         const crack = this.tone({
           type: 'square',

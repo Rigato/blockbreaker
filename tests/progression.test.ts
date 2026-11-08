@@ -9,17 +9,17 @@ function progressed(seed = 7): RunState {
 }
 
 describe('G4 XP curve', () => {
-  it('uses 13/20/26 XP thresholds and starts at level 1', () => {
+  it('uses 8/20/26 XP thresholds and starts at level 1', () => {
     const run = progressed();
     expect(run.level).toBe(1);
-    expect(run.xpToNext).toBe(13);
-    expect(xpToNextForLevel(1)).toBe(13);
+    expect(run.xpToNext).toBe(8);
+    expect(xpToNextForLevel(1)).toBe(8);
     expect(xpToNextForLevel(2)).toBe(20);
     expect(xpToNextForLevel(3)).toBe(26);
 
-    expect(run.addXp(13)).toMatchObject({
-      baseAmount: 13,
-      gained: 13,
+    expect(run.addXp(8)).toMatchObject({
+      baseAmount: 8,
+      gained: 8,
       level: 2,
       xp: 0,
       xpToNext: 20,
@@ -35,16 +35,16 @@ describe('G4 XP curve', () => {
     const run = progressed();
     const gain = run.addXp(25);
     expect(gain.level).toBe(2);
-    expect(gain.xp).toBe(12);
+    expect(gain.xp).toBe(17);
     expect(gain.xpToNext).toBe(20);
     expect(gain.levelsGained).toBe(1);
   });
 
   it('queues two level ups from one add', () => {
     const run = progressed();
-    const gain = run.addXp(55);
+    const gain = run.addXp(40);
     expect(gain.level).toBe(3);
-    expect(gain.xp).toBe(22);
+    expect(gain.xp).toBe(12);
     expect(gain.xpToNext).toBe(26);
     expect(gain.levelsGained).toBe(2);
     expect(gain.pendingLevelUps).toBe(2);
@@ -52,7 +52,7 @@ describe('G4 XP curve', () => {
 
   it('keeps pending level ups until a perk is chosen', () => {
     const run = progressed();
-    run.addXp(55);
+    run.addXp(40);
     expect(run.pendingLevelUps).toBe(2);
     run.takeOffers();
     expect(run.pendingLevelUps).toBe(2);
@@ -223,7 +223,7 @@ describe('M2 run lifecycle', () => {
     expect(run.seed).toBe(99);
     expect(run.level).toBe(1);
     expect(run.xp).toBe(0);
-    expect(run.xpToNext).toBe(13);
+    expect(run.xpToNext).toBe(8);
     expect(run.pendingLevelUps).toBe(0);
     expect(run.perks).toEqual([]);
     expect(run.takeOffers()).toEqual([]);

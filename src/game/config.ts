@@ -56,6 +56,8 @@ export const GAME_CONFIG = {
     xpStepPerLevel: 10,
     /** Global -35% tuning applied to the XP curve at the G4 review. */
     xpCurveMultiplier: 0.65,
+    /** Extra first-level discount so the first perk arrives quickly. */
+    firstLevelXpFactor: 0.6,
   },
 
   perks: {

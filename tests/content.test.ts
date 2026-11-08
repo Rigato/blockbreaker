@@ -132,7 +132,7 @@ describe('M3 content pacing', () => {
       expect(stats.levelUps).toBe(levelUpsForXp(stats.hp));
     }
     expect(levelUpsForXp(20)).toBe(1);
-    expect(levelUpsForXp(90)).toBe(3);
+    expect(levelUpsForXp(90)).toBe(4);
     expect(levelUpsForXp(140)).toBe(5);
     expect(levelUpsForXp(200)).toBe(6);
   });

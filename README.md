@@ -1,7 +1,7 @@
 # Block Breaker Roguelite
 
 Portrait HTML5 block breaker with roguelite progression. The repository is in the
-**M5 — Bridge, build and distribution readiness** stage: the full three-phase
+**M5 — Bridge, build and distribution readiness** stage: the full three-level
 game, presentation and save flow, plus final platform lifecycle, results
 interstitial, ZIP packaging and CI/release automation. The build is ready for
 the G5 review; portal submission remains M7.
@@ -62,7 +62,7 @@ npm run preview   # serves dist/ locally
 
 ## M4 — Presentation, feedback and mobile polish
 
-- Three procedural pixel-art phase themes: **Crystal Grove**, **Ruined Halls**
+- Three procedural pixel-art level themes: **Crystal Grove**, **Ruined Halls**
   and **Arcane Depths**, with layered backdrops, silhouettes, parallax motes and
   themed frames. No external art or runtime downloads.
 - Blocks read by material as well as colour: crystal facets, stone masonry,
@@ -94,27 +94,28 @@ npm run preview   # serves dist/ locally
   first **L+2** blocks in its column (1/3, 2/4, 3/5).
 - Paddle max speed increased from 2600 to **2808** (+8%).
 - Ball speeds increased by **10%**: 572/616/660, 616/660/704 and 638/682/726.
-- XP curve reduced by **35%**: 13/20/26/33/39/46…, yielding roughly 4/6/7 level
-  ups across the three phases.
+- XP curve reduced by **35%**, with a faster first level: **8/20/26/33/39/46…**,
+  yielding roughly 5/6/7 level ups across the three levels. The first perk is
+  intentionally quick.
 - Lost Multiball extras respawn after a **10 s** pause-aware cooldown, one at a
-  time; the HUD shows the countdown and the timer resets per wave/phase.
+  time; the HUD shows the countdown and the timer resets per wave/level.
 - New unique perk **Foresight**: a subtle dotted line predicts each ball’s short
   path with wall reflections.
 
-## M3 — Phases, progression and persistence
+## M3 — Levels, progression and persistence
 
-- Three phases with three waves each: **Crystal Grove** (572/616/660),
+- Three levels with three waves each: **Crystal Grove** (572/616/660),
   **Ruined Halls** (616/660/704) and **Arcane Depths** (638/682/726).
 - ASCII-authored layouts with crystal (1 HP), stone (2 HP) and obsidian (3 HP)
   blocks; corridors and gaps keep every wave clearable.
-- Phase select with locks, best score/time, attempts and clears; victory unlocks
-  the next phase and the menu Play button starts the most advanced unlocked one.
+- Level select with locks, best score/time, attempts and clears; victory unlocks
+  the next level and the menu Play button starts the most advanced unlocked one.
 - Results screen with score, time, bests, level and acquired perks; Retry,
-  Next Phase and Menu actions.
+  Next Level and Menu actions.
 - Versioned save (`bb.save`) and settings (`bb.settings`) through the platform
   storage adapter: safe parsing, defaults and no direct `localStorage` use.
 - Waves advance automatically **1.2 s** after a clear, with no intermediate
-  popup. Results appear only at the end of a phase.
+  popup. Results appear only at the end of a level.
 - Initial launch receives a seeded 2.5–5° side bias so a perfectly straight tap
   cannot clear a column.
 - `npm run validate:content` checks the nine waves (ids, legend, grid width,
@@ -123,8 +124,8 @@ npm run preview   # serves dist/ locally
 ## M2 — Progression
 
 - XP per destroyed block (`XP = max HP`), base curve `20 + 10 × (level − 1)`
-  with the G4.1 **−35%** multiplier (13/20/26/33/39…), overflow and a queued
-  multi-level-up flow.
+  with the G4.1 **−35%** multiplier and first-level discount (8/20/26/33/39…),
+  overflow and a queued multi-level-up flow.
 - Automatic pause on level up, XP-bar flash, three distinct perk cards,
   selection by tap/click or keys 1/2/3, no reroll.
 - Eleven perks: Multiball, Wide Paddle, Power Ball, Quick Study, Arcane Turret,
@@ -135,7 +136,7 @@ npm run preview   # serves dist/ locally
 - Contextual laser button plus E on desktop; sticky release by tap/timer;
   Safety Net protects the last ball and reloads each wave.
 - HUD XP bar, acquired-perks list, Multiball respawn countdown and live run
-  score; phase results with immediate retry.
+  score; level results with immediate retry.
 - Paddle base width reduced to **100** units; Wide Paddle adds 12% per level.
 
 ### Controls
@@ -147,7 +148,7 @@ npm run preview   # serves dist/ locally
 | Pause | Pause button → Resume/Restart/Sound/Menu | Pause button / P → Resume/Restart/Sound/Menu |
 | Laser | Laser button | Laser button / E |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
-| Menu / phases | Pause → Menu, Results → Menu | Pause → Menu, Results → Menu |
+| Menu / levels | Pause → Menu, Results → Menu | Pause → Menu, Results → Menu |
 | Rotate device | Portrait only (landscape guard) | — |
 
 ## Platform boot
@@ -167,7 +168,7 @@ npm run preview   # serves dist/ locally
 ### Debug
 
 Open `?debug=1` for FPS, platform, Bridge/storage source, canvas and stage sizes,
-save reset, live feel tuning, phase/wave info, force-perk, add-XP, add-ball and
+save reset, live feel tuning, level/wave info, force-perk, add-XP, add-ball and
 test projectile. `?resetSave=1` resets storage on boot. The full panel collapses
 to a compact FPS/platform strip while playing. For audio QA,
 `document.documentElement.dataset.audioState` reports
@@ -192,14 +193,14 @@ debug.
 src/
   boot/bridgeBoot.ts       Bridge timeout + fallback selection
   audio/                   Synthesized WebAudio service, voice budget and lifecycle
-  content/                 Phase/wave definitions, validator and M2 perk catalog
+  content/                 Level/wave definitions, validator and M2 perk catalog
   assets/fonts/            Bundled Silkscreen OFL font files
   game/                    Game orchestration, contracts, events and config
   sim/                     Pure fixed-step simulation and collision
-  progression/             XP curve, perks, phase save/stats and run modifiers
+  progression/             XP curve, perks, level save/stats and run modifiers
   input/                   Touch, mouse and keyboard input
   platform/                PlatformService + Bridge/Fallback adapters
-  render/                  Phase themes, pixel block art, pooled effects and scene
+  render/                  Level themes, pixel block art, pooled effects and scene
   ui/                      Menu, HUD, level-up, overlays, orientation and debug
   i18n/                    English strings
 tests/                     Unit tests

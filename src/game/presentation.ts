@@ -11,6 +11,7 @@ import type { SimEvent } from '../sim/World';
 export type SfxId =
   | 'paddle'
   | 'block-hit'
+  | 'block-damage'
   | 'block-break'
   | 'ball-lost'
   | 'laser'

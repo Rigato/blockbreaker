@@ -181,6 +181,9 @@ export class BlockBreakerGame implements GameCommands {
       scene: [scene],
     });
 
+    this.phaser.canvas.tabIndex = -1;
+    this.phaser.canvas.style.outline = 'none';
+
     this.input = new InputController(this.phaser.canvas, () => this.world.paddle.x);
     this.unsubscribePause = gameEvents.on('platform:pause-changed', ({ paused }) => {
       if (paused) this.pause();
@@ -271,6 +274,7 @@ export class BlockBreakerGame implements GameCommands {
       world: phase.id,
       level: phase.index,
     });
+    this.focusGameplay();
     this.clock.reset();
     this.pendingLaunch = false;
     this.input.resetTarget();
@@ -399,6 +403,7 @@ export class BlockBreakerGame implements GameCommands {
     this.phase = 'playing';
     this.audio.setSuspended(false);
     this.sendLevelMessage('level_resumed');
+    this.focusGameplay();
     this.clock.reset();
     this.syncHud(true);
   }
@@ -588,6 +593,13 @@ export class BlockBreakerGame implements GameCommands {
     this.phaser.destroy(true);
   }
 
+  /** Keeps Space/arrow keys on the field instead of a stale DOM button. */
+  private focusGameplay(): void {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.closest('#ui-root')) active.blur();
+    this.phaser.canvas.focus({ preventScroll: true });
+  }
+
   // -------------------------------------------------------------------------
   // Phase flow
   // -------------------------------------------------------------------------
@@ -656,6 +668,7 @@ export class BlockBreakerGame implements GameCommands {
     this.levelUpRevealAt = 0;
     this.audio.setSuspended(false);
     this.sendLevelMessage('level_resumed');
+    this.focusGameplay();
     this.clock.reset();
 
     if (this.pendingPerkBalls > 0) {
@@ -885,9 +898,12 @@ export class BlockBreakerGame implements GameCommands {
           this.audio.play('block-break');
           break;
         case 'block:hit':
-          this.audio.play('block-hit', {
-            rate: 0.94 + Math.min(3, Math.max(1, event.damage)) * 0.035,
-          });
+          if (event.hp > 0) {
+            this.audio.play('block-damage', {
+              rate: 0.96 + Math.min(3, Math.max(1, event.damage)) * 0.025,
+              volume: 0.9,
+            });
+          }
           break;
         case 'paddle:hit':
           this.audio.play('paddle');

@@ -10,5 +10,8 @@ export function xpCostForLevel(level: number): number {
   const raw =
     GAME_CONFIG.progression.baseXpToNext +
     GAME_CONFIG.progression.xpStepPerLevel * (Math.max(1, level) - 1);
-  return Math.round(raw * GAME_CONFIG.progression.xpCurveMultiplier);
+  const scaled = raw * GAME_CONFIG.progression.xpCurveMultiplier;
+  const factor =
+    level === 1 ? GAME_CONFIG.progression.firstLevelXpFactor : 1;
+  return Math.max(1, Math.round(scaled * factor));
 }

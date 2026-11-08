@@ -231,6 +231,7 @@ button {
 #canvas-host canvas {
   display: block;
   image-rendering: pixelated;
+  outline: none;
 }
 
 #ui-root {

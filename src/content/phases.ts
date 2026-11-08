@@ -331,7 +331,7 @@ export function formatContentReport(phases: readonly PhaseDef[] = PHASES): strin
 
   for (const stats of phases.map((phase) => phaseStats(phase))) {
     lines.push(
-      `Phase ${stats.phase.index} - ${stats.phase.name} (${stats.phase.id}) | ` +
+      `Level ${stats.phase.index} - ${stats.phase.name} (${stats.phase.id}) | ` +
         `waves=${stats.waves.length} blocks=${stats.blocks} xp=${stats.hp} ` +
         `avgHp=${stats.avgHp.toFixed(2)} density=${stats.density.toFixed(2)} ` +
         `levelUps=${stats.levelUps}`,
