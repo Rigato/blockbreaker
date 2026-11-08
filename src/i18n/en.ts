@@ -23,6 +23,10 @@ export const en = {
   menuBestEmpty: 'No run recorded yet',
   footer: 'Portrait · Touch · Mouse · Keyboard',
 
+  rotateKicker: 'Portrait mode',
+  rotateTitle: 'Rotate to portrait',
+  rotateBody: 'Turn your device upright to keep playing. Your run is paused.',
+
   phaseSelectTitle: 'Phases',
   phaseSelectSubtitle: 'Choose an unlocked phase',
   phaseSelectEmpty: 'No phase data yet. Play to begin.',
@@ -38,6 +42,7 @@ export const en = {
   hudBalls: 'Balls',
   hudBlocks: 'Blocks',
   hudScore: 'Score',
+  hudTime: 'Time',
   hudPause: 'Pause',
   hudLevel: 'Lv',
   hudXp: 'XP',

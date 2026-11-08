@@ -13,6 +13,7 @@ import { LevelUpOverlay } from './LevelUpOverlay';
 import type { MenuBest } from './Menu';
 import { Menu } from './Menu';
 import { HudOverlay } from './Overlay';
+import { Orientation } from './Orientation';
 import { PhaseSelect } from './PhaseSelect';
 
 export interface UIRootOptions {
@@ -76,6 +77,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   const hud = new Hud({ root: options.root, controller });
   const overlay = new HudOverlay({ root: options.root, controller });
   const levelUp = new LevelUpOverlay({ root: options.root, controller });
+  const orientation = new Orientation({ controller });
 
   const debugPanel = options.debug
     ? new DebugPanel({
@@ -219,6 +221,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       hud.dispose();
       overlay.dispose();
       levelUp.dispose();
+      orientation.dispose();
       debugPanel?.dispose();
       delete document.documentElement.dataset.debug;
     },

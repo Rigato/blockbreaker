@@ -16,6 +16,7 @@ import type {
 } from './contracts';
 import { GAME_CONFIG, SIM_TUNING_DEFAULTS, SIM_TUNING_LIMITS } from './config';
 import { gameEvents } from './events';
+import { AudioService } from '../audio';
 import { PHASES } from '../content/phases';
 import type { PhaseDef } from '../content/types';
 import { InputController } from '../input/Input';
@@ -65,9 +66,12 @@ export class BlockBreakerGame implements GameCommands {
   private tuning: SimTuning = { ...SIM_TUNING_DEFAULTS };
   private readonly world: World;
   private readonly input: InputController;
+  private readonly scene: GameScene;
+  private readonly audio: AudioService;
   private readonly runState = new RunState();
   private readonly saveRepository: SaveRepository;
   private readonly unsubscribePause: () => void;
+  private readonly unsubscribeAudio: () => void;
   private phase: HudPhase = 'menu';
   private currentPhase: PhaseDef | null = null;
   private currentWaveIndex = 0;
@@ -96,6 +100,10 @@ export class BlockBreakerGame implements GameCommands {
     this.saveRepository = new StorageSaveRepository(
       platform?.storage ?? new MemoryStorage(),
     );
+    this.audio = new AudioService({
+      enabled: true,
+      platformEnabled: platform?.isAudioEnabled ?? true,
+    });
 
     const preview = PHASES[0]?.waves[0];
     if (!preview) throw new Error('No M3 phase content available');
@@ -119,6 +127,8 @@ export class BlockBreakerGame implements GameCommands {
       onFrame: (deltaMs) => this.frame(deltaMs),
       onReady: () => resolveReady(),
     });
+    this.scene = scene;
+    scene.setPhase(PHASES[0]!.id, 1);
 
     this.phaser = new Phaser.Game({
       type: Phaser.AUTO,
@@ -153,6 +163,9 @@ export class BlockBreakerGame implements GameCommands {
     this.input = new InputController(this.phaser.canvas, () => this.world.paddle.x);
     this.unsubscribePause = gameEvents.on('platform:pause-changed', ({ paused }) => {
       if (paused) this.pause();
+    });
+    this.unsubscribeAudio = gameEvents.on('platform:audio-changed', ({ enabled }) => {
+      this.audio.setPlatformEnabled(enabled);
     });
     document.addEventListener('visibilitychange', this.handleVisibility);
 
@@ -228,6 +241,8 @@ export class BlockBreakerGame implements GameCommands {
     this.runSeed = this.nextSeed();
     this.runState.startRun(this.runSeed);
     this.loadPhaseWave(0);
+    this.scene.setPhase(phase.id, phase.index);
+    this.audio.setSuspended(false);
     this.phase = 'playing';
     this.clock.reset();
     this.pendingLaunch = false;
@@ -266,6 +281,8 @@ export class BlockBreakerGame implements GameCommands {
       this.world.loadWave(preview);
       this.world.applyRunModifiers(this.runState.modifiers);
     }
+    this.scene.setPhase(PHASES[0]!.id, 1);
+    this.audio.setSuspended(false);
     this.clock.reset();
     this.pendingLaunch = false;
     this.input.resetTarget();
@@ -290,6 +307,7 @@ export class BlockBreakerGame implements GameCommands {
 
   setSound(enabled: boolean): void {
     this.settings = { version: 1, sound: enabled };
+    this.audio.setEnabled(enabled);
     void this.saveRepository.saveSettings(this.settings).catch((error: unknown) => {
       console.warn('[save] could not persist settings', error);
     });
@@ -315,6 +333,9 @@ export class BlockBreakerGame implements GameCommands {
       this.world.loadWave(preview);
       this.world.applyRunModifiers(this.runState.modifiers);
     }
+    this.scene.setPhase(PHASES[0]!.id, 1);
+    this.audio.setEnabled(true);
+    this.audio.setSuspended(false);
     this.syncHud(true);
     gameEvents.emit('save:reset', {
       keys: [GAME_CONFIG.storage.saveKey, GAME_CONFIG.storage.settingsKey],
@@ -328,6 +349,7 @@ export class BlockBreakerGame implements GameCommands {
   pause(): void {
     if (this.phase !== 'playing') return;
     this.phase = 'paused';
+    this.audio.setSuspended(true);
     this.clock.reset();
     this.syncHud(true);
   }
@@ -335,6 +357,7 @@ export class BlockBreakerGame implements GameCommands {
   resume(): void {
     if (this.phase !== 'paused') return;
     this.phase = 'playing';
+    this.audio.setSuspended(false);
     this.clock.reset();
     this.syncHud(true);
   }
@@ -350,6 +373,8 @@ export class BlockBreakerGame implements GameCommands {
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
     this.loadPhaseWave(this.currentWaveIndex);
+    this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
+    this.audio.setSuspended(false);
     this.phase = 'playing';
     this.clock.reset();
     this.pendingLaunch = false;
@@ -369,6 +394,8 @@ export class BlockBreakerGame implements GameCommands {
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
     this.loadPhaseWave(this.currentWaveIndex);
+    this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
+    this.audio.setSuspended(false);
     this.phase = 'playing';
     this.clock.reset();
     this.pendingLaunch = false;
@@ -510,6 +537,8 @@ export class BlockBreakerGame implements GameCommands {
   destroy(): void {
     document.removeEventListener('visibilitychange', this.handleVisibility);
     this.unsubscribePause();
+    this.unsubscribeAudio();
+    this.audio.dispose();
     this.input.dispose();
     this.phaser.destroy(true);
   }
@@ -528,6 +557,7 @@ export class BlockBreakerGame implements GameCommands {
       this.save = createDefaultSave();
       this.settings = createDefaultSettings();
     }
+    this.audio.setEnabled(this.settings.sound);
     this.syncHud(true);
   }
 
@@ -556,6 +586,10 @@ export class BlockBreakerGame implements GameCommands {
     this.clock.reset();
     this.pendingLaunch = false;
 
+    this.audio.play('level-up');
+    this.audio.setSuspended(true);
+    this.scene.celebrate();
+
     const offers = this.runState.takeOffers();
     this.syncHud(true);
     gameEvents.emit('levelup:offered', {
@@ -566,6 +600,7 @@ export class BlockBreakerGame implements GameCommands {
 
   private finishLevelUp(): void {
     this.phase = 'playing';
+    this.audio.setSuspended(false);
     this.clock.reset();
 
     if (this.pendingPerkBalls > 0) {
@@ -638,6 +673,9 @@ export class BlockBreakerGame implements GameCommands {
     this.clock.reset();
     this.pendingLaunch = false;
     this.pendingPerkBalls = 0;
+    this.audio.setSuspended(false);
+    this.audio.play(victory ? 'victory' : 'defeat');
+    if (victory) this.scene.celebrate();
     this.syncHud(true);
 
     void this.saveRepository.save(updated).catch((error: unknown) => {
@@ -714,19 +752,50 @@ export class BlockBreakerGame implements GameCommands {
     this.syncHud();
   }
 
-  /** Converts simulation events into run score, XP and level-up state. */
+  /** Converts simulation events into run score, XP, feedback and level-up state. */
   private consumeEvents(events: readonly SimEvent[]): void {
+    if (events.length === 0) return;
+    this.scene.pushEvents(events);
+
     for (const event of events) {
-      if (event.type === 'block:destroyed') {
-        this.runScore += event.score;
-        this.runState.addXp(event.maxHp);
-      } else if (event.type === 'wave:cleared') {
-        this.runScore += 100;
+      switch (event.type) {
+        case 'block:destroyed':
+          this.runScore += event.score;
+          this.runState.addXp(event.maxHp);
+          this.audio.play('block-break');
+          break;
+        case 'block:hit':
+          this.audio.play('block-hit', {
+            rate: 0.94 + Math.min(3, Math.max(1, event.damage)) * 0.035,
+          });
+          break;
+        case 'paddle:hit':
+          this.audio.play('paddle');
+          break;
+        case 'ball:lost':
+          this.audio.play('ball-lost');
+          break;
+        case 'laser:fired':
+          this.audio.play('laser');
+          break;
+        case 'explosion':
+          this.audio.play('explosion');
+          break;
+        case 'safety-net':
+          this.audio.play('safety');
+          break;
+        case 'wave:cleared':
+          this.runScore += 100;
+          this.audio.play('wave-clear');
+          break;
+        default:
+          break;
       }
     }
   }
 
   private readonly handleVisibility = (): void => {
+    this.audio.setBackground(document.hidden);
     if (document.hidden) this.pause();
   };
 

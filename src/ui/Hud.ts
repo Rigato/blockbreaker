@@ -1,6 +1,7 @@
 import type { GameCommands, HudSnapshot, LaserHudState, PerkState } from '../game/contracts';
 import { GAME_CONFIG } from '../game/config';
 import { en } from '../i18n/en';
+import { formatTime } from './format';
 
 export interface HudOptions {
   root: HTMLElement;
@@ -25,6 +26,7 @@ export class Hud {
   private readonly ballDots: HTMLElement;
   private readonly blocksValue: HTMLElement;
   private readonly scoreValue: HTMLElement;
+  private readonly timeValue: HTMLElement;
   private readonly hint: HTMLElement;
   private readonly pauseButton: HTMLButtonElement;
   private readonly dots: HTMLElement[] = [];
@@ -42,6 +44,8 @@ export class Hud {
   private laserEndsAt = 0;
   private laserCooldownMs = 0;
   private laserTimer: ReturnType<typeof setInterval> | null = null;
+  private pulseTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastWaveId: string | null = null;
   private visible = false;
 
   constructor(options: HudOptions) {
@@ -114,6 +118,19 @@ export class Hud {
 
     blocks.append(blocksLabel, blocksValue);
 
+    const time = document.createElement('span');
+    time.className = 'hud__stat hud__stat--time';
+
+    const timeLabel = document.createElement('span');
+    timeLabel.className = 'hud__stat-label';
+    timeLabel.textContent = en.hudTime;
+
+    const timeValue = document.createElement('span');
+    this.timeValue = timeValue;
+    timeValue.className = 'hud__stat-value';
+
+    time.append(timeLabel, timeValue);
+
     const score = document.createElement('span');
     score.className = 'hud__stat hud__stat--score';
 
@@ -127,7 +144,7 @@ export class Hud {
 
     score.append(scoreLabel, scoreValue);
 
-    stats.append(balls, blocks, score);
+    stats.append(balls, blocks, time, score);
 
     const pauseButton = document.createElement('button');
     this.pauseButton = pauseButton;
@@ -242,6 +259,10 @@ export class Hud {
       snapshot.phaseCount,
     )} · ${snapshot.waveName}`;
     this.waveText.textContent = `${snapshot.phaseName} · ${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount}`;
+
+    if (this.lastWaveId !== null && snapshot.waveId !== this.lastWaveId) this.pulseWave();
+    this.lastWaveId = snapshot.waveId;
+
     const active = Math.max(0, Math.min(snapshot.ballsActive, this.dots.length));
     this.dots.forEach((dot, index) => {
       dot.classList.toggle('is-on', index < active);
@@ -250,6 +271,7 @@ export class Hud {
 
     this.blocksValue.textContent = String(Math.max(0, snapshot.blocksRemaining));
     this.scoreValue.textContent = snapshot.score.toLocaleString('en-US');
+    this.timeValue.textContent = formatTime(snapshot.elapsedMs);
     this.hint.textContent =
       snapshot.phase === 'cleared'
         ? en.hudWaveTransition
@@ -282,11 +304,24 @@ export class Hud {
 
   dispose(): void {
     this.stopLaserTimer();
+    if (this.pulseTimer !== null) clearTimeout(this.pulseTimer);
     document.removeEventListener('keydown', this.handleKeydown);
     this.pauseButton.removeEventListener('click', this.handlePause);
     this.perksButton.removeEventListener('click', this.handlePerksToggle);
     this.laserButton.removeEventListener('click', this.handleLaser);
     this.section.remove();
+  }
+
+  private pulseWave(): void {
+    if (!this.visible) return;
+    if (this.pulseTimer !== null) clearTimeout(this.pulseTimer);
+    this.section.classList.remove('is-wave-pulse');
+    void this.section.offsetWidth;
+    this.section.classList.add('is-wave-pulse');
+    this.pulseTimer = setTimeout(() => {
+      this.pulseTimer = null;
+      this.section.classList.remove('is-wave-pulse');
+    }, 700);
   }
 
   private updatePerks(perks: readonly PerkState[]): void {

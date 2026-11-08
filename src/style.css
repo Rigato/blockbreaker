@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('./assets/fonts/Silkscreen-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('./assets/fonts/Silkscreen-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
   --bg-deep: #05070f;
@@ -13,8 +29,13 @@
   --line: rgba(126, 231, 255, 0.18);
   --line-strong: rgba(126, 231, 255, 0.55);
   --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: Georgia, "Times New Roman", serif;
+  --font-display: 'Silkscreen', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-pixel: 'Silkscreen', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
 }
 
 *,
@@ -61,6 +82,66 @@ button {
   font: inherit;
 }
 
+/* Pixel display face for chrome, labels and numbers. Body copy stays in the
+   system sans stack for maximum legibility at 320 px. */
+.menu__kicker,
+.menu__subtitle,
+.menu__footer,
+.menu__best-phase,
+.menu__best-label,
+.boot__kicker,
+.boot__subtitle,
+.phase-select__subtitle,
+.phase-card__index,
+.phase-card__status,
+.phase-card__stat-label,
+.phase-card__meta,
+.hud__wave-kicker,
+.hud__stat-label,
+.hud__xp-line,
+.hud__laser-time,
+.hud__perks-label,
+.hud__perk-popover-title,
+.overlay__kicker,
+.overlay__phase,
+.overlay__summary-label,
+.overlay__perks-title,
+.overlay__setting-label,
+.overlay__switch-value,
+.levelup__level,
+.levelup__paused,
+.levelup__hint,
+.levelup__badge {
+  font-family: var(--font-pixel);
+}
+
+.menu__play,
+.menu__secondary,
+.menu__sound-toggle,
+.phase-select__back,
+.overlay__button,
+.overlay__switch,
+.levelup__key,
+.debug__toggle {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+}
+
+.menu__best-value,
+.phase-card__stat-value,
+.phase-card__name,
+.hud__stat-value,
+.hud__perks-count,
+.hud__perk-level,
+.overlay__score-value,
+.overlay__summary-value,
+.levelup__card-name,
+.levelup__card-levels {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 #app {
   position: fixed;
   inset: 0;
@@ -105,6 +186,23 @@ button {
   border: 1px solid var(--line);
   box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.6);
   content: "";
+  pointer-events: none;
+}
+
+/* Subtle CRT-style scanlines over the whole portrait field. */
+#game-shell::after {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.024) 0,
+    rgba(255, 255, 255, 0.024) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  content: "";
+  opacity: 0.55;
   pointer-events: none;
 }
 
@@ -819,6 +917,154 @@ button {
   line-height: 1.5;
 }
 
+/* --------------------------------------------------------------------------
+   Orientation guard (mobile landscape)
+   -------------------------------------------------------------------------- */
+
+.orientation {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding:
+    calc(var(--safe-top) + 20px)
+    calc(var(--safe-right) + 20px)
+    calc(var(--safe-bottom) + 20px)
+    calc(var(--safe-left) + 20px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(38, 132, 160, 0.24), transparent 56%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.02) 0,
+      rgba(255, 255, 255, 0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    #04070f;
+  pointer-events: auto;
+  text-align: center;
+  touch-action: none;
+}
+
+.orientation[hidden] {
+  display: none;
+}
+
+.orientation__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 360px);
+  padding: clamp(20px, 6vmin, 34px) clamp(18px, 5vmin, 30px);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(16, 34, 62, 0.96), rgba(6, 12, 26, 0.98)),
+    var(--bg-stage);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 34px rgba(80, 220, 255, 0.14),
+    0 24px 60px rgba(0, 0, 0, 0.62);
+}
+
+.orientation__device {
+  position: relative;
+  width: clamp(52px, 15vmin, 74px);
+  aspect-ratio: 9 / 16;
+  margin-bottom: clamp(12px, 4vmin, 20px);
+  border: 2px solid var(--cyan);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(100, 231, 255, 0.22), transparent 70%),
+    rgba(6, 16, 32, 0.9);
+  box-shadow:
+    0 0 20px rgba(100, 231, 255, 0.24),
+    inset 0 0 12px rgba(100, 231, 255, 0.12);
+  transform: rotate(90deg);
+  animation: orientation-tilt 2.4s ease-in-out infinite;
+}
+
+.orientation__device-screen {
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(126, 231, 255, 0.3);
+  border-radius: 4px;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(100, 231, 255, 0.14) 0,
+    rgba(100, 231, 255, 0.14) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.orientation__arrow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--gold);
+  border-top-color: transparent;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-40deg);
+}
+
+.orientation__arrow::after {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid var(--gold);
+  content: "";
+  transform: rotate(28deg);
+}
+
+.orientation__kicker {
+  margin: 0 0 6px;
+  color: var(--cyan);
+  font-family: var(--font-pixel);
+  font-size: clamp(9px, 2.2vmin, 11px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.orientation__title {
+  margin: 0;
+  color: #f2fbff;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 6.4vmin, 38px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  text-shadow:
+    0 0 22px rgba(100, 231, 255, 0.26),
+    0 8px 26px rgba(0, 0, 0, 0.5);
+}
+
+.orientation__body {
+  max-width: 28ch;
+  margin: clamp(8px, 2.6vmin, 12px) 0 0;
+  color: var(--muted);
+  font-size: clamp(12px, 2.6vmin, 14px);
+  line-height: 1.45;
+}
+
+@keyframes orientation-tilt {
+  0%,
+  100% {
+    transform: rotate(90deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
 .hud {
   position: absolute;
   inset: 0;
@@ -905,6 +1151,12 @@ button {
 
 .hud__stat--score .hud__stat-value {
   color: var(--gold);
+  font-size: clamp(11px, 3cqw, 15px);
+  text-shadow: 0 0 12px rgba(255, 212, 121, 0.3);
+}
+
+.hud__stat--time .hud__stat-value {
+  color: var(--cyan-bright);
 }
 
 .hud__balls {
@@ -1307,6 +1559,109 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.overlay__setting {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 2px;
+}
+
+.overlay__setting-label {
+  color: var(--muted);
+  font-size: clamp(9px, 2.2cqw, 11px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.overlay__switch {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 118px;
+  min-height: 44px;
+  padding: 5px 10px;
+  border: 1px solid rgba(126, 231, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(10, 24, 44, 0.85);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: clamp(10px, 2.5cqw, 12px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.overlay__switch:hover {
+  border-color: var(--line-strong);
+  background: rgba(18, 42, 72, 0.92);
+}
+
+.overlay__switch:active {
+  transform: translateY(1px);
+}
+
+.overlay__switch:focus-visible {
+  outline: 2px solid var(--cyan-bright);
+  outline-offset: 3px;
+}
+
+.overlay__switch.is-on {
+  border-color: rgba(100, 231, 255, 0.65);
+  background: rgba(20, 58, 88, 0.88);
+  color: var(--cyan-bright);
+  box-shadow: inset 0 0 12px rgba(100, 231, 255, 0.16);
+}
+
+.overlay__switch-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 20px;
+  border: 1px solid rgba(126, 231, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(4, 10, 22, 0.85);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.overlay__switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--dim);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.overlay__switch.is-on .overlay__switch-track {
+  border-color: rgba(100, 231, 255, 0.7);
+  background: rgba(100, 231, 255, 0.16);
+}
+
+.overlay__switch.is-on .overlay__switch-thumb {
+  background: var(--cyan);
+  box-shadow: 0 0 8px rgba(100, 231, 255, 0.8);
+  transform: translateX(18px);
+}
+
+.overlay__switch-value {
+  min-width: 2.2em;
+  text-align: left;
 }
 
 .overlay__button {
@@ -1726,6 +2081,127 @@ button {
   text-transform: uppercase;
 }
 
+/* --------------------------------------------------------------------------
+   Pixel skin: texture, entry motion and HUD feedback
+   -------------------------------------------------------------------------- */
+
+.overlay__panel,
+.levelup__panel,
+.phase-select__panel {
+  position: relative;
+}
+
+.overlay__panel::after,
+.levelup__panel::after,
+.phase-select__panel::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.022) 0,
+    rgba(255, 255, 255, 0.022) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  content: "";
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.overlay:not([hidden]) .overlay__panel,
+.levelup:not([hidden]) .levelup__panel,
+.phase-select:not([hidden]) .phase-select__panel {
+  animation: panel-in 190ms cubic-bezier(0.2, 0.85, 0.3, 1) both;
+}
+
+.phase-select:not([hidden]) .phase-card,
+.levelup:not([hidden]) .levelup__card {
+  animation: card-in 220ms cubic-bezier(0.2, 0.85, 0.3, 1) both;
+}
+
+.phase-select:not([hidden]) .phase-card:nth-child(2),
+.levelup:not([hidden]) .levelup__card:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.phase-select:not([hidden]) .phase-card:nth-child(3),
+.levelup:not([hidden]) .levelup__card:nth-child(3) {
+  animation-delay: 80ms;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hud.is-wave-pulse .hud__bar {
+  animation: hud-wave-pulse 680ms ease-out;
+}
+
+.hud.is-wave-pulse .hud__wave-text {
+  animation: hud-wave-text 520ms ease-out;
+}
+
+@keyframes hud-wave-pulse {
+  0% {
+    border-color: var(--line);
+    box-shadow:
+      0 4px 18px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  28% {
+    border-color: rgba(100, 231, 255, 0.75);
+    box-shadow:
+      0 0 24px rgba(100, 231, 255, 0.3),
+      inset 0 0 18px rgba(100, 231, 255, 0.12);
+  }
+  100% {
+    border-color: var(--line);
+    box-shadow:
+      0 4px 18px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+}
+
+@keyframes hud-wave-text {
+  0% {
+    transform: translateY(1px);
+  }
+  35% {
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.phase-card:active:not(:disabled),
+.phase-select__back:active,
+.hud__pause:active,
+.hud__perks:active,
+.hud__laser:active:not(.is-cooling) {
+  transform: translateY(1px) scale(0.99);
+}
+
 html[data-debug='1'] .menu__top {
   visibility: hidden;
 }
@@ -2024,6 +2500,161 @@ html[data-debug='1'] .hud__top {
   color: var(--gold);
   font-size: 9px;
   text-align: center;
+}
+
+@container (max-width: 360px) {
+  .menu {
+    padding: 10px 10px 8px;
+  }
+
+  .menu__title {
+    font-size: clamp(26px, 9.4cqw, 38px);
+  }
+
+  .menu__play {
+    min-height: 46px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-indent: 0.16em;
+  }
+
+  .menu__secondary {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-indent: 0.14em;
+  }
+
+  .hud {
+    padding: 6px;
+  }
+
+  .hud__bar {
+    gap: 4px;
+    padding: 5px 6px 7px;
+  }
+
+  .hud__stats {
+    gap: 4px;
+  }
+
+  .hud__stat-label {
+    font-size: 6px;
+    letter-spacing: 0.06em;
+  }
+
+  .hud__stat-value {
+    font-size: 9px;
+  }
+
+  .hud__stat--score .hud__stat-value {
+    font-size: 10px;
+  }
+
+  .hud__ball {
+    width: 4px;
+    height: 4px;
+  }
+
+  .hud__wave-kicker {
+    font-size: 6px;
+    letter-spacing: 0.1em;
+  }
+
+  .hud__wave-text {
+    font-size: 8px;
+  }
+
+  .hud__xp-line {
+    font-size: 6px;
+  }
+
+  .hud__hint {
+    max-width: calc(100% - 104px);
+    font-size: 8px;
+  }
+
+  .overlay,
+  .phase-select,
+  .levelup {
+    padding: 8px;
+  }
+
+  .overlay__panel {
+    gap: 7px;
+    padding: 14px 11px;
+  }
+
+  .overlay__title {
+    font-size: 22px;
+  }
+
+  .overlay--results .overlay__title {
+    font-size: 19px;
+  }
+
+  .overlay__button {
+    min-height: 44px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+
+  .overlay__setting {
+    min-height: 44px;
+  }
+
+  .overlay__switch {
+    min-width: 104px;
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+
+  .overlay__summary-value {
+    font-size: 10px;
+  }
+
+  .overlay__perk {
+    font-size: 7px;
+  }
+
+  .phase-select__panel {
+    gap: 5px;
+    padding: 12px 10px;
+  }
+
+  .phase-select__title {
+    font-size: 21px;
+  }
+
+  .phase-card {
+    min-height: 64px;
+    padding: 6px 8px;
+  }
+
+  .phase-card__name {
+    font-size: 14px;
+  }
+
+  .levelup__panel {
+    gap: 4px;
+    padding: 9px;
+  }
+
+  .levelup__title {
+    font-size: 19px;
+  }
+
+  .levelup__card {
+    min-height: 56px;
+    padding: 6px 8px;
+  }
+
+  .levelup__card-name {
+    font-size: 11px;
+  }
+
+  .levelup__card-desc {
+    font-size: 8px;
+  }
 }
 
 @media (max-height: 600px) {

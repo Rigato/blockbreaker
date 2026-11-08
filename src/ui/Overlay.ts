@@ -70,9 +70,12 @@ function buildAction(label: string, modifier: string, handler: () => void): HTML
  * `run-complete` / `defeat`, driven by `HudSnapshot.result`.
  */
 export class HudOverlay {
+  private readonly controller: GameCommands;
   private readonly pauseSection: HTMLElement;
   private readonly resumeButton: HTMLButtonElement;
   private readonly restartButton: HTMLButtonElement;
+  private readonly soundButton: HTMLButtonElement;
+  private readonly soundValue: HTMLElement;
 
   private readonly resultsSection: HTMLElement;
   private readonly resultsPanel: HTMLElement;
@@ -93,10 +96,12 @@ export class HudOverlay {
   private resultsVisible = false;
   private lastResultPhase: string | null = null;
   private perksSignature = '__unset__';
+  private soundEnabled = true;
   private readonly unsubscribeKeydown: () => void;
 
   constructor(options: OverlayOptions) {
     const controller = options.controller;
+    this.controller = controller;
 
     const pause = buildPanel('overlay-pause-title', 'overlay--pause');
     this.pauseSection = pause.section;
@@ -117,8 +122,49 @@ export class HudOverlay {
     this.restartButton = buildAction(en.restartWave, 'overlay__button--secondary', () =>
       controller.restartWave(),
     );
-    pauseActions.append(this.resumeButton, this.restartButton);
+
+    const sound = document.createElement('div');
+    sound.className = 'overlay__setting';
+
+    const soundLabel = document.createElement('span');
+    soundLabel.className = 'overlay__setting-label';
+    soundLabel.textContent = en.menuSound;
+
+    const soundButton = document.createElement('button');
+    this.soundButton = soundButton;
+    soundButton.type = 'button';
+    soundButton.className = 'overlay__switch';
+    soundButton.setAttribute('role', 'switch');
+    soundButton.setAttribute('aria-label', en.menuSound);
+    soundButton.addEventListener('click', this.handleSound);
+
+    const soundTrack = document.createElement('span');
+    soundTrack.className = 'overlay__switch-track';
+    soundTrack.setAttribute('aria-hidden', 'true');
+
+    const soundThumb = document.createElement('span');
+    soundThumb.className = 'overlay__switch-thumb';
+    soundTrack.append(soundThumb);
+
+    const soundValue = document.createElement('span');
+    this.soundValue = soundValue;
+    soundValue.className = 'overlay__switch-value';
+
+    soundButton.append(soundTrack, soundValue);
+    sound.append(soundLabel, soundButton);
+
+    const pauseMenuButton = buildAction(en.overlayMenu, 'overlay__button--ghost', () =>
+      controller.returnToMenu(),
+    );
+
+    pauseActions.append(
+      this.resumeButton,
+      this.restartButton,
+      sound,
+      pauseMenuButton,
+    );
     pause.panel.append(pauseTitle, pauseBody, pauseActions);
+    this.applySound(true);
 
     const results = buildPanel('overlay-results-title', 'overlay--results');
     this.resultsSection = results.section;
@@ -181,6 +227,8 @@ export class HudOverlay {
   }
 
   update(snapshot: HudSnapshot): void {
+    this.applySound(snapshot.soundEnabled);
+
     const pause = snapshot.phase === 'paused';
     if (pause) this.showPause();
     else this.hidePause();
@@ -281,6 +329,19 @@ export class HudOverlay {
     this.pauseSection.hidden = false;
     this.focusFirst(this.pauseSection, this.resumeButton);
   }
+
+  private applySound(enabled: boolean): void {
+    this.soundEnabled = enabled;
+    this.soundButton.classList.toggle('is-on', enabled);
+    this.soundButton.setAttribute('aria-checked', String(enabled));
+    this.soundValue.textContent = enabled ? en.soundOn : en.soundOff;
+  }
+
+  private readonly handleSound = (): void => {
+    const next = !this.soundEnabled;
+    this.applySound(next);
+    this.controller.setSound(next);
+  };
 
   private hidePause(): void {
     if (!this.pauseVisible) return;
