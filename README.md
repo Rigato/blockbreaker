@@ -1,10 +1,10 @@
 # Block Breaker Roguelite
 
 Portrait HTML5 block breaker with roguelite progression. The repository is in the
-**M5 — Bridge, build and distribution readiness** stage: the full three-level
-game, presentation and save flow, plus final platform lifecycle, results
-interstitial, ZIP packaging and CI/release automation. The build is ready for
-the G5 review; portal submission remains M7.
+**M6 — QA, performance and balance** stage: the full three-level game is built
+and distributed via Pages/ZIP, with Playwright E2E, an automated 10-run
+baseline, device-matrix and performance reports. Human playtest and real-device
+validation remain before any G6 go/no-go; portal submission remains M7.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -35,8 +35,25 @@ npm run validate:content
 node scripts/validate-bridge-config.mjs
 npm run build
 npm run package   # release/blockbreaker-web.zip + manifest
+npm run test:e2e  # Playwright smoke/layout (build first)
+npm run qa:runs -- --runs=10   # automated baseline, not human playtest
 npm run preview   # serves dist/ locally
 ```
+
+## M6 — QA, performance and balance
+
+- Playwright E2E (`tests/e2e`) covers boot/menu, Space vs V controls, pause,
+  sound persistence, level up, phase-1 victory/unlock/reload, AdMock
+  show/fail, CDN fallback and layout at 320/390/430/1440 + mobile landscape.
+- CI runs the E2E suite in a separate job with Chromium.
+- `npm run qa:runs -- --runs=10` produces `docs/qa/run-log.csv`: an automated
+  debug-projectile baseline for duration/levels/perks regression, explicitly
+  **not** a human playtest.
+- `docs/qa/` contains the device matrix, 10-run log, playtest kit, performance
+  and size report, and the M6 report draft.
+- No P0/P1 was found by the automated suite. Human playtest (5 people × 3 runs),
+  real iOS/Android/Chromebook devices and a 10-minute hardware session are still
+  required for G6. No M6 tuning was applied without human data.
 
 ## M5 — Bridge, build and distribution readiness
 
@@ -217,9 +234,9 @@ src/
   render/                  Level themes, pixel block art, pooled effects and scene
   ui/                      Menu, HUD, level-up, overlays, orientation and debug
   i18n/                    English strings
-tests/                     Unit tests
+tests/                     Unit tests + tests/e2e Playwright
 scripts/                   Content validator, Bridge config validator and packager
-docs/                      GDD, technical spec, build/release and plan
+docs/                      GDD, spec, build/release, plan and docs/qa reports
 public/                    Bridge config, favicon, licenses and static assets
 release/                   Generated ZIP + manifest (not committed)
 ```
