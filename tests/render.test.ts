@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { blend, hashId, hashUnit, steppedRect } from '../src/render/blockArt';
 import { Effects } from '../src/render/effects';
 import {
   predictBallPath,
@@ -42,6 +43,52 @@ describe('phase themes', () => {
       const accent = relativeLuminance(theme.accent);
       expect(accent).toBeGreaterThan(sky + 0.15);
       expect(relativeLuminance(theme.frameBright)).toBeGreaterThan(sky);
+    }
+  });
+});
+
+describe('block art helpers', () => {
+  it('hashes block ids deterministically and distributes samples', () => {
+    expect(hashId('0:0')).toBe(hashId('0:0'));
+    expect(hashId('0:0')).not.toBe(hashId('0:1'));
+    const samples = new Set<string>();
+    for (let index = 0; index < 64; index += 1) {
+      const unit = hashUnit(hashId(`${index % 8}:${index}`), index);
+      expect(unit).toBeGreaterThanOrEqual(0);
+      expect(unit).toBeLessThanOrEqual(1);
+      samples.add(unit.toFixed(4));
+    }
+    expect(samples.size).toBeGreaterThan(60);
+  });
+
+  it('blends channels and clamps out-of-range amounts', () => {
+    expect(blend(0x000000, 0xffffff, 1)).toBe(0xffffff);
+    expect(blend(0xffffff, 0x000000, 0)).toBe(0xffffff);
+    expect(blend(0x102030, 0xffffff, 0.5)).toBe(0x889098);
+    expect(blend(0x123456, 0xabcdef, -1)).toBe(0x123456);
+    expect(blend(0x123456, 0xabcdef, 2)).toBe(0xabcdef);
+  });
+
+  it('builds an inset-stepped silhouette without soft corners', () => {
+    const rect = steppedRect(0, 0, 80, 80);
+    expect(rect.length).toBeGreaterThan(8);
+    // All points stay on the integer pixel grid.
+    for (const point of rect) {
+      expect(Number.isInteger(point.x)).toBe(true);
+      expect(Number.isInteger(point.y)).toBe(true);
+      expect(point.x).toBeGreaterThanOrEqual(0);
+      expect(point.x).toBeLessThanOrEqual(80);
+    }
+    // The four extreme corners are chamfered, not rounded to a single point.
+    expect(rect.some((point) => point.x === 0 && point.y > 0)).toBe(true);
+    expect(rect.some((point) => point.x > 0 && point.y === 0)).toBe(true);
+
+    const inset = steppedRect(10, 10, 40, 40, 4);
+    for (const point of inset) {
+      expect(point.x).toBeGreaterThanOrEqual(14);
+      expect(point.x).toBeLessThanOrEqual(46);
+      expect(point.y).toBeGreaterThanOrEqual(14);
+      expect(point.y).toBeLessThanOrEqual(46);
     }
   });
 });
