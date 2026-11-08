@@ -968,8 +968,9 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     const graphics = this.fieldGraphics;
     if (!graphics || !this.blockDirty) return;
     graphics.clear();
+    const accent = this.theme.accent;
     for (const block of this.world.blocks) {
-      drawBlock(graphics, block);
+      drawBlock(graphics, block, { accent });
     }
     this.blockDirty = false;
   }
