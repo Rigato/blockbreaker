@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { HUD, monitorPage, waitForMenu } from './helpers';
+import { clickDebugAction, HUD, monitorPage, waitForMenu } from './helpers';
 
 interface DebugGame {
   debugStartWave(phaseId: string, waveIndex: number): void;
@@ -49,6 +49,10 @@ test.describe('v0.2 campaign runtime', () => {
       );
       await page.locator(HUD).waitFor({ state: 'visible' });
     };
+
+    await jump('phase-1', 0);
+    expect(await clickDebugAction(page, 'Next wave')).toBe(true);
+    await expect(page.locator('.hud__wave-text')).toContainText('Wave 2/3');
 
     await jump('phase-4', 1);
     await expect(page.locator('.hud__chip--rule')).toContainText('TIME');

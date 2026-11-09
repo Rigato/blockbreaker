@@ -145,6 +145,7 @@ export const en = {
   debugLoadWave: 'Load & start',
   debugActions: 'Actions',
   debugRestartWave: 'Restart wave',
+  debugNextWave: 'Next wave',
   debugAddBall: 'Add ball',
   debugFireProjectile: 'Fire projectile',
   debugForceDefeat: 'Force defeat',

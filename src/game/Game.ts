@@ -612,6 +612,23 @@ export class BlockBreakerGame implements GameCommands {
     this.finishPhase(false);
   }
 
+  /** Debug-only: skips to the next wave, or finishes the phase on the last. */
+  debugNextWave(): void {
+    if (!this.currentPhase) return;
+    if (
+      this.phase === 'menu' ||
+      this.phase === 'levelup' ||
+      this.phase === 'run-complete' ||
+      this.phase === 'defeat'
+    ) {
+      return;
+    }
+    // `nextWave` owns the transition; temporarily mark the wave as cleared so
+    // the QA button can skip without waiting for the last block.
+    this.phase = 'cleared';
+    this.nextWave();
+  }
+
   /** Debug-only deterministic victory for results/unlock E2E. */
   debugVictory(): void {
     if (this.phase === 'menu' || this.phase === 'run-complete' || this.phase === 'defeat') {

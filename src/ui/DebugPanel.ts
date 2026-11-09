@@ -329,6 +329,9 @@ export class DebugPanel {
     const restart = makeButton(en.debugRestartWave, 'debug__button');
     restart.addEventListener('click', () => this.controller.restartWave());
 
+    const nextWave = makeButton(en.debugNextWave, 'debug__button');
+    nextWave.addEventListener('click', () => this.controller.debugNextWave());
+
     const addBall = makeButton(en.debugAddBall, 'debug__button');
     addBall.addEventListener('click', () => this.controller.spawnBall());
 
@@ -341,7 +344,7 @@ export class DebugPanel {
     const victory = makeButton(en.debugForceVictory, 'debug__button');
     victory.addEventListener('click', () => this.controller.debugVictory());
 
-    section.append(restart, addBall, projectile, defeat, victory);
+    section.append(restart, nextWave, addBall, projectile, defeat, victory);
     return section;
   }
 

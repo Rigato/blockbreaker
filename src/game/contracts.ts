@@ -350,6 +350,8 @@ export interface GameCommands {
   togglePause(): void;
   /** Restarts the current wave with a fresh paddle/ball state. */
   restartWave(): void;
+  /** Debug-only: advances to the next wave, finishing the phase on the last. */
+  debugNextWave(): void;
   /** Restarts the whole run from wave 1 with reset XP/perks. */
   restartRun(): void;
   /** Advances from a cleared wave to the next one. */
