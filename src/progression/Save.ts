@@ -1,4 +1,5 @@
 import type {
+  EndlessStats,
   PhaseResult,
   PhaseStats,
   SaveRepository,
@@ -53,6 +54,25 @@ function defaultPhaseStats(): PhaseStats {
   };
 }
 
+/** Zeroed Endless statistics for new saves or missing/malformed data. */
+export function defaultEndlessStats(): EndlessStats {
+  return {
+    bestWave: 0,
+    bestScore: 0,
+    runs: 0,
+  };
+}
+
+/** Parses one `EndlessStats` entry, falling back per field. */
+function sanitizeEndlessStats(value: unknown): EndlessStats {
+  const record = isRecord(value) ? value : {};
+  return {
+    bestWave: nonNegativeInteger(record.bestWave, 0),
+    bestScore: nonNegativeInteger(record.bestScore, 0),
+    runs: nonNegativeInteger(record.runs, 0),
+  };
+}
+
 /** Parses one `PhaseStats` entry, falling back per field. */
 function sanitizePhaseStats(value: unknown): PhaseStats {
   const record = isRecord(value) ? value : {};
@@ -80,6 +100,7 @@ export function createDefaultSave(now: number = Date.now()): SaveV1 {
     version: SAVE_VERSION,
     unlockedPhase: 1,
     phases: {},
+    endless: defaultEndlessStats(),
     updatedAt: now,
   };
 }
@@ -119,6 +140,7 @@ export function parseSave(
     version: SAVE_VERSION,
     unlockedPhase,
     phases: sanitizePhases(parsed.phases),
+    endless: sanitizeEndlessStats(parsed.endless),
     updatedAt: isFiniteNumber(parsed.updatedAt) && parsed.updatedAt >= 0
       ? parsed.updatedAt
       : now,
@@ -239,6 +261,43 @@ export function applyPhaseResult(
     phases: {
       ...save.phases,
       [result.phaseId]: nextStats,
+    },
+    endless: getEndlessStats(save),
+    updatedAt: now,
+  };
+}
+
+/** Endless stats for `save`, with zeroed defaults and no shared references. */
+export function getEndlessStats(save: SaveV1): EndlessStats {
+  const stats = save.endless;
+  if (!isRecord(stats)) return defaultEndlessStats();
+  return {
+    bestWave: nonNegativeInteger(stats.bestWave, 0),
+    bestScore: nonNegativeInteger(stats.bestScore, 0),
+    runs: nonNegativeInteger(stats.runs, 0),
+  };
+}
+
+/**
+ * Pure, immutable update of the save after a finished Endless run. Only the
+ * Endless bests/runs and `updatedAt` change; campaign progress is untouched.
+ */
+export function applyEndlessResult(
+  save: SaveV1,
+  wave: number,
+  score: number,
+  now: number = Date.now(),
+): SaveV1 {
+  const previous = getEndlessStats(save);
+  const waveReached = nonNegativeInteger(wave, 0);
+  const runScore = nonNegativeInteger(score, 0);
+
+  return {
+    ...save,
+    endless: {
+      bestWave: Math.max(previous.bestWave, waveReached),
+      bestScore: Math.max(previous.bestScore, runScore),
+      runs: previous.runs + 1,
     },
     updatedAt: now,
   };

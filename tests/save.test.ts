@@ -10,9 +10,11 @@ import { MemoryStorage } from '../src/platform/MemoryStorage';
 import {
   MAX_PHASE,
   StorageSaveRepository,
+  applyEndlessResult,
   applyPhaseResult,
   createDefaultSave,
   createDefaultSettings,
+  getEndlessStats,
   getPhaseStats,
   parseSave,
   parseSettings,
@@ -61,6 +63,7 @@ describe('save defaults', () => {
       version: 1,
       unlockedPhase: 1,
       phases: {},
+      endless: { bestWave: 0, bestScore: 0, runs: 0 },
       updatedAt: 42,
     });
   });
@@ -164,6 +167,41 @@ describe('safe parse', () => {
     expect(getPhaseStats(save, 'phase-6').clears).toBe(0);
   });
 
+  it('fills endless stats for a save written before the Endless field existed', () => {
+    const raw = JSON.stringify({
+      version: 1,
+      unlockedPhase: 2,
+      phases: {},
+      updatedAt: 100,
+    });
+
+    const save = parseSave(raw, 100);
+    expect(save).toEqual({
+      version: 1,
+      unlockedPhase: 2,
+      phases: {},
+      endless: { bestWave: 0, bestScore: 0, runs: 0 },
+      updatedAt: 100,
+    });
+  });
+
+  it('sanitizes malformed endless stats to non-negative integers', () => {
+    const raw = JSON.stringify({
+      version: 1,
+      endless: { bestWave: '9', bestScore: -3, runs: 2.9 },
+      updatedAt: 1,
+    });
+
+    const save = parseSave(raw, 1);
+    expect(save.endless).toEqual({ bestWave: 0, bestScore: 0, runs: 2 });
+
+    const floats = parseSave(
+      JSON.stringify({ version: 1, endless: { bestWave: 7.8, bestScore: 12.3, runs: 1.9 } }),
+      1,
+    );
+    expect(floats.endless).toEqual({ bestWave: 7, bestScore: 12, runs: 1 });
+  });
+
   it('defaults invalid settings to sound on', () => {
     expect(parseSettings(null)).toEqual(createDefaultSettings());
     expect(parseSettings('nope')).toEqual(createDefaultSettings());
@@ -196,6 +234,7 @@ describe('StorageSaveRepository', () => {
           bestLevel: 6,
         },
       },
+      endless: { bestWave: 0, bestScore: 0, runs: 0 },
       updatedAt: 777,
     };
     const settings: SettingsV1 = { version: 1, sound: false };
@@ -434,5 +473,65 @@ describe('applyPhaseResult', () => {
     const first = getPhaseStats(save, 'missing');
     first.attempts = 5;
     expect(getPhaseStats(save, 'missing').attempts).toBe(0);
+  });
+});
+
+describe('endless stats', () => {
+  it('returns zeroed stats when the save has none', () => {
+    const save = createDefaultSave();
+    const stats = getEndlessStats(save);
+    expect(stats).toEqual({ bestWave: 0, bestScore: 0, runs: 0 });
+
+    stats.bestWave = 99;
+    expect(getEndlessStats(save).bestWave).toBe(0);
+  });
+
+  it('records the first endless run', () => {
+    const next = applyEndlessResult(createDefaultSave(), 7, 1200, 50);
+    expect(next.endless).toEqual({ bestWave: 7, bestScore: 1200, runs: 1 });
+    expect(next.updatedAt).toBe(50);
+  });
+
+  it('keeps the bests when a worse run finishes but counts it', () => {
+    const save = makeSave({ endless: { bestWave: 10, bestScore: 5000, runs: 2 } });
+    const next = applyEndlessResult(save, 4, 800, 60);
+    expect(next.endless).toEqual({ bestWave: 10, bestScore: 5000, runs: 3 });
+    expect(next.updatedAt).toBe(60);
+  });
+
+  it('updates both bests when a better run finishes', () => {
+    const save = makeSave({ endless: { bestWave: 10, bestScore: 5000, runs: 2 } });
+    const next = applyEndlessResult(save, 12, 6000, 70);
+    expect(next.endless).toEqual({ bestWave: 12, bestScore: 6000, runs: 3 });
+  });
+
+  it('floors fractional wave and score values', () => {
+    const next = applyEndlessResult(createDefaultSave(), 7.9, 1200.8, 1);
+    expect(next.endless).toEqual({ bestWave: 7, bestScore: 1200, runs: 1 });
+  });
+
+  it('does not change unlockedPhase or phases', () => {
+    const save = makeSave({
+      unlockedPhase: 4,
+      phases: {
+        'phase-1': {
+          bestTimeMs: 30_000,
+          bestScore: 900,
+          attempts: 1,
+          clears: 1,
+          bestLevel: 3,
+        },
+      },
+    });
+
+    const next = applyEndlessResult(save, 5, 1000, 1);
+    expect(next.unlockedPhase).toBe(4);
+    expect(next.phases).toEqual(save.phases);
+  });
+
+  it('applyPhaseResult preserves endless stats', () => {
+    const save = makeSave({ endless: { bestWave: 8, bestScore: 300, runs: 4 } });
+    const next = applyPhaseResult(save, makeResult(), 1);
+    expect(next.endless).toEqual({ bestWave: 8, bestScore: 300, runs: 4 });
   });
 });

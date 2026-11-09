@@ -82,6 +82,7 @@ export class HudOverlay {
   private readonly resultsKicker: HTMLElement;
   private readonly resultsTitle: HTMLElement;
   private readonly resultsPhase: HTMLElement;
+  private readonly resultsEndless: HTMLElement;
   private readonly resultsScore: HTMLElement;
   private readonly resultsTime: HTMLElement;
   private readonly resultsBestScore: HTMLElement;
@@ -185,6 +186,10 @@ export class HudOverlay {
     this.resultsPhase = document.createElement('p');
     this.resultsPhase.className = 'overlay__phase';
 
+    this.resultsEndless = document.createElement('p');
+    this.resultsEndless.className = 'overlay__endless';
+    this.resultsEndless.hidden = true;
+
     const summary = document.createElement('dl');
     summary.className = 'overlay__summary';
 
@@ -245,6 +250,7 @@ export class HudOverlay {
       this.resultsTitle,
       this.resultsPhase,
       summary,
+      this.resultsEndless,
       this.resultsEnding,
       perksTitle,
       this.resultsPerks,
@@ -309,26 +315,42 @@ export class HudOverlay {
   }
 
   private renderResult(result: PhaseResult): void {
+    const endless = result.endless === true;
     const campaignComplete =
+      !endless &&
       result.victory &&
       result.nextPhaseId === null &&
       result.phaseIndex === result.phaseCount;
 
-    this.resultsKicker.textContent = campaignComplete
-      ? en.resultCampaign
-      : result.victory
-        ? en.resultVictory
-        : en.resultDefeat;
-    this.resultsKicker.dataset.kind = campaignComplete
-      ? 'campaign'
-      : result.victory
-        ? 'victory'
-        : 'defeat';
+    this.resultsKicker.textContent = endless
+      ? en.resultEndless
+      : campaignComplete
+        ? en.resultCampaign
+        : result.victory
+          ? en.resultVictory
+          : en.resultDefeat;
+    this.resultsKicker.dataset.kind = endless
+      ? 'endless'
+      : campaignComplete
+        ? 'campaign'
+        : result.victory
+          ? 'victory'
+          : 'defeat';
     this.resultsTitle.textContent = result.phaseName;
-    this.resultsPhase.textContent = `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
-      1,
-      result.phaseCount,
-    )}`;
+    this.resultsPhase.textContent = endless
+      ? `${en.endless} · ${en.hudWave} ${Math.max(1, result.waveReached ?? 1)}`
+      : `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
+          1,
+          result.phaseCount,
+        )}`;
+
+    this.resultsEndless.hidden = !endless;
+    if (endless) {
+      const best = Math.max(result.bestWave ?? 0, result.waveReached ?? 0);
+      this.resultsEndless.textContent = `${en.overlayBestWave}: ${best}`;
+    } else {
+      this.resultsEndless.textContent = '';
+    }
 
     this.resultsScore.textContent = formatScore(result.score);
     this.resultsTime.textContent = formatTime(result.timeMs);
@@ -338,7 +360,7 @@ export class HudOverlay {
 
     this.renderEnding(result.ending ?? null);
 
-    const showNext = result.victory && result.nextPhaseId !== null;
+    const showNext = !endless && result.victory && result.nextPhaseId !== null;
     this.nextButton.hidden = !showNext;
 
     this.renderPerks(result.perks);

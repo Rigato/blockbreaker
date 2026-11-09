@@ -390,11 +390,16 @@ export class Hud {
       this.stopLevelUp();
     }
 
-    this.waveKicker.textContent = `${en.phaseLabel} ${snapshot.phaseIndex}/${Math.max(
-      1,
-      snapshot.phaseCount,
-    )} · ${snapshot.waveName}`;
-    this.waveText.textContent = `${snapshot.phaseName} · ${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount}`;
+    if (snapshot.endless) {
+      this.waveKicker.textContent = `${en.endless} · ${snapshot.waveName}`;
+      this.waveText.textContent = `${en.endless} · ${en.hudWave} ${snapshot.waveIndex}`;
+    } else {
+      this.waveKicker.textContent = `${en.phaseLabel} ${snapshot.phaseIndex}/${Math.max(
+        1,
+        snapshot.phaseCount,
+      )} · ${snapshot.waveName}`;
+      this.waveText.textContent = `${snapshot.phaseName} · ${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount}`;
+    }
 
     if (this.lastWaveId !== null && snapshot.waveId !== this.lastWaveId) this.pulseWave();
     this.lastWaveId = snapshot.waveId;

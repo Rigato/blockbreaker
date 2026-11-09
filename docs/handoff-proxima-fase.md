@@ -1,13 +1,21 @@
 # Handoff — Bricklike pós-MVP
 
 **Documento de transferência para planejar a próxima fase de desenvolvimento**  
-**Data:** 2026-11-08  
-**Versão do jogo:** `0.2.0-dev` (build publicado: `0.1.0-mvp`)  
+**Data:** 2026-11-09  
+**Versão do jogo:** `0.3.0-dev` (build publicado: `0.1.0-mvp`)  
 **Repositório:** <https://github.com/Rigato/blockbreaker>  
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`  
 **Build de review:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
 
+> **Atualização v0.3.0 — Endless (2026-11-09):** o jogo ganhou um **modo Endless**
+> separado da campanha: uma fase infinita com ondas procedurais, velocidade
+> **660→1100**, linhas **4→12**, blocos/elementos graduais e chefes a cada 5
+> ondas. Perks e XP seguem a curva do modo Levels; Second Chance vale uma vez por
+> run. O save v1 ganhou `endless: { bestWave, bestScore, runs }` (saves antigos
+> caem em zeros) e os results mostram Wave/Best wave/score/level/perks, sem Next.
+> A campanha e o build `0.1.0-mvp` do itch.io permanecem intactos.
+>
 > **Atualização v0.2.0 (2026-11-08):** a campanha passou de 3 fases × 3 ondas
 > para **6 fases e 21 ondas** (3/3/3/3/4/5), com **9 blocos**, **7 elementos**,
 > **3 chefes**, **19 perks**, regras de onda (`timeLimit`, `noLaser`), zoom de
@@ -15,10 +23,12 @@
 > aceita saves antigos. O build **`0.1.0-mvp` publicado no itch.io permanece
 > congelado**; a v0.2.0 é desenvolvimento e ainda não foi enviada aos portais.
 >
-> **Estado dos gates:** G6 aprovado pelo owner em 2026-11-08. A v0.2.0 tem
-> typecheck, 229 testes, `validate:content`, build, package e 16 E2E verdes. O
-> G7 original (pacote `0.1.0-mvp`) continua **pendente** para os portais que
-> ainda não receberam o build; não há tag, GitHub Release nem submissão nova.
+> **Estado dos gates:** G6 aprovado pelo owner em 2026-11-08. A v0.3.0 tem
+> typecheck, 252 testes, build e E2E de Endless/campanha verdes; `validate:content`
+> continua verde. O G7 original (pacote `0.1.0-mvp`) continua **pendente** para os
+> portais que ainda não receberam o build; não há tag, GitHub Release nem
+> submissão nova. A E5 (docs/release) da v0.3.0 foi concluída localmente; falta
+> apenas a publicação manual.
 
 ---
 
@@ -26,28 +36,30 @@
 
 O Bricklike é um block breaker HTML5 portrait com progressão roguelite. A versão
 atual de desenvolvimento tem **6 fases, 21 ondas, 9 tipos de bloco, 7 elementos
-de fase, 3 chefes e 19 perks**, save entre sessões, encerramentos por fase e
-integração com a Playgama Bridge. O conteúdo é validado (759 blocos, 1.831 XP) e
-a automação cobre simulação, progressão, conteúdo, save, layout e E2E.
+de fase, 3 chefes e 19 perks**, mais o **modo Endless** (fase infinita), save
+entre sessões, encerramentos por fase e integração com a Playgama Bridge. O
+conteúdo da campanha é validado (759 blocos, 1.831 XP) e a automação cobre
+simulação, progressão, conteúdo, save, layout, Endless e E2E.
 
 O que existe hoje:
 
 - build único para itch.io, GameFlare, Playgama e CrazyGames Basic;
 - campanha de 6 fases com ondas 3/3/3/3/4/5;
+- modo **Endless**: run infinita, velocidade 660→1100 e chefes a cada 5 ondas;
 - 9 blocos (3 básicos + 6 especiais), 7 elementos e 3 chefes;
 - 19 perks, Second Chance e sinergias de build;
 - desafios de onda, zoom de layout e endings com rank S/A/B;
-- 229 testes unitários e 16 testes E2E;
-- save v1 com `unlockedPhase` 1..6 e compatibilidade com saves antigos;
+- 252 testes unitários e E2E de Endless/campanha;
+- save v1 com `unlockedPhase` 1..6, `endless` e compatibilidade com saves antigos;
 - pacote de loja `0.1.0-mvp` com capas, screenshots, vídeo e metadata;
-- G6 aprovado; G7 original pendente; v0.2.0 não publicada.
+- G6 aprovado; G7 original pendente; v0.2.0/v0.3.0 não publicadas.
 
 O que a próxima fase precisa decidir:
 
-1. **Publicar a v0.2.0 e coletar dados reais** depois do QA final, ou
+1. **Publicar a v0.3.0 e coletar dados reais** depois do QA final, ou
 2. investir em metaprogressão/plataforma antes de novo lançamento.
 
-A recomendação é concluir o QA da v0.2.0, atualizar o pacote de loja e então
+A recomendação é concluir o QA da v0.3.0, atualizar o pacote de loja e então
 escolher a próxima frente com base em retenção, playtime, reviews e feedback dos
 jogadores. O histórico M0–M7 abaixo descreve o **MVP original** e continua válido
 como referência; números de 3 fases/9 ondas/11 perks pertencem a esse recorte.
@@ -58,15 +70,16 @@ como referência; números de 3 fases/9 ondas/11 perks pertencem a esse recorte.
 
 | Item | Valor |
 |---|---|
-| Branch de desenvolvimento | `feat/v0.2.0` |
+| Branch de desenvolvimento | `main` |
 | Branch publicada | `main` / build `0.1.0-mvp` no itch.io |
 | Commit de referência (MVP) | `3e663c1` (`docs(qa): record G6 approval`) |
-| Versão em desenvolvimento | `0.2.0-dev` |
+| Versão em desenvolvimento | `0.3.0-dev` |
 | Versão publicada | `0.1.0-mvp` |
 | Campanha | 6 fases; ondas 3/3/3/3/4/5 = 21; 759 blocos; 1.831 XP |
+| Endless | fase infinita; velocidade 660→1100; linhas 4→12; chefe a cada 5 ondas |
 | Conteúdo | 9 blocos, 7 elementos, 3 chefes, 19 perks |
-| Gate atual | G6 aprovado; G7 original pendente; v0.2.0 em QA |
-| Tag | `v0.1.0-mvp` planejada, **não criada**; `v0.2.0` não criada |
+| Gate atual | G6 aprovado; G7 original pendente; E5 da v0.3.0 concluída localmente |
+| Tag | `v0.1.0-mvp` planejada, **não criada**; `v0.2.0`/`v0.3.0` não criadas |
 | GitHub Release | **não criada** |
 | Portais | itch.io com `0.1.0-mvp`; demais **sem submissão** |
 | CI | checks + E2E + deploy verdes |
@@ -86,6 +99,8 @@ como referência; números de 3 fases/9 ondas/11 perks pertencem a esse recorte.
 - **G7 é o gate de publicação**: revisão humana dos assets e decisão de publicar.
 - **M8–M12 da v0.2.0 concluídos** com os gates técnicos verdes; a publicação
   da v0.2.0 ainda depende de decisão humana.
+- **Endless da v0.3.0 implementado** (E1–E5 concluídos localmente); a publicação
+  ainda depende de decisão humana.
 - A tag e o GitHub Release do MVP só devem ser criados **depois do G7**.
 - O upload nos portais é feito manualmente pelo owner.
 - O ZIP `0.1.0-mvp` do itch.io permanece congelado e não é substituído pela
@@ -814,7 +829,10 @@ depois de retenção validada.
 ## 12. Backlog priorizado sugerido
 
 Itens já entregues na v0.2.0 (campanha de 6 fases, blocos especiais, elementos,
-chefes, 19 perks, desafios, zoom, endings) saíram deste backlog.
+chefes, 19 perks, desafios, zoom, endings) saíram deste backlog. O **modo
+Endless** entrou na v0.3.0 com fase infinita, progressão, chefes recorrentes e
+recordes no save; leaderboard de Endless, dificuldade selecionável e
+metaprogressão continuam fora.
 
 ### P0 — fechar a v0.2.0
 
@@ -839,6 +857,8 @@ chefes, 19 perks, desafios, zoom, endings) saíram deste backlog.
 - [ ] Metaprogressão com desbloqueios de conteúdo, sem bônus permanentes.
 - [ ] Rewarded ads com vantagens específicas.
 - [ ] Leaderboards e conquistas, conforme APIs dos portais.
+- [ ] Leaderboard específico do modo Endless (fora da v0.3.0).
+- [ ] Dificuldade selecionável (fora da v0.3.0).
 - [ ] Localização para outros idiomas e landscape jogável.
 - [ ] Full Launch do CrazyGames.
 - [ ] Poki/GameDistribution/Famobi (avaliar contratos).

@@ -59,6 +59,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     root: options.root,
     controller,
     onPlay: handlePlay,
+    onEndless: handleEndless,
     onPhases: handlePhases,
   });
 
@@ -164,6 +165,11 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
 
     // Stub or no phase data yet: keep the M2 entry point working.
     controller.startRun();
+  }
+
+  function handleEndless(): void {
+    phaseSelect.close();
+    controller.startEndless();
   }
 
   function handlePhases(): void {

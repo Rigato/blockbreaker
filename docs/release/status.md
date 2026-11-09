@@ -1,19 +1,29 @@
 # Status de publicação — Bricklike
 
 Versão publicada: **`0.1.0-mvp`** (congelada)  
-Desenvolvimento atual: **`0.2.0-dev`** (não publicada)  
-Atualizado em: 2026-11-08  
+Desenvolvimento atual: **`0.3.0-dev`** — modo **Endless** em desenvolvimento (não publicado)  
+Atualizado em: 2026-11-09  
 Responsável pela submissão: **usuário (manual)**
 
 Este arquivo é o registro pós-G7. Preencha a tabela depois de cada upload e
 guarde a URL pública e a data. O itch.io recebeu o build `0.1.0-mvp`; a v0.2.0
-continua em desenvolvimento e não foi enviada aos portais.
+(campanha) e a v0.3.0 (Endless) continuam em desenvolvimento e não foram enviadas
+aos portais.
+
+## Modo Endless
+
+- **Status:** em desenvolvimento na v0.3.0; **não publicado** em nenhum portal.
+- Uma run infinita separada da campanha, com velocidade 660→1100, linhas 4→12 e
+  chefes a cada 5 ondas.
+- Save v1 ganha `endless: { bestWave, bestScore, runs }`; a campanha não muda.
+- A publicação depende da conclusão da E5 e de revisão humana; o build
+  `0.1.0-mvp` do itch.io permanece congelado.
 
 ## Portais
 
 | Portal | Status | URL pública | Data do upload | Review / observação |
 |---|---|---|---|---|
-| itch.io | **publicado `0.1.0-mvp`** | — | — | build congelado; v0.2.0 não publicada |
+| itch.io | **publicado `0.1.0-mvp`** | — | — | build congelado; v0.2.0/v0.3.0 (Endless) não publicadas |
 | GameFlare | não submetido | — | — | — |
 | Playgama | não submetido | — | — | review ~24 h |
 | CrazyGames Basic | não submetido | — | — | acompanhar 7 dias / 500 plays |

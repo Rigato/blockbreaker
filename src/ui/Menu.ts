@@ -6,6 +6,7 @@ export interface MenuOptions {
   root: HTMLElement;
   controller: GameCommands;
   onPlay: () => void;
+  onEndless: () => void;
   onPhases: () => void;
 }
 
@@ -23,9 +24,12 @@ export interface MenuBest {
 export class Menu {
   private readonly controller: GameCommands;
   private readonly onPlay: () => void;
+  private readonly onEndless: () => void;
   private readonly onPhases: () => void;
   private readonly section: HTMLElement;
   private readonly playButton: HTMLButtonElement;
+  private readonly endlessButton: HTMLButtonElement;
+  private readonly endlessNote: HTMLElement;
   private readonly phasesButton: HTMLButtonElement;
   private readonly soundButton: HTMLButtonElement;
   private readonly soundValue: HTMLElement;
@@ -37,6 +41,7 @@ export class Menu {
   constructor(options: MenuOptions) {
     this.controller = options.controller;
     this.onPlay = options.onPlay;
+    this.onEndless = options.onEndless;
     this.onPhases = options.onPhases;
 
     const section = document.createElement('section');
@@ -118,6 +123,25 @@ export class Menu {
     playButton.textContent = en.play;
     playButton.addEventListener('click', this.handlePlay);
 
+    const endlessWrap = document.createElement('div');
+    endlessWrap.className = 'menu__endless-wrap';
+
+    const endlessButton = document.createElement('button');
+    this.endlessButton = endlessButton;
+    endlessButton.type = 'button';
+    endlessButton.id = 'endless-button';
+    endlessButton.className = 'menu__secondary menu__endless';
+    endlessButton.textContent = en.endless;
+    endlessButton.addEventListener('click', this.handleEndless);
+
+    const endlessNote = document.createElement('span');
+    this.endlessNote = endlessNote;
+    endlessNote.className = 'menu__endless-note';
+    endlessNote.textContent = en.endlessNote;
+    endlessNote.hidden = true;
+
+    endlessWrap.append(endlessButton, endlessNote);
+
     const phasesButton = document.createElement('button');
     this.phasesButton = phasesButton;
     phasesButton.type = 'button';
@@ -155,7 +179,7 @@ export class Menu {
     note.setAttribute('role', 'status');
     note.textContent = en.playNote;
 
-    actions.append(playButton, phasesButton, sound, note);
+    actions.append(playButton, endlessWrap, phasesButton, sound, note);
 
     const footer = document.createElement('p');
     footer.className = 'menu__footer';
@@ -173,6 +197,15 @@ export class Menu {
     this.bestPhase.textContent = best.phaseName ?? en.menuBestEmpty;
     this.bestScore.textContent = formatScore(best.bestScore);
     this.bestTime.textContent = formatTime(best.bestTimeMs);
+
+    const bestWave = snapshot.endlessBestWave ?? 0;
+    if (bestWave > 0) {
+      this.endlessNote.hidden = false;
+      this.endlessNote.textContent = `${en.endlessBest}: ${bestWave}`;
+    } else {
+      this.endlessNote.hidden = true;
+      this.endlessNote.textContent = en.endlessNote;
+    }
   }
 
   setHidden(hidden: boolean): void {
@@ -185,6 +218,7 @@ export class Menu {
 
   dispose(): void {
     this.playButton.removeEventListener('click', this.handlePlay);
+    this.endlessButton.removeEventListener('click', this.handleEndless);
     this.phasesButton.removeEventListener('click', this.handlePhases);
     this.soundButton.removeEventListener('click', this.handleSound);
     this.section.remove();
@@ -200,6 +234,11 @@ export class Menu {
   private readonly handlePlay = (): void => {
     this.playButton.blur();
     this.onPlay();
+  };
+
+  private readonly handleEndless = (): void => {
+    this.endlessButton.blur();
+    this.onEndless();
   };
 
   private readonly handlePhases = (): void => {

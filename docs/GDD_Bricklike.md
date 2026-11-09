@@ -3,21 +3,22 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.1  
-**Data:** 2026-11-08  
-**Status:** v0.2.0 em desenvolvimento; v0.1.0-mvp publicado no itch.io  
+**Versão:** 1.2  
+**Data:** 2026-11-09  
+**Status:** v0.3.0 em desenvolvimento; v0.1.0-mvp no itch.io  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha v0.2.0 tem **6 fases e 21 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. O build `0.1.0-mvp` continua congelado no itch.io; a v0.2.0 é a expansão em desenvolvimento.
+A campanha v0.2.0 tem **6 fases e 21 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. A v0.3.0 adiciona o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. O build `0.1.0-mvp` continua congelado no itch.io.
 
 ### Como ler os status
 
 - **Confirmado:** escolha expressa pelo jogador ou consolidada no design.
-- **v0.2.0:** implementado e validado na expansão atual.
+- **v0.3.0:** implementado e validado na expansão atual (modo Endless).
+- **v0.2.0:** implementado e validado na expansão anterior (campanha).
 - **MVP:** recorte original de `0.1.0-mvp`.
 - **Futuro:** ideia aceita como possibilidade, sem compromisso de implementação.
 - **Em aberto:** parâmetro ou regra que ainda precisa de decisão ou teste.
@@ -52,6 +53,20 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 **Vitória de fase:** limpar todas as ondas previstas, incluindo o chefe quando a onda o define.  
 **Campanha:** 6 fases, com ondas por fase 3/3/3/3/4/5 (total 21).
 
+### Modo Endless (v0.3.0)
+
+- **Acesso:** botão **Endless** no menu principal, separado de Play e Levels.
+- **Estrutura:** uma run única em uma fase infinita (`endless`), sem vitória; a run termina quando todas as bolas caem.
+- **Velocidade:** base **660**, **+14 por onda**, teto **1100**. A velocidade passa de **780 na onda 10** (786) e satura em **1100 na onda 32**.
+- **Linhas:** começam em **4** e crescem até **12**; a densidade sobe de ~55% para ~92%.
+- **Blocos especiais:** introdução gradual — `moving` (onda 4), `explosive` (5), `regenerative` (7), `multiplier` (9), `linked` (11) e `generator` (13).
+- **Elementos:** `wall` (2), `deflector` (4), `portal` (6), `mover` (8), `gate` (10) e `rotor` (12); a partir da onda 14 a geração combina os **7** tipos.
+- **Chefes:** a cada **5 ondas**, alternando os padrões sentinel/warden/void (Frost Sentinel, Ember Warden e Void Herald), com HP **`40 + wave × 6`**.
+- **XP e perks:** a mesma curva do modo Levels; os perks persistem entre ondas. **Second Chance** continua valendo uma vez por run.
+- **Results:** mostram **Wave**, **Best wave**, score, level e perks; **sem botão Next**. Retry recomeça uma run Endless e Menu volta ao menu.
+- **Save:** `endless: { bestWave, bestScore, runs }` dentro de `bb.save` v1; saves antigos caem em zeros.
+- **Progressão:** o Endless **não desbloqueia fases da campanha**; os recordes são apenas pessoais.
+
 ## 3. Regras de gameplay confirmadas
 
 ### Controles e trajetória
@@ -70,6 +85,7 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - Perks podem salvar uma bolinha ou prevenir/reverter uma derrota. Não há vidas separadas por bolinha.
 - **Second Chance** revive a run uma vez por run, com uma bola nova presa ao paddle.
 - Alguns perks alteram propriedades físicas das bolinhas. Perks de bolinha são passivos ou automáticos; poderes ativáveis pertencem ao rebatedor.
+- **Velocidade no Endless:** as regras de laser (bola solta, dano e cooldown) são as mesmas da campanha, mas a velocidade da bola começa em **660**, sobe **14 por onda** e satura em **1100**. O limite de **780** vale apenas para a campanha.
 
 ### Ondas, XP e perks
 
@@ -199,12 +215,14 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Entre fases | Progressão sequencial: vencer uma fase desbloqueia a próxima. As fases 4–6 desbloqueiam em sequência, de 4 para 5 e de 5 para 6. |
 | Ao perder | Reiniciar a fase perdida imediatamente, sem limite de tentativas; fases já desbloqueadas permanecem disponíveis. |
 | Second Chance | Revive a run uma vez por run, com uma bola. É um perk único; não é uma vida extra por bolinha. |
+| Modo Endless | Run infinita separada da campanha. O save v1 guarda `endless` com `bestWave`, `bestScore` e `runs`; não altera `unlockedPhase`. |
 | Salvamento | Save schema v1 (`bb.save`), com `unlockedPhase` de 1 a 6 e estatísticas por fase. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
 | Compatibilidade | Saves antigos continuam válidos; `unlockedPhase` é limitado a 1..6 e campos malformados caem em defaults. |
-| Metaprogressão | Fora do escopo da v0.2.0. Desbloqueios permanentes de conteúdo e melhorias de atributos ficam para uma fase futura. |
+| Metaprogressão | Fora do escopo da v0.3.0. Desbloqueios permanentes de conteúdo e melhorias de atributos ficam para uma fase futura. |
 | Competição | Estatísticas pessoais e recordes por fase; rankings globais e conquistas continuam fora do escopo. |
 
 - Save v1 mantém `phases` por `phaseId` com `bestTimeMs`, `bestScore`, `attempts`, `clears` e `bestLevel`.
+- O mesmo save mantém `endless` com `bestWave`, `bestScore` e `runs`; é opcional no parse e saves antigos recebem zeros.
 - Settings v1 mantém `sound`.
 - A run ativa não é salva.
 
@@ -235,6 +253,17 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Save | v1 mantido, `unlockedPhase` 1..6 |
 | Correção | Laser só dispara com pelo menos uma bola solta |
 
+### O que entrou na v0.3.0
+
+| Item | Entrega |
+|---|---|
+| Modo Endless | Fase infinita com ondas procedurais e fim quando todas as bolas caem |
+| Progressão | Velocidade 660→1100, linhas 4→12, blocos e elementos graduais |
+| Chefes | Um a cada 5 ondas, alternando sentinel/warden/void; HP `40 + wave × 6` |
+| Save | `endless: { bestWave, bestScore, runs }` no schema v1 |
+| UI | Botão Endless no menu, HUD sem denominador e results sem Next |
+| Escopo | Campanha intacta; Endless não desbloqueia fases |
+
 ### O que continua fora
 
 - Metaprogressão permanente, rewarded ads, leaderboards e conquistas.
@@ -250,7 +279,7 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 - Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
 - **Um build, 6 fases:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração.
 - O **itch.io recebeu o build `0.1.0-mvp`**; esse ZIP permanece congelado.
-- A v0.2.0 é desenvolvimento e ainda não substitui o build publicado.
+- A v0.3.0 (modo Endless) é desenvolvimento e ainda não substitui o build publicado.
 - Os portais restantes (GameFlare, Playgama e CrazyGames Basic) continuam com submissão **manual**.
 - Revalidar os requisitos dos portais na data de submissão.
 
@@ -265,14 +294,15 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 
 - Jogo totalmente gratuito; receita somente de publicidade.
 - Modelo escolhido: anúncios convencionais conforme cada portal e anúncios recompensados opcionais que concedem uma vantagem ao jogador.
-- **Rewarded ads continuam fora da v0.2.0**; o build atual usa apenas interstitial na saída dos results.
+- **Rewarded ads continuam fora da v0.3.0**; o build atual usa apenas interstitial na saída dos results.
 - Sem compras, microtransações, cosméticos pagos ou opção paga para remover anúncios.
 - Respeitar a disponibilidade e as regras de cada portal; não inserir anúncios forçados durante a ação do block breaker.
 
 ## 9. Backlog futuro
 
-Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog.
+Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog. O **modo Endless** entrou no escopo da **v0.3.0** com fase infinita, progressão, chefes recorrentes e recordes no save.
 
+- Leaderboard específico do modo Endless (o ranking global continua fora).
 - Metaprogressão permanente com desbloqueios de conteúdo, sem bônus permanentes de atributos iniciais.
 - Rewarded ads com vantagens específicas, após definir benefícios e limites para preservar o equilíbrio.
 - Rankings globais e conquistas, condicionados aos recursos dos portais.
@@ -287,7 +317,8 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 
 | Tema | Pendência / observação |
 |---|---|
-| Conteúdo | A campanha de 6 fases / 21 ondas está fechada; não há novas fases previstas nesta versão. |
+| Conteúdo | A campanha de 6 fases / 21 ondas está fechada; não há novas fases da campanha nesta versão. O Endless é gerado proceduralmente. |
+| Endless | Uma fase infinita implementada; balanceamento das ondas altas e dos chefes ainda depende de playtest humano. |
 | Ondas | Distribuição decidida: 3/3/3/3/4/5. As ondas novas (3 na fase 4, 4 na fase 5, 5 na fase 6) estão implementadas e validadas. |
 | Perks | Catálogo fechado em 19 perks, com níveis, pré-requisitos e fallback interno. Balanceamento fino ainda depende de playtest humano. |
 | Chefes | Três chefes definidos (Frost Sentinel, Ember Warden, Void Herald) com HP, padrão, shards e corrosão. Ajuste de dificuldade segue aberto para playtest. |
@@ -298,7 +329,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | Metaprogressão | Fora do escopo; decidir se a próxima fase é conteúdo, meta ou plataforma. |
 | Localização | Fora do escopo; o catálogo de strings precisa ser separado por locale antes. |
 | Performance real | Números de hardware real ainda não estão versionados; criar baseline por device. |
-| Distribuição | itch.io com `0.1.0-mvp` congelado; portais restantes aguardam submissão manual da v0.2.0. |
+| Distribuição | itch.io com `0.1.0-mvp` congelado; portais restantes aguardam submissão manual. A v0.3.0 (Endless) é desenvolvimento e não substitui o build publicado. |
 | Áudio | Novos elementos e chefes usam SFX existentes; mixagem final ainda pode ser refinada. |
 
 ### Checklist de coerência
@@ -309,8 +340,9 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 - O laser exige pelo menos uma bola solta; Sticky e a bola inicial presa bloqueiam o disparo.
 - O zoom é escala de layout, não de câmera; o input não muda.
 - Metaprogressão desbloqueia conteúdo, não bônus permanentes de atributos. A run ativa não é salva.
-- A monetização é somente publicidade; rewarded ads continuam opcionais e fora da v0.2.0.
-- O build `0.1.0-mvp` do itch.io permanece congelado; a v0.2.0 é desenvolvimento.
+- O Endless é uma run separada: não desbloqueia fases, não substitui a campanha e mantém seus próprios recordes no save.
+- A monetização é somente publicidade; rewarded ads continuam opcionais e fora da v0.3.0.
+- O build `0.1.0-mvp` do itch.io permanece congelado; a v0.3.0 é desenvolvimento.
 
 ---
 
@@ -320,7 +352,9 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 |---|---|---|
 | `1.0` | 2026-11-07 | GDD do MVP: 3 fases × 3 ondas, 3 blocos, 11 perks, sem chefes. |
 | `1.1` | 2026-11-08 | v0.2.0-dev: campanha de 6 fases / 21 ondas, 9 blocos, 7 elementos, 3 chefes, 19 perks, desafios, zoom de layout, encerramentos e save 1..6. |
+| `1.2` | 2026-11-09 | v0.3.0-dev: modo Endless com fase infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas, save `endless` e results próprios. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
-| `0.2.0-dev` | 2026-11-08 | Expansão em desenvolvimento; ainda não publicada nos portais. |
+| `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
+| `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |
 
 Este GDD separa as decisões confirmadas do recorte da versão atual, do backlog futuro e das pendências de design. Use a seção de pendências para fechar parâmetros e critérios de aceite antes de transformar o escopo em tarefas de implementação.

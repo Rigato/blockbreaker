@@ -2,14 +2,15 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.2.0 — campaign expansion**: a **6-phase, 21-wave** campaign with
-**9 block types**, **7 phase elements**, **3 bosses**, **19 perks**, dynamic
-layout zoom and per-phase endings. The M0–M7 history below remains valid and the
-`0.1.0-mvp` build is still the frozen package published on itch.io.
+line is **v0.3.0 — Endless mode**: an infinite run with procedural waves on top
+of the **v0.2.0 campaign** — **6 phases, 21 waves**, **9 block types**, **7 phase
+elements**, **3 bosses**, **19 perks**, dynamic layout zoom and per-phase
+endings. The M0–M7 history below remains valid and the `0.1.0-mvp` build is still
+the frozen package published on itch.io.
 
-The v0.2.0 work is in progress on `feat/v0.2.0`; there is no public v0.2.0
-release or portal upload yet. The v0.1.0-mvp ZIP on itch.io is **frozen** and is
-not replaced by this branch. The GitHub Pages review build tracks the branch.
+The v0.3.0 work is implemented on `main`; there is no public v0.3.0 release or
+portal upload yet. The v0.1.0-mvp ZIP on itch.io is **frozen** and is not
+replaced by this branch. The GitHub Pages review build tracks the branch.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -40,10 +41,38 @@ npm run validate:content
 node scripts/validate-bridge-config.mjs
 npm run build
 npm run package   # release/blockbreaker-web.zip + manifest
-npm run test:e2e  # Playwright smoke/layout (build first)
+npm run test:e2e  # Playwright smoke/layout/endless/campaign (build first)
 npm run qa:runs -- --runs=10   # automated baseline, not human playtest
 npm run preview   # serves dist/ locally
 ```
+
+## v0.3.0 — Endless mode
+
+Development line: `main`. Not published to any portal yet; the `0.1.0-mvp` ZIP
+on itch.io stays frozen.
+
+- **Endless button** in the main menu, separate from Play and Levels.
+- **Infinite run:** no victory condition; the run ends when every ball is lost.
+  Waves are generated procedurally from the run seed.
+- **Speed ramp:** starts at **660**, gains **+14 per wave** and caps at **1100**.
+  It passes **780 on wave 10** (786) and reaches the cap on **wave 32**.
+- **Rows** grow from **4 to 12**; density rises from about 55% to 92%.
+- **Progressive content:** `moving` (wave 4), `explosive` (5), `regenerative`
+  (7), `multiplier` (9), `linked` (11) and `generator` (13). Elements enter as
+  `wall` (2), `deflector` (4), `portal` (6), `mover` (8), `gate` (10) and
+  `rotor` (12); wave 14+ combines all seven.
+- **Bosses every 5 waves**, alternating Frost Sentinel, Ember Warden and Void
+  Herald patterns, with HP `40 + wave × 6`.
+- **XP and perks** use the same curve as Levels and persist between waves.
+  Second Chance still revives once per run.
+- **Results** show Wave, Best wave, score, level and perks, with **no Next
+  button**. Retry starts a new Endless run and Menu returns to the menu.
+- **Save:** `endless: { bestWave, bestScore, runs }` inside the v1 `bb.save`;
+  old saves parse to zeroed stats.
+- Endless **does not unlock campaign phases** and does not change campaign
+  balance.
+- `npm run test:e2e` covers the Endless flow (menu → wave 1 → next waves →
+  defeat → results/save) alongside the campaign suite.
 
 ## v0.2.0 — campaign expansion
 
@@ -241,7 +270,7 @@ Development branch: `feat/v0.2.0`. Not published to any portal yet; the
 | Pause | Pause button → Resume/Restart/Sound/Menu | Pause button / P → Resume/Restart/Sound/Menu |
 | Laser | Laser button (needs a loose ball) | Laser button / Space / E (needs a loose ball) |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
-| Menu / levels | Pause → Menu, Results → Menu | Pause → Menu, Results → Menu |
+| Menu / modes | Pause → Menu, Results → Menu; Menu → Endless | Pause → Menu, Results → Menu; Menu → Endless |
 | Rotate device | Portrait only (landscape guard) | — |
 
 The Prism Laser is disabled while every ball is stuck (opening serve or Sticky
@@ -291,6 +320,7 @@ src/
   audio/                   Synthesized WebAudio service, voice budget and lifecycle
   content/                 Phase/wave/element/boss/perk definitions
   content/endings.ts       Per-phase epilogues, ranks and campaign finale
+  content/endless.ts       Endless wave generator, speed ramp and bosses
   assets/fonts/            Bundled Silkscreen OFL font files
   game/                    Game orchestration, contracts, events and config
   sim/                     Pure fixed-step simulation, collision and layout scale
@@ -317,6 +347,7 @@ release/                   Generated ZIP + manifest (not committed)
 - [Low-friction publishing plan](docs/plano-baixa-fricao.md)
 - [MVP implementation plan](docs/plano-implementacao-mvp.md)
 - [v0.2.0 campaign expansion plan](docs/plano-v0.2.0.md)
+- [Endless mode plan](docs/plano-endless.md)
 - [Post-MVP handoff](docs/handoff-proxima-fase.md)
 
 ## Deployment

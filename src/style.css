@@ -503,6 +503,45 @@ button {
   outline-offset: 3px;
 }
 
+.menu__endless-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.menu__endless {
+  border-color: rgba(255, 212, 121, 0.4);
+  background:
+    linear-gradient(180deg, rgba(255, 212, 121, 0.1), rgba(46, 32, 8, 0.55)),
+    rgba(10, 24, 44, 0.8);
+  color: var(--gold);
+}
+
+.menu__endless:hover {
+  border-color: var(--gold);
+  background:
+    linear-gradient(180deg, rgba(255, 212, 121, 0.18), rgba(58, 40, 10, 0.6)),
+    rgba(18, 42, 72, 0.9);
+}
+
+.menu__endless-note {
+  overflow: hidden;
+  color: var(--gold);
+  font-size: clamp(8px, 2cqw, 10px);
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.menu__endless-note[hidden] {
+  display: none;
+}
+
 .menu__sound {
   display: flex;
   gap: 10px;
@@ -2310,9 +2349,32 @@ button {
   color: var(--magenta);
 }
 
-.overlay__kicker[data-kind='campaign'] {
+.overlay__kicker[data-kind='campaign'],
+.overlay__kicker[data-kind='endless'] {
   color: var(--gold);
   text-shadow: 0 0 14px rgba(255, 212, 121, 0.4);
+}
+
+.overlay__endless {
+  margin: 0;
+  padding: 4px 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 212, 121, 0.35);
+  border-radius: 6px;
+  background: rgba(38, 28, 10, 0.45);
+  color: var(--gold);
+  font-size: clamp(9px, 2.4cqw, 12px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.overlay__endless[hidden] {
+  display: none;
 }
 
 .overlay--results .overlay__title {
@@ -3197,7 +3259,18 @@ html[data-debug='1'] .hud__top {
   }
 
   .hud__wave-text {
+    max-width: 100%;
     font-size: 8px;
+  }
+
+  .menu__endless-note {
+    font-size: 8px;
+  }
+
+  .overlay__endless {
+    padding: 3px 6px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
   }
 
   .hud__xp-line {

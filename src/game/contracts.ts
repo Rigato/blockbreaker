@@ -74,11 +74,19 @@ export interface PhaseStats {
   bestLevel: number;
 }
 
+/** Persisted Endless-mode statistics. */
+export interface EndlessStats {
+  bestWave: number;
+  bestScore: number;
+  runs: number;
+}
+
 /** Persisted save. Active runs are intentionally not saved. */
 export interface SaveV1 {
   version: 1;
   unlockedPhase: number;
   phases: Record<string, PhaseStats>;
+  endless: EndlessStats;
   updatedAt: number;
 }
 
@@ -230,6 +238,12 @@ export interface PhaseResult {
   nextPhaseId: string | null;
   /** Epilogue/rank for boss and campaign endings; null when none. */
   ending?: EndingSummary | null;
+  /** True when the result belongs to an Endless run. */
+  endless?: boolean;
+  /** Wave reached in the finished Endless run. */
+  waveReached?: number;
+  /** Best wave after recording the result. */
+  bestWave?: number;
 }
 
 /** Minimal state required by the DOM HUD. Emitted only when it changes. */
@@ -274,6 +288,12 @@ export interface HudSnapshot {
   combo?: { count: number; multiplier: number } | null;
   /** Wave intro text; optional until integrated. */
   waveIntro?: string | null;
+  /** True while the active run is Endless mode. */
+  endless?: boolean;
+  /** Persisted best wave for the HUD. */
+  endlessBestWave?: number;
+  /** Persisted best score for the HUD. */
+  endlessBestScore?: number;
 }
 
 /** Result of one XP grant, including overflow and queued level ups. */
@@ -345,6 +365,10 @@ export interface TestWaveInfo {
 export interface GameCommands {
   /** Starts the run at the selected test wave, or wave 1. */
   startRun(): void;
+  /** Starts a fresh Endless run at wave 1. */
+  startEndless(): void;
+  /** Returns the persisted Endless statistics. */
+  getEndlessStats(): EndlessStats;
   pause(): void;
   resume(): void;
   togglePause(): void;

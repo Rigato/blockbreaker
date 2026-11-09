@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type {
   AdsService,
+  EndlessStats,
   GameCommands,
   HudPhase,
   HudSnapshot,
@@ -21,16 +22,19 @@ import type {
 import { GAME_CONFIG, SIM_TUNING_DEFAULTS, SIM_TUNING_LIMITS } from './config';
 import { gameEvents } from './events';
 import { AudioService } from '../audio';
+import { ENDLESS_PHASE, endlessEnding, endlessWave } from '../content/endless';
 import { endingForResult } from '../content/endings';
 import { PHASES } from '../content/phases';
-import type { PhaseDef } from '../content/types';
+import type { PhaseDef, WaveDef } from '../content/types';
 import { InputController } from '../input/Input';
 import { MemoryStorage } from '../platform/MemoryStorage';
 import {
   StorageSaveRepository,
+  applyEndlessResult,
   applyPhaseResult,
   createDefaultSave,
   createDefaultSettings,
+  getEndlessStats,
   getPhaseStats,
 } from '../progression/Save';
 import { RunState } from '../progression/RunState';
@@ -90,7 +94,9 @@ export class BlockBreakerGame implements GameCommands {
   private readonly unsubscribePause: () => void;
   private readonly unsubscribeAudio: () => void;
   private phase: HudPhase = 'menu';
+  private mode: 'campaign' | 'endless' = 'campaign';
   private currentPhase: PhaseDef | null = null;
+  private currentWaveDef: WaveDef | null = null;
   private currentWaveIndex = 0;
   private phaseElapsedMs = 0;
   private phaseResult: PhaseResult | null = null;
@@ -257,10 +263,45 @@ export class BlockBreakerGame implements GameCommands {
     this.restartPhase();
   }
 
+  startEndless(): void {
+    this.mode = 'endless';
+    this.currentPhase = ENDLESS_PHASE;
+    this.currentWaveDef = null;
+    this.currentWaveIndex = 0;
+    this.phaseElapsedMs = 0;
+    this.phaseResult = null;
+    this.runScore = 0;
+    this.waveScoreAtStart = 0;
+    this.pendingPerkBalls = 0;
+    this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
+    this.runSeed = this.nextSeed();
+    this.reviveUsed = false;
+    this.waveIntroUntil = 0;
+    this.runState.startRun(this.runSeed);
+    this.loadEndlessWave(1);
+    this.scene.setPhase('phase-6', 5);
+    this.audio.setSuspended(false);
+    this.phase = 'playing';
+    this.sendPlatform('level_started', { world: 'endless', level: 1 });
+    this.focusGameplay();
+    this.clock.reset();
+    this.pendingLaunch = false;
+    this.input.resetTarget();
+    this.syncHud(true);
+  }
+
+  getEndlessStats(): EndlessStats {
+    return getEndlessStats(this.save);
+  }
+
   startPhase(phaseId: string): void {
     const phase = PHASES.find((candidate) => candidate.id === phaseId);
     if (!phase || phase.index > this.save.unlockedPhase) return;
 
+    this.mode = 'campaign';
+    this.currentWaveDef = null;
     this.currentPhase = phase;
     this.currentWaveIndex = 0;
     this.phaseElapsedMs = 0;
@@ -291,6 +332,15 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   restartPhase(): void {
+    if (this.mode === 'endless') {
+      if (this.phase === 'defeat' || this.phase === 'run-complete') {
+        void this.runResultsAction(() => this.startEndless());
+      } else {
+        this.startEndless();
+      }
+      return;
+    }
+
     if (this.phase === 'run-complete' || this.phase === 'defeat') {
       void this.runResultsAction(() => {
         if (this.currentPhase) this.startPhase(this.currentPhase.id);
@@ -307,6 +357,7 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   nextPhase(): void {
+    if (this.mode === 'endless') return;
     if (this.phase !== 'run-complete') return;
     const nextId = this.phaseResult?.nextPhaseId ?? null;
     if (!nextId) return;
@@ -315,7 +366,9 @@ export class BlockBreakerGame implements GameCommands {
 
   returnToMenu(): void {
     this.phase = 'menu';
+    this.mode = 'campaign';
     this.currentPhase = null;
+    this.currentWaveDef = null;
     this.currentWaveIndex = 0;
     this.phaseElapsedMs = 0;
     this.phaseResult = null;
@@ -374,7 +427,9 @@ export class BlockBreakerGame implements GameCommands {
     }
     this.save = createDefaultSave();
     this.settings = createDefaultSettings();
+    this.mode = 'campaign';
     this.currentPhase = null;
+    this.currentWaveDef = null;
     this.currentWaveIndex = 0;
     this.phaseElapsedMs = 0;
     this.phaseResult = null;
@@ -433,8 +488,12 @@ export class BlockBreakerGame implements GameCommands {
     this.nextWaveAt = 0;
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
-    this.loadPhaseWave(this.currentWaveIndex);
-    this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
+    this.loadCurrentWave();
+    if (this.mode === 'endless') {
+      this.scene.setPhase('phase-6', 5);
+    } else {
+      this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
+    }
     this.audio.setSuspended(false);
     this.phase = 'playing';
     this.focusGameplay();
@@ -446,6 +505,26 @@ export class BlockBreakerGame implements GameCommands {
 
   nextWave(): void {
     if (this.phase !== 'cleared' || !this.currentPhase) return;
+
+    if (this.mode === 'endless') {
+      this.currentWaveIndex += 1;
+      this.waveScoreAtStart = this.runScore;
+      this.pendingPerkBalls = 0;
+      this.nextWaveAt = 0;
+      this.levelUpRevealAt = 0;
+      this.ballRespawnLeftMs = 0;
+      this.loadEndlessWave(this.currentWaveIndex + 1);
+      this.scene.setPhase('phase-6', 5);
+      this.audio.setSuspended(false);
+      this.phase = 'playing';
+      this.focusGameplay();
+      this.clock.reset();
+      this.pendingLaunch = false;
+      this.input.resetTarget();
+      this.syncHud(true);
+      return;
+    }
+
     if (this.currentWaveIndex + 1 >= this.currentPhase.waves.length) {
       this.finishPhase(true);
       return;
@@ -634,6 +713,11 @@ export class BlockBreakerGame implements GameCommands {
     if (this.phase === 'menu' || this.phase === 'run-complete' || this.phase === 'defeat') {
       return;
     }
+    if (this.mode === 'endless') {
+      // QA shortcut: an Endless run has no victory, so it ends as a defeat.
+      this.finishEndless();
+      return;
+    }
     this.finishPhase(true);
   }
 
@@ -710,6 +794,7 @@ export class BlockBreakerGame implements GameCommands {
     if (!phase) return;
     const wave = phase.waves[index];
     if (!wave) return;
+    this.currentWaveDef = wave;
     this.world.setSeed(
       (this.runSeed ^ ((index + 1) * 0x9e3779b9)) >>> 0,
     );
@@ -719,6 +804,28 @@ export class BlockBreakerGame implements GameCommands {
     this.world.reset();
     // Discard load-time events (notably the duplicated `boss:spawned`) so the
     // first real step only reports fresh simulation events.
+    this.world.drainEvents();
+    this.waveIntroUntil = wave.intro ? performance.now() + 3500 : 0;
+  }
+
+  /** Loads the stored campaign wave or regenerates the current Endless wave. */
+  private loadCurrentWave(): void {
+    if (this.mode === 'endless') {
+      this.loadEndlessWave(this.currentWaveIndex + 1);
+      return;
+    }
+    this.loadPhaseWave(this.currentWaveIndex);
+  }
+
+  private loadEndlessWave(waveNumber: number): void {
+    const wave = endlessWave(waveNumber, this.runSeed);
+    this.currentWaveIndex = waveNumber - 1;
+    this.currentWaveDef = wave;
+    this.world.setSeed((this.runSeed ^ ((waveNumber + 1) * 0x9e3779b9)) >>> 0);
+    this.world.loadWave(wave);
+    this.world.applyRunModifiers(this.runState.modifiers);
+    this.world.setSafetyCharges(this.runState.modifiers.safetyNetCharges);
+    this.world.reset();
     this.world.drainEvents();
     this.waveIntroUntil = wave.intro ? performance.now() + 3500 : 0;
   }
@@ -801,6 +908,19 @@ export class BlockBreakerGame implements GameCommands {
 
   private finishWave(): void {
     if (!this.currentPhase) return;
+
+    if (this.mode === 'endless') {
+      this.phase = 'cleared';
+      this.nextWaveAt = performance.now() + WAVE_TRANSITION_MS;
+      this.levelUpRevealAt = 0;
+      this.ballRespawnLeftMs = 0;
+      this.clock.reset();
+      this.pendingLaunch = false;
+      this.pendingPerkBalls = 0;
+      this.syncHud(true);
+      return;
+    }
+
     if (this.currentWaveIndex + 1 >= this.currentPhase.waves.length) {
       this.finishPhase(true);
       return;
@@ -817,6 +937,11 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   private finishPhase(victory: boolean): void {
+    if (this.mode === 'endless') {
+      this.finishEndless();
+      return;
+    }
+
     const phase = this.currentPhase;
     if (!phase) return;
     if (this.phase === 'run-complete' || this.phase === 'defeat') return;
@@ -877,6 +1002,52 @@ export class BlockBreakerGame implements GameCommands {
 
     void this.saveRepository.save(updated).catch((error: unknown) => {
       console.warn('[save] could not persist phase result', error);
+    });
+  }
+
+  /** Records and presents the end of an Endless run (always a defeat). */
+  private finishEndless(): void {
+    if (this.phase === 'defeat' || this.phase === 'run-complete') return;
+
+    const wave = Math.max(1, this.currentWaveIndex + 1);
+    const score = this.runScore;
+    const timeMs = Math.max(0, Math.round(this.phaseElapsedMs));
+    const updated = applyEndlessResult(this.save, wave, score);
+    this.save = updated;
+    const stats = getEndlessStats(updated);
+
+    this.phaseResult = {
+      phaseId: 'endless',
+      phaseName: 'Endless',
+      phaseIndex: 0,
+      phaseCount: 0,
+      victory: false,
+      score,
+      timeMs,
+      level: this.runState.level,
+      perks: this.runState.perks,
+      bestScore: stats.bestScore,
+      bestTimeMs: null,
+      nextPhaseId: null,
+      ending: endlessEnding(wave, score),
+      endless: true,
+      waveReached: wave,
+      bestWave: stats.bestWave,
+    };
+    this.phase = 'defeat';
+    this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
+    this.clock.reset();
+    this.pendingLaunch = false;
+    this.pendingPerkBalls = 0;
+    this.audio.setSuspended(false);
+    this.audio.play('defeat');
+    this.sendPlatform('level_failed', { world: 'endless', level: wave });
+    this.syncHud(true);
+
+    void this.saveRepository.save(updated).catch((error: unknown) => {
+      console.warn('[save] could not persist endless result', error);
     });
   }
 
@@ -1148,8 +1319,10 @@ export class BlockBreakerGame implements GameCommands {
   private buildHud(): HudSnapshot {
     const modifiers = this.runState.modifiers;
     const phase = this.currentPhase;
-    const wave = phase?.waves[this.currentWaveIndex] ?? null;
-    const stats = phase ? getPhaseStats(this.save, phase.id) : null;
+    const endless = this.mode === 'endless';
+    const wave = this.currentWaveDef ?? phase?.waves[this.currentWaveIndex] ?? null;
+    const stats = !endless && phase ? getPhaseStats(this.save, phase.id) : null;
+    const endlessStats = endless ? getEndlessStats(this.save) : null;
     const laser =
       modifiers.laserCooldown !== null
         ? {
@@ -1206,11 +1379,11 @@ export class BlockBreakerGame implements GameCommands {
       phaseId: phase?.id ?? '',
       phaseName: phase?.name ?? '',
       phaseIndex: phase?.index ?? 0,
-      phaseCount: PHASES.length,
+      phaseCount: endless ? 0 : PHASES.length,
       waveId: wave?.id ?? '',
       waveName: wave?.name ?? '',
       waveIndex: phase ? this.currentWaveIndex + 1 : 0,
-      waveCount: phase?.waves.length ?? 0,
+      waveCount: endless ? 0 : phase?.waves.length ?? 0,
       ballsActive: this.world.balls.length,
       ballRespawnMs:
         this.ballRespawnLeftMs > 0
@@ -1226,8 +1399,8 @@ export class BlockBreakerGame implements GameCommands {
       laser,
       seed: this.runState.seed,
       elapsedMs: Math.floor(this.phaseElapsedMs / 1000) * 1000,
-      bestScore: stats?.bestScore ?? null,
-      bestTimeMs: stats?.bestTimeMs ?? null,
+      bestScore: endless ? endlessStats?.bestScore ?? null : stats?.bestScore ?? null,
+      bestTimeMs: endless ? null : stats?.bestTimeMs ?? null,
       soundEnabled: this.settings.sound,
       boss:
         boss && boss.hp > 0
@@ -1237,6 +1410,9 @@ export class BlockBreakerGame implements GameCommands {
       multiplier,
       combo,
       waveIntro,
+      endless,
+      endlessBestWave: this.save.endless.bestWave,
+      endlessBestScore: this.save.endless.bestScore,
       result:
         this.phase === 'run-complete' || this.phase === 'defeat'
           ? this.phaseResult
