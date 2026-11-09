@@ -32,6 +32,7 @@ frequência. O checklist abaixo registra o pacote preparado no M7.
 |---|---|---|---|
 | Capa 16:9 | `store/covers/cover-landscape-1920x1080.png` | 1920×1080 PNG | pendente de revisão humana |
 | Capa 2:3 | `store/covers/cover-portrait-800x1200.png` | 800×1200 PNG | pendente de revisão humana |
+| Capa portrait Playgama | `store/covers/cover-portrait-1080x1920.png` | 1080×1920 PNG | pendente de revisão humana |
 | Capa 1:1 | `store/covers/cover-square-800x800.png` | 800×800 PNG | pendente de revisão humana |
 | Contact sheet | `store/covers/cover-contact-sheet.png` | revisão interna | pendente de revisão humana |
 | Menu | `store/screenshots/01-menu-390x844.png` | 390×844 PNG | pendente de revisão humana |
@@ -89,7 +90,7 @@ frequência. O checklist abaixo registra o pacote preparado no M7.
 | Título | Bricklike | pendente de revisão humana |
 | Descrição | Curta + longa em inglês | pendente de revisão humana |
 | Orientação | Portrait | pendente de revisão humana |
-| Assets | Capa e screenshots aprovadas | pendente de revisão humana |
+| Assets | Capa portrait **1080×1920** (`cover-portrait-1080x1920.png`) e screenshots aprovadas | pendente de revisão humana |
 | Review | Acompanhar a review do portal (~24 h) | pendente de revisão humana |
 | Publicação | Usuário submete e acompanha o status | pendente de revisão humana |
 
@@ -103,7 +104,7 @@ frequência. O checklist abaixo registra o pacote preparado no M7.
 | Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | pendente de revisão humana |
 | Capa 2:3 | 800×1200, mesma linguagem visual | pendente de revisão humana |
 | Capa 1:1 | 800×800, mesma linguagem visual | pendente de revisão humana |
-| Preview video | MP4 30–60 s, gameplay real, 1280×720 | pendente de revisão humana |
+| Preview video | MP4 15–20 s, gameplay real, 1920×1080 + 1080×1620 | pendente de revisão humana |
 | Descrição | Inglês, ≥ 100 palavras | pendente de revisão humana |
 | Controles | Campo de controles preenchido | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |

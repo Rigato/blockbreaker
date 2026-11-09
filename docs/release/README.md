@@ -17,7 +17,7 @@ portais. Nenhum upload, tag ou GitHub Release foi feito pelo trabalho de M7.
 
 ## Assets
 
-- `store/covers/` — capas 1920×1080, 800×1200 e 800×800.
+- `store/covers/` — capas 1920×1080, 800×1200, 1080×1920 e 800×800.
 - `store/screenshots/` — cinco capturas reais em 390×844.
 - `store/video/` — previews MP4 1920×1080 e 1080×1620, 18,3 s, silenciosos.
 

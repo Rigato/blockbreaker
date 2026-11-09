@@ -111,9 +111,9 @@ Development branch: `feat/v0.2.0`. Not published to any portal yet; the
 
 ## M7 — release and publication package
 
-- `store/covers/` has the three required cover sizes (1920×1080, 800×1200,
-  800×800), a contact sheet and editable SVG sources. Visual language is
-  consistent across all three; the only text is **BRICKLIKE**.
+- `store/covers/` has the required cover sizes (1920×1080, 800×1200, 800×800)
+  plus the Playgama portrait **1080×1920**, a contact sheet and editable SVG
+  sources. Visual language is consistent; the only text is **BRICKLIKE**.
 - `store/screenshots/` has five real production-build captures at 390×844:
   menu, opening gameplay, laser + multiball, level-up and victory. Debug chrome
   is hidden in every shot.

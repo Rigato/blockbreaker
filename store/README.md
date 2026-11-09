@@ -8,7 +8,8 @@ submissão nos portais é manual.
 | Arquivo | Dimensão | Uso |
 |---|---|---|
 | `cover-landscape-1920x1080.png` | 1920×1080 | capa 16:9 / CrazyGames / itch.io |
-| `cover-portrait-800x1200.png` | 800×1200 | capa 2:3 |
+| `cover-portrait-800x1200.png` | 800×1200 | capa 2:3 / CrazyGames |
+| `cover-portrait-1080x1920.png` | 1080×1920 | capa portrait / Playgama |
 | `cover-square-800x800.png` | 800×800 | capa 1:1 |
 | `cover-contact-sheet.png` | 1608×674 | revisão interna |
 | `cover-*.svg` | vetor | fonte editável |

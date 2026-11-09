@@ -12,15 +12,16 @@ ainda depende do usuário ou do agente principal.
 | Arquivo | Dimensão | Formato | Observação |
 |---|---|---|---|
 | `cover-landscape-1920x1080.png` | 1920×1080 | PNG 8-bit | 16:9, CrazyGames/itch |
-| `cover-portrait-800x1200.png` | 800×1200 | PNG 8-bit | 2:3 |
+| `cover-portrait-800x1200.png` | 800×1200 | PNG 8-bit | 2:3, CrazyGames |
+| `cover-portrait-1080x1920.png` | 1080×1920 | PNG 8-bit | portrait Playgama |
 | `cover-square-800x800.png` | 800×800 | PNG 8-bit | 1:1 |
-| `cover-contact-sheet.png` | 1608×674 | PNG 8-bit | revisão interna das três |
+| `cover-contact-sheet.png` | 1608×674 | PNG 8-bit | revisão interna |
 | `cover-*.svg` | vetor | SVG | fontes editáveis, Silkscreen embutida |
 | `generate-covers.mjs` | script | Node | regenera SVGs e PNGs |
 
-As três capas usam a mesma paleta, os mesmos blocos de cristal, paddle, bola,
-glow e a fonte Silkscreen. O único texto é **BRICKLIKE**. Não há bordas, logos
-de loja ou screenshots.
+As capas usam a mesma paleta, os mesmos blocos de cristal, paddle, bola, glow e
+a fonte Silkscreen. O único texto é **BRICKLIKE**. Não há bordas, logos de loja
+ou screenshots.
 
 ### Screenshots — `store/screenshots/`
 

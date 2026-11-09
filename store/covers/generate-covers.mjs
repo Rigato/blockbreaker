@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generates the three Bricklike store covers as SVG, then rasterises them with
+ * Generates the Bricklike store covers as SVG, then rasterises them with
  * Chromium (Playwright) at the exact store sizes.
  *
  * No runtime dependency beyond the repo's existing devDependency:
@@ -23,6 +23,7 @@ const fontBase64 = (await readFile(fontPath)).toString('base64');
 const SIZE = {
   landscape: { w: 1920, h: 1080, title: 158, titleY: 232, tracking: 10 },
   portrait: { w: 800, h: 1200, title: 86, titleY: 208, tracking: 6 },
+  portraitTall: { w: 1080, h: 1920, title: 116, titleY: 340, tracking: 8 },
   square: { w: 800, h: 800, title: 84, titleY: 150, tracking: 6 },
 };
 
@@ -272,6 +273,44 @@ function svgPortrait() {
 </svg>`;
 }
 
+function svgPortraitTall() {
+  const { w, h, title: ts, titleY, tracking } = SIZE.portraitTall;
+  const sx = w / SIZE.portrait.w;
+  // Keep the portrait block proportions and spread the four rows over the
+  // taller 9:16 canvas instead of stretching the original artwork.
+  const blockRows = [640, 810, 985, 1160];
+  const blocks = [
+    [150, blockRows[0], 150, 74, 'violet', 1],
+    [330, blockRows[0] - 30, 156, 78, 'teal', 2],
+    [516, blockRows[0], 150, 74, 'cyan', 3],
+    [224, blockRows[1], 150, 74, 'cyan', 4],
+    [410, blockRows[1] - 20, 160, 82, 'magenta', 5],
+    [590, blockRows[1] + 5, 122, 66, 'gold', 6],
+    [316, blockRows[2], 150, 76, 'teal', 7],
+    [500, blockRows[2] + 15, 138, 70, 'violet', 8],
+    [220, blockRows[3], 132, 68, 'magenta', 9],
+    [390, blockRows[3] + 15, 148, 74, 'cyan', 10],
+  ]
+    .map(([x, y, bw, bh, palette, seed]) => block(x * sx, y, bw * sx, bh * sx, palette, seed))
+    .join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  ${defs()}
+  ${backdrop(w, h)}
+  ${motes(w, h, 90, 13)}
+  <g opacity=".9">${blocks}</g>
+  ${trail([[416 * sx, 1450, 0.28], [404 * sx, 1490, 0.44], [388 * sx, 1525, 0.62], [366 * sx, 1560, 0.82], [338 * sx, 1590, 1]])}
+  ${paddle(540, 1720, 258 * sx, 26 * sx)}
+  ${ball(416 * sx, 1432, 17 * sx)}
+  <g opacity=".8">
+    <path d="M120 900 C 220 800, 280 1080, 360 1000" fill="none" stroke="#ff5fd2" stroke-width="2.5" opacity=".3"/>
+    <path d="M730 1300 C 820 1200, 890 1500, 980 1400" fill="none" stroke="#7ef9ff" stroke-width="2.5" opacity=".26"/>
+  </g>
+  ${title(w, ts, titleY, tracking)}
+  ${scanlines(w, h)}
+  ${vignette(w, h)}
+</svg>`;
+}
+
 function svgSquare() {
   const { w, h, title: ts, titleY, tracking } = SIZE.square;
   const blocks = [
@@ -302,6 +341,7 @@ function svgSquare() {
 const variants = [
   ['cover-landscape-1920x1080.svg', svgLandscape(), SIZE.landscape],
   ['cover-portrait-800x1200.svg', svgPortrait(), SIZE.portrait],
+  ['cover-portrait-1080x1920.svg', svgPortraitTall(), SIZE.portraitTall],
   ['cover-square-800x800.svg', svgSquare(), SIZE.square],
 ];
 
