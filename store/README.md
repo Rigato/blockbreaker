@@ -23,9 +23,11 @@ laser + multiball, level-up e results. Veja `screenshots/README.md`.
 
 ## Vídeo — `store/video/`
 
-`bricklike-preview.mp4`: 1280×720, 30,6 s, H.264, silencioso. Mostra menu,
-gameplay com laser/multiball, level-up e results da mesma run. Veja
-`video/README.md`.
+- `bricklike-preview.mp4`: 1920×1080 (16:9), 18,3 s, H.264, silencioso.
+- `bricklike-preview-portrait.mp4`: 1080×1620 (2:3), 18,3 s, H.264, silencioso.
+
+Os dois abrem com a capa estática e mostram menu, gameplay com laser/multiball,
+level-up e results da mesma run. Veja `video/README.md`.
 
 ## Uso por portal
 

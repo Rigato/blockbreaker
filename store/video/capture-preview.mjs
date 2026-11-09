@@ -1,22 +1,20 @@
 #!/usr/bin/env node
 /**
- * Records a 30–45 s Bricklike preview from the production build.
+ * Records the Bricklike preview from the production build.
  *
- * The recording is assembled from four real gameplay clips:
- *   1. title/menu
- *   2. active run with paddle movement, Prism Laser/projectiles and multiball
- *   3. level-up with three perk cards
- *   4. victory/results
+ * Two CrazyGames-ready outputs are composed from the same real gameplay clips:
+ *   - bricklike-preview.mp4          1920x1080 (16:9)
+ *   - bricklike-preview-portrait.mp4 1080x1620 (2:3)
  *
- * The portrait capture is composed as a 1280×720 video over a blurred version
- * of the store key art. Debug chrome is hidden; debug actions are used only to
- * reach deterministic moments (perks, level-up, victory) and to keep the run
- * alive while recording.
+ * Each video opens on its static cover, then shows menu, gameplay, level-up and
+ * results in ~18 s. The portrait game is composed over a blurred cover backdrop
+ * so the HUD and paddle are never cropped and there are no black bars.
  *
  * Usage:
  *   npm run build
  *   npx vite preview --port 4180 --strictPort
- *   node store/video/capture-preview.mjs --url=http://localhost:4180
+ *   node store/video/capture-preview.mjs
+ *   node store/video/capture-preview.mjs --format=portrait
  *
  * Requires the system `ffmpeg` binary. Playwright records WebM clips; the final
  * MP4 is silent because Playwright does not capture audio.
@@ -35,19 +33,47 @@ const arg = (name, fallback) => {
   return hit ? hit.slice(name.length + 3) : fallback;
 };
 const baseUrl = arg('url', 'http://localhost:4180').replace(/\/$/, '');
+const format = arg('format', 'both');
+if (!['both', 'landscape', 'portrait'].includes(format)) {
+  throw new Error('--format must be both, landscape or portrait');
+}
+
 const viewport = { width: 390, height: 844 };
 const rawDir = join(repo, '.qa/video-raw');
-const segmentDir = join(repo, '.qa/video-segments');
-const outFile = join(here, 'bricklike-preview.mp4');
-const backdrop = join(repo, 'store/covers/cover-landscape-1920x1080.png');
+const segmentRoot = join(repo, '.qa/video-segments');
+const coverLandscape = join(repo, 'store/covers/cover-landscape-1920x1080.png');
+const coverPortrait = join(repo, 'store/covers/cover-portrait-800x1200.png');
+
+const variants = [
+  {
+    id: 'landscape',
+    width: 1920,
+    height: 1080,
+    cover: coverLandscape,
+    foregroundHeight: 1000,
+    out: join(here, 'bricklike-preview.mp4'),
+  },
+  {
+    id: 'portrait',
+    width: 1080,
+    height: 1620,
+    cover: coverPortrait,
+    foregroundHeight: 1500,
+    out: join(here, 'bricklike-preview-portrait.mp4'),
+  },
+].filter((variant) => format === 'both' || format === variant.id);
 
 await rm(rawDir, { recursive: true, force: true });
-await rm(segmentDir, { recursive: true, force: true });
+await rm(segmentRoot, { recursive: true, force: true });
 await mkdir(rawDir, { recursive: true });
-await mkdir(segmentDir, { recursive: true });
+await mkdir(segmentRoot, { recursive: true });
 
 async function hideDebug(page) {
-  await page.addStyleTag({ content: '.debug{display:none!important;visibility:hidden!important}' });
+  await page.addStyleTag({
+    content:
+      '.debug{display:none!important;visibility:hidden!important}' +
+      'html,body,canvas{cursor:none!important}',
+  });
   await page.evaluate(() => {
     delete document.documentElement.dataset.debug;
   });
@@ -191,31 +217,56 @@ const levelUpClip = await recordClip(
 
 await browser.close();
 
+/** Clip order and durations keep the final video between 15 and 20 seconds. */
 const clips = [
-  { path: menuClip, start: 0.7, duration: 3.2 },
-  { path: gameplayClip, start: 0.7, duration: 19.8 },
-  { path: levelUpClip, start: 0.8, duration: 3.6 },
-  { path: gameplayClip, fromEnd: 4.0, duration: 4.0 },
+  { path: menuClip, start: 0.4, duration: 2.0 },
+  { path: gameplayClip, start: 0.7, duration: 9.5 },
+  { path: levelUpClip, start: 3.8, duration: 2.6 },
+  { path: gameplayClip, fromEnd: 4.0, duration: 3.0 },
 ];
-const totalSeconds = clips.reduce((sum, clip) => sum + clip.duration, 0);
+const coverSeconds = 1.2;
+const totalSeconds =
+  coverSeconds + clips.reduce((sum, clip) => sum + clip.duration, 0);
 
-const segmentFiles = [];
-for (let i = 0; i < clips.length; i += 1) {
-  const clip = clips[i];
-  const out = join(segmentDir, `segment-${i}.mp4`);
+function runFfmpeg(argsToRun, message) {
+  const result = spawnSync('ffmpeg', argsToRun, { encoding: 'utf8' });
+  if (result.status !== 0) {
+    console.error(result.stderr?.slice(-4000));
+    throw new Error(message);
+  }
+}
+
+function composeCoverSegment(variant, out) {
+  runFfmpeg(
+    [
+      '-y',
+      '-loop', '1', '-i', variant.cover,
+      '-vf', `scale=${variant.width}:${variant.height},format=yuv420p`,
+      '-t', String(coverSeconds),
+      '-r', '30',
+      '-c:v', 'libx264',
+      '-preset', 'medium',
+      '-crf', '20',
+      '-an',
+      out,
+    ],
+    `ffmpeg could not compose the ${variant.id} cover frame`,
+  );
+}
+
+function composeGameplaySegment(variant, clip, out) {
   const filter = [
-    '[0:v]scale=1280:720,boxblur=18:2,eq=brightness=0.03:saturation=1.25[bg]',
-    '[1:v]scale=-2:700,pad=iw+18:ih+18:9:9:color=0x7ef9ff@0.65[fg]',
+    `[0:v]scale=${variant.width}:${variant.height},boxblur=18:2,eq=brightness=0.03:saturation=1.25[bg]`,
+    `[1:v]scale=-2:${variant.foregroundHeight},pad=iw+18:ih+18:9:9:color=0x7ef9ff@0.65[fg]`,
     '[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p[v]',
   ].join(';');
   const seek = clip.fromEnd
     ? ['-sseof', `-${clip.fromEnd}`]
     : ['-ss', String(clip.start)];
-  const ff = spawnSync(
-    'ffmpeg',
+  runFfmpeg(
     [
       '-y',
-      '-loop', '1', '-i', backdrop,
+      '-loop', '1', '-i', variant.cover,
       ...seek, '-i', clip.path,
       '-filter_complex', filter,
       '-map', '[v]',
@@ -227,56 +278,63 @@ for (let i = 0; i < clips.length; i += 1) {
       '-an',
       out,
     ],
-    { encoding: 'utf8' },
+    `ffmpeg could not compose a ${variant.id} gameplay segment`,
   );
-  if (ff.status !== 0) {
-    console.error(ff.stderr?.slice(-4000));
-    throw new Error(`ffmpeg could not compose segment ${i}`);
+}
+
+for (const variant of variants) {
+  const dir = join(segmentRoot, variant.id);
+  await mkdir(dir, { recursive: true });
+  const segmentFiles = [];
+
+  const coverFile = join(dir, 'segment-cover.mp4');
+  composeCoverSegment(variant, coverFile);
+  segmentFiles.push(coverFile);
+
+  for (let index = 0; index < clips.length; index += 1) {
+    const out = join(dir, `segment-${index}.mp4`);
+    composeGameplaySegment(variant, clips[index], out);
+    segmentFiles.push(out);
   }
-  segmentFiles.push(out);
+
+  const listFile = join(dir, 'list.txt');
+  await writeFile(
+    listFile,
+    segmentFiles.map((file) => `file '${file}'`).join('\n'),
+  );
+
+  const concatFile = join(dir, 'concat.mp4');
+  runFfmpeg(
+    [
+      '-y',
+      '-f', 'concat',
+      '-safe', '0',
+      '-i', listFile,
+      '-c', 'copy',
+      concatFile,
+    ],
+    `ffmpeg could not concatenate the ${variant.id} preview`,
+  );
+
+  runFfmpeg(
+    [
+      '-y',
+      '-i', concatFile,
+      '-vf', `fade=t=out:st=${Math.max(0, totalSeconds - 0.4)}:d=0.4`,
+      '-r', '30',
+      '-c:v', 'libx264',
+      '-preset', 'medium',
+      '-crf', '20',
+      '-movflags', '+faststart',
+      '-an',
+      variant.out,
+    ],
+    `ffmpeg could not finish the ${variant.id} preview`,
+  );
+
+  const info = await stat(variant.out);
+  console.log(
+    `composed ${variant.out} (${variant.width}x${variant.height}, ` +
+      `${totalSeconds.toFixed(1)} s, ${(info.size / 1024 / 1024).toFixed(1)} MB)`,
+  );
 }
-
-const listFile = join(segmentDir, 'list.txt');
-await writeFile(listFile, segmentFiles.map((file) => `file '${file}'`).join('\n'));
-
-const concatFile = join(segmentDir, 'concat.mp4');
-const concat = spawnSync(
-  'ffmpeg',
-  [
-    '-y',
-    '-f', 'concat',
-    '-safe', '0',
-    '-i', listFile,
-    '-c', 'copy',
-    concatFile,
-  ],
-  { encoding: 'utf8' },
-);
-if (concat.status !== 0) {
-  console.error(concat.stderr?.slice(-4000));
-  throw new Error('ffmpeg could not concatenate the preview');
-}
-
-const fade = spawnSync(
-  'ffmpeg',
-  [
-    '-y',
-    '-i', concatFile,
-    '-vf', `fade=t=in:st=0:d=0.4,fade=t=out:st=${Math.max(0, totalSeconds - 0.5)}:d=0.5`,
-    '-r', '30',
-    '-c:v', 'libx264',
-    '-preset', 'medium',
-    '-crf', '20',
-    '-movflags', '+faststart',
-    '-an',
-    outFile,
-  ],
-  { encoding: 'utf8' },
-);
-if (fade.status !== 0) {
-  console.error(fade.stderr?.slice(-4000));
-  throw new Error('ffmpeg could not add preview fades');
-}
-
-const info = await stat(outFile);
-console.log(`composed ${outFile} (${(info.size / 1024 / 1024).toFixed(1)} MB)`);
