@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { blend, hashId, hashUnit, steppedRect } from '../src/render/blockArt';
+import { bossColor, bossHurtColor } from '../src/render/bossArt';
+import { elementColor, portalColor, portalHue } from '../src/render/elementArt';
 import { Effects } from '../src/render/effects';
+import { BLOCK_TYPES } from '../src/sim/blocks';
 import {
   predictBallPath,
   TRAJECTORY_STEPS,
@@ -18,22 +21,34 @@ import {
 } from '../src/render/themes';
 
 describe('phase themes', () => {
-  it('maps the three phase ids to distinct shapes and palettes', () => {
-    const themes = [
-      themeForPhase('phase-1', 0),
-      themeForPhase('phase-2', 1),
-      themeForPhase('phase-3', 2),
-    ];
-    expect(themes.map((theme) => theme.id)).toEqual(['phase-1', 'phase-2', 'phase-3']);
-    expect(themes.map((theme) => theme.shape)).toEqual(['crystal', 'ruins', 'arcane']);
-    expect(new Set(themes.map((theme) => theme.accent)).size).toBe(3);
-    expect(new Set(themes.map((theme) => theme.skyTop)).size).toBe(3);
+  it('maps the six phase ids to distinct shapes and palettes', () => {
+    const themes = PHASE_THEMES.map((theme) => themeForPhase(theme.id, theme.index));
+    expect(themes.map((theme) => theme.id)).toEqual([
+      'phase-1',
+      'phase-2',
+      'phase-3',
+      'phase-4',
+      'phase-5',
+      'phase-6',
+    ]);
+    expect(themes.map((theme) => theme.shape)).toEqual([
+      'crystal',
+      'ruins',
+      'arcane',
+      'frost',
+      'forge',
+      'void',
+    ]);
+    expect(new Set(themes.map((theme) => theme.accent)).size).toBe(6);
+    expect(new Set(themes.map((theme) => theme.skyTop)).size).toBe(6);
+    expect(new Set(themes.map((theme) => theme.name)).size).toBe(6);
   });
 
   it('falls back to the phase index, then phase 1', () => {
     expect(themeForPhase('unknown', 1).id).toBe('phase-2');
+    expect(themeForPhase('unknown', 4).id).toBe('phase-5');
     expect(themeForPhase('unknown', -4).id).toBe('phase-1');
-    expect(themeForPhase('unknown', 99).id).toBe('phase-3');
+    expect(themeForPhase('unknown', 99).id).toBe('phase-6');
     expect(themeForPhase('unknown', Number.NaN).id).toBe('phase-1');
   });
 
@@ -90,6 +105,62 @@ describe('block art helpers', () => {
       expect(point.y).toBeGreaterThanOrEqual(14);
       expect(point.y).toBeLessThanOrEqual(46);
     }
+  });
+});
+
+describe('block type catalog', () => {
+  it('has nine distinct types with distinct colours and behaviours', () => {
+    const types = Object.values(BLOCK_TYPES);
+    expect(types).toHaveLength(9);
+    expect(new Set(types.map((type) => type.id)).size).toBe(9);
+    expect(new Set(types.map((type) => type.color)).size).toBe(9);
+    expect(new Set(types.map((type) => type.behavior)).size).toBe(7);
+    for (const type of types) {
+      expect(type.hp).toBeGreaterThan(0);
+      expect(type.score).toBeGreaterThan(0);
+    }
+    expect(BLOCK_TYPES.explosive.behavior).toBe('explosive');
+    expect(BLOCK_TYPES.regenerative.behavior).toBe('regenerative');
+    expect(BLOCK_TYPES.moving.behavior).toBe('moving');
+    expect(BLOCK_TYPES.multiplier.behavior).toBe('multiplier');
+    expect(BLOCK_TYPES.generator.behavior).toBe('generator');
+    expect(BLOCK_TYPES.linked.behavior).toBe('linked');
+  });
+});
+
+describe('element art helpers', () => {
+  it('derives stable portal hues and pair colours without Phaser', () => {
+    expect(portalHue('portal-a')).toBe(portalHue('portal-a'));
+    expect(portalHue('portal-a')).not.toBe(portalHue('portal-b'));
+    for (const pair of ['a', 'b', 'c', 'd', 'e']) {
+      const hue = portalHue(pair);
+      expect(hue).toBeGreaterThanOrEqual(0);
+      expect(hue).toBeLessThanOrEqual(1);
+    }
+    expect(portalColor('portal-a', 0xffffff)).toBe(portalColor('portal-a', 0xffffff));
+    const colors = new Set(['a', 'b', 'c', 'd', 'e'].map((pair) => portalColor(pair, 0xffffff)));
+    expect(colors.size).toBeGreaterThan(2);
+  });
+
+  it('gives every element kind its own readable base colour', () => {
+    const kinds = ['wall', 'obstacle', 'deflector', 'portal', 'mover', 'rotor', 'gate'] as const;
+    const colors = kinds.map((kind) => elementColor(kind, 0xffffff));
+    for (const color of colors) {
+      expect(color).toBeGreaterThanOrEqual(0);
+      expect(color).toBeLessThanOrEqual(0xffffff);
+    }
+    expect(new Set(colors).size).toBe(kinds.length);
+    expect(elementColor('gate', 0xffffff)).toBe(elementColor('gate', 0xffffff));
+  });
+});
+
+describe('boss art helpers', () => {
+  it('assigns distinct signature colours to the three patterns', () => {
+    const colors = [bossColor('sentinel'), bossColor('warden'), bossColor('void')];
+    expect(new Set(colors).size).toBe(3);
+    expect(bossHurtColor('void', 0)).toBe(bossColor('void'));
+    expect(bossHurtColor('void', 1)).toBe(0xffffff);
+    expect(bossHurtColor('sentinel', 2)).toBe(0xffffff);
   });
 });
 

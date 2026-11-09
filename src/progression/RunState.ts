@@ -118,7 +118,9 @@ export class RunState implements ProgressionService {
     if (this.currentOffers.length > 0) return this.currentOffers;
 
     const eligible = PERK_CATALOG.filter(
-      (definition) => this.levelOf(definition.id) < definition.maxLevel,
+      (definition) =>
+        this.levelOf(definition.id) < definition.maxLevel &&
+        (definition.requires === undefined || this.levelOf(definition.requires) > 0),
     );
     const pool: PerkDefinition[] = [...eligible];
     if (eligible.length < OFFER_SIZE) pool.push(FALLBACK_PERK);
@@ -223,6 +225,16 @@ export class RunState implements ProgressionService {
       laserCooldownMs,
       safetyCharges,
       explosiveEvery,
+      critChanceStep,
+      critMultiplier,
+      laserWidthStep,
+      laserCooldownStep,
+      comboStep,
+      reviveCharges,
+      bombEvery,
+      bossDamageStep,
+      swiftBallStep,
+      swiftScoreStep,
     } = GAME_CONFIG.perks;
 
     const widePaddle = this.levelOf('wide_paddle');
@@ -233,6 +245,15 @@ export class RunState implements ProgressionService {
     const turret = this.levelOf('auto_turret');
     const laserLevel = this.levelOf('prism_laser');
     const multiballLevel = this.levelOf('multiball');
+    const critLevel = this.levelOf('critical_strike');
+    const laserFocusLevel = this.levelOf('laser_focus');
+    const overchargeLevel = this.levelOf('overcharge');
+    const comboLevel = this.levelOf('combo_master');
+    const swiftLevel = this.levelOf('swift_ball');
+    const laserCooldownMultiplier = Math.max(
+      0.6,
+      1 - laserCooldownStep * overchargeLevel,
+    );
 
     modifiers.paddleWidthMultiplier = 1 + widePaddleStep * widePaddle;
     modifiers.ballRadiusMultiplier = 1 + giantBallStep * giantBall;
@@ -245,7 +266,8 @@ export class RunState implements ProgressionService {
         ? Math.max(turretMinMs, turretBaseMs - turretStepMs * (turret - 1))
         : null;
     modifiers.stickyPaddle = this.levelOf('sticky_paddle') > 0;
-    modifiers.laserCooldown = laserLevel > 0 ? laserCooldownMs : null;
+    modifiers.laserCooldown =
+      laserLevel > 0 ? laserCooldownMs * laserCooldownMultiplier : null;
     modifiers.laserLevel = laserLevel;
     modifiers.safetyNetCharges =
       this.levelOf('safety_net') > 0 ? safetyCharges : 0;
@@ -253,6 +275,18 @@ export class RunState implements ProgressionService {
       this.levelOf('explosive_core') > 0 ? explosiveEvery : null;
     modifiers.multiballLevel = multiballLevel;
     modifiers.trajectoryGuide = this.levelOf('foresight') > 0;
+    modifiers.critChance = critChanceStep * critLevel;
+    modifiers.critMultiplier = critMultiplier;
+    modifiers.laserTargetBonus = laserFocusLevel;
+    modifiers.laserWidthMultiplier = 1 + laserWidthStep * laserFocusLevel;
+    modifiers.laserCooldownMultiplier = laserCooldownMultiplier;
+    modifiers.comboStep = comboLevel > 0 ? comboStep : 0;
+    modifiers.comboMax = comboStep * comboLevel;
+    modifiers.reviveCharges = this.levelOf('second_chance') > 0 ? reviveCharges : 0;
+    modifiers.bombEvery = this.levelOf('bomb_ball') > 0 ? bombEvery : null;
+    modifiers.bossDamageBonus = bossDamageStep * this.levelOf('boss_bane');
+    modifiers.ballSpeedMultiplier = 1 + swiftBallStep * swiftLevel;
+    modifiers.scoreMultiplier = 1 + swiftScoreStep * swiftLevel;
 
     return modifiers;
   }

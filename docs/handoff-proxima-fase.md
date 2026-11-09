@@ -2,44 +2,55 @@
 
 **Documento de transferência para planejar a próxima fase de desenvolvimento**  
 **Data:** 2026-11-08  
-**Versão do jogo:** `0.1.0-mvp`  
+**Versão do jogo:** `0.2.0-dev` (build publicado: `0.1.0-mvp`)  
 **Repositório:** <https://github.com/Rigato/blockbreaker>  
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`  
 **Build de review:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
 
-> **Estado dos gates:** G6 aprovado pelo owner em 2026-11-08. O pacote de M7
-> está pronto para review, mas **G7 ainda não foi aprovado**. Não há tag, GitHub
-> Release nem submissão em portal. A publicação nos portais é **manual** e
-> continua com o owner.
+> **Atualização v0.2.0 (2026-11-08):** a campanha passou de 3 fases × 3 ondas
+> para **6 fases e 21 ondas** (3/3/3/3/4/5), com **9 blocos**, **7 elementos**,
+> **3 chefes**, **19 perks**, regras de onda (`timeLimit`, `noLaser`), zoom de
+> layout (0,68–1,0), encerramentos/rank e `MAX_PHASE = 6`. O save continua v1 e
+> aceita saves antigos. O build **`0.1.0-mvp` publicado no itch.io permanece
+> congelado**; a v0.2.0 é desenvolvimento e ainda não foi enviada aos portais.
+>
+> **Estado dos gates:** G6 aprovado pelo owner em 2026-11-08. A v0.2.0 tem
+> typecheck, 229 testes, `validate:content`, build, package e 16 E2E verdes. O
+> G7 original (pacote `0.1.0-mvp`) continua **pendente** para os portais que
+> ainda não receberam o build; não há tag, GitHub Release nem submissão nova.
 
 ---
 
 ## 0. TL;DR
 
-O Bricklike é um block breaker HTML5 portrait com progressão roguelite, três
-levels, nove ondas, onze perks, três tipos de bloco, save entre sessões e
-integração com a Playgama Bridge. O MVP está tecnicamente completo, com CI,
-testes unitários, E2E Playwright, pacote de release e documentação de QA.
+O Bricklike é um block breaker HTML5 portrait com progressão roguelite. A versão
+atual de desenvolvimento tem **6 fases, 21 ondas, 9 tipos de bloco, 7 elementos
+de fase, 3 chefes e 19 perks**, save entre sessões, encerramentos por fase e
+integração com a Playgama Bridge. O conteúdo é validado (759 blocos, 1.831 XP) e
+a automação cobre simulação, progressão, conteúdo, save, layout e E2E.
 
 O que existe hoje:
 
 - build único para itch.io, GameFlare, Playgama e CrazyGames Basic;
-- 179 testes unitários e 16 testes E2E;
-- ZIP de **490,5 KiB**, 13 arquivos, `index.html` na raiz;
-- pacote de loja com três capas, cinco screenshots e vídeo de 30,6 s;
-- metadata em inglês e checklist de submissão;
-- G6 aprovado; G7 pendente;
-- nenhuma submissão em portal e nenhuma tag pública criada.
+- campanha de 6 fases com ondas 3/3/3/3/4/5;
+- 9 blocos (3 básicos + 6 especiais), 7 elementos e 3 chefes;
+- 19 perks, Second Chance e sinergias de build;
+- desafios de onda, zoom de layout e endings com rank S/A/B;
+- 229 testes unitários e 16 testes E2E;
+- save v1 com `unlockedPhase` 1..6 e compatibilidade com saves antigos;
+- pacote de loja `0.1.0-mvp` com capas, screenshots, vídeo e metadata;
+- G6 aprovado; G7 original pendente; v0.2.0 não publicada.
 
 O que a próxima fase precisa decidir:
 
-1. **Publicar primeiro e coletar dados reais** (recomendado), ou
-2. investir em conteúdo/plataforma antes de lançar.
+1. **Publicar a v0.2.0 e coletar dados reais** depois do QA final, ou
+2. investir em metaprogressão/plataforma antes de novo lançamento.
 
-A recomendação é fechar o G7, publicar manualmente nos quatro portais, acompanhar
-CrazyGames Basic por 7 dias/500 plays e só então escolher a próxima expansão com
-base em retenção, playtime, reviews e feedback dos jogadores.
+A recomendação é concluir o QA da v0.2.0, atualizar o pacote de loja e então
+escolher a próxima frente com base em retenção, playtime, reviews e feedback dos
+jogadores. O histórico M0–M7 abaixo descreve o **MVP original** e continua válido
+como referência; números de 3 fases/9 ondas/11 perks pertencem a esse recorte.
 
 ---
 
@@ -47,19 +58,23 @@ base em retenção, playtime, reviews e feedback dos jogadores.
 
 | Item | Valor |
 |---|---|
-| Branch | `main` |
-| Commit de referência | `3e663c1` (`docs(qa): record G6 approval`; base analisada, o handoff é um commit posterior) |
-| Versão | `0.1.0-mvp` |
-| Gate atual | G6 aprovado; **G7 pendente** |
-| Tag | `v0.1.0-mvp` planejada, **não criada** |
+| Branch de desenvolvimento | `feat/v0.2.0` |
+| Branch publicada | `main` / build `0.1.0-mvp` no itch.io |
+| Commit de referência (MVP) | `3e663c1` (`docs(qa): record G6 approval`) |
+| Versão em desenvolvimento | `0.2.0-dev` |
+| Versão publicada | `0.1.0-mvp` |
+| Campanha | 6 fases; ondas 3/3/3/3/4/5 = 21; 759 blocos; 1.831 XP |
+| Conteúdo | 9 blocos, 7 elementos, 3 chefes, 19 perks |
+| Gate atual | G6 aprovado; G7 original pendente; v0.2.0 em QA |
+| Tag | `v0.1.0-mvp` planejada, **não criada**; `v0.2.0` não criada |
 | GitHub Release | **não criada** |
-| Portais | **nenhum upload/submissão** |
+| Portais | itch.io com `0.1.0-mvp`; demais **sem submissão** |
 | CI | checks + E2E + deploy verdes |
 | Live Pages | <https://rigato.github.io/blockbreaker/> |
-| ZIP final | `release/blockbreaker-web.zip` |
-| SHA-256 do ZIP | `e35893177fb7df1a34397a65e913927017816f4265043419551b19d6ff5dbd23` |
-| Tamanho do ZIP | 502.321 bytes / 490,5 KiB |
-| Arquivos no ZIP | 13 |
+| ZIP congelado | `release/blockbreaker-web.zip` (`0.1.0-mvp`) |
+| SHA-256 do ZIP 0.1.0 | `e35893177fb7df1a34397a65e913927017816f4265043419551b19d6ff5dbd23` |
+| Tamanho do ZIP 0.1.0 | 502.321 bytes / 490,5 KiB |
+| Arquivos no ZIP 0.1.0 | 13 |
 | Maior path | 38 caracteres |
 | Node | 22.12+ (CI usa Node 24) |
 | Dependências principais | Phaser 3.90.0, Bridge 2.4.1, TypeScript 7.0.2, Vite 8.3.6, Vitest 5.1.0, Playwright 1.65.0 |
@@ -67,10 +82,14 @@ base em retenção, playtime, reviews e feedback dos jogadores.
 ### O que “pronto” significa aqui
 
 - **M0–M6 concluídos** e aprovados nos gates correspondentes.
-- **M7 concluído como pacote**: assets, metadata, checklist e validação técnica.
+- **M7 concluído como pacote** do MVP: assets, metadata, checklist e validação.
 - **G7 é o gate de publicação**: revisão humana dos assets e decisão de publicar.
-- A tag e o GitHub Release só devem ser criados **depois do G7**.
+- **M8–M12 da v0.2.0 concluídos** com os gates técnicos verdes; a publicação
+  da v0.2.0 ainda depende de decisão humana.
+- A tag e o GitHub Release do MVP só devem ser criados **depois do G7**.
 - O upload nos portais é feito manualmente pelo owner.
+- O ZIP `0.1.0-mvp` do itch.io permanece congelado e não é substituído pela
+  branch de desenvolvimento.
 
 ---
 
@@ -210,9 +229,37 @@ fases, landscape jogável ou localização.
 - Checklist de submissão por portal e status log.
 - **G7 pendente**; nenhum upload em portal.
 
+### M8–M12 — v0.2.0 (campanha)
+
+- Simulação v2: 9 blocos, 7 elementos, chefes/shards, regras de onda e revive.
+- Conteúdo v2: 3 fases novas com 3/4/5 ondas, temas `frost`, `forge` e `void`.
+- Chefes: Frost Sentinel (60 HP), Ember Warden (80) e Void Herald (100).
+- Progressão: 8 perks novos (total 19), Second Chance e sinergias.
+- Apresentação: arte dos blocos/elementos/chefes, HUD de chefe/desafio/combo,
+  phase select com 6 cards e results com ending/rank.
+- Integração: `Game.ts`, save com `MAX_PHASE = 6`, endings e E2E atualizado.
+- Gates técnicos verdes: typecheck, 229 testes, `validate:content`, build,
+  package e 16 E2E.
+- **Ainda não publicado**: itch.io continua com `0.1.0-mvp` congelado.
+
 ---
 
-## 4. Conteúdo e tuning atuais
+## 4. Conteúdo e tuning do MVP (histórico)
+
+> Esta seção descreve o recorte `0.1.0-mvp`. O estado atual da campanha está no
+> resumo abaixo; os detalhes de 3 fases/9 ondas/11 perks são históricos.
+
+| Item | MVP `0.1.0-mvp` | v0.2.0-dev |
+|---|---|---|
+| Fases | 3 | 6 |
+| Ondas | 9 (3 por fase) | 21 (3/3/3/3/4/5) |
+| Blocos | 3 | 9 |
+| Elementos | 0 | 7 |
+| Chefes | 0 | 3 |
+| Perks | 11 | 19 |
+| Save | `unlockedPhase` 1..3 | `unlockedPhase` 1..6 |
+| Zoom | estático | layout 0,68–1,0 |
+| Endings | results simples | epílogo + rank S/A/B |
 
 ### 4.1 Levels e ondas
 
@@ -366,7 +413,7 @@ main.ts
 
 ```text
 version: 1
-unlockedPhase: 1..3
+unlockedPhase: 1..6
 phases: {
   [phaseId]: {
     bestTimeMs, bestScore, attempts, clears, bestLevel
@@ -436,11 +483,11 @@ npm run preview
 | Camada | Resultado |
 |---|---|
 | Typecheck | ✅ |
-| Unitários | ✅ 179 testes em 18 arquivos |
-| Conteúdo | ✅ 9 ondas válidas |
+| Unitários | ✅ 229 testes |
+| Conteúdo | ✅ 6 fases, 21 ondas, 759 blocos, 1.831 XP |
 | Config do Bridge | ✅ schema 2.4.1 |
 | Build | ✅ |
-| Package | ✅ 490,5 KiB, 13 arquivos |
+| Package | ✅ `0.1.0-mvp` 490,5 KiB, 13 arquivos |
 | E2E | ✅ 16 testes Playwright |
 | CI | ✅ checks + E2E + deploy |
 | Subpasta | ✅ ZIP extraído e servido sem 404 |
@@ -582,8 +629,10 @@ Estas decisões não devem ser revertidas sem uma decisão explícita de nova fa
 - **Ads:** somente interstitial na saída dos results; sem rewarded, banners ou
   frequência própria.
 - **Analytics:** desligado; sem GA4 ou rede externa.
-- **Save:** schema v1; run ativa não é salva.
-- **Conteúdo:** 3 levels × 3 waves, 3 blocos, 11 perks; sem chefe.
+- **Save:** schema v1; `unlockedPhase` 1..6; run ativa não é salva.
+- **Conteúdo:** 6 fases, ondas 3/3/3/3/4/5, 9 blocos, 7 elementos, 3 chefes e
+  19 perks na v0.2.0. O recorte `0.1.0-mvp` (3 × 3, 3 blocos, 11 perks, sem
+  chefe) permanece congelado no itch.io.
 - **Build:** paths relativos, sem recursos externos além do CDN do Bridge com
   fallback local.
 - **Escopo:** sem backend, sem contas, sem ranking global, sem conquistas, sem
@@ -605,7 +654,7 @@ Estas decisões não devem ser revertidas sem uma decisão explícita de nova fa
 | Testes | E2E só Chromium | Safari/Firefox podem regredir | matriz real + smoke manual por release |
 | Release | `release.yml` não roda E2E | tag pode apontar para commit não testado em browser | rodar E2E no commit da tag ou incluir no workflow |
 | Performance | números reais fora do repo | regressão em low-end não detectável | criar baseline de hardware e budget de FPS/memória |
-| Conteúdo | 9 ondas, 3 blocos, 11 perks | pouca variedade para retenção longa | expandir conteúdo só com dados de retenção |
+| Conteúdo | 21 ondas, 9 blocos, 7 elementos, 3 chefes, 19 perks | variedade razoável, mas sem dados de retenção da campanha | playtest e dados reais antes de nova expansão |
 | Metaprogressão | inexistente | baixa retenção de longo prazo | decidir se fase 2 é conteúdo ou meta |
 | Backend | inexistente | sem ranking, conta, sync | manter fora até haver necessidade |
 | Sitelock | não implementado | cópia em sites não autorizados | avaliar só se distribuição exigir |
@@ -764,31 +813,34 @@ depois de retenção validada.
 
 ## 12. Backlog priorizado sugerido
 
-### P0 — antes de considerar a fase 2 “iniciada”
+Itens já entregues na v0.2.0 (campanha de 6 fases, blocos especiais, elementos,
+chefes, 19 perks, desafios, zoom, endings) saíram deste backlog.
 
-- [ ] Revisar e aprovar G7 (capas, vídeo, textos, ZIP).
-- [ ] Criar tag `v0.1.0-mvp` e GitHub Release.
-- [ ] Publicar manualmente nos quatro portais.
-- [ ] Preencher `docs/release/status.md` com URLs/datas.
-- [ ] Arquivar evidência humana do G6 (CSV/notas/devices/FPS) em `docs/qa/`.
-- [ ] Acompanhar CrazyGames Basic por 7 dias/500 plays.
+### P0 — fechar a v0.2.0
 
-### P1 — próxima fase, se o lançamento validar
+- [ ] Playtest humano da campanha e ajuste de balanceamento com dados reais.
+- [ ] Revisar o pacote de loja para a v0.2.0 (capas, screenshots, vídeo, textos).
+- [ ] Gerar e validar o ZIP `0.2.0` em subpasta.
+- [ ] Decidir se a v0.2.0 substitui o `0.1.0-mvp` no itch.io ou entra como build
+      separado; manter o ZIP publicado congelado até a decisão.
+- [ ] Atualizar `docs/release/status.md` e a metadata por portal.
+- [ ] Arquivar a evidência humana do G6 e o baseline de performance real.
 
-- [ ] Definir métrica de sucesso da fase 2.
+### P1 — depois do lançamento da v0.2.0
+
 - [ ] Corrigir bugs de portal/feedback real.
-- [ ] Decidir conteúdo vs plataforma.
-- [ ] Melhorar arte de capa e vídeo com assets finais/humanos.
+- [ ] Definir métrica de sucesso da próxima fase.
+- [ ] Analytics privacy-friendly ou uso exclusivo dos dashboards dos portais.
 - [ ] Criar baseline de performance em hardware real.
-- [ ] Avaliar analytics privacy-friendly ou dashboards.
-- [ ] Planejar expansão de conteúdo (levels/perks/blocos).
+- [ ] Melhorar arte de capa/vídeo com assets finais ou runs humanas.
 
 ### P2 — depois de retenção/dados
 
-- [ ] Landscape + localização russa, se parceiros Playgama forem prioridade.
-- [ ] Full Launch CrazyGames.
-- [ ] Metaprogressão/leaderboards/conquistas.
-- [ ] Rewarded ads.
+- [ ] Metaprogressão com desbloqueios de conteúdo, sem bônus permanentes.
+- [ ] Rewarded ads com vantagens específicas.
+- [ ] Leaderboards e conquistas, conforme APIs dos portais.
+- [ ] Localização para outros idiomas e landscape jogável.
+- [ ] Full Launch do CrazyGames.
 - [ ] Poki/GameDistribution/Famobi (avaliar contratos).
 - [ ] Backend/cloud save, se necessário.
 
@@ -955,7 +1007,11 @@ npm run test:e2e
 | G6 | M6 QA/balance | **aprovado em 2026-11-08** |
 | G7 | M7 Publicação | **pendente** |
 
-## Apêndice B — O que não foi feito (por escopo)
+## Apêndice B — O que não foi feito no MVP (por escopo)
+
+> Recorte original `0.1.0-mvp`. A v0.2.0 entregou campanha de 6 fases, 3 chefes,
+> blocos especiais, elementos e 19 perks; os itens abaixo continuam fora apenas
+> quando indicado no backlog da §12.
 
 - Campanha completa, vários mundos e chefes.
 - Catálogo grande de blocos/perks e blocos especiais.

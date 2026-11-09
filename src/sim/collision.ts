@@ -151,6 +151,66 @@ export function sweptCircleAabb(
   return { t: tmin, nx, ny, depth: 0.01 };
 }
 
+/** Closest point on the segment (x1,y1)-(x2,y2) to (px,py). */
+export function closestPointOnSegment(
+  px: number,
+  py: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): { x: number; y: number; t: number } {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared < EPS) return { x: x1, y: y1, t: 0 };
+  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
+  return { x: x1 + dx * t, y: y1 + dy * t, t };
+}
+
+export interface SegmentHit {
+  /** Unit normal pointing from the segment towards the circle. */
+  nx: number;
+  ny: number;
+  /** Penetration depth; move the circle along the normal by this amount. */
+  depth: number;
+}
+
+/**
+ * Circle vs segment (capsule) overlap. Returns the depenetration normal and
+ * depth, or null when the circle does not touch the segment.
+ */
+export function circleSegmentHit(
+  cx: number,
+  cy: number,
+  radius: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): SegmentHit | null {
+  const point = closestPointOnSegment(cx, cy, x1, y1, x2, y2);
+  let dx = cx - point.x;
+  let dy = cy - point.y;
+  let distance = Math.hypot(dx, dy);
+  if (distance > radius) return null;
+
+  if (distance < EPS) {
+    // Circle centre sits exactly on the line: use the segment's perpendicular.
+    const sx = x2 - x1;
+    const sy = y2 - y1;
+    const length = Math.hypot(sx, sy) || 1;
+    dx = -sy / length;
+    dy = sx / length;
+    distance = 0;
+  } else {
+    dx /= distance;
+    dy /= distance;
+  }
+
+  return { nx: dx, ny: dy, depth: radius - distance };
+}
+
 /** Reflects a velocity around a (unit) normal. Mutates and returns the vector. */
 export function reflectVelocity(
   velocity: { vx: number; vy: number },

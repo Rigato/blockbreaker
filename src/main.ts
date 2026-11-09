@@ -93,6 +93,10 @@ async function start(): Promise<void> {
   game.resize(layout.size.width, layout.size.height);
   await game.ready;
 
+  if (options.debug) {
+    (window as unknown as { __bricklike?: BlockBreakerGame }).__bricklike = game;
+  }
+
   setBootStatus(en.bootSave);
   await game.saveReady;
 

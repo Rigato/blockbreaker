@@ -120,6 +120,30 @@ export interface RunModifiers {
   multiballLevel: number;
   /** Foresight: draw a short dotted prediction ahead of each ball. */
   trajectoryGuide: boolean;
+  /** Critical strike chance in [0, 1]. */
+  critChance: number;
+  /** Damage multiplier applied on a critical hit. */
+  critMultiplier: number;
+  /** Extra laser targets granted by perks. */
+  laserTargetBonus: number;
+  /** Multiplier applied to the laser beam width. */
+  laserWidthMultiplier: number;
+  /** Multiplier applied to the laser cooldown (lower is faster). */
+  laserCooldownMultiplier: number;
+  /** Score/XP bonus added per combo step (fraction). */
+  comboStep: number;
+  /** Maximum combo bonus (fraction). */
+  comboMax: number;
+  /** Remaining Second Chance revives for the run. */
+  reviveCharges: number;
+  /** Blocks destroyed between Bomb Ball drops; null when not acquired. */
+  bombEvery: number | null;
+  /** Extra damage against bosses. */
+  bossDamageBonus: number;
+  /** Multiplier applied to the base ball speed. */
+  ballSpeedMultiplier: number;
+  /** Global score multiplier. */
+  scoreMultiplier: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -166,6 +190,8 @@ export interface LaserHudState {
   ready: boolean;
   cooldownMs: number;
   remainingMs: number;
+  /** Why the laser cannot fire, when blocked. */
+  blocked?: 'stuck' | 'rule' | null;
 }
 
 /** Read-only phase card data for the phase select screen. */
@@ -178,6 +204,14 @@ export interface PhaseSelectInfo {
   bestScore: number | null;
   attempts: number;
   clears: number;
+}
+
+/** Epilogue and rank shown on the results screen. */
+export interface EndingSummary {
+  id: string;
+  title: string;
+  body: string;
+  rank: 'S' | 'A' | 'B';
 }
 
 /** Final summary shown after a phase victory or defeat. */
@@ -194,6 +228,8 @@ export interface PhaseResult {
   bestScore: number | null;
   bestTimeMs: number | null;
   nextPhaseId: string | null;
+  /** Epilogue/rank for boss and campaign endings; null when none. */
+  ending?: EndingSummary | null;
 }
 
 /** Minimal state required by the DOM HUD. Emitted only when it changes. */
@@ -228,6 +264,16 @@ export interface HudSnapshot {
   soundEnabled: boolean;
   /** Non-null only while the results screen is open. */
   result: PhaseResult | null;
+  /** Boss health for the current wave; optional until integrated. */
+  boss?: { name: string; hp: number; maxHp: number; phase: number } | null;
+  /** Active wave challenge; optional until integrated. */
+  rule?: { kind: 'timeLimit' | 'noLaser'; remainingMs: number | null } | null;
+  /** Multiplier block buff; optional until integrated. */
+  multiplier?: { xpFactor: number; scoreFactor: number; remainingMs: number } | null;
+  /** Consecutive-block combo; optional until integrated. */
+  combo?: { count: number; multiplier: number } | null;
+  /** Wave intro text; optional until integrated. */
+  waveIntro?: string | null;
 }
 
 /** Result of one XP grant, including overflow and queued level ups. */

@@ -2,22 +2,24 @@
 
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
-**Documento de design para orientar o MVP e a expansão do jogo**  
-**Versão:** 1.0  
-**Data:** 7 de novembro de 2026  
+**Documento de design para orientar a campanha e as próximas fases do jogo**  
+**Versão:** 1.1  
+**Data:** 2026-11-08  
+**Status:** v0.2.0 em desenvolvimento; v0.1.0-mvp publicado no itch.io  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
-Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas, idealmente de até cinco minutos por run.
+Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A prioridade do MVP é provar que rebater, mirar, quebrar blocos e escolher perks forma um ciclo divertido. O jogo não depende de uma campanha extensa para esse teste.
+A campanha v0.2.0 tem **6 fases e 21 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. O build `0.1.0-mvp` continua congelado no itch.io; a v0.2.0 é a expansão em desenvolvimento.
 
 ### Como ler os status
 
-- **Confirmado:** escolha expressa pelo jogador ou consolidada como definida no Grill Me.
-- **MVP:** recorte para testar o loop principal.
-- **Futuro:** ideia aceita como possibilidade, sem compromisso de implementação no MVP.
+- **Confirmado:** escolha expressa pelo jogador ou consolidada no design.
+- **v0.2.0:** implementado e validado na expansão atual.
+- **MVP:** recorte original de `0.1.0-mvp`.
+- **Futuro:** ideia aceita como possibilidade, sem compromisso de implementação.
 - **Em aberto:** parâmetro ou regra que ainda precisa de decisão ou teste.
 
 ## 1. Visão e pilares
@@ -31,44 +33,54 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - Sensação e controles de um block breaker clássico.
 - Evolução perceptível ao longo das ondas e das fases.
 - Alta rejogabilidade por meio de combinações diferentes de perks a cada run.
+- **Builds com sinergias e chefes:** as escolhas de perk se combinam em arquétipos reconhecíveis, e cada fase nova termina em um chefe que testa a build.
 - Habilidade manual no início da run e sensação crescente de poder conforme as sinergias de perks se acumulam.
-- Sessões rápidas e fáceis de reiniciar; a referência inicial é uma run de até cinco minutos.
+- Sessões rápidas e fáceis de reiniciar; a referência é uma run curta por fase.
 
 ## 2. Loop principal
 
 1. Mover o rebatedor horizontalmente para posicionar a rebatida.
 2. Controlar ângulo e trajetória para conduzir as bolinhas por corredores e aberturas entre os blocos.
-3. Quebrar blocos, evitar que todas as bolinhas caiam e aproveitar obstáculos e elementos da formação.
-4. Receber XP por blocos destruídos e preencher a barra de nível.
-5. Ao subir de nível, pausar a partida e escolher um entre três perks aleatórios.
-6. Retomar a onda com a nova combinação de habilidades; limpar todos os blocos para iniciar a próxima onda.
+3. Quebrar blocos comuns e **blocos especiais** (explosivo, regenerativo, móvel, multiplicador, gerador e ligado), usando o comportamento de cada um a favor da run.
+4. Interagir com os **elementos da fase** — paredes, obstáculos, defletores, portais, mecanismos móveis, rotores e portões temporizados.
+5. Receber XP por blocos destruídos e preencher a barra de nível.
+6. Ao subir de nível, pausar a partida e escolher um entre três perks aleatórios.
+7. Retomar a onda com a nova combinação de habilidades; limpar todos os blocos — e o **chefe**, quando houver — para iniciar a próxima onda.
+8. Sobreviver às ondas com **desafio** (`timeLimit`, `noLaser`) e concluir a fase; as fases 4–6 terminam em chefe e a fase 6 fecha a campanha.
 
-**Derrota:** nenhuma bolinha permanece ativa em jogo.  
-**Conclusão do MVP:** limpar a quantidade definida de ondas da fase. A quantidade de ondas e os valores de duração continuam em aberto.
+**Derrota:** nenhuma bolinha permanece ativa em jogo, ou o tempo de uma onda com `timeLimit` chega a zero.  
+**Vitória de fase:** limpar todas as ondas previstas, incluindo o chefe quando a onda o define.  
+**Campanha:** 6 fases, com ondas por fase 3/3/3/3/4/5 (total 21).
 
 ## 3. Regras de gameplay confirmadas
 
 ### Controles e trajetória
 
 - Orientação portrait; controle principal por toque e deslize horizontal para mover o rebatedor.
-- A habilidade de mirar e posicionar o rebatedor deve influenciar a trajetória. O jogador aprende por experimentação; não haverá tutorial tradicional.
-- O zoom pode se afastar dinamicamente conforme as formações aumentam, preservando a visibilidade do rebatedor e das bolinhas. Os limites de zoom precisam ser testados em telas pequenas.
-- Há um perk que prende a bolinha ao rebatedor. O método de soltura — botão ou liberação temporizada — permanece em aberto.
+- Também há mouse absoluto e teclado (setas/A-D) no desktop.
+- A habilidade de mirar e posicionar o rebatedor influencia a trajetória. O jogador aprende por experimentação; não há tutorial tradicional.
+- **Zoom de layout:** formações altas reduzem a escala do campo (blocos, elementos e chefe) para manter tudo visível entre o HUD e o paddle. Não é zoom de câmera: o paddle, a bola e o mapeamento de input não mudam.
+- **Sticky Paddle:** prende a bola ao rebatedor e solta com tap/toque; há soltura automática de segurança após 2,5 s.
+- **Prism Laser:** só pode ser disparado quando **pelo menos uma bola está solta** (`!ball.stuck`). Com a única bola presa — no início da onda ou por Sticky — o laser fica bloqueado e o botão indica o motivo.
 
 ### Bolinhas, vidas e falha
 
 - A run tem uma vida compartilhada: perder uma bolinha não encerra a partida enquanto outra estiver ativa; perder todas encerra a run.
 - Perks e elementos da fase podem criar bolinhas simultâneas. A multiplicação aumenta o poder de destruição e a carga de controle.
 - Perks podem salvar uma bolinha ou prevenir/reverter uma derrota. Não há vidas separadas por bolinha.
+- **Second Chance** revive a run uma vez por run, com uma bola nova presa ao paddle.
 - Alguns perks alteram propriedades físicas das bolinhas. Perks de bolinha são passivos ou automáticos; poderes ativáveis pertencem ao rebatedor.
 
 ### Ondas, XP e perks
 
-- A próxima onda começa somente quando todos os blocos da onda atual forem destruídos.
-- Cada bloco destruído concede XP. O XP necessário por nível pode crescer, mas a curva e os valores ainda não foram definidos.
+- A próxima onda começa somente quando todos os blocos da onda atual forem destruídos; em ondas com chefe, o chefe também precisa cair.
+- Cada bloco destruído concede XP. A curva atual é `8 / 20 / 26 / 33 / 39 / 46…` (base `20 + 10 × (level − 1)`, multiplicador global de 0,65 e desconto de primeiro nível).
 - Ao preencher a barra de XP, a partida pausa automaticamente; três opções aleatórias de perk aparecem e o jogador escolhe uma.
-- O catálogo usa um modelo híbrido: alguns perks podem ser escolhidos repetidamente e evoluem por níveis; outros são únicos. Limites variam por perk e ainda não foram definidos.
-- O catálogo deve ser amplo ao longo do produto. No MVP, usar uma seleção curta o bastante para testar escolhas e sinergias.
+- O catálogo usa um modelo híbrido: alguns perks podem ser escolhidos repetidamente e evoluem por níveis; outros são únicos. Limites variam por perk.
+- **Regras de onda:**
+  - `timeLimit`: a onda tem contagem regressiva; se o tempo zerar antes da limpeza, a run termina em derrota. O HUD mostra o tempo restante.
+  - `noLaser`: o Prism Laser fica desabilitado apenas naquela onda; o perk continua adquirido para as ondas seguintes.
+- Ofertas são três cards distintos, sem reroll; um perk interno de fallback (**Arcane Insight**, +XP) preenche a oferta quando faltam opções elegíveis.
 
 ### Ataques do rebatedor
 
@@ -76,119 +88,239 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - Controles de habilidade aparecem de forma contextual, somente quando um perk exigir esse comando, para manter a interface inicial limpa.
 - Poderes do rebatedor e propriedades da bolinha são sistemas separados. O jogador explicitamente não quer poderes ativáveis disparados pelas bolinhas.
 
-## 4. Blocos e desenho das fases
+## 4. Blocos, elementos e desenho das fases
 
 ### Blocos
 
-A visão de produto inclui blocos tradicionais de resistência variável e blocos especiais ou interativos. Resistência deve ser comunicada por cor, textura e/ou estado visual, sem depender exclusivamente da cor.
+A campanha usa 9 tipos. `behavior` dirige a simulação e o renderer; `hp`, `score` e a arte continuam sendo a fonte de verdade. A resistência é comunicada por cor, material, pips de HP e estado visual, sem depender exclusivamente da cor.
 
-Ideias para o catálogo futuro:
+| id | char | HP | Score | Comportamento |
+|---|---|---:|---:|---|
+| `crystal` | `1` | 1 | 10 | `none` — bloco básico |
+| `stone` | `2` | 2 | 20 | `none` — resistência intermediária |
+| `obsidian` | `3` | 3 | 30 | `none` — resistência alta, com runas |
+| `explosive` | `e` | 2 | 25 | `explosive` — ao ser destruído, causa 2 de dano a blocos a até 1 célula (inclui diagonais), com profundidade máxima 3 |
+| `regenerative` | `r` | 3 | 30 | `regenerative` — recupera 1 HP a cada 3,5 s até o máximo; o timer reinicia ao levar dano |
+| `moving` | `m` | 2 | 20 | `moving` — oscila horizontalmente ±0,22 célula, período de 2,4 s; a colisão usa o AABB atual |
+| `multiplier` | `x` | 1 | 30 | `multiplier` — ao ser destruído, ativa `xpFactor = 2` e `scoreFactor = 2` por 6 s |
+| `generator` | `g` | 3 | 40 | `generator` — a cada 5 s cria um `crystal` em célula vazia adjacente, até 3 gerações |
+| `linked` | `l` | 2 | 20 | `linked` — blocos conectados ortogonalmente formam grupo; dano em um membro propaga 1 de dano aos demais (com guarda de recursão) |
 
-- Blocos explosivos, regenerativos, móveis, multiplicadores e geradores de blocos.
-- Blocos que interagem com outros blocos, obstáculos ou poderes das bolinhas.
-- Introdução gradual dos tipos de bloco, para que uma onda ensine uma novidade sem sobrecarregar o jogador.
+- XP por bloco = HP máximo.
+- A introdução é gradual: as fases 1–3 usam só os três blocos básicos; a fase 4 introduz `moving`, `explosive` e `regenerative`; a fase 5, `multiplier` e `linked`; a fase 6 combina todos e adiciona `generator`.
 
 ### Elementos de fase
 
-- Elementos fixos e dinâmicos fazem parte da visão de level design: paredes, obstáculos, defletores, portais, mecanismos, estruturas móveis ou giratórias e elementos que abrem e fecham.
-- Formações podem criar corredores e labirintos. O jogador busca um ponto de entrada que mantenha a bolinha quicando dentro da formação por mais tempo.
-- A onda tradicional exige destruir todos os blocos. Alternativas de ritmo — sobrevivência por tempo, meta parcial ou ondas sobrepostas — ficam no backlog de experimentos.
+São 7 tipos, definidos como união discriminada de `LevelElement`, todos em coordenadas de célula e com a mesma escala do campo.
+
+| kind | Comportamento | Campos principais |
+|---|---|---|
+| `wall` | parede indestrutível, AABB; bloqueia bola, projéteis e laser | `col`, `row`, `widthCells`, `heightCells` |
+| `obstacle` | obstáculo indestrutível, arte distinta da parede; mesmo bloqueio | idem |
+| `deflector` | segmento diagonal que reflete a bola com a normal do segmento | `angleDeg` |
+| `portal` | par de portais; teleporta a bola preservando a velocidade | `pairId` |
+| `mover` | AABB oscilante horizontal ou vertical | `axis`, `rangeCells`, `periodMs`, `phaseMs` |
+| `rotor` | segmento girando em torno do centro | `lengthCells`, `periodMs`, `phaseMs` |
+| `gate` | parede que abre e fecha em ciclo; só colide quando fechada | `closedMs`, `openMs`, `phaseMs` |
+
+Regras:
+
+- `wall` e `obstacle` colidem com bola, projéteis e laser.
+- Laser e projéteis são bloqueados por `wall`/`obstacle`; portais não os afetam.
+- `deflector` e `rotor` refletem a bola com a normal do segmento.
+- `portal` tem cooldown de 300 ms por bola para evitar loop.
+- `mover` e `gate` usam AABB; `gate` só colide quando fechado.
+- `rotor` usa micro-passos de no máximo 8 px para não atravessar.
+
+### Chefes
+
+`WaveDef.boss` define o chefe da onda. O chefe é uma entidade grande, com HP próprio, movimento horizontal e ataques periódicos. A onda só limpa quando todos os blocos **e** o chefe estiverem destruídos.
+
+| Fase | Chefe | HP | Padrão | Shards por ataque | Intervalo base |
+|---|---|---:|---|---:|---:|
+| 4 | Frost Sentinel | 60 | move devagar | 1 | 5,0 s |
+| 5 | Ember Warden | 80 | move médio | 2 | 4,5 s |
+| 6 | Void Herald | 100 | move rápido | 3 | 4,0 s |
+
+Regras:
+
+- Bola, laser, projétil, explosão e bomba causam dano ao chefe.
+- O chefe tem 3 fases internas: acima de 66% de HP, entre 66% e 33% e abaixo de 33%. O intervalo entre ataques cai 15% a cada fase; a quantidade de shards é fixa pelo padrão do chefe.
+- Shards descem lentamente; ao acertar o paddle, aplicam **corrosão**: −6% de largura do paddle por stack, até 3 stacks, válido até o fim da onda.
+- O chefe pisca, recua levemente e emite evento ao levar dano.
+- A morte do chefe dispara explosão, áudio e o encerramento da fase.
+
+### Desafios de onda
+
+| Onda | Fase | Regra |
+|---|---|---|
+| `p4w2` | Frostbound Spire | `timeLimit` 65 s |
+| `p5w2` | Emberforge | `noLaser` |
+| `p5w3` | Emberforge | `timeLimit` 60 s |
+| `p6w2` | Void Threshold | `timeLimit` 75 s |
+| `p6w4` | Void Threshold | `noLaser` |
+
+### Campanha
+
+| # | Nome | Ondas | Velocidades de bola | Tema | Novidade |
+|---|---|---:|---|---|---|
+| 1 | Crystal Grove | 3 | 572 / 616 / 660 | crystal | base |
+| 2 | Ruined Halls | 3 | 616 / 660 / 704 | ruins | stone/obsidian |
+| 3 | Arcane Depths | 3 | 638 / 682 / 726 | arcane | densidade |
+| 4 | Frostbound Spire | 3 | 660 / 682 / 704 | frost | moving, explosive, regenerative, wall, deflector, Frost Sentinel |
+| 5 | Emberforge | 4 | 682 / 704 / 726 / 748 | forge | multiplier, linked, portal, gate, mover, rotor, Ember Warden |
+| 6 | Void Threshold | 5 | 704 / 726 / 748 / 770 / 780 | void | generator e todos os especiais, rotor, mover, Void Herald |
+
+- Total: **21 ondas**, **759 blocos**, **1.831 XP** no conteúdo validado.
+- Blocos por fase: 86 / 90 / 94 / 103 / 136 / 250.
+- XP por fase: 130 / 212 / 262 / 229 / 348 / 650.
+- Cada fase termina em results; a vitória desbloqueia a fase seguinte.
+- A fase 6 termina com o Void Herald e um encerramento de campanha.
+- A fase 6 inclui uma onda alta (12 linhas esparsas) para exercitar o zoom de layout.
+- A dificuldade (HP médio × densidade) não regride entre ondas e fases; o validador permite tolerância de 5% e exclui ondas de chefe do ritmo por densidade.
+
+### Zoom dinâmico do campo
+
+Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala do layout** de blocos, elementos e chefe, com o paddle e a bola no tamanho normal.
+
+- `computeFieldScale(rows, columns, extraRows)` em `src/sim/layout.ts`.
+- Altura de referência: 1280 unidades (mínimo do mundo).
+- Escala = `clamp(available / rawHeight, 0.68, 1)`.
+- Layout centralizado horizontalmente quando a escala é menor que 1.
+- Aplicada no `loadWave`; não muda com resize.
+- Exposta como `World.fieldScale` para debug e para o renderer.
+- A validação de conteúdo usa a mesma função para calcular `gridBottom`.
 
 ## 5. Progressão e persistência
 
 | Momento | Decisão confirmada |
 |---|---|
 | Dentro da run | Perks e níveis formam uma build temporária. A derrota descarta a run. |
-| Entre fases | Progressão sequencial no MVP: vencer uma fase desbloqueia a próxima. |
+| Entre fases | Progressão sequencial: vencer uma fase desbloqueia a próxima. As fases 4–6 desbloqueiam em sequência, de 4 para 5 e de 5 para 6. |
 | Ao perder | Reiniciar a fase perdida imediatamente, sem limite de tentativas; fases já desbloqueadas permanecem disponíveis. |
-| Salvamento | Salvar fases desbloqueadas, recordes/estatísticas e desbloqueios permanentes. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
-| Metaprogressão | Desbloquear opções de conteúdo, como novos perks, tipos de bola, rebatedores e elementos. Sem melhorias permanentes de atributos iniciais. |
-| Competição | Estatísticas pessoais e recordes por fase no MVP; rankings globais e conquistas entram depois. |
+| Second Chance | Revive a run uma vez por run, com uma bola. É um perk único; não é uma vida extra por bolinha. |
+| Salvamento | Save schema v1 (`bb.save`), com `unlockedPhase` de 1 a 6 e estatísticas por fase. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
+| Compatibilidade | Saves antigos continuam válidos; `unlockedPhase` é limitado a 1..6 e campos malformados caem em defaults. |
+| Metaprogressão | Fora do escopo da v0.2.0. Desbloqueios permanentes de conteúdo e melhorias de atributos ficam para uma fase futura. |
+| Competição | Estatísticas pessoais e recordes por fase; rankings globais e conquistas continuam fora do escopo. |
+
+- Save v1 mantém `phases` por `phaseId` com `bestTimeMs`, `bestScore`, `attempts`, `clears` e `bestLevel`.
+- Settings v1 mantém `sound`.
+- A run ativa não é salva.
 
 ## 6. Direção visual e sonora
 
 - Arte 2D em pixel art colorida, com blocos temáticos que representam materiais e estruturas, em vez de formas geométricas genéricas.
-- **Tema do MVP:** fantasia acessível, com magia, cristais, ruínas e elementos naturais. A arte do protótipo pode ser provisória.
-- **Mundos futuros possíveis:** fantasia, sci-fi/futurista e industrial/pós-apocalíptico. São direções para expansão, não conteúdo comprometido para o MVP.
-- A direção sonora inicial é música eletrônica acelerada. Definir efeitos, mixagem e critérios de feedback sonoro antes do polish.
+- **6 temas procedurais:** Crystal Grove, Ruined Halls, Arcane Depths, Frostbound Spire, Emberforge e Void Threshold, com backdrops, silhuetas, parallax, frames e acentos próprios.
+- **Arte procedural dos novos blocos e elementos:** os 9 blocos têm assinatura visual própria; paredes, obstáculos, defletores, portais, movers, rotores e gates são desenhados pelo renderer.
+- **Chefes procedurais:** Frost Sentinel, Ember Warden e Void Herald, com shards e feedback de dano/fase.
+- A leitura não depende só de cor: facetas, material, pips de HP e cracks.
+- A direção sonora continua música eletrônica acelerada, com SFX sintetizados em WebAudio e sem samples licenciados.
+- Reduced motion e budgets de partículas/trails continuam respeitados.
 
-## 7. Escopo do MVP
+## 7. Escopo da versão
 
-O MVP deve provar o ciclo completo de uma run sem exigir a campanha inteira. O recorte abaixo combina as decisões do Grill Me com o objetivo de testar a diversão antes de investir em conteúdo. Onde não há números definidos, o parâmetro permanece em aberto.
+### O que entrou na v0.2.0
 
-| Incluído no MVP | Critério de escopo |
+| Item | Entrega |
 |---|---|
-| Build jogável HTML5 portrait | Um jogo web funcional em desktop e dispositivos móveis; testar o controle por toque e mouse. |
-| Loop de block breaker | Rebatida, colisões, destruição de blocos, queda de bolinhas, vitória e derrota. |
-| Fase/run curta com ondas finitas | Quantidade fixa de ondas; a próxima só inicia após limpar todos os blocos; sem chefe. |
-| Progressão de perks | XP por bloco, pausa no level up, três opções aleatórias e escolha de uma; conjunto inicial enxuto de perks. |
-| Perks de tipos diferentes | Cobrir progressão de atributos/bolinha e ao menos uma opção ligada ao rebatedor; a lista final é decisão de balanceamento. |
-| Feedback e interface essenciais | Estado de onda, XP/nível, perks, bolinhas ativas, pausa, vitória e derrota. |
-| Fantasia provisória | Pixel art simples e colorida, suficiente para leitura de blocos e resistência. |
-| Persistência entre fases | Guardar desbloqueio da próxima fase e estatísticas pessoais; sem salvar a run ativa. |
-| Integração de distribuição inicial | HTML5 com Playgama Bridge como camada de integração. Publicidade pode começar em escopo mínimo, sem interromper a validação do gameplay. |
+| Campanha | 6 fases, ondas 3/3/3/3/4/5, total 21 |
+| Blocos | 9 tipos, incluindo 6 especiais com comportamento próprio |
+| Elementos | 7 tipos, com colisão e render |
+| Chefes | 3, um por fase nova, com shards e corrosão |
+| Desafios | `timeLimit` e `noLaser` em ondas selecionadas |
+| Zoom | Escala de layout 0,68–1,0, sem alterar input |
+| Perks | 19 no catálogo, com níveis e sinergias |
+| Encerramentos | Epílogo por fase, rank S/A/B, final de campanha e derrota |
+| Save | v1 mantido, `unlockedPhase` 1..6 |
+| Correção | Laser só dispara com pelo menos uma bola solta |
 
-**Fora do MVP:** campanha completa, vários mundos, chefes, catálogo grande de blocos/perks, rankings globais, conquistas, anúncios obrigatórios durante a ação e monetização por pagamento.
+### O que continua fora
+
+- Metaprogressão permanente, rewarded ads, leaderboards e conquistas.
+- Mundos sci-fi/industrial, localização e landscape jogável.
+- Editor de fases e pipeline procedural.
+- Backend, contas e cloud save.
+- Full Launch e submission automática em portais.
 
 ## 8. Distribuição, tecnologia e monetização
 
 ### Distribuição
 
 - Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
-- Meta técnica: um build HTML5 e um ZIP reutilizados nos quatro portais, com integração da Playgama Bridge.
-- Sequência registrada: validar o build e checklist; publicar no itch.io, GameFlare e Playgama; submeter no CrazyGames em Basic Launch e só depois preparar Full Launch. Revalidar os requisitos dos portais na data de submissão.
+- **Um build, 6 fases:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração.
+- O **itch.io recebeu o build `0.1.0-mvp`**; esse ZIP permanece congelado.
+- A v0.2.0 é desenvolvimento e ainda não substitui o build publicado.
+- Os portais restantes (GameFlare, Playgama e CrazyGames Basic) continuam com submissão **manual**.
+- Revalidar os requisitos dos portais na data de submissão.
 
 ### Stack de desenvolvimento
 
-- HTML5 está confirmado.
-- Stack recomendada no contexto: **Phaser, TypeScript, Vite e Git**. Phaser para jogo 2D, cenas, colisões, áudio e entrada; TypeScript para tipagem; Vite para desenvolvimento e empacotamento.
-- Confirmar se Phaser/TypeScript/Vite deve ser tratada como decisão final antes de iniciar a implementação.
+- HTML5 confirmado.
+- **Phaser 3.90, TypeScript estrito, Vite 8 e Git.**
+- Vitest para simulação, progressão, conteúdo e save; Playwright para E2E.
+- Playgama Bridge 2.4.1 para plataforma, storage e anúncios.
 
 ### Monetização
 
 - Jogo totalmente gratuito; receita somente de publicidade.
 - Modelo escolhido: anúncios convencionais conforme cada portal e anúncios recompensados opcionais que concedem uma vantagem ao jogador.
+- **Rewarded ads continuam fora da v0.2.0**; o build atual usa apenas interstitial na saída dos results.
 - Sem compras, microtransações, cosméticos pagos ou opção paga para remover anúncios.
 - Respeitar a disponibilidade e as regras de cada portal; não inserir anúncios forçados durante a ação do block breaker.
 
 ## 9. Backlog futuro
 
-- Campanha completa com fases sequenciais, runs independentes por fase, ondas mais longas/difíceis e introdução gradual de novas mecânicas.
-- Mundos temáticos de fantasia, sci-fi/futurista e industrial/pós-apocalíptico.
-- Chefes, desafios especiais e encerramentos variados ao final de fases.
-- Novas estruturas de onda: limite de tempo, meta parcial ou ondas que se sobrepõem.
-- Catálogo amplo de blocos: regeneração, movimento, explosão, multiplicação, geração e interações.
-- Mais obstáculos, portais, defletores e mecanismos móveis, giratórios ou temporizados.
-- Grande catálogo de perks, mais sinergias, níveis individuais e perks únicos.
-- Desbloqueios de tipos de bolinha, rebatedores e elementos de gameplay, sem aumentar atributos iniciais de forma permanente.
+Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog.
+
+- Metaprogressão permanente com desbloqueios de conteúdo, sem bônus permanentes de atributos iniciais.
+- Rewarded ads com vantagens específicas, após definir benefícios e limites para preservar o equilíbrio.
 - Rankings globais e conquistas, condicionados aos recursos dos portais.
-- Rewarded ads com vantagens específicas, após definir benefícios e limites para preservar equilíbrio.
+- Mundos temáticos sci-fi/futurista e industrial/pós-apocalíptico.
+- Localização para outros idiomas.
+- Modo landscape jogável.
+- Editor de fases ou pipeline procedural.
+- Backend, contas e cloud save.
+- Full Launch do CrazyGames e novos portais (Poki, GameDistribution, Famobi).
 
 ## 10. Pendências e validação de consistência
 
 | Tema | Pendência / observação |
 |---|---|
-| Escopo do MVP | A proposta inicial mencionava sobrevivência contínua; a decisão posterior definiu quantidade fixa de ondas e ausência de chefes no MVP. Este GDD segue a decisão posterior. |
-| Estrutura geral | A visão final é uma campanha de fases, cada fase uma run com várias ondas. Confirmar a sequência e o encerramento de uma run após vitória. |
-| Critérios de entrega | Traduzir o escopo em entregáveis e critérios de aceite; confirmar a quantidade de conteúdo antes de congelar tarefas. |
-| Parâmetros | Número de fases e ondas, duração-alvo, layout, zoom mínimo/máximo, velocidade e ângulo da bola, tamanho/velocidade do rebatedor, vidas e valores de XP. |
-| Perks | Lista inicial, raridade, repetição no sorteio, limites por perk, reroll, sinergias e distribuição de ataques manuais/automáticos. |
-| Perk “grudar” | Como a bolinha é lançada de novo: botão contextual ou soltura automática por tempo. |
-| Blocos e balanceamento | Quantidade de blocos por onda, resistência, pontuação/XP, frequência de blocos especiais e regras de geração. |
-| Áudio | Definir efeitos sonoros, mixagem e feedback de gameplay. |
-| Plataforma | Comportamento de mouse/teclado, tamanhos de tela, fullscreen, pausa, foco/aba inativa e armazenamento entre portais. |
-| Publicidade | Formatos convencionais e recompensas por portal, recompensa específica, frequência e tratamento de falha/cancelamento do anúncio. |
-| Critérios de sucesso | Definir sinais de diversão e metas para decidir se o MVP avança: completude, repetição voluntária, duração de sessão e variedade de perks escolhidos. |
+| Conteúdo | A campanha de 6 fases / 21 ondas está fechada; não há novas fases previstas nesta versão. |
+| Ondas | Distribuição decidida: 3/3/3/3/4/5. As ondas novas (3 na fase 4, 4 na fase 5, 5 na fase 6) estão implementadas e validadas. |
+| Perks | Catálogo fechado em 19 perks, com níveis, pré-requisitos e fallback interno. Balanceamento fino ainda depende de playtest humano. |
+| Chefes | Três chefes definidos (Frost Sentinel, Ember Warden, Void Herald) com HP, padrão, shards e corrosão. Ajuste de dificuldade segue aberto para playtest. |
+| Regras de onda | `timeLimit` e `noLaser` implementados nas ondas definidas. Novas combinações de desafio ficam para o futuro. |
+| Zoom | Escala 0,68–1,0 implementada e validada no conteúdo. Testar legibilidade em telas pequenas reais. |
+| Balanceamento | Ainda depende de playtest humano; o bot de QA não substitui jogador. |
+| Rewarded ads | Fora do escopo; decidir formato, recompensa e frequência antes de implementar. |
+| Metaprogressão | Fora do escopo; decidir se a próxima fase é conteúdo, meta ou plataforma. |
+| Localização | Fora do escopo; o catálogo de strings precisa ser separado por locale antes. |
+| Performance real | Números de hardware real ainda não estão versionados; criar baseline por device. |
+| Distribuição | itch.io com `0.1.0-mvp` congelado; portais restantes aguardam submissão manual da v0.2.0. |
+| Áudio | Novos elementos e chefes usam SFX existentes; mixagem final ainda pode ser refinada. |
 
 ### Checklist de coerência
 
 - A vida compartilhada significa que uma bolinha pode cair sem terminar a run se outra continuar ativa; a derrota ocorre quando todas caem.
 - Perks de bola são passivos/automáticos; perks de ataque pertencem ao rebatedor e podem ser automáticos ou manuais.
-- O level up pausa o jogo para a escolha de um entre três perks; as ondas só avançam após todos os blocos serem destruídos.
+- O level up pausa o jogo para a escolha de um entre três perks; as ondas só avançam após todos os blocos (e o chefe, quando houver) serem destruídos.
+- O laser exige pelo menos uma bola solta; Sticky e a bola inicial presa bloqueiam o disparo.
+- O zoom é escala de layout, não de câmera; o input não muda.
 - Metaprogressão desbloqueia conteúdo, não bônus permanentes de atributos. A run ativa não é salva.
-- A monetização é somente publicidade, o jogo continua gratuito e rewarded ads são opcionais.
-- Para o MVP, vale a definição posterior: ondas finitas e sem chefe.
+- A monetização é somente publicidade; rewarded ads continuam opcionais e fora da v0.2.0.
+- O build `0.1.0-mvp` do itch.io permanece congelado; a v0.2.0 é desenvolvimento.
 
 ---
 
-Este GDD separa as decisões confirmadas do recorte do MVP, do backlog futuro e das pendências de design. Use a seção de pendências para fechar parâmetros e critérios de aceite antes de transformar o escopo em tarefas de implementação.
+## Histórico de versões
+
+| Versão | Data | Mudanças |
+|---|---|---|
+| `1.0` | 2026-11-07 | GDD do MVP: 3 fases × 3 ondas, 3 blocos, 11 perks, sem chefes. |
+| `1.1` | 2026-11-08 | v0.2.0-dev: campanha de 6 fases / 21 ondas, 9 blocos, 7 elementos, 3 chefes, 19 perks, desafios, zoom de layout, encerramentos e save 1..6. |
+| `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
+| `0.2.0-dev` | 2026-11-08 | Expansão em desenvolvimento; ainda não publicada nos portais. |
+
+Este GDD separa as decisões confirmadas do recorte da versão atual, do backlog futuro e das pendências de design. Use a seção de pendências para fechar parâmetros e critérios de aceite antes de transformar o escopo em tarefas de implementação.

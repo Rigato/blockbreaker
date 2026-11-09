@@ -1,12 +1,15 @@
 # Bricklike
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
-live URL and ZIP keep the technical slug `blockbreaker`. G6 is approved. The
-repository is in the **M7 — release and publication package** stage: the full
-three-level game, QA evidence and technical release are complete, and the store
-package (covers, screenshots, preview video, English metadata and submission
-checklist) is ready for human review. Portal submission is manual and remains
-with the user; G7 is **not** approved yet.
+live URL and ZIP keep the technical slug `blockbreaker`. The current development
+line is **v0.2.0 — campaign expansion**: a **6-phase, 21-wave** campaign with
+**9 block types**, **7 phase elements**, **3 bosses**, **19 perks**, dynamic
+layout zoom and per-phase endings. The M0–M7 history below remains valid and the
+`0.1.0-mvp` build is still the frozen package published on itch.io.
+
+The v0.2.0 work is in progress on `feat/v0.2.0`; there is no public v0.2.0
+release or portal upload yet. The v0.1.0-mvp ZIP on itch.io is **frozen** and is
+not replaced by this branch. The GitHub Pages review build tracks the branch.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -41,6 +44,41 @@ npm run test:e2e  # Playwright smoke/layout (build first)
 npm run qa:runs -- --runs=10   # automated baseline, not human playtest
 npm run preview   # serves dist/ locally
 ```
+
+## v0.2.0 — campaign expansion
+
+Development branch: `feat/v0.2.0`. Not published to any portal yet; the
+`0.1.0-mvp` ZIP on itch.io stays frozen.
+
+- **Campaign:** 6 phases with waves per phase **3 / 3 / 3 / 3 / 4 / 5 = 21**.
+  Phases 4–6 are **Frostbound Spire** (3), **Emberforge** (4) and
+  **Void Threshold** (5). Validated content: **759 blocks**, **1.831 XP**.
+- **9 block types:** crystal, stone, obsidian plus explosive, regenerative,
+  moving, multiplier, generator and linked. Each special block has simulation
+  behaviour, not just different HP.
+- **7 phase elements:** wall, obstacle, deflector, portal, mover, rotor and gate,
+  with collision and procedural art.
+- **3 bosses:** Frost Sentinel (phase 4), Ember Warden (phase 5) and Void Herald
+  (phase 6). Boss waves only clear when the blocks **and** the boss are down.
+  Boss shards apply paddle **corrosion** (−6% width per stack, max 3, until the
+  end of the wave).
+- **Wave challenges:** `timeLimit` on `p4w2`, `p5w3` and `p6w2`; `noLaser` on
+  `p5w2` and `p6w4`. A failed time limit ends the run; `noLaser` disables only
+  that wave.
+- **19 perks:** the original 11 plus Critical Strike, Laser Focus, Overcharge,
+  Combo Master, Second Chance, Bomb Ball, Boss Bane and Swift Ball. Builds have
+  intended synergies (laser, damage, XP/score, defence, explosions).
+- **Second Chance:** one revive per run with a fresh ball. It consumes a single
+  charge and does not create per-ball lives.
+- **Dynamic layout zoom:** tall waves scale blocks, elements and bosses between
+  **0.68 and 1.0**; the paddle, ball and input mapping keep their normal size.
+  This is a layout scale, not a camera zoom.
+- **Endings:** per-phase epilogues, **S/A/B** rank, a campaign finale after
+  Void Herald and a defeat epilogue. Shown on the results screen.
+- **Save:** schema v1 is unchanged; `unlockedPhase` now spans **1..6** and
+  phases 4–6 unlock sequentially. Old saves remain valid.
+- **Laser rule:** Prism Laser only fires while at least one ball is loose. The
+  initial stuck ball and Sticky Paddle block it, and the HUD shows why.
 
 ## M7 — release and publication package
 
@@ -201,10 +239,13 @@ npm run preview   # serves dist/ locally
 | Move paddle | Relative 1:1 drag | Mouse absolute / arrows / A-D |
 | Launch | Tap the field | Click / V |
 | Pause | Pause button → Resume/Restart/Sound/Menu | Pause button / P → Resume/Restart/Sound/Menu |
-| Laser | Laser button | Laser button / Space / E |
+| Laser | Laser button (needs a loose ball) | Laser button / Space / E (needs a loose ball) |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
 | Menu / levels | Pause → Menu, Results → Menu | Pause → Menu, Results → Menu |
 | Rotate device | Portrait only (landscape guard) | — |
+
+The Prism Laser is disabled while every ball is stuck (opening serve or Sticky
+Paddle). Sticky releases on tap or automatically after 2.5 s.
 
 ## Platform boot
 
@@ -248,14 +289,18 @@ debug.
 src/
   boot/bridgeBoot.ts       Bridge timeout + fallback selection
   audio/                   Synthesized WebAudio service, voice budget and lifecycle
-  content/                 Level/wave definitions, validator and M2 perk catalog
+  content/                 Phase/wave/element/boss/perk definitions
+  content/endings.ts       Per-phase epilogues, ranks and campaign finale
   assets/fonts/            Bundled Silkscreen OFL font files
   game/                    Game orchestration, contracts, events and config
-  sim/                     Pure fixed-step simulation and collision
+  sim/                     Pure fixed-step simulation, collision and layout scale
+  sim/layout.ts            computeFieldScale (0.68–1.0 layout zoom)
   progression/             XP curve, perks, level save/stats and run modifiers
   input/                   Touch, mouse and keyboard input
   platform/                PlatformService + Bridge/Fallback adapters
-  render/                  Level themes, pixel block art, pooled effects and scene
+  render/                  Themes, block/element/boss art, effects and scene
+  render/elementArt.ts     Walls, obstacles, deflectors, portals, movers, rotors, gates
+  render/bossArt.ts        Frost Sentinel, Ember Warden, Void Herald and shards
   ui/                      Menu, HUD, level-up, overlays, orientation and debug
   i18n/                    English strings
 tests/                     Unit tests + tests/e2e Playwright
@@ -271,6 +316,7 @@ release/                   Generated ZIP + manifest (not committed)
 - [Technical publishing spec](docs/spec-tecnica-publicacao.md)
 - [Low-friction publishing plan](docs/plano-baixa-fricao.md)
 - [MVP implementation plan](docs/plano-implementacao-mvp.md)
+- [v0.2.0 campaign expansion plan](docs/plano-v0.2.0.md)
 - [Post-MVP handoff](docs/handoff-proxima-fase.md)
 
 ## Deployment

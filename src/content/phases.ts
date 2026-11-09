@@ -1,9 +1,17 @@
 import { GAME_CONFIG } from '../game/config';
 import { BLOCK_TYPES, isBlockTypeId } from '../sim/blocks';
 import { BLOCK_TOP, PADDLE_BOTTOM_OFFSET } from '../sim/World';
+import { computeFieldScale } from '../sim/layout';
 import { xpCostForLevel } from '../progression/xp';
-import type { PhaseDef, WaveDef } from './types';
-import { PHASE_1_WAVES, PHASE_2_WAVES, PHASE_3_WAVES } from './waves';
+import type { BossDef, LevelElement, PhaseDef, WaveDef } from './types';
+import {
+  PHASE_1_WAVES,
+  PHASE_2_WAVES,
+  PHASE_3_WAVES,
+  PHASE_4_WAVES,
+  PHASE_5_WAVES,
+  PHASE_6_WAVES,
+} from './waves';
 
 /** Stable phase order consumed by the game and by the content validator. */
 export const PHASES: readonly PhaseDef[] = [
@@ -25,19 +33,43 @@ export const PHASES: readonly PhaseDef[] = [
     name: 'Arcane Depths',
     waves: PHASE_3_WAVES,
   },
+  {
+    id: 'phase-4',
+    index: 4,
+    name: 'Frostbound Spire',
+    waves: PHASE_4_WAVES,
+  },
+  {
+    id: 'phase-5',
+    index: 5,
+    name: 'Emberforge',
+    waves: PHASE_5_WAVES,
+  },
+  {
+    id: 'phase-6',
+    index: 6,
+    name: 'Void Threshold',
+    waves: PHASE_6_WAVES,
+  },
 ];
 
-/** Conservative validation viewport. The live game is always taller (1280+). */
-export const CONTENT_EVALUATION_HEIGHT = 720;
+/** Waves per phase in campaign order. */
+export const EXPECTED_WAVE_COUNTS = [3, 3, 3, 3, 4, 5] as const;
+
+/** Conservative validation viewport. Matches the real minimum world height. */
+export const CONTENT_EVALUATION_HEIGHT = 1280;
 export const CONTENT_EVALUATION_WIDTH = 720;
 
-/** Top of the paddle box at the conservative 720-unit validation height. */
+/** Top of the paddle box at the 1280-unit validation height. */
 export const PADDLE_ZONE_TOP =
   CONTENT_EVALUATION_HEIGHT - PADDLE_BOTTOM_OFFSET - GAME_CONFIG.paddle.height / 2;
 
+/** Hard row cap for a single wave (keeps the field readable when scaled). */
+export const MAX_WAVE_ROWS = 12;
+
 export const BALL_SPEED_MIN = 500;
 export const BALL_SPEED_MAX = 780;
-/** Slack for the monotonic difficulty check across wave boundaries. */
+/** Relative slack (5%) for the monotonic difficulty and speed checks. */
 export const DIFFICULTY_TOLERANCE = 0.05;
 
 export interface WaveStats {
@@ -87,6 +119,21 @@ export function levelUpsForXp(xp: number): number {
   return levelUps;
 }
 
+/** Rows an element or boss extends beyond the block grid, if any. */
+function extraRowsFor(wave: WaveDef): number {
+  const rows = wave.rows.length;
+  let maxRow = rows;
+  for (const element of wave.elements ?? []) {
+    const bottom = element.row + (element.heightCells ?? 1);
+    if (Number.isFinite(bottom) && bottom > maxRow) maxRow = bottom;
+  }
+  if (wave.boss) {
+    const bottom = wave.boss.row + wave.boss.heightCells;
+    if (Number.isFinite(bottom) && bottom > maxRow) maxRow = bottom;
+  }
+  return Math.max(0, maxRow - rows);
+}
+
 export function waveStats(phase: PhaseDef, wave: WaveDef): WaveStats {
   const columns = wave.rows[0]?.length ?? 0;
   const rows = wave.rows.length;
@@ -106,8 +153,10 @@ export function waveStats(phase: PhaseDef, wave: WaveDef): WaveStats {
 
   const density = cells > 0 ? blocks / cells : 0;
   const avgHp = blocks > 0 ? hp / blocks : 0;
-  const cellSize = columns > 0 ? CONTENT_EVALUATION_WIDTH / columns : 0;
-  const gridBottom = BLOCK_TOP + rows * cellSize;
+  const extraRows = extraRowsFor(wave);
+  const scale = computeFieldScale(rows, columns, extraRows);
+  const cellSize = columns > 0 ? (CONTENT_EVALUATION_WIDTH / columns) * scale : 0;
+  const gridBottom = BLOCK_TOP + (rows + extraRows) * cellSize;
 
   return {
     wave,
@@ -154,6 +203,52 @@ export function allWaveStats(phases: readonly PhaseDef[] = PHASES): readonly Wav
   return phases.flatMap((phase) => phaseStats(phase).waves);
 }
 
+/** Waves whose block density drives the pace (boss waves are boss-driven). */
+function pacedWaves(stats: PhaseStats): readonly WaveStats[] {
+  return stats.waves.filter((wave) => !wave.wave.boss && wave.blocks > 0);
+}
+
+function phasePeaks(stats: PhaseStats): { avgHp: number; difficulty: number } {
+  const waves = pacedWaves(stats);
+  if (waves.length === 0) return { avgHp: 0, difficulty: 0 };
+  return {
+    avgHp: Math.max(...waves.map((wave) => wave.avgHp)),
+    difficulty: Math.max(...waves.map((wave) => wave.difficulty)),
+  };
+}
+
+/** True when `value` did not fall more than the relative tolerance below `previous`. */
+function didNotRegress(value: number, previous: number): boolean {
+  return value + previous * DIFFICULTY_TOLERANCE >= previous;
+}
+
+/** Element rectangle in cell units, with the documented 1-cell defaults. */
+function elementRect(element: LevelElement): {
+  col: number;
+  row: number;
+  width: number;
+  height: number;
+} {
+  return {
+    col: element.col,
+    row: element.row,
+    width: element.widthCells ?? 1,
+    height: element.heightCells ?? 1,
+  };
+}
+
+function cellsOverlap(
+  a: { col: number; row: number; width: number; height: number },
+  b: { col: number; row: number; width: number; height: number },
+): boolean {
+  return (
+    a.col < b.col + b.width &&
+    a.col + a.width > b.col &&
+    a.row < b.row + b.height &&
+    a.row + a.height > b.row
+  );
+}
+
 /** Structural and tuning checks shared by the CLI validator and unit tests. */
 export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIssue[] {
   const issues: ContentIssue[] = [];
@@ -161,8 +256,11 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     issues.push({ path, message });
   };
 
-  if (phases.length !== 3) {
-    push('phases', `expected exactly 3 phases, found ${phases.length}`);
+  if (phases.length !== EXPECTED_WAVE_COUNTS.length) {
+    push(
+      'phases',
+      `expected exactly ${EXPECTED_WAVE_COUNTS.length} phases, found ${phases.length}`,
+    );
   }
 
   const phaseIds = new Set<string>();
@@ -182,8 +280,9 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     if (!phase.name.trim()) {
       push(phasePath, 'phase name must not be empty');
     }
-    if (phase.waves.length !== 3) {
-      push(phasePath, `expected exactly 3 waves, found ${phase.waves.length}`);
+    const expectedWaves = EXPECTED_WAVE_COUNTS[phaseIndex];
+    if (expectedWaves !== undefined && phase.waves.length !== expectedWaves) {
+      push(phasePath, `expected exactly ${expectedWaves} waves, found ${phase.waves.length}`);
     }
 
     phase.waves.forEach((wave, waveIndex) => {
@@ -205,6 +304,9 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
         push(wavePath, 'wave must have at least one row');
         return;
       }
+      if (wave.rows.length > MAX_WAVE_ROWS) {
+        push(wavePath, `wave has ${wave.rows.length} rows, at most ${MAX_WAVE_ROWS} allowed`);
+      }
 
       const columns = wave.rows[0]?.length ?? 0;
       if (columns === 0) {
@@ -214,10 +316,7 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
 
       wave.rows.forEach((row, rowIndex) => {
         if (row.length !== columns) {
-          push(
-            wavePath,
-            `row ${rowIndex} has width ${row.length}, expected ${columns}`,
-          );
+          push(wavePath, `row ${rowIndex} has width ${row.length}, expected ${columns}`);
         }
       });
 
@@ -229,6 +328,12 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
           push(wavePath, `legend "${char}" maps to invalid block type "${String(type)}"`);
         }
       }
+
+      const hasBlockAt = (row: number, col: number): boolean => {
+        const char = wave.rows[row]?.[col];
+        if (char === undefined || char === '.') return false;
+        return wave.legend[char] !== undefined;
+      };
 
       let blockCount = 0;
       wave.rows.forEach((row, rowIndex) => {
@@ -243,8 +348,184 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
         }
       });
 
-      if (blockCount === 0) {
+      if (blockCount === 0 && !wave.boss) {
         push(wavePath, 'wave must contain at least one destructible block');
+      }
+
+      const elements = wave.elements ?? [];
+      const elementIds = new Set<string>();
+      const portalCounts = new Map<string, number>();
+      const elementRects: {
+        id: string;
+        rect: { col: number; row: number; width: number; height: number };
+      }[] = [];
+
+      elements.forEach((element, elementIndex) => {
+        const elementPath = `${wavePath}/element[${elementIndex}]`;
+        const id = element.id;
+        if (!id || !id.trim()) {
+          push(elementPath, 'element id must not be empty');
+        } else if (elementIds.has(id)) {
+          push(elementPath, `duplicate element id "${id}"`);
+        } else {
+          elementIds.add(id);
+        }
+
+        const rect = elementRect(element);
+        if (!Number.isInteger(rect.col) || rect.col < 0) {
+          push(elementPath, `col must be a non-negative integer, found ${rect.col}`);
+        }
+        if (!Number.isInteger(rect.row) || rect.row < 0) {
+          push(elementPath, `row must be a non-negative integer, found ${rect.row}`);
+        }
+        if (!Number.isInteger(rect.width) || rect.width < 1) {
+          push(elementPath, `widthCells must be >= 1, found ${rect.width}`);
+        }
+        if (!Number.isInteger(rect.height) || rect.height < 1) {
+          push(elementPath, `heightCells must be >= 1, found ${rect.height}`);
+        }
+        if (rect.col + rect.width > columns) {
+          push(
+            elementPath,
+            `col ${rect.col} + widthCells ${rect.width} exceeds ${columns} columns`,
+          );
+        }
+        if (rect.row + rect.height > wave.rows.length) {
+          push(
+            elementPath,
+            `row ${rect.row} + heightCells ${rect.height} exceeds ${wave.rows.length} rows`,
+          );
+        }
+
+        for (let row = rect.row; row < rect.row + rect.height; row += 1) {
+          for (let col = rect.col; col < rect.col + rect.width; col += 1) {
+            if (hasBlockAt(row, col)) {
+              push(elementPath, `overlaps block at row ${row}, col ${col}`);
+            }
+          }
+        }
+        for (const other of elementRects) {
+          if (cellsOverlap(rect, other.rect)) {
+            push(elementPath, `overlaps element "${other.id}"`);
+          }
+        }
+        elementRects.push({ id, rect });
+
+        if (element.kind === 'portal') {
+          if (!element.pairId || !element.pairId.trim()) {
+            push(elementPath, 'portal must define a non-empty pairId');
+          } else {
+            portalCounts.set(element.pairId, (portalCounts.get(element.pairId) ?? 0) + 1);
+          }
+        } else if (element.kind === 'deflector') {
+          if (!Number.isFinite(element.angleDeg)) {
+            push(elementPath, 'deflector angleDeg must be finite');
+          }
+        } else if (element.kind === 'mover') {
+          if (!Number.isFinite(element.periodMs) || element.periodMs <= 0) {
+            push(elementPath, `mover periodMs must be > 0, found ${element.periodMs}`);
+          }
+          if (!Number.isFinite(element.rangeCells) || element.rangeCells < 0) {
+            push(elementPath, 'mover rangeCells must be a finite non-negative number');
+          }
+          if (element.phaseMs !== undefined && !Number.isFinite(element.phaseMs)) {
+            push(elementPath, 'mover phaseMs must be finite when present');
+          }
+        } else if (element.kind === 'rotor') {
+          if (!Number.isFinite(element.periodMs) || element.periodMs <= 0) {
+            push(elementPath, `rotor periodMs must be > 0, found ${element.periodMs}`);
+          }
+          if (!Number.isFinite(element.lengthCells) || element.lengthCells < 1) {
+            push(elementPath, 'rotor lengthCells must be >= 1');
+          }
+          if (element.phaseMs !== undefined && !Number.isFinite(element.phaseMs)) {
+            push(elementPath, 'rotor phaseMs must be finite when present');
+          }
+        } else if (element.kind === 'gate') {
+          if (!Number.isFinite(element.closedMs) || element.closedMs <= 0) {
+            push(elementPath, `gate closedMs must be > 0, found ${element.closedMs}`);
+          }
+          if (!Number.isFinite(element.openMs) || element.openMs <= 0) {
+            push(elementPath, `gate openMs must be > 0, found ${element.openMs}`);
+          }
+          if (element.phaseMs !== undefined && !Number.isFinite(element.phaseMs)) {
+            push(elementPath, 'gate phaseMs must be finite when present');
+          }
+        }
+      });
+
+      for (const [pairId, count] of portalCounts) {
+        if (count !== 2) {
+          push(wavePath, `portal pair "${pairId}" has ${count} portals, expected exactly 2`);
+        }
+      }
+
+      if (wave.boss) {
+        const boss = wave.boss as BossDef;
+        const bossPath = `${wavePath}/boss`;
+        if (!boss.id.trim()) push(bossPath, 'boss id must not be empty');
+        if (!boss.name.trim()) push(bossPath, 'boss name must not be empty');
+        if (!Number.isFinite(boss.hp) || boss.hp <= 0) {
+          push(bossPath, `boss hp must be > 0, found ${boss.hp}`);
+        }
+        if (!Number.isInteger(boss.widthCells) || boss.widthCells < 1) {
+          push(bossPath, `boss widthCells must be >= 1, found ${boss.widthCells}`);
+        }
+        if (!Number.isInteger(boss.heightCells) || boss.heightCells < 1) {
+          push(bossPath, `boss heightCells must be >= 1, found ${boss.heightCells}`);
+        }
+        if (!Number.isInteger(boss.row) || boss.row < 0) {
+          push(bossPath, `boss row must be a non-negative integer, found ${boss.row}`);
+        }
+        if (boss.widthCells > columns) {
+          push(bossPath, `boss widthCells ${boss.widthCells} exceeds ${columns} columns`);
+        }
+        if (boss.row + boss.heightCells > wave.rows.length) {
+          push(
+            bossPath,
+            `boss row ${boss.row} + heightCells ${boss.heightCells} exceeds ` +
+              `${wave.rows.length} rows`,
+          );
+        }
+        if (!Number.isFinite(boss.attackMs) || boss.attackMs <= 0) {
+          push(bossPath, 'boss attackMs must be finite and > 0');
+        }
+        if (!Number.isFinite(boss.moveSpeed)) {
+          push(bossPath, 'boss moveSpeed must be finite');
+        }
+
+        // The boss is horizontally centred, so its cell span is symmetric even
+        // when `widthCells` is odd. Any touched cell counts as occupied.
+        const bossStartCol = Math.floor((columns - boss.widthCells) / 2);
+        const bossEndCol = Math.ceil((columns + boss.widthCells) / 2) - 1;
+        let blockOverlap = false;
+        let elementOverlap = false;
+        for (let row = boss.row; row < boss.row + boss.heightCells; row += 1) {
+          for (let col = bossStartCol; col <= bossEndCol; col += 1) {
+            if (hasBlockAt(row, col)) blockOverlap = true;
+            for (const element of elementRects) {
+              if (cellsOverlap(element.rect, { col, row, width: 1, height: 1 })) {
+                elementOverlap = true;
+              }
+            }
+          }
+        }
+        if (blockOverlap) push(bossPath, 'boss overlaps a block cell');
+        if (elementOverlap) push(bossPath, 'boss overlaps an element');
+      }
+
+      for (const rule of wave.rules ?? []) {
+        if (rule.kind === 'timeLimit') {
+          if (!Number.isFinite(rule.ms) || rule.ms <= 0) {
+            push(wavePath, `timeLimit ms must be > 0, found ${rule.ms}`);
+          }
+        } else if (rule.kind === 'noLaser') {
+          if (Object.keys(rule as unknown as Record<string, unknown>).length !== 1) {
+            push(wavePath, 'noLaser rule must not carry a payload');
+          }
+        } else {
+          push(wavePath, `unknown wave rule "${String((rule as { kind?: unknown }).kind)}"`);
+        }
       }
 
       const stats = waveStats(phase, wave);
@@ -276,45 +557,63 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     });
 
     const stats = phaseStats(phase);
-    if (stats.levelUps < 4 || stats.levelUps > 8) {
-      push(phasePath, `expected 4-8 level ups, found ${stats.levelUps}`);
+    if (stats.levelUps < 4 || stats.levelUps > 16) {
+      push(phasePath, `expected 4-16 level ups, found ${stats.levelUps}`);
     }
+
+    // Block-density pace only compares boss-less waves, so a final boss wave
+    // may be sparse without looking like a difficulty regression.
+    const paced = pacedWaves(stats);
+    paced.forEach((wave, index) => {
+      if (index === 0) return;
+      const previous = paced[index - 1]!;
+      const path = `${phasePath}/${wave.wave.id}`;
+      if (!didNotRegress(wave.avgHp, previous.avgHp)) {
+        push(
+          path,
+          `average HP ${wave.avgHp.toFixed(2)} falls below previous ` +
+            `${previous.avgHp.toFixed(2)} by more than ${DIFFICULTY_TOLERANCE * 100}%`,
+        );
+      }
+      if (!didNotRegress(wave.difficulty, previous.difficulty)) {
+        push(
+          path,
+          `difficulty ${wave.difficulty.toFixed(2)} falls below previous ` +
+            `${previous.difficulty.toFixed(2)} by more than ${DIFFICULTY_TOLERANCE * 100}%`,
+        );
+      }
+    });
   });
 
-  // Max speed must climb phase over phase (waves may reset at a phase start).
   const phaseStatsList = phases.map((phase) => phaseStats(phase));
+
+  // Each phase peak must not regress against the previous phase peak. This
+  // allows a lighter introductory wave while keeping the campaign escalating.
   phaseStatsList.forEach((stats, index) => {
     if (index === 0) return;
     const previous = phaseStatsList[index - 1];
-    if (previous && stats.maxBallSpeed <= previous.maxBallSpeed) {
+    if (!previous) return;
+    const currentPeak = phasePeaks(stats);
+    const previousPeak = phasePeaks(previous);
+    if (!didNotRegress(currentPeak.avgHp, previousPeak.avgHp)) {
       push(
         stats.phase.id,
-        `phase max ballSpeed ${stats.maxBallSpeed} must exceed ` +
+        `phase peak average HP ${currentPeak.avgHp.toFixed(2)} regresses from ` +
+          `previous peak ${previousPeak.avgHp.toFixed(2)}`,
+      );
+    }
+    if (!didNotRegress(currentPeak.difficulty, previousPeak.difficulty)) {
+      push(
+        stats.phase.id,
+        `phase peak difficulty ${currentPeak.difficulty.toFixed(2)} regresses from ` +
+          `previous peak ${previousPeak.difficulty.toFixed(2)}`,
+      );
+    }
+    if (!didNotRegress(stats.maxBallSpeed, previous.maxBallSpeed)) {
+      push(
+        stats.phase.id,
+        `phase max ballSpeed ${stats.maxBallSpeed} regresses from ` +
           `previous phase max ${previous.maxBallSpeed}`,
-      );
-    }
-  });
-
-  // Average HP and the HP x density score must never go backwards.
-  const ordered = phaseStatsList.flatMap((stats) => stats.waves);
-  ordered.forEach((stats, index) => {
-    if (index === 0) return;
-    const previous = ordered[index - 1];
-    if (!previous) return;
-    const path = `${stats.phaseId}/${stats.wave.id}`;
-
-    if (stats.avgHp + DIFFICULTY_TOLERANCE < previous.avgHp) {
-      push(
-        path,
-        `average HP ${stats.avgHp.toFixed(2)} falls below previous ` +
-          `${previous.avgHp.toFixed(2)}`,
-      );
-    }
-    if (stats.difficulty + DIFFICULTY_TOLERANCE < previous.difficulty) {
-      push(
-        path,
-        `difficulty ${stats.difficulty.toFixed(2)} falls below previous ` +
-          `${previous.difficulty.toFixed(2)}`,
       );
     }
   });
@@ -340,12 +639,19 @@ export function formatContentReport(phases: readonly PhaseDef[] = PHASES): strin
       totalWaves += 1;
       totalBlocks += wave.blocks;
       totalXp += wave.hp;
+      const tags: string[] = [];
+      if (wave.wave.boss) tags.push(`boss=${wave.wave.boss.name}`);
+      for (const rule of wave.wave.rules ?? []) {
+        tags.push(rule.kind === 'timeLimit' ? `limit=${rule.ms / 1000}s` : rule.kind);
+      }
+      const suffix = tags.length > 0 ? ` [${tags.join(' ')}]` : '';
       lines.push(
-        `  ${wave.wave.id.padEnd(5)} ${wave.wave.name.padEnd(18)} ` +
-          `${wave.columns}x${wave.rows} blocks=${String(wave.blocks).padStart(2)} ` +
+        `  ${wave.wave.id.padEnd(5)} ${wave.wave.name.padEnd(20)} ` +
+          `${wave.columns}x${String(wave.rows).padStart(2)} ` +
+          `blocks=${String(wave.blocks).padStart(2)} ` +
           `xp=${String(wave.hp).padStart(3)} avgHp=${wave.avgHp.toFixed(2)} ` +
           `density=${wave.density.toFixed(2)} score=${wave.difficulty.toFixed(2)} ` +
-          `speed=${wave.wave.ballSpeed}`,
+          `speed=${wave.wave.ballSpeed}${suffix}`,
       );
     }
   }

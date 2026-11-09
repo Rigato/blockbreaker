@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from '../game/config';
 import type { ScenePresentation } from '../game/presentation';
-import type { Block, SimEvent, World } from '../sim/World';
+import type { Block, RuntimeElement, SimEvent, World } from '../sim/World';
 import { BLOCK_TOP, FIELD_WIDTH } from '../sim/World';
 import { BLOCK_TYPES } from '../sim/blocks';
 import { drawBlock } from './blockArt';
+import { drawBoss, drawBossShard } from './bossArt';
+import { drawElement } from './elementArt';
 import { Effects } from './effects';
 import {
   predictBallPath,
@@ -73,6 +75,7 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   private theme: PhaseTheme = PHASE_THEMES[0]!;
   private backdrop?: Phaser.GameObjects.Graphics;
   private motesGraphics?: Phaser.GameObjects.Graphics;
+  private elementsGraphics?: Phaser.GameObjects.Graphics;
   private fieldGraphics?: Phaser.GameObjects.Graphics;
   private trajectoryGraphics?: Phaser.GameObjects.Graphics;
   private entityGraphics?: Phaser.GameObjects.Graphics;
@@ -182,6 +185,8 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
 
     this.backdrop = this.add.graphics().setDepth(-50);
     this.motesGraphics = this.add.graphics().setDepth(-40);
+    // Elements sit above the backdrop/motes but behind the block grid.
+    this.elementsGraphics = this.add.graphics().setDepth(-5);
     this.fieldGraphics = this.add.graphics().setDepth(0);
     // Same layer as the entities but added first, so the dotted guide sits
     // behind the balls while staying above the backdrop.
@@ -555,15 +560,352 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
         );
         return;
       }
+      case 'critical': {
+        const block = this.blockCache.get(event.blockId);
+        const x = block ? block.left + block.width / 2 : this.world.boss?.x ?? FIELD_WIDTH / 2;
+        const y = block ? block.top + block.height / 2 : (this.world.boss?.y ?? 0) + 20;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(5, this.reducedMotion),
+          0xfff2c4,
+          {
+            speed: 190,
+            life: 380,
+            size: 3,
+            gravity: 90,
+            altColor: 0xffd84d,
+            jitter: 8,
+          },
+        );
+        this.effects.emitRing(x, y, 14, 0xfff2c4, 260, 2);
+        this.shake(1.2, 80);
+        return;
+      }
+      case 'block:healed': {
+        const block = this.blockCache.get(event.blockId);
+        if (!block) return;
+        const x = block.left + block.width / 2;
+        const y = block.top + block.height / 2;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(4, this.reducedMotion),
+          BLOCK_TYPES.regenerative.color,
+          {
+            speed: 90,
+            life: 420,
+            size: 2.4,
+            gravity: -70,
+            altColor: 0xffffff,
+            jitter: block.width * 0.22,
+          },
+        );
+        this.effects.emitRing(x, y, block.width * 0.35, 0x6dff9e, 300, 2);
+        return;
+      }
+      case 'block:spawned': {
+        const block = this.world.blocks.find((candidate) => candidate.id === event.blockId);
+        if (!block) return;
+        const x = block.left + block.width / 2;
+        const y = block.top + block.height / 2;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(6, this.reducedMotion),
+          BLOCK_TYPES[block.type].color,
+          {
+            speed: 120,
+            life: 380,
+            size: 2.4,
+            gravity: -30,
+            altColor: theme.moteAlt,
+            jitter: block.width * 0.3,
+          },
+        );
+        this.effects.emitRing(x, y, block.width * 0.3, theme.accent, 320, 2);
+        return;
+      }
+      case 'multiplier:activated': {
+        const paddle = this.world.paddle;
+        this.effects.emitBurst(
+          paddle.x,
+          paddle.y,
+          scaleFxCount(12, this.reducedMotion),
+          0xffd84d,
+          {
+            speed: 180,
+            life: 620,
+            size: 3,
+            gravity: -40,
+            altColor: 0xfff2c4,
+            jitter: paddle.width * 0.4,
+          },
+        );
+        this.effects.emitRing(paddle.x, paddle.y, paddle.width * 0.6, 0xfff2c4, 460, 3);
+        this.triggerFlash(0xffd84d, 0.1, 220);
+        return;
+      }
+      case 'multiplier:expired': {
+        const paddle = this.world.paddle;
+        this.effects.emitRing(paddle.x, paddle.y, paddle.width * 0.5, 0xc9a63a, 340, 2);
+        return;
+      }
+      case 'link:pulse': {
+        const source = this.blockCache.get(event.blockId);
+        if (source) {
+          this.effects.emitRing(
+            source.left + source.width / 2,
+            source.top + source.height / 2,
+            source.width * 0.45,
+            BLOCK_TYPES.linked.color,
+            280,
+            2,
+          );
+        }
+        const linked = event.linkedIds.slice(0, 3);
+        for (const id of linked) {
+          const block = this.blockCache.get(id);
+          if (!block) continue;
+          this.effects.emitRing(
+            block.left + block.width / 2,
+            block.top + block.height / 2,
+            block.width * 0.32,
+            BLOCK_TYPES.linked.color,
+            300,
+            1,
+          );
+        }
+        if (linked.length > 0) this.shake(0.8, 70);
+        return;
+      }
+      case 'element:hit': {
+        const element = this.findElement(event.elementId);
+        if (!element) return;
+        const x = element.left + element.width / 2;
+        const y = element.top + element.height / 2;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(4, this.reducedMotion),
+          theme.accent,
+          {
+            speed: 130,
+            life: 300,
+            size: 2.2,
+            gravity: 30,
+            altColor: 0xffffff,
+            jitter: Math.max(element.width, element.height) * 0.18,
+          },
+        );
+        if (event.kind === 'deflector' || event.kind === 'rotor') {
+          this.effects.emitRing(x, y, 12, theme.accent, 220, 2);
+        }
+        return;
+      }
+      case 'portal:teleport': {
+        const from = this.findElement(event.fromId);
+        const to = this.findElement(event.toId);
+        for (const element of [from, to]) {
+          if (!element) continue;
+          const x = element.left + element.width / 2;
+          const y = element.top + element.height / 2;
+          this.effects.emitRing(x, y, Math.max(element.width, element.height) * 0.4, theme.accent, 380, 2);
+          this.effects.emitBurst(
+            x,
+            y,
+            scaleFxCount(5, this.reducedMotion),
+            theme.accent,
+            {
+              speed: 140,
+              life: 340,
+              size: 2.4,
+              altColor: theme.moteAlt,
+              jitter: element.width * 0.2,
+            },
+          );
+        }
+        return;
+      }
+      case 'boss:spawned': {
+        const boss = this.world.boss;
+        const x = boss?.x ?? FIELD_WIDTH / 2;
+        const y = (boss?.y ?? 0) + (boss?.height ?? 60) / 2;
+        this.effects.emitRing(x, y, (boss?.width ?? 120) * 0.7, 0xffffff, 620, 3);
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(16, this.reducedMotion),
+          theme.accent,
+          {
+            speed: 240,
+            life: 760,
+            size: 3.4,
+            gravity: 40,
+            altColor: theme.moteAlt,
+            jitter: (boss?.width ?? 100) * 0.35,
+          },
+        );
+        this.triggerFlash(theme.accent, 0.12, 300);
+        this.shake(2.4, 220);
+        return;
+      }
+      case 'boss:hit': {
+        const boss = this.world.boss;
+        const x = boss?.x ?? FIELD_WIDTH / 2;
+        const y = (boss?.y ?? 0) + (boss?.height ?? 60) * 0.5;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(6, this.reducedMotion),
+          0xfff2c4,
+          {
+            speed: 200,
+            life: 420,
+            size: 3,
+            gravity: 60,
+            altColor: theme.accent,
+            jitter: (boss?.width ?? 80) * 0.2,
+          },
+        );
+        this.shake(1.8, 100);
+        return;
+      }
+      case 'boss:defeated': {
+        const boss = this.world.boss;
+        const x = boss?.x ?? FIELD_WIDTH / 2;
+        const y = (boss?.y ?? 0) + (boss?.height ?? 60) / 2;
+        const color = theme.accent;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(30, this.reducedMotion),
+          color,
+          {
+            speed: 320,
+            life: 980,
+            size: 4,
+            gravity: 80,
+            drag: 1.2,
+            altColor: 0xffffff,
+            jitter: (boss?.width ?? 120) * 0.3,
+          },
+        );
+        this.effects.emitRing(x, y, (boss?.width ?? 120) * 0.6, 0xffffff, 620, 4);
+        this.effects.emitRing(x, y, (boss?.width ?? 120) * 0.35, color, 480, 3);
+        this.triggerFlash(color, 0.18, 360);
+        this.shake(5, 320);
+        return;
+      }
+      case 'boss:attack': {
+        const boss = this.world.boss;
+        if (!boss) return;
+        const x = boss.x;
+        const y = boss.y + boss.height;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(Math.max(3, event.shards * 2), this.reducedMotion),
+          theme.accent,
+          {
+            speed: 140,
+            angle: Math.PI / 2,
+            spread: Math.PI * 0.35,
+            life: 360,
+            size: 2.6,
+            gravity: 120,
+            altColor: 0xffffff,
+            jitter: boss.width * 0.25,
+          },
+        );
+        this.effects.emitRing(x, y, 16, theme.accent, 300, 2);
+        return;
+      }
+      case 'boss:shard-hit': {
+        const paddle = this.world.paddle;
+        this.effects.emitBurst(
+          paddle.x,
+          paddle.y - paddle.height / 2,
+          scaleFxCount(9, this.reducedMotion),
+          0xff6b6b,
+          {
+            speed: 190,
+            angle: -Math.PI / 2,
+            spread: Math.PI * 0.5,
+            life: 460,
+            size: 2.8,
+            gravity: 120,
+            altColor: 0x3a0b14,
+          },
+        );
+        this.effects.emitRing(paddle.x, paddle.y, 16, 0xff6b6b, 300, 2);
+        this.triggerFlash(0xff2f4f, 0.1, 180);
+        this.shake(2, 140);
+        return;
+      }
+      case 'rule:failed': {
+        this.triggerFlash(0xff2f4f, 0.2, 420);
+        this.shake(4, 280);
+        this.effects.emitBurst(
+          FIELD_WIDTH / 2,
+          this.world.height * 0.4,
+          scaleFxCount(16, this.reducedMotion),
+          0xff4d5e,
+          {
+            speed: 180,
+            life: 800,
+            size: 3,
+            gravity: 140,
+            altColor: 0x2a0710,
+            jitter: FIELD_WIDTH * 0.28,
+          },
+        );
+        return;
+      }
+      case 'combo:changed': {
+        // The HUD owns the combo readout; on canvas only milestone rings show.
+        if (event.count <= 0 || event.count % 5 !== 0) return;
+        const paddle = this.world.paddle;
+        const color = event.multiplier >= 2 ? 0xffd84d : theme.accent;
+        this.effects.emitRing(paddle.x, paddle.y, paddle.width * 0.45, color, 300, 2);
+        return;
+      }
+      case 'revive': {
+        const ball = this.ballCache.get(event.ballId);
+        const x = ball?.x ?? this.world.paddle.x;
+        const y = ball?.y ?? this.world.paddle.y;
+        this.effects.emitBurst(
+          x,
+          y,
+          scaleFxCount(12, this.reducedMotion),
+          0x7ef9ff,
+          {
+            speed: 160,
+            life: 640,
+            size: 3,
+            gravity: -40,
+            altColor: 0xffffff,
+          },
+        );
+        this.effects.emitRing(x, y, 22, 0x7ef9ff, 520, 3);
+        this.triggerFlash(0x7ef9ff, 0.12, 260);
+        return;
+      }
       case 'anti-stall':
         return;
     }
   }
 
+  private findElement(id: string): RuntimeElement | undefined {
+    return this.world.elements.find((element) => element.id === id);
+  }
+
   private triggerFlash(color: number, alpha: number, durationMs: number): void {
+    // Reduced motion keeps the colour cue but halves the intensity.
+    const strength = this.reducedMotion ? alpha * 0.5 : alpha;
     this.flashColor = color;
-    this.flashAlpha = alpha;
-    this.flashMaxAlpha = alpha;
+    this.flashAlpha = strength;
+    this.flashMaxAlpha = strength;
     this.flashMs = durationMs;
     this.flashDurationMs = Math.max(1, durationMs);
   }
@@ -656,6 +998,12 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
       this.drawCrystalSilhouettes(graphics, width, height);
     } else if (theme.shape === 'ruins') {
       this.drawRuinsSilhouettes(graphics, width, height);
+    } else if (theme.shape === 'frost') {
+      this.drawFrostSilhouettes(graphics, width, height);
+    } else if (theme.shape === 'forge') {
+      this.drawForgeSilhouettes(graphics, width, height);
+    } else if (theme.shape === 'void') {
+      this.drawVoidSilhouettes(graphics, width, height);
     } else {
       this.drawArcaneSilhouettes(graphics, width, height);
     }
@@ -802,6 +1150,169 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     }
   }
 
+  private drawFrostSilhouettes(
+    graphics: Phaser.GameObjects.Graphics,
+    width: number,
+    height: number,
+  ): void {
+    const theme = this.theme;
+    const horizon = height * 0.62;
+
+    // Distant frozen ridge: tilted ice teeth.
+    graphics.fillStyle(theme.silhouetteFar, 0.9);
+    const peaks = [0.24, 0.42, 0.3, 0.54, 0.36, 0.48];
+    let x = -width * 0.04;
+    for (const peak of peaks) {
+      const peakX = x + width * 0.1;
+      const peakY = horizon - height * peak * 0.3;
+      graphics.fillTriangle(x, horizon, peakX, peakY, x + width * 0.16, horizon);
+      x += width * 0.17;
+    }
+    graphics.fillRect(0, horizon, width, height - horizon);
+
+    // Near spires framing the playfield.
+    graphics.fillStyle(theme.silhouetteNear, 1);
+    graphics.fillTriangle(-30, height, width * 0.14, height * 0.28, width * 0.24, height);
+    graphics.fillTriangle(width * 0.02, height, width * 0.09, height * 0.42, width * 0.14, height);
+    graphics.fillTriangle(width + 30, height, width * 0.86, height * 0.24, width * 0.76, height);
+    graphics.fillTriangle(width * 0.98, height, width * 0.91, height * 0.4, width * 0.86, height);
+
+    // Icicles hanging from the ceiling.
+    graphics.fillStyle(theme.silhouetteNear, 0.95);
+    for (let index = 0; index < 9; index += 1) {
+      const ix = width * (0.04 + index * 0.115);
+      const length = 18 + (index % 4) * 14;
+      graphics.fillTriangle(ix - 7, 0, ix + 7, 0, ix, length);
+    }
+
+    // Frozen veins and a cold horizon line.
+    graphics.lineStyle(2, theme.accent, 0.14);
+    graphics.lineBetween(width * 0.14, height * 0.32, width * 0.19, height * 0.78);
+    graphics.lineBetween(width * 0.86, height * 0.28, width * 0.82, height * 0.72);
+    graphics.lineStyle(1, theme.frameBright, 0.18);
+    graphics.lineBetween(0, horizon, width, horizon);
+
+    // Drifts at the floor.
+    graphics.fillStyle(theme.silhouetteFar, 1);
+    for (let index = 0; index < 7; index += 1) {
+      const dx = index % 2 === 0 ? index * width * 0.08 : width - index * width * 0.08;
+      graphics.fillEllipse(dx, height - 4, width * 0.2, 24);
+    }
+  }
+
+  private drawForgeSilhouettes(
+    graphics: Phaser.GameObjects.Graphics,
+    width: number,
+    height: number,
+  ): void {
+    const theme = this.theme;
+    const horizon = height * 0.68;
+
+    // Distant foundry blocks and chimneys.
+    graphics.fillStyle(theme.silhouetteFar, 0.92);
+    graphics.fillRect(width * 0.06, height * 0.34, width * 0.16, height * 0.34);
+    graphics.fillRect(width * 0.76, height * 0.3, width * 0.18, height * 0.38);
+    graphics.fillRect(width * 0.12, height * 0.22, width * 0.05, height * 0.14);
+    graphics.fillRect(width * 0.82, height * 0.16, width * 0.05, height * 0.16);
+    graphics.fillTriangle(width * 0.12, height * 0.22, width * 0.145, height * 0.16, width * 0.17, height * 0.22);
+    graphics.fillTriangle(width * 0.82, height * 0.16, width * 0.845, height * 0.1, width * 0.87, height * 0.16);
+
+    // Chimney embers.
+    graphics.fillStyle(theme.glow, 0.16);
+    graphics.fillCircle(width * 0.145, height * 0.13, 9);
+    graphics.fillCircle(width * 0.845, height * 0.07, 7);
+
+    // Furnace mouth glow behind the field.
+    graphics.fillStyle(theme.glow, 0.06);
+    graphics.fillCircle(width / 2, height * 0.94, width * 0.5);
+    graphics.fillStyle(theme.glowDeep, 0.4);
+    graphics.fillRect(0, horizon, width, height - horizon);
+
+    // Foreground pipes and tanks.
+    graphics.fillStyle(theme.silhouetteNear, 1);
+    graphics.fillRect(-18, height * 0.42, 46, height * 0.6);
+    graphics.fillRect(width - 30, height * 0.38, 48, height * 0.64);
+    graphics.fillRect(-18, height * 0.46, width * 0.2, 14);
+    graphics.fillRect(width * 0.8, height * 0.52, width * 0.24, 12);
+    // Rivet bands.
+    graphics.fillStyle(theme.silhouetteFar, 1);
+    for (let index = 0; index < 4; index += 1) {
+      graphics.fillRect(-16, height * (0.52 + index * 0.1), 42, 4);
+      graphics.fillRect(width - 28, height * (0.5 + index * 0.1), 44, 4);
+    }
+    // Anvil-like floor notches.
+    graphics.fillStyle(theme.silhouetteNear, 1);
+    graphics.fillTriangle(0, height, width * 0.3, height, width * 0.18, height - 30);
+    graphics.fillTriangle(width, height, width * 0.7, height, width * 0.82, height - 26);
+
+    // Molten seams.
+    graphics.lineStyle(2, theme.accent, 0.16);
+    graphics.lineBetween(width * 0.18, height * 0.36, width * 0.22, height * 0.8);
+    graphics.lineBetween(width * 0.82, height * 0.34, width * 0.78, height * 0.78);
+    graphics.lineStyle(1, theme.frameBright, 0.12);
+    for (let index = 0; index < 6; index += 1) {
+      const y = height * (0.72 + index * 0.045);
+      graphics.lineBetween(0, y, width, y);
+    }
+  }
+
+  private drawVoidSilhouettes(
+    graphics: Phaser.GameObjects.Graphics,
+    width: number,
+    height: number,
+  ): void {
+    const theme = this.theme;
+    const centreX = width / 2;
+    const centreY = height * 0.42;
+
+    // Concentric broken rings behind the field.
+    for (let ring = 0; ring < 4; ring += 1) {
+      const radius = width * (0.22 + ring * 0.12);
+      const segments = 10 + ring * 4;
+      graphics.lineStyle(ring === 0 ? 2 : 1, ring % 2 === 0 ? theme.silhouetteFar : theme.accent, 0.18 + ring * 0.03);
+      for (let index = 0; index < segments; index += 1) {
+        if (index % 4 === 0) continue;
+        const start = (index / segments) * Math.PI * 2;
+        const end = ((index + 1) / segments) * Math.PI * 2;
+        graphics.lineBetween(
+          centreX + Math.cos(start) * radius,
+          centreY + Math.sin(start) * radius * 0.72,
+          centreX + Math.cos(end) * radius,
+          centreY + Math.sin(end) * radius * 0.72,
+        );
+      }
+    }
+
+    // Inverted floating spires.
+    graphics.fillStyle(theme.silhouetteNear, 1);
+    graphics.fillTriangle(width * 0.14, height * 0.1, width * 0.22, height * 0.5, width * 0.05, height * 0.5);
+    graphics.fillTriangle(width * 0.86, height * 0.08, width * 0.94, height * 0.46, width * 0.77, height * 0.46);
+    graphics.fillTriangle(-20, height, width * 0.2, height, width * 0.1, height * 0.58);
+    graphics.fillTriangle(width + 20, height, width * 0.8, height, width * 0.9, height * 0.54);
+
+    // Dark floor with a faint threshold arc.
+    graphics.fillStyle(theme.silhouetteNear, 0.95);
+    graphics.fillRect(0, height * 0.84, width, height * 0.16);
+    graphics.lineStyle(2, theme.accent, 0.18);
+    graphics.strokeEllipse(centreX, height * 0.86, width * 0.72, 44);
+
+    // Floating shards.
+    graphics.fillStyle(theme.silhouetteFar, 1);
+    for (let index = 0; index < 6; index += 1) {
+      const sx = width * (0.16 + index * 0.14);
+      const sy = height * (0.16 + ((index * 41) % 64) / 100);
+      const size = 8 + (index % 3) * 6;
+      graphics.fillTriangle(sx, sy - size, sx + size * 0.55, sy + size * 0.35, sx - size * 0.55, sy + size * 0.35);
+    }
+    // Stars.
+    graphics.fillStyle(theme.frameBright, 0.5);
+    for (let index = 0; index < 14; index += 1) {
+      const sx = width * (0.05 + ((index * 37) % 90) / 100);
+      const sy = height * (0.06 + ((index * 53) % 70) / 100);
+      graphics.fillRect(Math.round(sx), Math.round(sy), index % 3 === 0 ? 2 : 1, 1);
+    }
+  }
+
   private rebuildMotes(): void {
     const count = this.reducedMotion ? 14 : 28;
     this.motes.length = 0;
@@ -926,9 +1437,28 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   // -------------------------------------------------------------------------
 
   private drawWorld(time: number): void {
+    this.drawElements();
     this.drawBlocks();
     this.drawTrajectory();
     this.drawEntities(time);
+  }
+
+  /**
+   * Field elements change every frame (movers slide, rotors spin, gates open
+   * and close), so they get their own clear+redraw pass. The count per wave is
+   * small (single digits), which keeps this well inside the frame budget.
+   */
+  private drawElements(): void {
+    const graphics = this.elementsGraphics;
+    if (!graphics) return;
+    graphics.clear();
+    if (!this.world.isRunning) return;
+    const options = {
+      accent: this.theme.accent,
+      timeMs: this.world.timeMs,
+      reducedMotion: this.reducedMotion,
+    };
+    for (const element of this.world.elements) drawElement(graphics, element, options);
   }
 
   /** Foresight: a short, fading dotted preview ahead of every live ball. */
@@ -986,6 +1516,53 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     const paddleLeft = paddle.x - paddle.width / 2;
     const paddleTop = paddle.y - paddle.height / 2;
     const pulse = this.paddlePulseMs / 170;
+    const accent = this.theme.accent;
+
+    // Boss and its falling shards share the entity layer but are drawn first
+    // so balls and the paddle always stay on top of them.
+    const boss = world.boss;
+    if (boss && boss.hp > 0) {
+      drawBoss(graphics, boss, {
+        accent,
+        timeMs: world.timeMs,
+        reducedMotion: this.reducedMotion,
+      });
+    }
+    if (world.bossShards.length > 0) {
+      for (const shard of world.bossShards) {
+        drawBossShard(graphics, shard, {
+          pattern: boss?.pattern,
+          accent,
+          timeMs: world.timeMs,
+        });
+      }
+    }
+
+    // Multiplier aura on the paddle: a cheap golden rim while the buff runs.
+    const multiplier = world.multiplierState;
+    if (multiplier) {
+      const ratio = Math.max(
+        0,
+        Math.min(1, multiplier.remainingMs / GAME_CONFIG.elements.multiplierDurationMs),
+      );
+      const shimmer = this.reducedMotion ? 0.5 : 0.5 + Math.sin(world.timeMs / 160) * 0.5;
+      graphics.fillStyle(0xffd84d, 0.06 + shimmer * 0.08);
+      graphics.fillRoundedRect(
+        paddleLeft - 8,
+        paddleTop - 8,
+        paddle.width + 16,
+        paddle.height + 16,
+        12,
+      );
+      graphics.lineStyle(1, 0xfff2c4, 0.25 + ratio * 0.35 + shimmer * 0.15);
+      graphics.strokeRoundedRect(
+        paddleLeft - 6,
+        paddleTop - 6,
+        paddle.width + 12,
+        paddle.height + 12,
+        10,
+      );
+    }
 
     // Pulse halo.
     if (pulse > 0) {

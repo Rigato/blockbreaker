@@ -1,11 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { RunState, xpToNextForLevel } from '../src/progression/RunState';
 import { BASE_RUN_MODIFIERS, GAME_CONFIG } from '../src/game/config';
+import { PERK_CATALOG } from '../src/content/perks';
 
 function progressed(seed = 7): RunState {
   const run = new RunState();
   run.startRun(seed);
   return run;
+}
+
+/** Grants every catalog perk except the skipped ids, clamping at max level. */
+function maxOutCatalog(run: RunState, skip: readonly string[] = []): void {
+  for (const perk of PERK_CATALOG) {
+    if (skip.includes(perk.id)) continue;
+    for (let level = 0; level < perk.maxLevel; level += 1) {
+      run.grantPerk(perk.id);
+    }
+  }
 }
 
 describe('G4 XP curve', () => {
@@ -172,6 +183,18 @@ describe('M2 derived modifiers', () => {
     expect(modifiers.explosiveEvery).toBe(8);
     expect(modifiers.multiballLevel).toBe(0);
     expect(modifiers.trajectoryGuide).toBe(false);
+    expect(modifiers.critChance).toBe(0);
+    expect(modifiers.critMultiplier).toBe(2);
+    expect(modifiers.laserTargetBonus).toBe(0);
+    expect(modifiers.laserWidthMultiplier).toBe(1);
+    expect(modifiers.laserCooldownMultiplier).toBe(1);
+    expect(modifiers.comboStep).toBe(0);
+    expect(modifiers.comboMax).toBe(0);
+    expect(modifiers.reviveCharges).toBe(0);
+    expect(modifiers.bombEvery).toBeNull();
+    expect(modifiers.bossDamageBonus).toBe(0);
+    expect(modifiers.ballSpeedMultiplier).toBe(1);
+    expect(modifiers.scoreMultiplier).toBe(1);
 
     expect(BASE_RUN_MODIFIERS).toEqual({
       paddleWidthMultiplier: 1,
@@ -187,6 +210,18 @@ describe('M2 derived modifiers', () => {
       explosiveEvery: null,
       multiballLevel: 0,
       trajectoryGuide: false,
+      critChance: 0,
+      critMultiplier: GAME_CONFIG.perks.critMultiplier,
+      laserTargetBonus: 0,
+      laserWidthMultiplier: 1,
+      laserCooldownMultiplier: 1,
+      comboStep: 0,
+      comboMax: 0,
+      reviveCharges: 0,
+      bombEvery: null,
+      bossDamageBonus: 0,
+      ballSpeedMultiplier: 1,
+      scoreMultiplier: 1,
     });
   });
 
@@ -209,6 +244,100 @@ describe('M2 derived modifiers', () => {
       { id: 'multiball', name: 'Multiball', level: 1, maxLevel: 3 },
       { id: 'power_ball', name: 'Power Ball', level: 1, maxLevel: 3 },
     ]);
+  });
+});
+
+describe('v0.2.0 derived modifiers', () => {
+  it('scales Critical Strike chance per level', () => {
+    const run = progressed();
+    run.grantPerk('critical_strike');
+    expect(run.modifiers.critChance).toBeCloseTo(0.08);
+    run.grantPerk('critical_strike');
+    expect(run.modifiers.critChance).toBeCloseTo(0.16);
+    expect(run.modifiers.critMultiplier).toBe(GAME_CONFIG.perks.critMultiplier);
+  });
+
+  it('adds laser targets and beam width with Laser Focus', () => {
+    const run = progressed();
+    run.grantPerk('prism_laser');
+    run.grantPerk('laser_focus');
+    run.grantPerk('laser_focus');
+    expect(run.modifiers.laserTargetBonus).toBe(2);
+    expect(run.modifiers.laserWidthMultiplier).toBeCloseTo(1.24);
+  });
+
+  it('reduces the laser cooldown with Overcharge and floors the multiplier', () => {
+    const run = progressed();
+    run.grantPerk('prism_laser');
+    run.grantPerk('overcharge');
+    run.grantPerk('overcharge');
+    run.grantPerk('overcharge');
+    expect(run.modifiers.laserCooldownMultiplier).toBeCloseTo(0.64);
+    expect(run.modifiers.laserCooldown).toBeCloseTo(5120);
+
+    run.grantPerk('prism_laser');
+    run.grantPerk('prism_laser');
+    expect(run.modifiers.laserCooldownMultiplier).toBeCloseTo(0.64);
+  });
+
+  it('keeps the laser cooldown null without Prism Laser', () => {
+    const run = progressed();
+    expect(run.modifiers.laserCooldownMultiplier).toBeCloseTo(1);
+    expect(run.modifiers.laserCooldown).toBeNull();
+  });
+
+  it('derives the Combo Master step and cap', () => {
+    const run = progressed();
+    run.grantPerk('combo_master');
+    run.grantPerk('combo_master');
+    run.grantPerk('combo_master');
+    expect(run.modifiers.comboStep).toBeCloseTo(0.05);
+    expect(run.modifiers.comboMax).toBeCloseTo(0.15);
+  });
+
+  it('grants a revive charge and no ball from Second Chance', () => {
+    const run = progressed();
+    const choice = run.grantPerk('second_chance');
+    expect(choice.spawnedBalls).toBe(0);
+    expect(run.modifiers.reviveCharges).toBe(1);
+  });
+
+  it('enables Bomb Ball drops and scales Boss Bane damage', () => {
+    const run = progressed();
+    expect(run.modifiers.bombEvery).toBeNull();
+    run.grantPerk('bomb_ball');
+    expect(run.modifiers.bombEvery).toBe(12);
+
+    run.grantPerk('boss_bane');
+    expect(run.modifiers.bossDamageBonus).toBe(1);
+    run.grantPerk('boss_bane');
+    expect(run.modifiers.bossDamageBonus).toBe(2);
+  });
+
+  it('scales ball speed and score with Swift Ball', () => {
+    const run = progressed();
+    run.grantPerk('swift_ball');
+    run.grantPerk('swift_ball');
+    expect(run.modifiers.ballSpeedMultiplier).toBeCloseTo(1.12);
+    expect(run.modifiers.scoreMultiplier).toBeCloseTo(1.2);
+  });
+
+  it('hides Prism Laser dependants until Prism Laser is acquired', () => {
+    const run = progressed();
+    maxOutCatalog(run, ['prism_laser', 'laser_focus', 'overcharge']);
+    run.addXp(8);
+    const before = run.takeOffers().map((offer) => offer.id);
+    expect(before).toContain('prism_laser');
+    expect(before).not.toContain('laser_focus');
+    expect(before).not.toContain('overcharge');
+
+    const afterRun = progressed();
+    afterRun.grantPerk('prism_laser');
+    maxOutCatalog(afterRun, ['laser_focus', 'overcharge']);
+    afterRun.addXp(8);
+    const after = afterRun.takeOffers().map((offer) => offer.id);
+    expect(after).toContain('laser_focus');
+    expect(after).toContain('overcharge');
   });
 });
 
@@ -240,10 +369,10 @@ describe('M2 run lifecycle', () => {
     expect(run.perks).toEqual([]);
   });
 
-  it('returns the eleven catalog perks without the fallback', () => {
+  it('returns the nineteen catalog perks without the fallback', () => {
     const run = progressed();
     const catalog = run.getCatalog();
-    expect(catalog).toHaveLength(11);
+    expect(catalog).toHaveLength(19);
     expect(catalog.map((perk) => perk.id)).not.toContain('xp_fallback');
     expect(catalog.map((perk) => perk.id)).toEqual([
       'multiball',
@@ -257,6 +386,14 @@ describe('M2 run lifecycle', () => {
       'prism_laser',
       'foresight',
       'explosive_core',
+      'critical_strike',
+      'laser_focus',
+      'overcharge',
+      'combo_master',
+      'second_chance',
+      'bomb_ball',
+      'boss_bane',
+      'swift_ball',
     ]);
   });
 });

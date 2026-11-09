@@ -102,10 +102,15 @@ test.describe('smoke', () => {
     expect(results.values).toHaveLength(5);
     expect(results.nextVisible).toBe(true);
 
+    // The results screen renders the campaign epilogue and rank.
+    await expect(page.locator('.overlay__ending')).toBeVisible();
+    await expect(page.locator('.overlay__ending-title')).not.toBeEmpty();
+    await expect(page.locator('.overlay__ending-rank')).toHaveText(/^[SAB]$/);
+
     const resultsPanel = page.locator('.overlay--results');
     await resultsPanel.getByRole('button', { name: 'Next level' }).click();
     await expect(page.locator('.hud')).toBeVisible();
-    await expect(page.locator('#debug-phase')).toContainText('(2/3)');
+    await expect(page.locator('#debug-phase')).toContainText('(2/6)');
     await expect(page.locator('.hud__wave-text')).toContainText('Ruined Halls');
 
     const saved = await page.evaluate(() => localStorage.getItem('bb.save'));

@@ -21,6 +21,7 @@ import type {
 import { GAME_CONFIG, SIM_TUNING_DEFAULTS, SIM_TUNING_LIMITS } from './config';
 import { gameEvents } from './events';
 import { AudioService } from '../audio';
+import { endingForResult } from '../content/endings';
 import { PHASES } from '../content/phases';
 import type { PhaseDef } from '../content/types';
 import { InputController } from '../input/Input';
@@ -107,6 +108,8 @@ export class BlockBreakerGame implements GameCommands {
   private readonly clock = new FixedStepClock();
   private pendingLaunch = false;
   private lastHud = '';
+  private waveIntroUntil = 0;
+  private reviveUsed = false;
 
   constructor(parent: HTMLElement, platform?: PlatformService) {
     let resolveReady: () => void = () => {
@@ -269,6 +272,8 @@ export class BlockBreakerGame implements GameCommands {
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
     this.runSeed = this.nextSeed();
+    this.reviveUsed = false;
+    this.waveIntroUntil = 0;
     this.runState.startRun(this.runSeed);
     this.loadPhaseWave(0);
     this.scene.setPhase(phase.id, phase.index);
@@ -320,6 +325,8 @@ export class BlockBreakerGame implements GameCommands {
     this.nextWaveAt = 0;
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
+    this.reviveUsed = false;
+    this.waveIntroUntil = 0;
     this.runState.reset();
     const preview = PHASES[0]?.waves[0];
     if (preview) {
@@ -375,6 +382,8 @@ export class BlockBreakerGame implements GameCommands {
     this.phase = 'menu';
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
+    this.reviveUsed = false;
+    this.waveIntroUntil = 0;
     const preview = PHASES[0]?.waves[0];
     if (preview) {
       this.world.loadWave(preview);
@@ -512,7 +521,11 @@ export class BlockBreakerGame implements GameCommands {
 
   fireLaser(): void {
     if (this.phase !== 'playing') return;
-    if (!this.world.fireLaser()) return;
+    if (!this.world.fireLaser()) {
+      // Stuck ball or a `noLaser` wave: reflect the block reason in the HUD.
+      this.syncHud(true);
+      return;
+    }
 
     this.consumeEvents(this.world.drainEvents());
     if (this.runState.pendingLevelUps > 0) {
@@ -607,6 +620,40 @@ export class BlockBreakerGame implements GameCommands {
     this.finishPhase(true);
   }
 
+  /**
+   * Debug-only jump used by campaign E2E. Starts a phase and immediately loads
+   * the requested wave, bypassing normal unlock checks for QA only.
+   */
+  debugStartWave(phaseId: string, waveIndex: number): void {
+    const phase = PHASES.find((candidate) => candidate.id === phaseId);
+    if (!phase) return;
+
+    const previousUnlock = this.save.unlockedPhase;
+    if (phase.index > previousUnlock) {
+      this.save = { ...this.save, unlockedPhase: phase.index };
+    }
+    this.startPhase(phaseId);
+    this.save = { ...this.save, unlockedPhase: previousUnlock };
+    if (this.currentPhase?.id !== phase.id) return;
+
+    const index = Math.max(0, Math.min(phase.waves.length - 1, Math.floor(waveIndex)));
+    if (index === 0) return;
+
+    this.currentWaveIndex = index;
+    this.waveScoreAtStart = 0;
+    this.pendingPerkBalls = 0;
+    this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.ballRespawnLeftMs = 0;
+    this.loadPhaseWave(index);
+    this.scene.setPhase(phase.id, phase.index);
+    this.phase = 'playing';
+    this.pendingLaunch = false;
+    this.input.resetTarget();
+    this.clock.reset();
+    this.syncHud(true);
+  }
+
   destroy(): void {
     document.removeEventListener('visibilitychange', this.handleVisibility);
     this.unsubscribePause();
@@ -653,6 +700,10 @@ export class BlockBreakerGame implements GameCommands {
     this.world.applyRunModifiers(this.runState.modifiers);
     this.world.setSafetyCharges(this.runState.modifiers.safetyNetCharges);
     this.world.reset();
+    // Discard load-time events (notably the duplicated `boss:spawned`) so the
+    // first real step only reports fresh simulation events.
+    this.world.drainEvents();
+    this.waveIntroUntil = wave.intro ? performance.now() + 3500 : 0;
   }
 
   private nextSeed(): number {
@@ -705,11 +756,30 @@ export class BlockBreakerGame implements GameCommands {
       this.finishWave();
       return;
     }
+    if (this.world.outcome === 'defeat' && this.tryRevive()) {
+      // Second Chance revived the run: keep playing with a fresh stuck ball.
+      this.syncHud(true);
+      return;
+    }
     if (this.world.outcome === 'defeat') {
       this.finishPhase(false);
       return;
     }
     this.syncHud(true);
+  }
+
+  /**
+   * Second Chance hook: consumes the single revive charge for this run.
+   * Returns false when unavailable or the world is not defeated.
+   */
+  private tryRevive(): boolean {
+    if (this.reviveUsed) return false;
+    if (this.runState.modifiers.reviveCharges <= 0) return false;
+    if (!this.world.revive()) return false;
+    this.reviveUsed = true;
+    this.audio.play('safety');
+    this.syncHud(true);
+    return true;
   }
 
   private finishWave(): void {
@@ -737,6 +807,16 @@ export class BlockBreakerGame implements GameCommands {
     const nextPhase = victory
       ? PHASES.find((candidate) => candidate.index === phase.index + 1) ?? null
       : null;
+    const score = this.runScore;
+    const timeMs = Math.max(0, Math.round(this.phaseElapsedMs));
+    const ending = endingForResult({
+      phaseIndex: phase.index,
+      phaseName: phase.name,
+      phaseCount: PHASES.length,
+      victory,
+      score,
+      timeMs,
+    });
 
     const provisional: PhaseResult = {
       phaseId: phase.id,
@@ -744,13 +824,14 @@ export class BlockBreakerGame implements GameCommands {
       phaseIndex: phase.index,
       phaseCount: PHASES.length,
       victory,
-      score: this.runScore,
-      timeMs: Math.max(0, Math.round(this.phaseElapsedMs)),
+      score,
+      timeMs,
       level: this.runState.level,
       perks: this.runState.perks,
       bestScore: null,
       bestTimeMs: null,
       nextPhaseId: nextPhase?.id ?? null,
+      ending,
     };
 
     const updated = applyPhaseResult(this.save, provisional);
@@ -893,6 +974,10 @@ export class BlockBreakerGame implements GameCommands {
     }
 
     if (this.world.outcome === 'defeat') {
+      if (this.tryRevive()) {
+        this.syncHud(true);
+        return;
+      }
       this.finishPhase(false);
       return;
     }
@@ -917,7 +1002,7 @@ export class BlockBreakerGame implements GameCommands {
       switch (event.type) {
         case 'block:destroyed':
           this.runScore += event.score;
-          this.runState.addXp(event.maxHp);
+          this.runState.addXp(event.xp);
           this.audio.play('block-break');
           break;
         case 'block:hit':
@@ -947,6 +1032,49 @@ export class BlockBreakerGame implements GameCommands {
         case 'wave:cleared':
           this.runScore += 100;
           this.audio.play('wave-clear');
+          break;
+        case 'critical':
+          this.audio.play('block-damage', { rate: 1.35 });
+          break;
+        case 'block:healed':
+          this.audio.play('block-hit', { rate: 1.3, volume: 0.5 });
+          break;
+        case 'block:spawned':
+          this.audio.play('block-hit', { rate: 0.8, volume: 0.5 });
+          break;
+        case 'multiplier:activated':
+          this.audio.play('safety', { rate: 1.2, volume: 0.8 });
+          break;
+        case 'link:pulse':
+          this.audio.play('block-damage', { rate: 1.1, volume: 0.6 });
+          break;
+        case 'element:hit':
+          this.audio.play('paddle', { rate: 0.8, volume: 0.5 });
+          break;
+        case 'portal:teleport':
+          this.audio.play('safety', { rate: 1.5, volume: 0.6 });
+          break;
+        case 'boss:spawned':
+          this.audio.play('explosion', { rate: 0.7, volume: 0.8 });
+          break;
+        case 'boss:hit':
+          this.audio.play('block-damage', { rate: 0.7, volume: 0.8 });
+          break;
+        case 'boss:defeated':
+          this.audio.play('explosion', { rate: 0.6 });
+          break;
+        case 'boss:attack':
+          this.audio.play('laser', { rate: 0.6, volume: 0.6 });
+          break;
+        case 'boss:shard-hit':
+          this.audio.play('ball-lost', { rate: 1.4, volume: 0.5 });
+          break;
+        case 'revive':
+          this.audio.play('safety');
+          break;
+        case 'rule:failed':
+        case 'combo:changed':
+        case 'multiplier:expired':
           break;
         default:
           break;
@@ -1010,12 +1138,50 @@ export class BlockBreakerGame implements GameCommands {
         ? {
             acquired: true,
             ready: this.world.laserReady,
+            blocked: this.world.laserBlockedReason,
             cooldownMs: Math.max(1, Math.round(modifiers.laserCooldown)),
             remainingMs: Math.max(
               0,
               Math.ceil(this.world.laserRemainingMs / 100) * 100,
             ),
           }
+        : null;
+    const timeLimitRemainingMs = this.world.timeLimitRemainingMs;
+    const rule =
+      this.world.noLaserRule
+        ? { kind: 'noLaser' as const, remainingMs: null }
+        : timeLimitRemainingMs !== null
+          ? {
+              kind: 'timeLimit' as const,
+              remainingMs: Math.max(0, Math.ceil(timeLimitRemainingMs / 250) * 250),
+            }
+          : null;
+    const multiplierState = this.world.multiplierState;
+    const multiplier = multiplierState
+      ? {
+          xpFactor: multiplierState.xpFactor,
+          scoreFactor: multiplierState.scoreFactor,
+          remainingMs: Math.max(0, Math.ceil(multiplierState.remainingMs / 100) * 100),
+        }
+      : null;
+    const combo =
+      this.world.comboCount > 0
+        ? {
+            count: this.world.comboCount,
+            multiplier:
+              1 +
+              Math.min(
+                modifiers.comboMax,
+                this.world.comboCount * modifiers.comboStep,
+              ),
+          }
+        : null;
+    const boss = this.world.boss;
+    const waveIntro =
+      this.phase === 'playing' &&
+      this.waveIntroUntil > 0 &&
+      performance.now() < this.waveIntroUntil
+        ? wave?.intro ?? null
         : null;
 
     return {
@@ -1046,6 +1212,14 @@ export class BlockBreakerGame implements GameCommands {
       bestScore: stats?.bestScore ?? null,
       bestTimeMs: stats?.bestTimeMs ?? null,
       soundEnabled: this.settings.sound,
+      boss:
+        boss && boss.hp > 0
+          ? { name: boss.name, hp: boss.hp, maxHp: boss.maxHp, phase: boss.phase }
+          : null,
+      rule,
+      multiplier,
+      combo,
+      waveIntro,
       result:
         this.phase === 'run-complete' || this.phase === 'defeat'
           ? this.phaseResult

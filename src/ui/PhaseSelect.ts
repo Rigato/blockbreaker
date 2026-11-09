@@ -126,49 +126,62 @@ export class PhaseSelect {
   }
 
   private render(info: readonly PhaseSelectInfo[]): void {
-    this.list.replaceChildren(
-      ...Array.from({ length: 3 }, (_, index) => this.buildCard(info[index], index)),
-    );
+    this.list.replaceChildren(...info.map((phase, index) => this.buildCard(phase, index)));
     this.empty.hidden = info.length > 0;
   }
 
-  private buildCard(phase: PhaseSelectInfo | undefined, index: number): HTMLButtonElement {
+  private buildCard(phase: PhaseSelectInfo, index: number): HTMLButtonElement {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'phase-card';
-    card.dataset.phaseIndex = String(index + 1);
-
-    if (!phase) {
-      card.disabled = true;
-      card.classList.add('is-missing');
-      card.append(this.buildHead(index, false, false), this.buildName(en.phaseSelectUnavailable));
-      return card;
-    }
+    card.dataset.phaseIndex = String(phase.index || index + 1);
 
     card.dataset.phaseId = phase.id;
     card.classList.toggle('is-locked', !phase.unlocked);
     card.classList.toggle('is-selected', phase.id === this.selectedPhaseId);
+    const boss = phase.index >= 4;
+    card.classList.toggle('is-boss', boss);
 
     if (!phase.unlocked) {
       card.disabled = true;
       card.setAttribute('aria-label', `${phase.name} · ${en.phaseLocked}`);
-      card.append(this.buildHead(index, true, false), this.buildName(phase.name), this.buildStats(phase));
+      card.append(
+        this.buildHead(phase.index || index + 1, true, false, boss),
+        this.buildName(phase.name),
+        this.buildStats(phase),
+      );
       return card;
     }
 
     card.setAttribute('aria-label', `${phase.name} · ${en.play}`);
-    card.append(this.buildHead(index, false, true), this.buildName(phase.name), this.buildStats(phase));
+    card.append(
+      this.buildHead(phase.index || index + 1, false, true, boss),
+      this.buildName(phase.name),
+      this.buildStats(phase),
+    );
     card.addEventListener('click', () => this.choose(phase.id));
     return card;
   }
 
-  private buildHead(index: number, locked: boolean, playable: boolean): HTMLElement {
+  private buildHead(index: number, locked: boolean, playable: boolean, boss: boolean): HTMLElement {
     const head = document.createElement('span');
     head.className = 'phase-card__head';
 
+    const identity = document.createElement('span');
+    identity.className = 'phase-card__identity';
+
     const label = document.createElement('span');
     label.className = 'phase-card__index';
-    label.textContent = `${en.phaseLabel} ${index + 1}`;
+    label.textContent = `${en.phaseLabel} ${index}`;
+
+    identity.append(label);
+
+    if (boss) {
+      const badge = document.createElement('span');
+      badge.className = 'phase-card__badge';
+      badge.textContent = en.phaseBoss;
+      identity.append(badge);
+    }
 
     const status = document.createElement('span');
     status.className = 'phase-card__status';
@@ -187,7 +200,7 @@ export class PhaseSelect {
       status.textContent = en.phaseSelectUnavailable;
     }
 
-    head.append(label, status);
+    head.append(identity, status);
     return head;
   }
 

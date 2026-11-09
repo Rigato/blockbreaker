@@ -6,7 +6,13 @@
  * unit-tested) without booting Phaser.
  */
 
-export type BackdropShape = 'crystal' | 'ruins' | 'arcane';
+export type BackdropShape =
+  | 'crystal'
+  | 'ruins'
+  | 'arcane'
+  | 'frost'
+  | 'forge'
+  | 'void';
 
 export interface PhaseTheme {
   readonly id: string;
@@ -94,6 +100,66 @@ export const PHASE_THEMES: readonly PhaseTheme[] = [
     frame: 0x7a4cc0,
     frameBright: 0xf3c6ff,
     lane: 0x261442,
+  },
+  {
+    id: 'phase-4',
+    index: 3,
+    name: 'Frostbound Spire',
+    shape: 'frost',
+    skyTop: 0x04101f,
+    skyMid: 0x0b2b4a,
+    skyBottom: 0x071a2c,
+    glow: 0x66d9ff,
+    glowDeep: 0x123a5c,
+    accent: 0xd6f7ff,
+    accentSoft: 0x4d94c7,
+    mote: 0xbfefff,
+    moteAlt: 0xffffff,
+    silhouetteFar: 0x0a2036,
+    silhouetteNear: 0x04101c,
+    frame: 0x4d94c7,
+    frameBright: 0xe6ffff,
+    lane: 0x12314d,
+  },
+  {
+    id: 'phase-5',
+    index: 4,
+    name: 'Emberforge',
+    shape: 'forge',
+    skyTop: 0x1c0a04,
+    skyMid: 0x3d1606,
+    skyBottom: 0x260c05,
+    glow: 0xff7a2e,
+    glowDeep: 0x6b2410,
+    accent: 0xffd08a,
+    accentSoft: 0xc25a24,
+    mote: 0xffa25c,
+    moteAlt: 0xffe0b0,
+    silhouetteFar: 0x331408,
+    silhouetteNear: 0x180803,
+    frame: 0xa85324,
+    frameBright: 0xffd6a0,
+    lane: 0x4a1e0d,
+  },
+  {
+    id: 'phase-6',
+    index: 5,
+    name: 'Void Threshold',
+    shape: 'void',
+    skyTop: 0x0a0418,
+    skyMid: 0x1b0a38,
+    skyBottom: 0x0d0522,
+    glow: 0xa46bff,
+    glowDeep: 0x3a1a6b,
+    accent: 0xe5b8ff,
+    accentSoft: 0x7e4fbf,
+    mote: 0xd2a8ff,
+    moteAlt: 0xff9df0,
+    silhouetteFar: 0x1a0d33,
+    silhouetteNear: 0x080314,
+    frame: 0x6b46a8,
+    frameBright: 0xf1d6ff,
+    lane: 0x24124a,
   },
 ];
 

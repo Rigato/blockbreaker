@@ -9,8 +9,8 @@ import type {
 } from '../game/contracts';
 import { GAME_CONFIG } from '../game/config';
 
-/** Highest phase in the MVP; `unlockedPhase` is clamped to 1..MAX_PHASE. */
-export const MAX_PHASE = 3;
+/** Highest phase in the campaign; `unlockedPhase` is clamped to 1..MAX_PHASE. */
+export const MAX_PHASE = 6;
 
 const SAVE_VERSION = 1 as const;
 

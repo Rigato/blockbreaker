@@ -88,6 +88,10 @@ export class HudOverlay {
   private readonly resultsBestTime: HTMLElement;
   private readonly resultsLevel: HTMLElement;
   private readonly resultsPerks: HTMLElement;
+  private readonly resultsEnding: HTMLElement;
+  private readonly resultsEndingTitle: HTMLElement;
+  private readonly resultsEndingBody: HTMLElement;
+  private readonly resultsEndingRank: HTMLElement;
   private readonly retryButton: HTMLButtonElement;
   private readonly nextButton: HTMLButtonElement;
   private readonly menuButton: HTMLButtonElement;
@@ -190,6 +194,31 @@ export class HudOverlay {
     this.resultsBestTime = buildSummaryRow(summary, en.overlayBestTime).value;
     this.resultsLevel = buildSummaryRow(summary, en.overlayLevel).value;
 
+    const ending = document.createElement('section');
+    this.resultsEnding = ending;
+    ending.className = 'overlay__ending';
+    ending.hidden = true;
+    ending.setAttribute('aria-label', en.overlayEnding);
+
+    const endingHead = document.createElement('div');
+    endingHead.className = 'overlay__ending-head';
+
+    const endingTitle = document.createElement('h3');
+    this.resultsEndingTitle = endingTitle;
+    endingTitle.className = 'overlay__ending-title';
+
+    const endingRank = document.createElement('span');
+    this.resultsEndingRank = endingRank;
+    endingRank.className = 'overlay__ending-rank';
+
+    endingHead.append(endingTitle, endingRank);
+
+    const endingBody = document.createElement('p');
+    this.resultsEndingBody = endingBody;
+    endingBody.className = 'overlay__ending-body';
+
+    ending.append(endingHead, endingBody);
+
     const perksTitle = document.createElement('h3');
     perksTitle.className = 'overlay__perks-title';
     perksTitle.textContent = en.overlayPerks;
@@ -216,6 +245,7 @@ export class HudOverlay {
       this.resultsTitle,
       this.resultsPhase,
       summary,
+      this.resultsEnding,
       perksTitle,
       this.resultsPerks,
       resultsActions,
@@ -279,8 +309,21 @@ export class HudOverlay {
   }
 
   private renderResult(result: PhaseResult): void {
-    this.resultsKicker.textContent = result.victory ? en.resultVictory : en.resultDefeat;
-    this.resultsKicker.dataset.kind = result.victory ? 'victory' : 'defeat';
+    const campaignComplete =
+      result.victory &&
+      result.nextPhaseId === null &&
+      result.phaseIndex === result.phaseCount;
+
+    this.resultsKicker.textContent = campaignComplete
+      ? en.resultCampaign
+      : result.victory
+        ? en.resultVictory
+        : en.resultDefeat;
+    this.resultsKicker.dataset.kind = campaignComplete
+      ? 'campaign'
+      : result.victory
+        ? 'victory'
+        : 'defeat';
     this.resultsTitle.textContent = result.phaseName;
     this.resultsPhase.textContent = `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
       1,
@@ -293,15 +336,33 @@ export class HudOverlay {
     this.resultsBestTime.textContent = formatTime(result.bestTimeMs);
     this.resultsLevel.textContent = String(result.level);
 
+    this.renderEnding(result.ending ?? null);
+
     const showNext = result.victory && result.nextPhaseId !== null;
     this.nextButton.hidden = !showNext;
 
     this.renderPerks(result.perks);
 
-    this.resultsPanel.setAttribute(
-      'aria-label',
-      `${result.victory ? en.resultVictory : en.resultDefeat} · ${result.phaseName}`,
-    );
+    const kicker = this.resultsKicker.textContent ?? '';
+    this.resultsPanel.setAttribute('aria-label', `${kicker} · ${result.phaseName}`);
+  }
+
+  private renderEnding(ending: PhaseResult['ending']): void {
+    if (!ending) {
+      this.resultsEnding.hidden = true;
+      this.resultsEndingTitle.textContent = '';
+      this.resultsEndingBody.textContent = '';
+      this.resultsEndingRank.textContent = '';
+      this.resultsEndingRank.removeAttribute('data-rank');
+      return;
+    }
+
+    this.resultsEnding.hidden = false;
+    this.resultsEndingTitle.textContent = ending.title;
+    this.resultsEndingBody.textContent = ending.body;
+    this.resultsEndingRank.textContent = ending.rank;
+    this.resultsEndingRank.dataset.rank = ending.rank;
+    this.resultsEndingRank.setAttribute('aria-label', `${en.overlayRank} ${ending.rank}`);
   }
 
   private renderPerks(perks: readonly PerkState[]): void {

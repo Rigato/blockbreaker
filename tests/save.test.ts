@@ -23,7 +23,7 @@ function makeResult(overrides: Partial<PhaseResult> = {}): PhaseResult {
     phaseId: 'phase-1',
     phaseName: 'Phase 1',
     phaseIndex: 1,
-    phaseCount: 3,
+    phaseCount: 6,
     victory: true,
     score: 1000,
     timeMs: 60_000,
@@ -67,7 +67,7 @@ describe('save defaults', () => {
 
   it('creates default settings with sound on', () => {
     expect(createDefaultSettings()).toEqual({ version: 1, sound: true });
-    expect(MAX_PHASE).toBe(3);
+    expect(MAX_PHASE).toBe(6);
   });
 });
 
@@ -102,7 +102,7 @@ describe('safe parse', () => {
     const save = parseSave(raw, 555);
 
     expect(save.version).toBe(1);
-    expect(save.unlockedPhase).toBe(3);
+    expect(save.unlockedPhase).toBe(6);
     expect(save.updatedAt).toBe(555);
     expect(save.phases['phase-1']).toEqual({
       bestTimeMs: null,
@@ -120,10 +120,48 @@ describe('safe parse', () => {
     expect(save).toEqual(createDefaultSave(3));
   });
 
-  it('clamps unlockedPhase into 1..3', () => {
+  it('clamps unlockedPhase into 1..6', () => {
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 0 })).unlockedPhase).toBe(1);
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 2 })).unlockedPhase).toBe(2);
-    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 4 })).unlockedPhase).toBe(3);
+    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 4 })).unlockedPhase).toBe(4);
+    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 7 })).unlockedPhase).toBe(6);
+  });
+
+  it('migrates a v0.1 save with unlockedPhase 3 into the 6-phase campaign', () => {
+    const raw = JSON.stringify({
+      version: 1,
+      unlockedPhase: 3,
+      phases: {
+        'phase-1': { bestScore: 1200, bestTimeMs: 40_000, attempts: 2, clears: 1, bestLevel: 5 },
+        'phase-2': { bestScore: 900, bestTimeMs: 55_000, attempts: 1, clears: 1, bestLevel: 4 },
+        'phase-3': { bestScore: 800, bestTimeMs: null, attempts: 1, clears: 0, bestLevel: 3 },
+      },
+      updatedAt: 1000,
+    });
+
+    const save = parseSave(raw, 2000);
+    expect(save.version).toBe(1);
+    expect(save.unlockedPhase).toBe(3);
+
+    const canOpen = (index: number): boolean => index <= save.unlockedPhase;
+    expect([1, 2, 3].map(canOpen)).toEqual([true, true, true]);
+    expect([4, 5, 6].map(canOpen)).toEqual([false, false, false]);
+
+    expect(getPhaseStats(save, 'phase-3')).toEqual({
+      bestTimeMs: null,
+      bestScore: 800,
+      attempts: 1,
+      clears: 0,
+      bestLevel: 3,
+    });
+    expect(getPhaseStats(save, 'phase-4')).toEqual({
+      bestTimeMs: null,
+      bestScore: null,
+      attempts: 0,
+      clears: 0,
+      bestLevel: 0,
+    });
+    expect(getPhaseStats(save, 'phase-6').clears).toBe(0);
   });
 
   it('defaults invalid settings to sound on', () => {
@@ -254,16 +292,29 @@ describe('StorageSaveRepository', () => {
 });
 
 describe('applyPhaseResult', () => {
-  it('unlocks phases sequentially up to phase 3', () => {
-    const first = applyPhaseResult(createDefaultSave(), makeResult({ phaseIndex: 1 }), 10);
-    expect(first.unlockedPhase).toBe(2);
+  it('unlocks phases sequentially up to phase 6 and clamps there', () => {
+    let save = createDefaultSave();
 
-    const second = applyPhaseResult(first, makeResult({ phaseId: 'phase-2', phaseIndex: 2 }), 20);
-    expect(second.unlockedPhase).toBe(3);
+    for (let index = 1; index <= 5; index += 1) {
+      save = applyPhaseResult(
+        save,
+        makeResult({
+          phaseId: `phase-${index}`,
+          phaseIndex: index,
+          nextPhaseId: `phase-${index + 1}`,
+        }),
+        index * 10,
+      );
+      expect(save.unlockedPhase).toBe(index + 1);
+    }
 
-    const third = applyPhaseResult(second, makeResult({ phaseId: 'phase-3', phaseIndex: 3 }), 30);
-    expect(third.unlockedPhase).toBe(3);
-    expect(third.updatedAt).toBe(30);
+    save = applyPhaseResult(
+      save,
+      makeResult({ phaseId: 'phase-6', phaseIndex: 6, nextPhaseId: null }),
+      60,
+    );
+    expect(save.unlockedPhase).toBe(6);
+    expect(save.updatedAt).toBe(60);
   });
 
   it('does not unlock on defeat and keeps the best time', () => {

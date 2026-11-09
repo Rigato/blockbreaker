@@ -3,6 +3,11 @@ import { GAME_CONFIG } from '../game/config';
 import { en } from '../i18n/en';
 import { formatTime } from './format';
 
+function formatFactor(value: number): string {
+  const safe = Number.isFinite(value) ? value : 1;
+  return Number.isInteger(safe) ? String(safe) : safe.toFixed(1);
+}
+
 export interface HudOptions {
   root: HTMLElement;
   controller: GameCommands;
@@ -39,12 +44,32 @@ export class Hud {
   private readonly laserButton: HTMLButtonElement;
   private readonly laserRing: HTMLElement;
   private readonly laserTime: HTMLElement;
+  private readonly laserNote: HTMLElement;
+
+  private readonly bossBar: HTMLElement;
+  private readonly bossName: HTMLElement;
+  private readonly bossHp: HTMLElement;
+  private readonly bossPhase: HTMLElement;
+  private readonly bossTrack: HTMLElement;
+  private readonly bossFill: HTMLElement;
+  private readonly bossPips: HTMLElement;
+  private readonly chips: HTMLElement;
+  private readonly challengeChip: HTMLElement;
+  private readonly multiplierChip: HTMLElement;
+  private readonly comboChip: HTMLElement;
+  private readonly waveIntro: HTMLElement;
 
   private perksSignature = '';
   private laser: LaserHudState | null = null;
+  private laserBlocked: 'stuck' | 'rule' | null = null;
   private laserEndsAt = 0;
   private laserCooldownMs = 0;
   private laserTimer: ReturnType<typeof setInterval> | null = null;
+  private bossSignature = '';
+  private ruleKind: 'timeLimit' | 'noLaser' | null = null;
+  private ruleEndsAt = 0;
+  private ruleTimer: ReturnType<typeof setInterval> | null = null;
+  private waveIntroText = '';
   private pulseTimer: ReturnType<typeof setTimeout> | null = null;
   private levelUpTimer: ReturnType<typeof setTimeout> | null = null;
   private levelUpPhase = false;
@@ -158,6 +183,76 @@ export class Hud {
 
     stats.append(balls, blocks, time, score);
 
+    const bossBar = document.createElement('div');
+    this.bossBar = bossBar;
+    bossBar.className = 'hud__boss';
+    bossBar.hidden = true;
+
+    const bossHead = document.createElement('div');
+    bossHead.className = 'hud__boss-head';
+
+    const bossName = document.createElement('span');
+    this.bossName = bossName;
+    bossName.className = 'hud__boss-name';
+
+    const bossHp = document.createElement('span');
+    this.bossHp = bossHp;
+    bossHp.className = 'hud__boss-hp';
+
+    bossHead.append(bossName, bossHp);
+
+    const bossTrack = document.createElement('div');
+    this.bossTrack = bossTrack;
+    bossTrack.className = 'hud__boss-track';
+    bossTrack.setAttribute('role', 'progressbar');
+    bossTrack.setAttribute('aria-label', en.hudBoss);
+    bossTrack.setAttribute('aria-valuemin', '0');
+    bossTrack.setAttribute('aria-valuemax', '1');
+    bossTrack.setAttribute('aria-valuenow', '0');
+
+    const bossFill = document.createElement('span');
+    this.bossFill = bossFill;
+    bossFill.className = 'hud__boss-fill';
+    bossTrack.append(bossFill);
+
+    const bossFoot = document.createElement('div');
+    bossFoot.className = 'hud__boss-foot';
+
+    const bossPhase = document.createElement('span');
+    this.bossPhase = bossPhase;
+    bossPhase.className = 'hud__boss-phase';
+
+    const bossPips = document.createElement('span');
+    this.bossPips = bossPips;
+    bossPips.className = 'hud__boss-pips';
+    bossPips.setAttribute('aria-hidden', 'true');
+
+    bossFoot.append(bossPhase, bossPips);
+    bossBar.append(bossHead, bossTrack, bossFoot);
+
+    const chips = document.createElement('div');
+    this.chips = chips;
+    chips.className = 'hud__chips';
+    chips.hidden = true;
+
+    const challengeChip = document.createElement('span');
+    this.challengeChip = challengeChip;
+    challengeChip.className = 'hud__chip hud__chip--rule';
+    challengeChip.hidden = true;
+    challengeChip.setAttribute('role', 'status');
+
+    const multiplierChip = document.createElement('span');
+    this.multiplierChip = multiplierChip;
+    multiplierChip.className = 'hud__chip hud__chip--multiplier';
+    multiplierChip.hidden = true;
+
+    const comboChip = document.createElement('span');
+    this.comboChip = comboChip;
+    comboChip.className = 'hud__chip hud__chip--combo';
+    comboChip.hidden = true;
+
+    chips.append(challengeChip, multiplierChip, comboChip);
+
     const pauseButton = document.createElement('button');
     this.pauseButton = pauseButton;
     pauseButton.type = 'button';
@@ -192,7 +287,7 @@ export class Hud {
     levelUpBadge.textContent = en.hudLevelUp;
     levelUpBadge.setAttribute('aria-hidden', 'true');
 
-    top.append(bar, levelUpBadge);
+    top.append(bossBar, bar, chips, levelUpBadge);
 
     const footer = document.createElement('div');
     footer.className = 'hud__footer';
@@ -242,9 +337,23 @@ export class Hud {
     this.laserTime = laserTime;
     laserTime.className = 'hud__laser-time';
 
-    laserButton.append(laserRing, laserCore, laserTime);
+    const laserNote = document.createElement('span');
+    this.laserNote = laserNote;
+    laserNote.className = 'hud__laser-note';
+    laserNote.hidden = true;
+    laserNote.setAttribute('aria-hidden', 'true');
+
+    laserButton.append(laserRing, laserCore, laserTime, laserNote);
 
     footer.append(perksButton, hint, laserButton);
+
+    const waveIntro = document.createElement('p');
+    this.waveIntro = waveIntro;
+    waveIntro.className = 'hud__wave-intro';
+    waveIntro.hidden = true;
+    waveIntro.setAttribute('role', 'status');
+    waveIntro.setAttribute('aria-live', 'polite');
+    waveIntro.setAttribute('aria-atomic', 'true');
 
     const perksPopover = document.createElement('div');
     this.perksPopover = perksPopover;
@@ -264,7 +373,7 @@ export class Hud {
 
     perksPopover.append(perksTitle, perksList);
 
-    section.append(top, footer, perksPopover);
+    section.append(top, footer, perksPopover, waveIntro);
     options.root.append(section);
 
     document.addEventListener('keydown', this.handleKeydown);
@@ -318,6 +427,11 @@ export class Hud {
     this.xpTrack.setAttribute('aria-valuetext', `${en.hudLevel} ${snapshot.level}, ${snapshot.xp}/${snapshot.xpToNext} ${en.hudXp}`);
 
     this.updatePerks(snapshot.perks);
+    this.updateBoss(snapshot.boss ?? null);
+    this.updateRule(snapshot.rule ?? null);
+    this.updateMultiplier(snapshot.multiplier ?? null);
+    this.updateCombo(snapshot.combo ?? null);
+    this.updateWaveIntro(snapshot.waveIntro ?? null);
     this.updateLaser(snapshot.laser);
   }
 
@@ -327,13 +441,19 @@ export class Hud {
     if (!visible) {
       this.closePerks();
       this.stopLaserTimer();
-    } else if (this.laser) {
-      this.syncLaserClock();
+      this.stopRuleTimer();
+    } else {
+      if (this.laser) this.syncLaserClock();
+      if (this.ruleKind === 'timeLimit') {
+        this.syncRuleClock();
+        this.startRuleTimer();
+      }
     }
   }
 
   dispose(): void {
     this.stopLaserTimer();
+    this.stopRuleTimer();
     if (this.pulseTimer !== null) clearTimeout(this.pulseTimer);
     this.stopLevelUp();
     this.levelUpPhase = false;
@@ -424,13 +544,177 @@ export class Hud {
     );
   }
 
+  private updateBoss(boss: HudSnapshot['boss'] | null): void {
+    if (!boss) {
+      this.bossBar.hidden = true;
+      this.bossSignature = '';
+      return;
+    }
+
+    this.bossBar.hidden = false;
+    const maxHp = Math.max(1, Math.round(boss.maxHp));
+    const hp = Math.max(0, Math.min(maxHp, Math.round(boss.hp)));
+    const ratio = Math.max(0, Math.min(1, hp / maxHp));
+
+    this.bossName.textContent = boss.name;
+    this.bossHp.textContent = `${en.hudBossHp} ${hp}/${maxHp}`;
+    this.bossFill.style.width = `${(ratio * 100).toFixed(1)}%`;
+    this.bossTrack.setAttribute('aria-valuemax', String(maxHp));
+    this.bossTrack.setAttribute('aria-valuenow', String(hp));
+    this.bossTrack.setAttribute(
+      'aria-valuetext',
+      `${boss.name} · ${en.hudBossHp} ${hp}/${maxHp}`,
+    );
+
+    const phases = Math.max(1, Math.min(9, Math.round(boss.phase)));
+    this.bossPhase.textContent = `${en.hudBossPhase} ${phases}`;
+    this.bossPips.setAttribute('aria-label', `${en.hudBossPhase} ${phases}`);
+
+    const signature = `${boss.name}|${phases}`;
+    if (signature === this.bossSignature) return;
+    this.bossSignature = signature;
+
+    this.bossPips.replaceChildren(
+      ...Array.from({ length: phases }, (_, index) => {
+        const pip = document.createElement('span');
+        pip.className = 'hud__boss-pip is-on';
+        if (index === phases - 1) pip.classList.add('is-current');
+        return pip;
+      }),
+    );
+  }
+
+  private updateRule(rule: HudSnapshot['rule'] | null): void {
+    this.stopRuleTimer();
+    this.ruleKind = rule?.kind ?? null;
+
+    if (!rule) {
+      this.challengeChip.hidden = true;
+      this.challengeChip.classList.remove('is-urgent');
+      this.challengeChip.textContent = '';
+      this.syncChipsVisibility();
+      return;
+    }
+
+    this.challengeChip.hidden = false;
+    this.challengeChip.classList.toggle('is-no-laser', rule.kind === 'noLaser');
+    this.challengeChip.classList.remove('is-urgent');
+
+    if (rule.kind === 'noLaser') {
+      this.challengeChip.textContent = en.hudChallengeNoLaser;
+      this.challengeChip.setAttribute('aria-label', en.hudChallengeNoLaser);
+      this.ruleKind = 'noLaser';
+      this.syncChipsVisibility();
+      return;
+    }
+
+    this.ruleKind = 'timeLimit';
+    this.ruleEndsAt =
+      performance.now() + Math.max(0, rule.remainingMs ?? 0);
+    this.syncRuleClock();
+    this.startRuleTimer();
+    this.syncChipsVisibility();
+  }
+
+  private syncRuleClock(): void {
+    if (!this.ruleKind || this.ruleKind !== 'timeLimit') return;
+
+    const remaining = Math.max(0, this.ruleEndsAt - performance.now());
+    const seconds = Math.ceil(remaining / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const padded = String(seconds % 60).padStart(2, '0');
+    this.challengeChip.textContent = `${en.hudChallengeTime} ${minutes}:${padded}`;
+    this.challengeChip.setAttribute(
+      'aria-label',
+      `${en.hudChallengeTime} ${minutes}:${padded}`,
+    );
+    this.challengeChip.classList.toggle('is-urgent', remaining <= 10_000);
+
+    if (remaining <= 0) {
+      this.stopRuleTimer();
+      return;
+    }
+
+    if (this.visible) this.startRuleTimer();
+  }
+
+  private startRuleTimer(): void {
+    if (this.ruleTimer !== null || !this.visible) return;
+    this.ruleTimer = setInterval(() => this.syncRuleClock(), 250);
+  }
+
+  private stopRuleTimer(): void {
+    if (this.ruleTimer !== null) {
+      clearInterval(this.ruleTimer);
+      this.ruleTimer = null;
+    }
+  }
+
+  private updateMultiplier(multiplier: HudSnapshot['multiplier'] | null): void {
+    if (!multiplier) {
+      this.multiplierChip.hidden = true;
+      this.multiplierChip.textContent = '';
+      this.syncChipsVisibility();
+      return;
+    }
+
+    const xp = formatFactor(multiplier.xpFactor);
+    const score = formatFactor(multiplier.scoreFactor);
+    const seconds = Math.max(0, multiplier.remainingMs) / 1000;
+    const text = `×${xp} ${en.hudMultiplierXp} · ×${score} ${en.hudMultiplierScore} · ${seconds.toFixed(1)}s`;
+    this.multiplierChip.hidden = false;
+    this.multiplierChip.textContent = text;
+    this.multiplierChip.setAttribute('aria-label', text);
+    this.syncChipsVisibility();
+  }
+
+  private updateCombo(combo: HudSnapshot['combo'] | null): void {
+    if (!combo || combo.count <= 0) {
+      this.comboChip.hidden = true;
+      this.comboChip.textContent = '';
+      this.syncChipsVisibility();
+      return;
+    }
+
+    const text = `${en.hudCombo} ×${Math.max(1, combo.multiplier).toFixed(2)}`;
+    this.comboChip.hidden = false;
+    this.comboChip.textContent = text;
+    this.comboChip.setAttribute('aria-label', text);
+    this.syncChipsVisibility();
+  }
+
+  private syncChipsVisibility(): void {
+    this.chips.hidden =
+      this.challengeChip.hidden && this.multiplierChip.hidden && this.comboChip.hidden;
+  }
+
+  private updateWaveIntro(intro: string | null): void {
+    const value = intro?.trim() ?? '';
+    if (!value) {
+      this.waveIntro.hidden = true;
+      this.waveIntroText = '';
+      this.waveIntro.classList.remove('is-visible');
+      return;
+    }
+
+    if (value === this.waveIntroText) return;
+    this.waveIntroText = value;
+    this.waveIntro.textContent = value;
+    this.waveIntro.hidden = false;
+    this.waveIntro.classList.remove('is-visible');
+    void this.waveIntro.offsetWidth;
+    this.waveIntro.classList.add('is-visible');
+  }
+
   private updateLaser(laser: LaserHudState | null): void {
     this.laser = laser;
+    this.laserBlocked = laser?.blocked ?? null;
     const acquired = Boolean(laser && laser.acquired);
     this.laserButton.hidden = !acquired;
 
     if (!laser || !acquired) {
       this.stopLaserTimer();
+      this.resetLaserBlockedUi();
       return;
     }
 
@@ -441,11 +725,37 @@ export class Hud {
     this.syncLaserClock();
   }
 
+  private resetLaserBlockedUi(): void {
+    this.laserButton.disabled = false;
+    this.laserButton.classList.remove('is-blocked');
+    this.laserNote.hidden = true;
+    this.laserNote.textContent = '';
+  }
+
   private syncLaserClock(): void {
     if (!this.laser || !this.laser.acquired || !this.visible) {
       this.stopLaserTimer();
       return;
     }
+
+    if (this.laserBlocked) {
+      const reason =
+        this.laserBlocked === 'stuck' ? en.hudLaserStuck : en.hudLaserRuleBlocked;
+      this.stopLaserTimer();
+      this.laserButton.classList.remove('is-ready', 'is-cooling');
+      this.laserButton.classList.add('is-blocked');
+      this.laserButton.disabled = true;
+      this.laserButton.setAttribute('aria-disabled', 'true');
+      this.laserButton.setAttribute('aria-label', `${en.hudLaser} · ${reason}`);
+      this.laserRing.style.setProperty('--laser-sweep', '0deg');
+      this.laserTime.textContent = '—';
+      this.laserNote.hidden = false;
+      this.laserNote.textContent = reason;
+      return;
+    }
+
+    this.resetLaserBlockedUi();
+    this.laserButton.setAttribute('aria-disabled', 'false');
 
     const now = performance.now();
     const remaining = Math.max(0, this.laserEndsAt - now);
@@ -495,6 +805,7 @@ export class Hud {
   };
 
   private readonly handleLaser = (): void => {
+    if (this.laserBlocked) return;
     if (this.laserButton.classList.contains('is-cooling')) return;
     this.controller.fireLaser();
   };

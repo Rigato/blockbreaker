@@ -1,18 +1,6 @@
-import type { BlockTypeId } from './blocks';
+import type { WaveDef } from '../content/types';
 
-/**
- * Provisional wave definition for M1. This mirrors the content `WaveDef`
- * described in the plan (§4.5); the real content pipeline arrives in M3.
- */
-export interface WaveDef {
-  id: string;
-  name: string;
-  /** Every row must have the same length; characters map through `legend`. */
-  rows: readonly string[];
-  legend: Record<string, BlockTypeId>;
-  /** Base ball speed in logical units per second. */
-  ballSpeed: number;
-}
+export type { WaveDef } from '../content/types';
 
 /** Fixtures only — not final content. */
 export const TEST_WAVES: readonly WaveDef[] = [

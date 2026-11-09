@@ -1,15 +1,18 @@
 import type { RunModifiers, SimTuning } from '../game/contracts';
 import { BASE_RUN_MODIFIERS, GAME_CONFIG } from '../game/config';
 import { BLOCK_TYPES, type BlockTypeId } from './blocks';
+import { computeFieldScale } from './layout';
 import {
   aabbFromRect,
+  circleOverlapsAabb,
+  circleSegmentHit,
   reflectVelocity,
   rotateVelocity,
   sweptCircleAabb,
   type Aabb,
 } from './collision';
 import { createRng } from './rng';
-import type { WaveDef } from './testWaves';
+import type { LevelElement, WaveDef } from '../content/types';
 
 export const FIELD_WIDTH = GAME_CONFIG.logicalWidth;
 export const BLOCK_TOP = 160;
@@ -26,6 +29,9 @@ export const LASER_BEAM_MS = 180;
 export const EXPLOSION_FX_MS = 260;
 /** Hard cap so a turret can never flood the projectile list. */
 export const MAX_PROJECTILES = 16;
+/** Boss shard fall speed and radius. */
+export const BOSS_SHARD_SPEED = 260;
+export const BOSS_SHARD_RADIUS = 7;
 
 /** Anti-stall thresholds from the implementation plan (§4.4). */
 export const ANTI_STALL = {
@@ -65,6 +71,28 @@ export interface Paddle {
   vx: number;
 }
 
+/** Oscillating block movement (horizontal by default). */
+export interface BlockMotion {
+  axis: 'horizontal' | 'vertical';
+  baseLeft: number;
+  baseTop: number;
+  rangePx: number;
+  periodMs: number;
+  phaseMs: number;
+}
+
+export interface BlockRegen {
+  everyMs: number;
+  timerMs: number;
+}
+
+export interface BlockGenerator {
+  everyMs: number;
+  timerMs: number;
+  maxSpawns: number;
+  spawned: number;
+}
+
 export interface Block {
   id: string;
   type: BlockTypeId;
@@ -78,6 +106,10 @@ export interface Block {
   height: number;
   /** Time (ms) until the impact flash ends. */
   flashMs: number;
+  motion?: BlockMotion;
+  regen?: BlockRegen;
+  generator?: BlockGenerator;
+  linkGroup?: number;
 }
 
 export interface Projectile {
@@ -106,6 +138,68 @@ export interface ExplosionFx {
   durationMs: number;
 }
 
+/** Runtime representation of one phase element. */
+export interface RuntimeElement {
+  id: string;
+  kind: LevelElement['kind'];
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  active: boolean;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  baseLeft: number;
+  baseTop: number;
+  axis: 'horizontal' | 'vertical';
+  rangePx: number;
+  periodMs: number;
+  phaseMs: number;
+  angleRad: number;
+  lengthPx: number;
+  /** Closed window for gates, in milliseconds. */
+  closedMs: number;
+  pairId?: string;
+}
+
+/** Boss runtime entity. */
+export interface Boss {
+  id: string;
+  name: string;
+  hp: number;
+  maxHp: number;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+  vx: number;
+  attackMs: number;
+  attackTimerMs: number;
+  phase: number;
+  hurtMs: number;
+  pattern: 'sentinel' | 'warden' | 'void';
+}
+
+/** Boss projectile that falls towards the paddle. */
+export interface BossShard {
+  id: number;
+  bossId: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+}
+
+/** Temporary multiplier buff activated by a multiplier block. */
+export interface MultiplierState {
+  xpFactor: number;
+  scoreFactor: number;
+  remainingMs: number;
+}
+
 export type WorldOutcome = 'playing' | 'cleared' | 'defeat';
 
 export interface SimInput {
@@ -129,6 +223,15 @@ export type SimEvent =
       maxHp: number;
       xp: number;
     }
+  | { type: 'block:healed'; blockId: string; hp: number }
+  | {
+      type: 'block:spawned';
+      blockId: string;
+      blockType: BlockTypeId;
+      sourceBlockId: string;
+      row: number;
+      col: number;
+    }
   | { type: 'paddle:hit'; ballId: number }
   | { type: 'projectile:fired'; projectileId: number }
   | { type: 'projectile:hit'; projectileId: number; blockId: string }
@@ -142,12 +245,28 @@ export type SimEvent =
       kind: 'nudge' | 'horizontal' | 'teleport';
       ballId: number;
       atMs: number;
-    };
+    }
+  | { type: 'multiplier:activated'; xpFactor: number; scoreFactor: number; remainingMs: number }
+  | { type: 'multiplier:expired' }
+  | { type: 'critical'; blockId: string; ballId: number; damage: number }
+  | { type: 'link:pulse'; blockId: string; group: number; linkedIds: readonly string[] }
+  | { type: 'element:hit'; elementId: string; kind: LevelElement['kind']; ballId: number }
+  | { type: 'portal:teleport'; ballId: number; fromId: string; toId: string }
+  | { type: 'boss:spawned'; bossId: string; name: string; hp: number; maxHp: number }
+  | { type: 'boss:hit'; bossId: string; hp: number; damage: number }
+  | { type: 'boss:defeated'; bossId: string }
+  | { type: 'boss:attack'; bossId: string; shards: number }
+  | { type: 'boss:shard-hit'; bossId: string; corrosion: number }
+  | { type: 'rule:failed'; kind: 'timeLimit' }
+  | { type: 'combo:changed'; count: number; multiplier: number }
+  | { type: 'revive'; ballId: number };
 
 interface Collider {
-  kind: 'wall' | 'paddle' | 'block';
+  kind: 'wall' | 'paddle' | 'block' | 'boss';
   box: Aabb;
   block?: Block;
+  element?: RuntimeElement;
+  boss?: Boss;
 }
 
 const NO_INPUT: SimInput = {
@@ -155,6 +274,9 @@ const NO_INPUT: SimInput = {
   paddleDirection: 0,
   launch: false,
 };
+
+/** Fallback column count for boss-only waves with no block grid. */
+const FALLBACK_COLUMNS = 7;
 
 /**
  * Pure fixed-step simulation. It owns no Phaser or DOM objects and is safe to
@@ -168,6 +290,13 @@ export class World {
   readonly balls: Ball[] = [];
   readonly blocks: Block[] = [];
   readonly projectiles: Projectile[] = [];
+  readonly elements: RuntimeElement[] = [];
+  readonly bossShards: BossShard[] = [];
+
+  boss: Boss | null = null;
+  multiplierState: MultiplierState | null = null;
+  corrosionStacks = 0;
+  comboCount = 0;
 
   score = 0;
   timeMs = 0;
@@ -183,12 +312,22 @@ export class World {
   private readonly explosionFx: ExplosionFx[] = [];
   private destroyedBlocks = 0;
   private explosionDepth = 0;
+  private linkDepth = 0;
   private rng: () => number;
   private readonly eventLog: SimEvent[] = [];
   private readonly eventHistory: SimEvent[] = [];
   private readonly blockCooldowns = new Map<number, Map<string, number>>();
+  private readonly portalCooldowns = new Map<number, number>();
   private nextId = 1;
   private running = false;
+
+  private fieldScaleValue = 1;
+  private cell = 60;
+  private offsetX = 0;
+  private gridColumns = 0;
+  private gridRows = 0;
+  private timeLimitRemainingMsValue: number | null = null;
+  private noLaserValue = false;
 
   constructor(options: {
     wave: WaveDef;
@@ -219,11 +358,26 @@ export class World {
   }
 
   get ballSpeed(): number {
-    return this.wave.ballSpeed * this.tuning.ballSpeedScale;
+    return this.wave.ballSpeed * this.tuning.ballSpeedScale * this.modifiersValue.ballSpeedMultiplier;
   }
 
   get tuningState(): SimTuning {
     return { ...this.tuning };
+  }
+
+  /** Layout scale computed on wave load; never changes with resize. */
+  get fieldScale(): number {
+    return this.fieldScaleValue;
+  }
+
+  /** Remaining time for a `timeLimit` rule; null when the wave has no limit. */
+  get timeLimitRemainingMs(): number | null {
+    return this.timeLimitRemainingMsValue;
+  }
+
+  /** True while the active wave forbids the Prism Laser. */
+  get noLaserRule(): boolean {
+    return this.noLaserValue;
   }
 
   /** Re-seeds the deterministic launch/multiball RNG for a new run or wave. */
@@ -258,11 +412,18 @@ export class World {
     return this.modifiersValue.laserCooldown;
   }
 
+  /** Why the laser cannot fire right now, or null when it can. */
+  get laserBlockedReason(): 'stuck' | 'rule' | null {
+    if (this.noLaserValue) return 'rule';
+    return this.balls.some((ball) => !ball.stuck) ? null : 'stuck';
+  }
+
   get laserReady(): boolean {
     return (
       this.modifiersValue.laserCooldown !== null &&
       this.modifiersValue.laserLevel > 0 &&
-      this.laserCooldownLeftMs <= 0
+      this.laserCooldownLeftMs <= 0 &&
+      this.laserBlockedReason === null
     );
   }
 
@@ -303,12 +464,14 @@ export class World {
     return events;
   }
 
-  /** Loads a wave's block grid and clears every transient entity. */
+  /** Loads a wave's grid, elements, boss and challenge rules. */
   loadWave(wave: WaveDef): void {
     this.wave = wave;
+    this.computeLayout(wave);
     this.blocks.length = 0;
     this.balls.length = 0;
     this.projectiles.length = 0;
+    this.bossShards.length = 0;
     this.blockCooldowns.clear();
     this.score = 0;
     this.timeMs = 0;
@@ -318,12 +481,15 @@ export class World {
     this.paddle.vx = 0;
     this.resetEffectState();
     this.buildBlocks(wave);
+    this.buildElements(wave);
+    this.buildBoss(wave);
   }
 
   /** Starts a fresh run state on the loaded wave (ball attached to paddle). */
   reset(): void {
     this.balls.length = 0;
     this.projectiles.length = 0;
+    this.bossShards.length = 0;
     this.blockCooldowns.clear();
     this.score = 0;
     this.timeMs = 0;
@@ -334,6 +500,9 @@ export class World {
     this.resetEffectState();
     this.blocks.length = 0;
     this.buildBlocks(this.wave);
+    this.elements.length = 0;
+    this.buildElements(this.wave);
+    this.buildBoss(this.wave);
     this.spawnStuckBall();
   }
 
@@ -344,7 +513,26 @@ export class World {
     this.explosionFx.length = 0;
     this.destroyedBlocks = 0;
     this.explosionDepth = 0;
+    this.linkDepth = 0;
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
+    this.multiplierState = null;
+    this.corrosionStacks = 0;
+    this.comboCount = 0;
+    this.portalCooldowns.clear();
+    this.applyRules(this.wave);
+    this.applyEffectiveSize();
+  }
+
+  private applyRules(wave: WaveDef): void {
+    this.timeLimitRemainingMsValue = null;
+    this.noLaserValue = false;
+    for (const rule of wave.rules ?? []) {
+      if (rule.kind === 'timeLimit') {
+        this.timeLimitRemainingMsValue = Math.max(0, rule.ms);
+      } else if (rule.kind === 'noLaser') {
+        this.noLaserValue = true;
+      }
+    }
   }
 
   resize(height: number): void {
@@ -396,6 +584,21 @@ export class World {
         modifiers.explosiveEvery !== null && modifiers.explosiveEvery > 0
           ? Math.floor(modifiers.explosiveEvery)
           : null,
+      critChance: Math.max(0, Math.min(1, modifiers.critChance)),
+      critMultiplier: Math.max(1, modifiers.critMultiplier),
+      laserTargetBonus: Math.max(0, Math.floor(modifiers.laserTargetBonus)),
+      laserWidthMultiplier: Math.max(0.1, modifiers.laserWidthMultiplier),
+      laserCooldownMultiplier: Math.max(0.1, modifiers.laserCooldownMultiplier),
+      comboStep: Math.max(0, modifiers.comboStep),
+      comboMax: Math.max(0, modifiers.comboMax),
+      reviveCharges: Math.max(0, Math.floor(modifiers.reviveCharges)),
+      bombEvery:
+        modifiers.bombEvery !== null && modifiers.bombEvery > 0
+          ? Math.floor(modifiers.bombEvery)
+          : null,
+      bossDamageBonus: Math.max(0, modifiers.bossDamageBonus),
+      ballSpeedMultiplier: Math.max(0.1, modifiers.ballSpeedMultiplier),
+      scoreMultiplier: Math.max(0, modifiers.scoreMultiplier),
     };
 
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
@@ -416,12 +619,19 @@ export class World {
     return Math.max(1, this.tuning.ballRadius * this.modifiersValue.ballRadiusMultiplier);
   }
 
-  private applyEffectiveSize(): void {
-    const width = Math.max(
+  private effectivePaddleWidth(): number {
+    const corrosion = 1 - this.corrosionStacks * GAME_CONFIG.elements.bossCorrosionStep;
+    return Math.max(
       20,
-      Math.min(FIELD_WIDTH, this.tuning.paddleWidth * this.modifiersValue.paddleWidthMultiplier),
+      Math.min(
+        FIELD_WIDTH,
+        this.tuning.paddleWidth * this.modifiersValue.paddleWidthMultiplier * corrosion,
+      ),
     );
-    this.paddle.width = width;
+  }
+
+  private applyEffectiveSize(): void {
+    this.paddle.width = this.effectivePaddleWidth();
     this.clampPaddle();
 
     const radius = this.effectiveBallRadius();
@@ -513,46 +723,73 @@ export class World {
 
   /**
    * Prism Laser: vertical beam at the paddle column. Level L deals L damage to
-   * the first `laserTargetsBase + (L - 1) * laserTargetsPerLevel` blocks in the
-   * beam, ordered from the one nearest the paddle upwards. Only usable when the
-   * perk is owned (`laserCooldown != null`), levelled and off cooldown.
+   * the first `laserTargetsBase + (L - 1) * laserTargetsPerLevel + bonus`
+   * blocks in the beam, ordered from the one nearest the paddle upwards.
+   * Walls and obstacles stop the beam. Requires at least one free ball.
    */
   fireLaser(): boolean {
     const cooldown = this.modifiersValue.laserCooldown;
     const level = this.modifiersValue.laserLevel;
     if (cooldown === null || level <= 0 || this.laserCooldownLeftMs > 0) return false;
     if (this.outcome !== 'playing' || !this.running) return false;
+    if (this.laserBlockedReason !== null) return false;
 
     const x = this.paddle.x;
-    const half = LASER_BEAM_WIDTH / 2;
-    const targets = this.blocks
-      .filter((block) => block.left < x + half && block.left + block.width > x - half)
-      .sort((a, b) => b.top - a.top);
+    const width = LASER_BEAM_WIDTH * this.modifiersValue.laserWidthMultiplier;
+    const half = width / 2;
+
+    const entries: { top: number; block?: Block }[] = [];
+    for (const block of this.blocks) {
+      if (block.left < x + half && block.left + block.width > x - half) {
+        entries.push({ top: block.top, block });
+      }
+    }
+    for (const element of this.elements) {
+      if (!this.isSolidElement(element)) continue;
+      if (element.left < x + half && element.left + element.width > x - half) {
+        entries.push({ top: element.top });
+      }
+    }
+    entries.sort((a, b) => b.top - a.top);
 
     const targetCount = Math.max(
       1,
       GAME_CONFIG.perks.laserTargetsBase +
-        (level - 1) * GAME_CONFIG.perks.laserTargetsPerLevel,
+        (level - 1) * GAME_CONFIG.perks.laserTargetsPerLevel +
+        this.modifiersValue.laserTargetBonus,
     );
-    const hitTargets = targets.slice(0, targetCount);
+    const hitTargets: Block[] = [];
+    for (const entry of entries) {
+      if (!entry.block) break;
+      hitTargets.push(entry.block);
+      if (hitTargets.length >= targetCount) break;
+    }
 
     this.laserCooldownLeftMs = cooldown;
     this.laserBeamFx = {
       x,
-      width: LASER_BEAM_WIDTH,
+      width,
       remainingMs: LASER_BEAM_MS,
       durationMs: LASER_BEAM_MS,
     };
     this.pushEvent({
       type: 'laser:fired',
       x,
-      width: LASER_BEAM_WIDTH,
+      width,
       hits: hitTargets.length,
     });
 
     // applyDamage validates membership, so blocks destroyed by a chained
     // explosion mid-loop are safely skipped.
     for (const target of hitTargets) this.applyDamage(target, level, -1);
+
+    if (this.boss && this.boss.hp > 0 && this.beamOverlapsBoss(x, half, this.boss)) {
+      // A solid element below the boss (closer to the paddle) stops the beam.
+      const blockedBeforeBoss = entries.some((entry) => !entry.block && entry.top > this.boss!.y);
+      if (!blockedBeforeBoss) {
+        this.damageBossTotal(level + this.modifiersValue.bossDamageBonus);
+      }
+    }
     return true;
   }
 
@@ -571,6 +808,31 @@ export class World {
     return projectile;
   }
 
+  /** Second Chance hook: restores play after a defeat with a fresh ball. */
+  revive(): boolean {
+    if (this.outcome !== 'defeat') return false;
+    this.outcome = 'playing';
+    this.running = true;
+    // A time-limit defeat would otherwise re-trigger on the next step. Give
+    // the revived ball a short grace window instead of an instant re-defeat.
+    if (this.timeLimitRemainingMsValue !== null && this.timeLimitRemainingMsValue <= 0) {
+      this.timeLimitRemainingMsValue = 10_000;
+    }
+    const ball = this.spawnStuckBall();
+    this.pushEvent({ type: 'revive', ballId: ball.id });
+    return true;
+  }
+
+  /** Applies block damage through the normal pipeline (tests/debug). */
+  damageBlock(block: Block, damage: number, sourceBallId = -1): boolean {
+    return this.applyDamage(block, damage, sourceBallId);
+  }
+
+  /** Applies boss damage through the normal pipeline (tests/debug). */
+  damageBoss(amount: number): void {
+    this.damageBossTotal(amount);
+  }
+
   step(input: SimInput = NO_INPUT, dtMs: number = 1000 / GAME_CONFIG.fixedStepHz): readonly SimEvent[] {
     this.eventLog.length = 0;
     if (this.outcome !== 'playing' || !this.running) return this.eventLog;
@@ -581,11 +843,15 @@ export class World {
     this.updatePaddle(input, dt);
     if (input.launch) this.launchStuckBalls();
     this.updateTimers(dtMs);
+    if (this.outcome !== 'playing') return this.eventLog;
 
     for (const block of this.blocks) {
       if (block.flashMs > 0) block.flashMs = Math.max(0, block.flashMs - dtMs);
     }
 
+    this.updateBlockBehaviors(dtMs);
+    this.updateElements();
+    this.updateBoss(dt, dtMs);
     this.updateBalls(dt, dtMs);
     this.updateTurret(dtMs);
     this.updateProjectiles(dt);
@@ -607,6 +873,22 @@ export class World {
       fx.remainingMs -= dtMs;
       if (fx.remainingMs <= 0) this.explosionFx.splice(index, 1);
     }
+
+    if (this.multiplierState) {
+      this.multiplierState.remainingMs = Math.max(0, this.multiplierState.remainingMs - dtMs);
+      if (this.multiplierState.remainingMs <= 0) {
+        this.multiplierState = null;
+        this.pushEvent({ type: 'multiplier:expired' });
+      }
+    }
+
+    if (this.timeLimitRemainingMsValue !== null) {
+      this.timeLimitRemainingMsValue = Math.max(0, this.timeLimitRemainingMsValue - dtMs);
+      if (this.timeLimitRemainingMsValue <= 0) {
+        this.outcome = 'defeat';
+        this.pushEvent({ type: 'rule:failed', kind: 'timeLimit' });
+      }
+    }
   }
 
   /** Arcane Turret perk: fires a projectile every `turretInterval` ms. */
@@ -624,15 +906,37 @@ export class World {
   }
 
   // -------------------------------------------------------------------------
-  // Grid
+  // Layout, grid and elements
   // -------------------------------------------------------------------------
+
+  private computeLayout(wave: WaveDef): void {
+    const rows = wave.rows.length;
+    const rawColumns = wave.rows[0]?.length ?? 0;
+    const columns = rawColumns > 0 ? rawColumns : FALLBACK_COLUMNS;
+
+    let maxRow = rows;
+    for (const element of wave.elements ?? []) {
+      maxRow = Math.max(maxRow, element.row + (element.heightCells ?? 1));
+    }
+    if (wave.boss) {
+      maxRow = Math.max(maxRow, wave.boss.row + wave.boss.heightCells);
+    }
+    const extraRows = Math.max(0, maxRow - rows);
+
+    this.fieldScaleValue = computeFieldScale(rows, columns, extraRows);
+    this.cell = (FIELD_WIDTH / columns) * this.fieldScaleValue;
+    this.offsetX = (FIELD_WIDTH - columns * this.cell) / 2;
+    this.gridColumns = rawColumns;
+    this.gridRows = rows;
+  }
 
   private buildBlocks(wave: WaveDef): void {
     const rows = wave.rows;
-    const columns = rows[0]?.length ?? 0;
-    if (columns === 0) return;
-    const cell = FIELD_WIDTH / columns;
+    if (rows.length === 0) return;
+    const cell = this.cell;
     const cellHeight = cell;
+    const columns = rows[0]?.length ?? 0;
+    const rowCount = rows.length;
 
     rows.forEach((row, rowIndex) => {
       for (let col = 0; col < row.length; col += 1) {
@@ -640,21 +944,349 @@ export class World {
         const typeId = wave.legend[char];
         if (!typeId) continue;
         const type = BLOCK_TYPES[typeId];
-        this.blocks.push({
+        const left = this.offsetX + col * cell + BLOCK_GAP / 2;
+        const top = BLOCK_TOP + rowIndex * cellHeight + BLOCK_GAP / 2;
+        const block: Block = {
           id: `${rowIndex}:${col}`,
           type: typeId,
           hp: type.hp,
           maxHp: type.hp,
           row: rowIndex,
           col,
-          left: col * cell + BLOCK_GAP / 2,
-          top: BLOCK_TOP + rowIndex * cellHeight + BLOCK_GAP / 2,
+          left,
+          top,
           width: cell - BLOCK_GAP,
           height: cellHeight - BLOCK_GAP,
           flashMs: 0,
-        });
+        };
+
+        if (type.behavior === 'moving') {
+          const periodMs = GAME_CONFIG.elements.movingPeriodMs;
+          const phaseSeed = (rowIndex * 7 + col * 13) % 17;
+          block.motion = {
+            axis: 'horizontal',
+            baseLeft: left,
+            baseTop: top,
+            rangePx: cell * GAME_CONFIG.elements.movingRangeCells,
+            periodMs,
+            phaseMs: (phaseSeed / 17) * periodMs,
+          };
+        } else if (type.behavior === 'regenerative') {
+          block.regen = {
+            everyMs: GAME_CONFIG.elements.regenEveryMs,
+            timerMs: GAME_CONFIG.elements.regenEveryMs,
+          };
+        } else if (type.behavior === 'generator') {
+          block.generator = {
+            everyMs: GAME_CONFIG.elements.generatorEveryMs,
+            timerMs: GAME_CONFIG.elements.generatorEveryMs,
+            maxSpawns: GAME_CONFIG.elements.generatorMaxSpawns,
+            spawned: 0,
+          };
+        }
+
+        this.blocks.push(block);
       }
     });
+
+    // Keep stable references for the grid bounds even when the wave is sparse.
+    this.gridRows = Math.max(this.gridRows, rowCount);
+    this.gridColumns = Math.max(this.gridColumns, columns);
+    this.assignLinkGroups();
+  }
+
+  private assignLinkGroups(): void {
+    const linked = this.blocks.filter((block) => BLOCK_TYPES[block.type].behavior === 'linked');
+    const byCell = new Map<string, Block>();
+    for (const block of linked) {
+      block.linkGroup = undefined;
+      byCell.set(`${block.row}:${block.col}`, block);
+    }
+
+    const visited = new Set<string>();
+    let group = 0;
+    const directions = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ] as const;
+
+    for (const start of linked) {
+      const startKey = `${start.row}:${start.col}`;
+      if (visited.has(startKey)) continue;
+      group += 1;
+      const stack: Block[] = [start];
+      visited.add(startKey);
+      while (stack.length > 0) {
+        const current = stack.pop()!;
+        current.linkGroup = group;
+        for (const [dRow, dCol] of directions) {
+          const key = `${current.row + dRow}:${current.col + dCol}`;
+          if (visited.has(key)) continue;
+          const neighbour = byCell.get(key);
+          if (!neighbour) continue;
+          visited.add(key);
+          stack.push(neighbour);
+        }
+      }
+    }
+  }
+
+  private buildElements(wave: WaveDef): void {
+    for (const definition of wave.elements ?? []) {
+      const widthCells = definition.widthCells ?? 1;
+      const heightCells = definition.heightCells ?? 1;
+      const width = widthCells * this.cell - BLOCK_GAP;
+      const height = heightCells * this.cell - BLOCK_GAP;
+      const left = this.offsetX + definition.col * this.cell + BLOCK_GAP / 2;
+      const top = BLOCK_TOP + definition.row * this.cell + BLOCK_GAP / 2;
+
+      const element: RuntimeElement = {
+        id: definition.id,
+        kind: definition.kind,
+        left,
+        top,
+        width,
+        height,
+        active: true,
+        x1: 0,
+        y1: 0,
+        x2: 0,
+        y2: 0,
+        baseLeft: left,
+        baseTop: top,
+        axis: 'horizontal',
+        rangePx: 0,
+        periodMs: 0,
+        phaseMs: 0,
+        angleRad: 0,
+        lengthPx: 0,
+        closedMs: 0,
+      };
+
+      if (definition.kind === 'deflector') {
+        const centreX = left + width / 2;
+        const centreY = top + height / 2;
+        element.lengthPx = Math.hypot(width, height);
+        element.angleRad = (definition.angleDeg * Math.PI) / 180;
+        this.setSegment(element, centreX, centreY);
+      } else if (definition.kind === 'portal') {
+        element.pairId = definition.pairId;
+      } else if (definition.kind === 'mover') {
+        element.axis = definition.axis;
+        element.rangePx = definition.rangeCells * this.cell;
+        element.periodMs = definition.periodMs;
+        element.phaseMs = definition.phaseMs ?? 0;
+      } else if (definition.kind === 'rotor') {
+        const centreX = left + width / 2;
+        const centreY = top + height / 2;
+        element.lengthPx = definition.lengthCells * this.cell;
+        element.periodMs = definition.periodMs;
+        element.phaseMs = definition.phaseMs ?? 0;
+        element.angleRad = (element.phaseMs / element.periodMs) * Math.PI * 2;
+        this.setSegment(element, centreX, centreY);
+      } else if (definition.kind === 'gate') {
+        element.periodMs = Math.max(1, definition.closedMs + definition.openMs);
+        element.phaseMs = definition.phaseMs ?? 0;
+        element.closedMs = Math.max(0, definition.closedMs);
+        element.active = this.gateClosed(element);
+      }
+
+      this.elements.push(element);
+    }
+  }
+
+  private setSegment(element: RuntimeElement, centreX: number, centreY: number): void {
+    const half = element.lengthPx / 2;
+    const cos = Math.cos(element.angleRad);
+    const sin = Math.sin(element.angleRad);
+    element.x1 = centreX - cos * half;
+    element.y1 = centreY - sin * half;
+    element.x2 = centreX + cos * half;
+    element.y2 = centreY + sin * half;
+  }
+
+  private gateClosed(element: RuntimeElement): boolean {
+    if (element.periodMs <= 0) return true;
+    const elapsed = (this.timeMs + element.phaseMs) % element.periodMs;
+    const closedMs = element.closedMs > 0 ? element.closedMs : element.periodMs / 2;
+    return elapsed < closedMs;
+  }
+
+  private buildBoss(wave: WaveDef): void {
+    this.boss = null;
+    this.bossShards.length = 0;
+    const definition = wave.boss;
+    if (!definition) return;
+
+    const width = Math.max(this.cell, definition.widthCells * this.cell - BLOCK_GAP);
+    const height = Math.max(this.cell, definition.heightCells * this.cell - BLOCK_GAP);
+    const boss: Boss = {
+      id: definition.id,
+      name: definition.name,
+      hp: definition.hp,
+      maxHp: definition.hp,
+      width,
+      height,
+      x: FIELD_WIDTH / 2,
+      y: BLOCK_TOP + definition.row * this.cell,
+      vx: definition.moveSpeed,
+      attackMs: definition.attackMs,
+      attackTimerMs: definition.attackMs,
+      phase: 1,
+      hurtMs: 0,
+      pattern: definition.pattern,
+    };
+    this.boss = boss;
+    this.pushEvent({
+      type: 'boss:spawned',
+      bossId: boss.id,
+      name: boss.name,
+      hp: boss.hp,
+      maxHp: boss.maxHp,
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Block behaviours
+  // -------------------------------------------------------------------------
+
+  private updateBlockBehaviors(dtMs: number): void {
+    if (this.blocks.length === 0) return;
+    const snapshot = [...this.blocks];
+
+    for (const block of snapshot) {
+      if (block.motion) {
+        const motion = block.motion;
+        if (motion.periodMs > 0) {
+          const phase = ((this.timeMs + motion.phaseMs) / motion.periodMs) * Math.PI * 2;
+          const offset = Math.sin(phase) * motion.rangePx;
+          if (motion.axis === 'horizontal') {
+            block.left = motion.baseLeft + offset;
+            block.top = motion.baseTop;
+          } else {
+            block.left = motion.baseLeft;
+            block.top = motion.baseTop + offset;
+          }
+        }
+      }
+
+      if (block.regen) {
+        const regen = block.regen;
+        regen.timerMs -= dtMs;
+        if (regen.timerMs <= 0) {
+          regen.timerMs += regen.everyMs;
+          if (block.hp > 0 && block.hp < block.maxHp) {
+            block.hp = Math.min(block.maxHp, block.hp + 1);
+            block.flashMs = 80;
+            this.pushEvent({ type: 'block:healed', blockId: block.id, hp: block.hp });
+          }
+        }
+      }
+
+      if (block.generator) {
+        const generator = block.generator;
+        generator.timerMs -= dtMs;
+        if (generator.timerMs <= 0) {
+          generator.timerMs += generator.everyMs;
+          if (generator.spawned < generator.maxSpawns) {
+            if (this.spawnGeneratorBlock(block)) {
+              generator.spawned += 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private spawnGeneratorBlock(source: Block): Block | null {
+    if (this.gridColumns <= 0 || this.gridRows <= 0) return null;
+    const directions = [
+      [-1, 0],
+      [0, 1],
+      [1, 0],
+      [0, -1],
+    ] as const;
+
+    for (const [dRow, dCol] of directions) {
+      const row = source.row + dRow;
+      const col = source.col + dCol;
+      if (row < 0 || row >= this.gridRows || col < 0 || col >= this.gridColumns) continue;
+      if (this.blockAt(row, col)) continue;
+
+      const type = BLOCK_TYPES.crystal;
+      const left = this.offsetX + col * this.cell + BLOCK_GAP / 2;
+      const top = BLOCK_TOP + row * this.cell + BLOCK_GAP / 2;
+      const block: Block = {
+        id: `${row}:${col}`,
+        type: 'crystal',
+        hp: type.hp,
+        maxHp: type.hp,
+        row,
+        col,
+        left,
+        top,
+        width: this.cell - BLOCK_GAP,
+        height: this.cell - BLOCK_GAP,
+        flashMs: 0,
+      };
+      this.blocks.push(block);
+      this.pushEvent({
+        type: 'block:spawned',
+        blockId: block.id,
+        blockType: block.type,
+        sourceBlockId: source.id,
+        row,
+        col,
+      });
+      return block;
+    }
+    return null;
+  }
+
+  private blockAt(row: number, col: number): Block | undefined {
+    return this.blocks.find((block) => block.row === row && block.col === col);
+  }
+
+  // -------------------------------------------------------------------------
+  // Elements
+  // -------------------------------------------------------------------------
+
+  private updateElements(): void {
+    for (const element of this.elements) {
+      if (element.kind === 'mover') {
+        if (element.periodMs <= 0) continue;
+        const phase = ((this.timeMs + element.phaseMs) / element.periodMs) * Math.PI * 2;
+        const offset = Math.sin(phase) * element.rangePx;
+        if (element.axis === 'horizontal') {
+          element.left = element.baseLeft + offset;
+          element.top = element.baseTop;
+        } else {
+          element.left = element.baseLeft;
+          element.top = element.baseTop + offset;
+        }
+      } else if (element.kind === 'rotor') {
+        if (element.periodMs <= 0) continue;
+        element.angleRad = ((this.timeMs + element.phaseMs) / element.periodMs) * Math.PI * 2;
+        const centreX = element.left + element.width / 2;
+        const centreY = element.top + element.height / 2;
+        this.setSegment(element, centreX, centreY);
+      } else if (element.kind === 'gate') {
+        element.active = this.gateClosed(element);
+      }
+    }
+  }
+
+  private isSolidElement(element: RuntimeElement): boolean {
+    if (element.kind === 'wall' || element.kind === 'obstacle' || element.kind === 'mover') {
+      return true;
+    }
+    return element.kind === 'gate' && element.active;
+  }
+
+  private isSegmentElement(element: RuntimeElement): boolean {
+    return (element.kind === 'deflector' || element.kind === 'rotor') && element.active;
   }
 
   // -------------------------------------------------------------------------
@@ -769,6 +1401,7 @@ export class World {
       }
 
       this.moveBall(ball, dt);
+      if (!this.balls.includes(ball)) continue;
       if (ball.y - ball.radius > this.height + LOSS_MARGIN) {
         this.removeBall(ball);
         continue;
@@ -778,6 +1411,29 @@ export class World {
   }
 
   private moveBall(ball: Ball, dt: number): void {
+    const hasSegments = this.elements.some((element) => this.isSegmentElement(element));
+    if (!hasSegments) {
+      this.moveBallAabb(ball, dt);
+      this.checkPortals(ball);
+      return;
+    }
+
+    const speed = Math.hypot(ball.vx, ball.vy);
+    const distance = speed * dt;
+    const maxStep = GAME_CONFIG.elements.rotorMaxStepPx;
+    const steps = Math.max(1, Math.ceil(distance / Math.max(1, maxStep)));
+    const subDt = dt / steps;
+
+    for (let stepIndex = 0; stepIndex < steps; stepIndex += 1) {
+      this.moveBallAabb(ball, subDt);
+      this.resolveSegments(ball);
+      if (ball.stuck) break;
+      if (this.checkPortals(ball)) continue;
+      if (!this.balls.includes(ball)) break;
+    }
+  }
+
+  private moveBallAabb(ball: Ball, dt: number): void {
     let remaining = dt;
     let impacts = 0;
 
@@ -816,14 +1472,92 @@ export class World {
       } else if (collider.kind === 'block' && collider.block) {
         this.handleBlockHit(ball, collider.block);
         reflectVelocity(ball, hit.nx, hit.ny);
+      } else if (collider.kind === 'boss' && collider.boss) {
+        this.handleBossBallHit(ball, collider.boss);
+        reflectVelocity(ball, hit.nx, hit.ny);
       } else {
         reflectVelocity(ball, hit.nx, hit.ny);
+        if (collider.element) {
+          this.pushEvent({
+            type: 'element:hit',
+            elementId: collider.element.id,
+            kind: collider.element.kind,
+            ballId: ball.id,
+          });
+        }
       }
 
       ball.x += hit.nx * hit.depth;
       ball.y += hit.ny * hit.depth;
       impacts += 1;
     }
+  }
+
+  private resolveSegments(ball: Ball): void {
+    for (const element of this.elements) {
+      if (!this.isSegmentElement(element)) continue;
+      const hit = circleSegmentHit(
+        ball.x,
+        ball.y,
+        ball.radius,
+        element.x1,
+        element.y1,
+        element.x2,
+        element.y2,
+      );
+      if (!hit) continue;
+
+      let { nx, ny } = hit;
+      // The normal must oppose the velocity so the reflection flips it.
+      if (ball.vx * nx + ball.vy * ny > 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+      ball.x += nx * hit.depth;
+      ball.y += ny * hit.depth;
+      reflectVelocity(ball, nx, ny);
+      ball.sinceInteractionMs = 0;
+      ball.horizontalMs = 0;
+      ball.aboveBlocksMs = 0;
+      this.pushEvent({
+        type: 'element:hit',
+        elementId: element.id,
+        kind: element.kind,
+        ballId: ball.id,
+      });
+    }
+  }
+
+  private checkPortals(ball: Ball): boolean {
+    for (const element of this.elements) {
+      if (element.kind !== 'portal') continue;
+      const box = aabbFromRect(element.left, element.top, element.width, element.height);
+      if (!circleOverlapsAabb(ball.x, ball.y, ball.radius, box)) continue;
+
+      const last = this.portalCooldowns.get(ball.id);
+      if (last !== undefined && this.timeMs - last < GAME_CONFIG.elements.portalCooldownMs) {
+        continue;
+      }
+      const pair = this.elements.find(
+        (candidate) =>
+          candidate !== element &&
+          candidate.kind === 'portal' &&
+          candidate.pairId === element.pairId,
+      );
+      if (!pair) continue;
+
+      this.portalCooldowns.set(ball.id, this.timeMs);
+      ball.x = pair.left + pair.width / 2;
+      ball.y = pair.top + pair.height / 2;
+      this.pushEvent({
+        type: 'portal:teleport',
+        ballId: ball.id,
+        fromId: element.id,
+        toId: pair.id,
+      });
+      return true;
+    }
+    return false;
   }
 
   private collectColliders(ball: Ball): Collider[] {
@@ -861,6 +1595,23 @@ export class World {
       });
     }
 
+    for (const element of this.elements) {
+      if (!this.isSolidElement(element)) continue;
+      colliders.push({
+        kind: 'wall',
+        box: aabbFromRect(element.left, element.top, element.width, element.height),
+        element,
+      });
+    }
+
+    if (this.boss && this.boss.hp > 0) {
+      colliders.push({
+        kind: 'boss',
+        box: this.bossBox(this.boss),
+        boss: this.boss,
+      });
+    }
+
     return colliders;
   }
 
@@ -868,6 +1619,7 @@ export class World {
     ball.sinceInteractionMs = 0;
     ball.horizontalMs = 0;
     ball.aboveBlocksMs = 0;
+    this.resetCombo();
     this.pushEvent({ type: 'paddle:hit', ballId: ball.id });
 
     if (ny > 0) {
@@ -917,15 +1669,27 @@ export class World {
     ball.sinceInteractionMs = 0;
     ball.horizontalMs = 0;
     ball.aboveBlocksMs = 0;
-    this.applyDamage(block, this.modifiersValue.ballDamage, ball.id);
+
+    let damage = this.modifiersValue.ballDamage;
+    if (this.modifiersValue.critChance > 0 && this.rng() < this.modifiersValue.critChance) {
+      damage = Math.max(1, Math.round(damage * this.modifiersValue.critMultiplier));
+      this.pushEvent({ type: 'critical', blockId: block.id, ballId: ball.id, damage });
+    }
+    this.applyDamage(block, damage, ball.id);
   }
 
   /**
    * Central damage path shared by balls, laser, projectiles and explosions.
    * Emits `block:hit`, then `block:destroyed` with the XP payload.
    */
-  private applyDamage(block: Block, damage: number, sourceBallId: number): boolean {
+  private applyDamage(
+    block: Block,
+    damage: number,
+    sourceBallId: number,
+    allowLinks = true,
+  ): boolean {
     if (damage <= 0 || !this.blocks.includes(block)) return false;
+    if (block.regen) block.regen.timerMs = block.regen.everyMs;
     block.flashMs = 80;
     block.hp -= damage;
     this.pushEvent({
@@ -935,16 +1699,79 @@ export class World {
       hp: block.hp,
       damage,
     });
-    if (block.hp > 0) return false;
-    this.destroyBlock(block, sourceBallId);
-    return true;
+
+    const destroyed = block.hp <= 0;
+    if (destroyed) this.destroyBlock(block, sourceBallId);
+    if (allowLinks) this.propagateLinks(block, sourceBallId);
+    return destroyed;
+  }
+
+  private propagateLinks(block: Block, sourceBallId: number): void {
+    if (this.linkDepth >= 3 || block.linkGroup === undefined) return;
+    const linked = this.blocks.filter(
+      (candidate) =>
+        candidate !== block &&
+        candidate.linkGroup === block.linkGroup &&
+        BLOCK_TYPES[candidate.type].behavior === 'linked',
+    );
+    if (linked.length === 0) return;
+
+    this.pushEvent({
+      type: 'link:pulse',
+      blockId: block.id,
+      group: block.linkGroup,
+      linkedIds: linked.map((candidate) => candidate.id),
+    });
+
+    this.linkDepth += 1;
+    try {
+      for (const candidate of linked) {
+        this.applyDamage(candidate, 1, sourceBallId, false);
+      }
+    } finally {
+      this.linkDepth -= 1;
+    }
+  }
+
+  private comboMultiplier(): number {
+    return 1 + Math.min(this.modifiersValue.comboMax, this.comboCount * this.modifiersValue.comboStep);
+  }
+
+  private resetCombo(): void {
+    if (this.comboCount === 0) return;
+    this.comboCount = 0;
+    this.pushEvent({ type: 'combo:changed', count: 0, multiplier: this.comboMultiplier() });
   }
 
   private destroyBlock(block: Block, sourceBallId: number): void {
     const index = this.blocks.indexOf(block);
     if (index < 0) return;
     this.blocks.splice(index, 1);
-    const score = block.maxHp * 10;
+
+    this.comboCount += 1;
+    const comboMult = this.comboMultiplier();
+    this.pushEvent({
+      type: 'combo:changed',
+      count: this.comboCount,
+      multiplier: comboMult,
+    });
+
+    const type = BLOCK_TYPES[block.type];
+    const multiplier = this.multiplierState;
+    const score = Math.max(
+      0,
+      Math.round(
+        type.score *
+          this.modifiersValue.scoreMultiplier *
+          comboMult *
+          (multiplier?.scoreFactor ?? 1),
+      ),
+    );
+    const xp = Math.max(
+      0,
+      Math.round(block.maxHp * comboMult * (multiplier?.xpFactor ?? 1)),
+    );
+
     this.score += score;
     this.destroyedBlocks += 1;
     this.pushEvent({
@@ -953,25 +1780,45 @@ export class World {
       ballId: sourceBallId,
       score,
       maxHp: block.maxHp,
-      xp: block.maxHp,
+      xp,
     });
-    this.maybeExplode(block, sourceBallId);
+
+    const behavior = type.behavior;
+    if (behavior === 'multiplier') {
+      this.activateMultiplier();
+    } else if (behavior === 'explosive') {
+      this.explode(block, 2, 1, sourceBallId);
+    }
+
+    this.maybeBomb(block, sourceBallId);
+    this.maybeExplodePerk(block, sourceBallId);
   }
 
-  /** Explosive Core: every `explosiveEvery` kills, blast the 1-cell ring. */
-  private maybeExplode(block: Block, sourceBallId: number): void {
-    const every = this.modifiersValue.explosiveEvery;
-    if (every === null) return;
-    if (this.destroyedBlocks % every !== 0) return;
-    if (this.explosionDepth >= 3) return;
+  private activateMultiplier(): void {
+    const state: MultiplierState = {
+      xpFactor: GAME_CONFIG.elements.multiplierXpFactor,
+      scoreFactor: GAME_CONFIG.elements.multiplierScoreFactor,
+      remainingMs: GAME_CONFIG.elements.multiplierDurationMs,
+    };
+    this.multiplierState = state;
+    this.pushEvent({
+      type: 'multiplier:activated',
+      xpFactor: state.xpFactor,
+      scoreFactor: state.scoreFactor,
+      remainingMs: state.remainingMs,
+    });
+  }
 
-    const radius = this.cellSize();
+  /** Explosive blocks and Bomb Ball: 1-cell ring damage. */
+  private explode(block: Block, damage: number, radiusCells: number, sourceBallId: number): void {
+    if (this.explosionDepth >= 3) return;
+    const radius = this.cell * radiusCells;
     const centerX = block.left + block.width / 2;
     const centerY = block.top + block.height / 2;
     const targets = this.blocks.filter(
       (candidate) =>
-        Math.abs(candidate.row - block.row) <= 1 &&
-        Math.abs(candidate.col - block.col) <= 1,
+        Math.abs(candidate.row - block.row) <= radiusCells &&
+        Math.abs(candidate.col - block.col) <= radiusCells,
     );
 
     this.explosionFx.push({
@@ -991,22 +1838,177 @@ export class World {
 
     this.explosionDepth += 1;
     try {
-      for (const target of targets) this.applyDamage(target, 1, sourceBallId);
+      for (const target of targets) this.applyDamage(target, damage, sourceBallId);
     } finally {
       this.explosionDepth -= 1;
     }
+
+    if (this.boss && this.boss.hp > 0) {
+      const box = this.bossBox(this.boss);
+      const nearestX = Math.max(box.left, Math.min(centerX, box.right));
+      const nearestY = Math.max(box.top, Math.min(centerY, box.bottom));
+      if (Math.hypot(centerX - nearestX, centerY - nearestY) <= radius) {
+        this.damageBossTotal(damage + this.modifiersValue.bossDamageBonus);
+      }
+    }
   }
 
-  private cellSize(): number {
-    const columns = this.wave.rows[0]?.length ?? 0;
-    return columns > 0 ? FIELD_WIDTH / columns : 60;
+  /** Bomb Ball: every `bombEvery` kills drops a 1-cell, 2-damage blast. */
+  private maybeBomb(block: Block, sourceBallId: number): void {
+    const every = this.modifiersValue.bombEvery;
+    if (every === null) return;
+    if (this.destroyedBlocks % every !== 0) return;
+    this.explode(block, 2, 1, sourceBallId);
+  }
+
+  /** Explosive Core: every `explosiveEvery` kills, blast the 1-cell ring. */
+  private maybeExplodePerk(block: Block, sourceBallId: number): void {
+    const every = this.modifiersValue.explosiveEvery;
+    if (every === null) return;
+    if (this.destroyedBlocks % every !== 0) return;
+    this.explode(block, 1, 1, sourceBallId);
   }
 
   private removeBall(ball: Ball): void {
     const index = this.balls.indexOf(ball);
     if (index >= 0) this.balls.splice(index, 1);
     this.blockCooldowns.delete(ball.id);
+    this.portalCooldowns.delete(ball.id);
     this.pushEvent({ type: 'ball:lost', ballId: ball.id });
+  }
+
+  // -------------------------------------------------------------------------
+  // Boss
+  // -------------------------------------------------------------------------
+
+  private bossBox(boss: Boss): Aabb {
+    return aabbFromRect(boss.x - boss.width / 2, boss.y, boss.width, boss.height);
+  }
+
+  private beamOverlapsBoss(x: number, half: number, boss: Boss): boolean {
+    const box = this.bossBox(boss);
+    return box.left < x + half && box.right > x - half;
+  }
+
+  private bossPhase(boss: Boss): number {
+    if (boss.maxHp <= 0) return 3;
+    const ratio = boss.hp / boss.maxHp;
+    if (ratio > 0.66) return 1;
+    if (ratio > 0.33) return 2;
+    return 3;
+  }
+
+  private updateBoss(dt: number, dtMs: number): void {
+    const boss = this.boss;
+    if (!boss || boss.hp <= 0) return;
+
+    if (boss.hurtMs > 0) boss.hurtMs = Math.max(0, boss.hurtMs - dtMs);
+    boss.phase = this.bossPhase(boss);
+
+    boss.x += boss.vx * dt;
+    const half = boss.width / 2;
+    if (boss.x - half < 0) {
+      boss.x = half;
+      boss.vx = Math.abs(boss.vx);
+    } else if (boss.x + half > FIELD_WIDTH) {
+      boss.x = FIELD_WIDTH - half;
+      boss.vx = -Math.abs(boss.vx);
+    }
+
+    const interval = boss.attackMs * (1 - 0.15 * (boss.phase - 1));
+    boss.attackTimerMs -= dtMs;
+    if (boss.attackTimerMs <= 0) {
+      boss.attackTimerMs += Math.max(1, interval);
+      this.spawnBossShards(boss);
+    }
+
+    this.updateBossShards(dt);
+  }
+
+  private spawnBossShards(boss: Boss): void {
+    const count = boss.pattern === 'sentinel' ? 1 : boss.pattern === 'warden' ? 2 : 3;
+    for (let index = 0; index < count; index += 1) {
+      const offset = count === 1 ? 0 : (index / (count - 1) - 0.5) * boss.width * 0.7;
+      this.bossShards.push({
+        id: this.nextId++,
+        bossId: boss.id,
+        x: boss.x + offset,
+        y: boss.y + boss.height + BOSS_SHARD_RADIUS,
+        vx: 0,
+        vy: BOSS_SHARD_SPEED,
+        radius: BOSS_SHARD_RADIUS,
+      });
+    }
+    this.pushEvent({ type: 'boss:attack', bossId: boss.id, shards: count });
+  }
+
+  private updateBossShards(dt: number): void {
+    const boss = this.boss;
+    if (!boss) return;
+    const paddleBox = aabbFromRect(
+      this.paddle.x - this.paddle.width / 2,
+      this.paddle.y - this.paddle.height / 2,
+      this.paddle.width,
+      this.paddle.height,
+    );
+
+    for (let index = this.bossShards.length - 1; index >= 0; index -= 1) {
+      const shard = this.bossShards[index]!;
+      shard.x += shard.vx * dt;
+      shard.y += shard.vy * dt;
+
+      if (circleOverlapsAabb(shard.x, shard.y, shard.radius, paddleBox)) {
+        this.bossShards.splice(index, 1);
+        if (this.corrosionStacks < GAME_CONFIG.elements.bossCorrosionStacks) {
+          this.corrosionStacks += 1;
+          this.applyEffectiveSize();
+        }
+        this.pushEvent({
+          type: 'boss:shard-hit',
+          bossId: boss.id,
+          corrosion: this.corrosionStacks,
+        });
+        continue;
+      }
+
+      if (shard.y - shard.radius > this.height + LOSS_MARGIN) {
+        this.bossShards.splice(index, 1);
+      }
+    }
+  }
+
+  private handleBossBallHit(ball: Ball, boss: Boss): void {
+    let damage = this.modifiersValue.ballDamage + this.modifiersValue.bossDamageBonus;
+    if (this.modifiersValue.critChance > 0 && this.rng() < this.modifiersValue.critChance) {
+      damage = Math.max(1, Math.round(damage * this.modifiersValue.critMultiplier));
+      this.pushEvent({ type: 'critical', blockId: boss.id, ballId: ball.id, damage });
+    }
+    ball.sinceInteractionMs = 0;
+    this.damageBossTotal(damage);
+  }
+
+  private damageBossTotal(amount: number): void {
+    const boss = this.boss;
+    if (!boss || boss.hp <= 0) return;
+    const damage = Math.max(0, Math.round(amount));
+    if (damage <= 0) return;
+
+    boss.hp = Math.max(0, boss.hp - damage);
+    boss.hurtMs = 120;
+    boss.phase = this.bossPhase(boss);
+    this.pushEvent({ type: 'boss:hit', bossId: boss.id, hp: boss.hp, damage });
+
+    if (boss.hp <= 0) {
+      this.bossShards.length = 0;
+      this.explosionFx.push({
+        x: boss.x,
+        y: boss.y + boss.height / 2,
+        radius: boss.width * 0.6,
+        remainingMs: EXPLOSION_FX_MS,
+        durationMs: EXPLOSION_FX_MS,
+      });
+      this.pushEvent({ type: 'boss:defeated', bossId: boss.id });
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -1094,6 +2096,43 @@ export class World {
       for (let stepIndex = 0; stepIndex < steps && !removed; stepIndex += 1) {
         projectile.x += projectile.vx * subDt;
         projectile.y += projectile.vy * subDt;
+
+        for (const element of this.elements) {
+          if (!this.isSolidElement(element)) continue;
+          if (
+            circleOverlapsAabb(
+              projectile.x,
+              projectile.y,
+              projectile.radius,
+              aabbFromRect(element.left, element.top, element.width, element.height),
+            )
+          ) {
+            removed = true;
+            break;
+          }
+        }
+        if (removed) break;
+
+        if (this.boss && this.boss.hp > 0) {
+          if (
+            circleOverlapsAabb(
+              projectile.x,
+              projectile.y,
+              projectile.radius,
+              this.bossBox(this.boss),
+            )
+          ) {
+            this.pushEvent({
+              type: 'projectile:hit',
+              projectileId: projectile.id,
+              blockId: this.boss.id,
+            });
+            this.damageBossTotal(1 + this.modifiersValue.bossDamageBonus);
+            removed = true;
+            break;
+          }
+        }
+
         for (const block of this.blocks) {
           if (
             projectile.x + projectile.radius < block.left ||
@@ -1144,7 +2183,8 @@ export class World {
 
   private updateOutcome(): void {
     if (this.outcome !== 'playing') return;
-    if (this.blocks.length === 0) {
+    const bossAlive = this.boss !== null && this.boss.hp > 0;
+    if (this.blocks.length === 0 && !bossAlive) {
       this.outcome = 'cleared';
       this.score += 100;
       this.pushEvent({ type: 'wave:cleared', score: this.score });
