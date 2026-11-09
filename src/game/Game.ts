@@ -103,6 +103,10 @@ export class BlockBreakerGame implements GameCommands {
   private runScore = 0;
   private waveScoreAtStart = 0;
   private pendingPerkBalls = 0;
+  /** Extra Multiball slots waiting for the player's first launch this wave. */
+  private pendingMultiballBalls = 0;
+  private multiballLaunchArmed = false;
+  private nextMultiballLaunchAt = 0;
   private runCount = 0;
   private runSeed = 1;
   private nextWaveAt = 0;
@@ -375,6 +379,9 @@ export class BlockBreakerGame implements GameCommands {
     this.runScore = 0;
     this.waveScoreAtStart = 0;
     this.pendingPerkBalls = 0;
+    this.pendingMultiballBalls = 0;
+    this.multiballLaunchArmed = false;
+    this.nextMultiballLaunchAt = 0;
     this.nextWaveAt = 0;
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
@@ -435,6 +442,9 @@ export class BlockBreakerGame implements GameCommands {
     this.phaseResult = null;
     this.runScore = 0;
     this.phase = 'menu';
+    this.pendingMultiballBalls = 0;
+    this.multiballLaunchArmed = false;
+    this.nextMultiballLaunchAt = 0;
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
     this.reviveUsed = false;
@@ -805,7 +815,21 @@ export class BlockBreakerGame implements GameCommands {
     // Discard load-time events (notably the duplicated `boss:spawned`) so the
     // first real step only reports fresh simulation events.
     this.world.drainEvents();
+    this.armMultiballForWave();
     this.waveIntroUntil = wave.intro ? performance.now() + 3500 : 0;
+  }
+
+  /**
+   * Multiball slots are re-armed on every wave. The player still launches one
+   * ball; the extra balls follow automatically in a short sequence.
+   */
+  private armMultiballForWave(): void {
+    this.pendingMultiballBalls = Math.max(
+      0,
+      Math.floor(this.runState.modifiers.multiballLevel),
+    );
+    this.multiballLaunchArmed = false;
+    this.nextMultiballLaunchAt = 0;
   }
 
   /** Loads the stored campaign wave or regenerates the current Endless wave. */
@@ -827,6 +851,7 @@ export class BlockBreakerGame implements GameCommands {
     this.world.setSafetyCharges(this.runState.modifiers.safetyNetCharges);
     this.world.reset();
     this.world.drainEvents();
+    this.armMultiballForWave();
     this.waveIntroUntil = wave.intro ? performance.now() + 3500 : 0;
   }
 
@@ -1038,6 +1063,9 @@ export class BlockBreakerGame implements GameCommands {
     this.nextWaveAt = 0;
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
+    this.pendingMultiballBalls = 0;
+    this.multiballLaunchArmed = false;
+    this.nextMultiballLaunchAt = 0;
     this.clock.reset();
     this.pendingLaunch = false;
     this.pendingPerkBalls = 0;
@@ -1161,6 +1189,8 @@ export class BlockBreakerGame implements GameCommands {
       }
     }
 
+    this.armMultiballFromLaunch(actions.launch);
+
     if (this.world.outcome === 'defeat') {
       if (this.tryRevive()) {
         this.syncHud(true);
@@ -1178,7 +1208,41 @@ export class BlockBreakerGame implements GameCommands {
       return;
     }
 
+    this.tickMultiballLaunch(performance.now());
     this.syncHud();
+  }
+
+  /**
+   * The first launch releases the attached ball and arms the extra Multiball
+   * slots. They are spawned one at a time so the player can read the field.
+   */
+  private armMultiballFromLaunch(launchRequested: boolean): void {
+    if (!launchRequested || this.pendingMultiballBalls <= 0) return;
+    if (!this.world.balls.some((ball) => !ball.stuck)) return;
+    if (this.multiballLaunchArmed) return;
+    this.multiballLaunchArmed = true;
+    this.nextMultiballLaunchAt = performance.now() + 180;
+  }
+
+  private tickMultiballLaunch(now: number): void {
+    if (!this.multiballLaunchArmed || this.pendingMultiballBalls <= 0) return;
+    if (this.phase !== 'playing' || !this.world.isRunning) return;
+    if (now < this.nextMultiballLaunchAt) return;
+    if (!this.world.balls.some((ball) => !ball.stuck)) {
+      this.nextMultiballLaunchAt = now + 500;
+      return;
+    }
+    if (this.world.balls.length >= this.world.maxBalls) {
+      this.nextMultiballLaunchAt = now + 500;
+      return;
+    }
+    if (this.world.spawnPerkBalls(1) > 0) {
+      this.pendingMultiballBalls -= 1;
+      this.nextMultiballLaunchAt = now + 220;
+    } else {
+      this.nextMultiballLaunchAt = now + 500;
+    }
+    if (this.pendingMultiballBalls <= 0) this.multiballLaunchArmed = false;
   }
 
   /** Converts simulation events into run score, XP, feedback and level-up state. */

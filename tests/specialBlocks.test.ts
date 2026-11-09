@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SIM_TUNING_DEFAULTS } from '../src/game/config';
+import { BASE_RUN_MODIFIERS, SIM_TUNING_DEFAULTS } from '../src/game/config';
 import type { WaveDef } from '../src/content/types';
 import { World } from '../src/sim/World';
 
@@ -109,6 +109,55 @@ describe('special blocks', () => {
       expect(destroyed.score).toBe(20);
       expect(destroyed.xp).toBe(2);
     }
+  });
+
+  it('starts the Explosive Core count when the perk is acquired', () => {
+    const world = makeWorld({
+      id: 'explosive-core-counter',
+      name: 'Counter',
+      rows: ['11111', '11111', '11111', '11111'],
+      legend: { '1': 'crystal' },
+      ballSpeed: 520,
+    });
+
+    // Seven kills before the perk must not count toward Explosive Core.
+    for (let index = 0; index < 7; index += 1) {
+      world.damageBlock(world.blocks[0]!, 1);
+    }
+    world.drainEvents();
+    world.applyRunModifiers({ ...BASE_RUN_MODIFIERS, explosiveEvery: 8 });
+
+    world.damageBlock(world.blocks[0]!, 1);
+    expect(world.events.some((event) => event.type === 'explosion')).toBe(false);
+
+    for (let index = 0; index < 7; index += 1) {
+      world.damageBlock(world.blocks[0]!, 1);
+    }
+    expect(world.events.some((event) => event.type === 'explosion')).toBe(true);
+  });
+
+  it('starts the Bomb Ball count when the perk is acquired', () => {
+    const world = makeWorld({
+      id: 'bomb-counter',
+      name: 'Counter',
+      rows: ['11111', '11111', '11111', '11111', '11111'],
+      legend: { '1': 'crystal' },
+      ballSpeed: 520,
+    });
+
+    for (let index = 0; index < 11; index += 1) {
+      world.damageBlock(world.blocks[0]!, 1);
+    }
+    world.drainEvents();
+    world.applyRunModifiers({ ...BASE_RUN_MODIFIERS, bombEvery: 12 });
+
+    world.damageBlock(world.blocks[0]!, 1);
+    expect(world.events.some((event) => event.type === 'explosion')).toBe(false);
+
+    for (let index = 0; index < 11; index += 1) {
+      world.damageBlock(world.blocks[0]!, 1);
+    }
+    expect(world.events.some((event) => event.type === 'explosion')).toBe(true);
   });
 
   it('linked blocks share damage with every member of their group', () => {

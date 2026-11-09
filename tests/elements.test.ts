@@ -57,6 +57,17 @@ describe('phase elements', () => {
     expect(shot.x).toBeLessThan(element.left);
   });
 
+  it('keeps deflector bars at 60% of the cell diagonal', () => {
+    const world = makeWorld({
+      elements: [{ id: 'deflector-size', kind: 'deflector', col: 6, row: 2, angleDeg: 0 }],
+    });
+    const element = world.elements[0]!;
+    expect(element.lengthPx).toBeCloseTo(
+      Math.hypot(element.width, element.height) * 0.6,
+      5,
+    );
+  });
+
   it('deflectors reflect the ball along the segment normal', () => {
     const world = makeWorld({
       elements: [{ id: 'deflector', kind: 'deflector', col: 6, row: 2, angleDeg: 0 }],

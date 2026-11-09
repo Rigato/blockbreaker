@@ -313,6 +313,9 @@ export class World {
   private destroyedBlocks = 0;
   private explosionDepth = 0;
   private linkDepth = 0;
+  /** Perk-local kill counters, reset when the perk is acquired. */
+  private explosiveCoreProgress = 0;
+  private bombBallProgress = 0;
   private rng: () => number;
   private readonly eventLog: SimEvent[] = [];
   private readonly eventHistory: SimEvent[] = [];
@@ -514,6 +517,8 @@ export class World {
     this.destroyedBlocks = 0;
     this.explosionDepth = 0;
     this.linkDepth = 0;
+    this.explosiveCoreProgress = 0;
+    this.bombBallProgress = 0;
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
     this.multiplierState = null;
     this.corrosionStacks = 0;
@@ -563,6 +568,8 @@ export class World {
    * values) are never mutated: multipliers are applied on top of them.
    */
   applyRunModifiers(modifiers: RunModifiers): void {
+    const previousExplosiveEvery = this.modifiersValue.explosiveEvery;
+    const previousBombEvery = this.modifiersValue.bombEvery;
     this.modifiersValue = {
       ...modifiers,
       paddleWidthMultiplier: Math.max(0.1, modifiers.paddleWidthMultiplier),
@@ -600,6 +607,13 @@ export class World {
       ballSpeedMultiplier: Math.max(0.1, modifiers.ballSpeedMultiplier),
       scoreMultiplier: Math.max(0, modifiers.scoreMultiplier),
     };
+
+    if (previousExplosiveEvery !== this.modifiersValue.explosiveEvery) {
+      this.explosiveCoreProgress = 0;
+    }
+    if (previousBombEvery !== this.modifiersValue.bombEvery) {
+      this.bombBallProgress = 0;
+    }
 
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
     this.turretTimerMs = 0;
@@ -1068,7 +1082,8 @@ export class World {
       if (definition.kind === 'deflector') {
         const centreX = left + width / 2;
         const centreY = top + height / 2;
-        element.lengthPx = Math.hypot(width, height);
+        // 60% of the cell diagonal: readable, but no longer dominates the lane.
+        element.lengthPx = Math.hypot(width, height) * 0.6;
         element.angleRad = (definition.angleDeg * Math.PI) / 180;
         this.setSegment(element, centreX, centreY);
       } else if (definition.kind === 'portal') {
@@ -1857,7 +1872,9 @@ export class World {
   private maybeBomb(block: Block, sourceBallId: number): void {
     const every = this.modifiersValue.bombEvery;
     if (every === null) return;
-    if (this.destroyedBlocks % every !== 0) return;
+    this.bombBallProgress += 1;
+    if (this.bombBallProgress < every) return;
+    this.bombBallProgress = 0;
     this.explode(block, 2, 1, sourceBallId);
   }
 
@@ -1865,7 +1882,9 @@ export class World {
   private maybeExplodePerk(block: Block, sourceBallId: number): void {
     const every = this.modifiersValue.explosiveEvery;
     if (every === null) return;
-    if (this.destroyedBlocks % every !== 0) return;
+    this.explosiveCoreProgress += 1;
+    if (this.explosiveCoreProgress < every) return;
+    this.explosiveCoreProgress = 0;
     this.explode(block, 1, 1, sourceBallId);
   }
 
