@@ -2,6 +2,7 @@ import type { GameCommands, HudSnapshot, LaserHudState, PerkState } from '../gam
 import { GAME_CONFIG } from '../game/config';
 import { en } from '../i18n/en';
 import { formatTime } from './format';
+import '../styles/hud-compact.css';
 
 function formatFactor(value: number): string {
   const safe = Number.isFinite(value) ? value : 1;
@@ -30,6 +31,10 @@ export class Hud {
   private readonly xpFill: HTMLElement;
   private readonly ballDots: HTMLElement;
   private readonly respawn: HTMLElement;
+  private readonly ballsGroup: HTMLElement;
+  private readonly blocksGroup: HTMLElement;
+  private readonly timeGroup: HTMLElement;
+  private readonly scoreGroup: HTMLElement;
   private readonly blocksValue: HTMLElement;
   private readonly scoreValue: HTMLElement;
   private readonly timeValue: HTMLElement;
@@ -114,7 +119,8 @@ export class Hud {
     stats.className = 'hud__stats';
 
     const balls = document.createElement('span');
-    balls.className = 'hud__stat';
+    balls.className = 'hud__stat hud__stat--balls';
+    this.ballsGroup = balls;
 
     const ballsLabel = document.createElement('span');
     ballsLabel.className = 'hud__stat-label';
@@ -143,7 +149,8 @@ export class Hud {
     balls.append(ballsLabel, ballDots, respawn);
 
     const blocks = document.createElement('span');
-    blocks.className = 'hud__stat';
+    blocks.className = 'hud__stat hud__stat--blocks';
+    this.blocksGroup = blocks;
 
     const blocksLabel = document.createElement('span');
     blocksLabel.className = 'hud__stat-label';
@@ -157,6 +164,7 @@ export class Hud {
 
     const time = document.createElement('span');
     time.className = 'hud__stat hud__stat--time';
+    this.timeGroup = time;
 
     const timeLabel = document.createElement('span');
     timeLabel.className = 'hud__stat-label';
@@ -170,6 +178,7 @@ export class Hud {
 
     const score = document.createElement('span');
     score.className = 'hud__stat hud__stat--score';
+    this.scoreGroup = score;
 
     const scoreLabel = document.createElement('span');
     scoreLabel.className = 'hud__stat-label';
@@ -393,13 +402,22 @@ export class Hud {
     if (snapshot.endless) {
       this.waveKicker.textContent = `${en.endless} · ${snapshot.waveName}`;
       this.waveText.textContent = `${en.endless} · ${en.hudWave} ${snapshot.waveIndex}`;
+      this.waveText.dataset.compact = `${en.endless} · ${en.hudWave} ${snapshot.waveIndex}`;
+      this.waveText.dataset.compactShort = `${en.endless} · ${snapshot.waveIndex}`;
     } else {
       this.waveKicker.textContent = `${en.phaseLabel} ${snapshot.phaseIndex}/${Math.max(
         1,
         snapshot.phaseCount,
       )} · ${snapshot.waveName}`;
       this.waveText.textContent = `${snapshot.phaseName} · ${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount}`;
+      // Compact line: wave count first so ellipsis never clips the count.
+      this.waveText.dataset.compact = `${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
+      this.waveText.dataset.compactShort = `${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
     }
+    // The compact layout swaps in `data-compact` via CSS; keep the accessible
+    // name on the full original text regardless of the visual presentation.
+    this.waveText.setAttribute('aria-label', this.waveText.textContent);
+    this.waveText.title = this.waveText.textContent;
 
     if (this.lastWaveId !== null && snapshot.waveId !== this.lastWaveId) this.pulseWave();
     this.lastWaveId = snapshot.waveId;
@@ -414,6 +432,16 @@ export class Hud {
     this.blocksValue.textContent = String(Math.max(0, snapshot.blocksRemaining));
     this.scoreValue.textContent = snapshot.score.toLocaleString('en-US');
     this.timeValue.textContent = formatTime(snapshot.elapsedMs);
+
+    // Compact stat groups drop the text labels visually (they become icons);
+    // keep each value labeled for screen readers and as a hover tooltip.
+    this.blocksValue.setAttribute('aria-label', `${en.hudBlocks}: ${this.blocksValue.textContent}`);
+    this.scoreValue.setAttribute('aria-label', `${en.hudScore}: ${this.scoreValue.textContent}`);
+    this.timeValue.setAttribute('aria-label', `${en.hudTime}: ${this.timeValue.textContent}`);
+    this.ballsGroup.title = `${en.hudBalls}: ${snapshot.ballsActive}`;
+    this.blocksGroup.title = `${en.hudBlocks}: ${this.blocksValue.textContent}`;
+    this.timeGroup.title = `${en.hudTime}: ${this.timeValue.textContent}`;
+    this.scoreGroup.title = `${en.hudScore}: ${this.scoreValue.textContent}`;
     this.hint.textContent =
       snapshot.phase === 'cleared'
         ? en.hudWaveTransition
@@ -426,6 +454,8 @@ export class Hud {
     const xpToNext = Math.max(1, snapshot.xpToNext);
     const ratio = Math.max(0, Math.min(1, snapshot.xp / xpToNext));
     this.xpLine.textContent = `${en.hudLevel} ${snapshot.level} · ${snapshot.xp}/${snapshot.xpToNext} ${en.hudXp}`;
+    this.xpLine.dataset.compactShort = `${en.hudLevel} ${snapshot.level}`;
+    this.xpLine.title = this.xpLine.textContent;
     this.xpFill.style.width = `${(ratio * 100).toFixed(1)}%`;
     this.xpTrack.setAttribute('aria-valuemax', String(snapshot.xpToNext));
     this.xpTrack.setAttribute('aria-valuenow', String(Math.max(0, snapshot.xp)));

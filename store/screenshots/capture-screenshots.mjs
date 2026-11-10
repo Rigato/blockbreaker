@@ -60,6 +60,13 @@ async function grantPerk(page, perkId) {
   if (!ok) throw new Error(`could not grant perk ${perkId}`);
 }
 
+async function startCampaign(page) {
+  await page.locator('#campaign-button').click();
+  await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
+  await page.locator('.phase-card:not(:disabled)').first().click();
+  await page.locator('.hud').waitFor({ state: 'visible' });
+}
+
 async function shot(page, name) {
   await page.screenshot({ path: join(outDir, name), animations: 'disabled' });
   console.log(`captured ${name}`);
@@ -83,16 +90,16 @@ const page = await context.newPage();
 
 // 1. Menu. No debug flag is needed for a clean title screen.
 await page.goto(`${baseUrl}/?resetSave=1`, { waitUntil: 'networkidle' });
-await page.locator('#play-button').waitFor({ state: 'visible' });
+await page.locator('#campaign-button').waitFor({ state: 'visible' });
 await page.evaluate(() => document.fonts.ready);
 await page.waitForTimeout(400);
 await shot(page, '01-menu-390x844.png');
 
 // 2. Opening gameplay: ball in play, formation intact, HUD visible.
 await page.goto(`${baseUrl}/?debug=1&resetSave=1`, { waitUntil: 'networkidle' });
-await page.locator('#play-button').waitFor({ state: 'visible' });
+await page.locator('#campaign-button').waitFor({ state: 'visible' });
 await hideDebug(page);
-await page.locator('#play-button').click();
+await startCampaign(page);
 await page.locator('.hud').waitFor({ state: 'visible' });
 await page.locator('canvas').hover({ position: { x: 195, y: 600 } });
 await page.keyboard.press('v');
@@ -168,5 +175,55 @@ if (!(await results.isVisible().catch(() => false))) {
 await results.waitFor({ state: 'visible' });
 await page.waitForTimeout(650);
 await shot(page, '05-results-victory-390x844.png');
+
+// 6. Phase 6 special blocks.
+await page.evaluate(() => {
+  localStorage.setItem(
+    'bb.save',
+    JSON.stringify({
+      version: 1,
+      unlockedPhase: 6,
+      phases: {},
+      endless: { bestWave: 0, bestScore: 0, runs: 0 },
+      campaignComplete: false,
+      updatedAt: Date.now(),
+    }),
+  );
+});
+await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
+await page.locator('#campaign-button').waitFor({ state: 'visible' });
+await page.locator('#campaign-button').click();
+await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
+await page.locator('.phase-card[data-phase-index="6"]').click();
+await page.locator('.hud').waitFor({ state: 'visible' });
+await page.waitForTimeout(1400);
+await shot(page, '06-special-blocks-390x844.png');
+
+// 7. Frost Sentinel boss.
+await page.goto(`${baseUrl}/?debug=1`, { waitUntil: 'networkidle' });
+await page.locator('#campaign-button').waitFor({ state: 'visible' });
+await hideDebug(page);
+await page.evaluate(() => {
+  const game = window.__bricklike;
+  game?.debugStartWave?.('phase-4', 2);
+});
+await page.locator('.hud__boss').waitFor({ state: 'visible' });
+await page.waitForTimeout(2200);
+await shot(page, '07-boss-frost-sentinel-390x844.png');
+
+// 8. Endless wave 1.
+await page.evaluate(() => {
+  const raw = localStorage.getItem('bb.save');
+  const save = raw ? JSON.parse(raw) : { version: 1, unlockedPhase: 6, phases: {}, endless: { bestWave: 0, bestScore: 0, runs: 0 }, updatedAt: Date.now() };
+  save.campaignComplete = true;
+  save.unlockedPhase = 6;
+  localStorage.setItem('bb.save', JSON.stringify(save));
+});
+await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
+await page.locator('#campaign-button').waitFor({ state: 'visible' });
+await page.locator('#endless-button').click();
+await page.locator('.hud').waitFor({ state: 'visible' });
+await page.waitForTimeout(1400);
+await shot(page, '08-endless-wave-1-390x844.png');
 
 await browser.close();

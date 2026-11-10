@@ -15,11 +15,22 @@ aos portais.
 - **Playgama:** build enviado; está no **sandbox** e precisa cumprir milestones
   antes de ser publicado no catálogo.
 - **CrazyGames:** build avaliado e **reprovado** por “abaixo dos padrões de
-  qualidade”, sem detalhamento. Diagnóstico e backlog em
+  qualidade”, sem detalhamento. O P0 de apresentação foi executado: blocos,
+  menu, seleção de fases, settings, HUD compacto, How to Play, About Us,
+  screenshots/capas/vídeos e metadata. Diagnóstico e backlog em
   [`crazygames-review.md`](crazygames-review.md).
 - **GameFlare:** conta criada, mas com problema de acesso; suporte acionado e
   aguardando resposta. Build ainda não publicado.
 - **itch.io:** `0.1.0-mvp` congelado.
+
+## P0 executado neste ciclo
+
+- HUD compacto e legível em 907×510, 800×450, 1216×684, 1280×720 e 1920×1080.
+- **How to Play** no menu: 5 páginas com screenshots reais do build.
+- **About Us** no rodapé: logomarca Bad Decision Games + texto do estúdio.
+- 8 screenshots de loja atualizados, capas regeradas e vídeos de 18,1 s.
+- Metadata de portal atualizada para 6 fases, chefes e Endless.
+- 263 testes unitários e 21 testes E2E verdes.
 
 ## Modo Endless
 

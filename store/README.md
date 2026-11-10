@@ -19,13 +19,26 @@ sem bordas, sem logos de loja e sem screenshot puro. Veja `covers/README.md`.
 
 ## Screenshots — `store/screenshots/`
 
-Cinco capturas reais do build de produção em 390×844: menu, gameplay inicial,
-laser + multiball, level-up e results. Veja `screenshots/README.md`.
+Oito capturas reais do build de produção em 390×844: menu, gameplay inicial,
+laser + multiball, level-up, results, blocos especiais, chefe Frost Sentinel e
+Endless. Veja `screenshots/README.md`.
+
+## How to Play — `public/how-to-play/`
+
+Cinco capturas em 390×844 usadas pelo diálogo **How to Play** do jogo:
+`move-launch.png`, `level-up.png`, `specials.png`, `boss.png` e `endless.png`.
+Elas também alimentam as screenshots de loja 02, 04 e 06–08.
+
+## Marca do estúdio — `public/bad-decision-games/`
+
+- `logo.webp` — logomarca transparente otimizada para o diálogo **About Us**.
+- `logo.png` — fallback PNG transparente.
+- Fontes originais em `docs/bad-decision-games-logo/`.
 
 ## Vídeo — `store/video/`
 
-- `bricklike-preview.mp4`: 1920×1080 (16:9), 18,3 s, H.264, silencioso.
-- `bricklike-preview-portrait.mp4`: 1080×1620 (2:3), 18,3 s, H.264, silencioso.
+- `bricklike-preview.mp4`: 1920×1080 (16:9), 18,1 s, H.264, silencioso.
+- `bricklike-preview-portrait.mp4`: 1080×1620 (2:3), 18,1 s, H.264, silencioso.
 
 Os dois abrem com a capa estática e mostram menu, gameplay com laser/multiball,
 level-up e results da mesma run. Veja `video/README.md`.

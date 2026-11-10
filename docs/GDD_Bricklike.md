@@ -87,6 +87,12 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
   destacam o chefe.
 - **Settings:** diálogo com **Sound**, **Music** e **Screen shake**,
   persistidos em `bb.settings`. O pause oferece os mesmos três controles.
+- **How to Play:** diálogo de cinco páginas com screenshots reais e textos
+  curtos sobre movimento/lançamento, XP/perks, builds, chefes e Endless.
+- **About Us:** diálogo no rodapé com a logomarca **Bad Decision Games** e o
+  texto de apresentação do estúdio.
+- **HUD compacto:** abaixo de 440 px de shell, o HUD troca rótulos por ícones e
+  usa valores de 11–13 px; legível em iframes 907×510/800×450.
 - **Blocos:** nova direção visual “arcade tile” — corpo saturado, bisel, sombra,
   brilho, materiais distintos e leitura em 46 px, alinhada às capas.
 
@@ -377,7 +383,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.0` | 2026-11-07 | GDD do MVP: 3 fases × 3 ondas, 3 blocos, 11 perks, sem chefes. |
 | `1.1` | 2026-11-08 | v0.2.0-dev: campanha de 6 fases / 21 ondas, 9 blocos, 7 elementos, 3 chefes, 19 perks, desafios, zoom de layout, encerramentos e save 1..6. |
 | `1.2` | 2026-11-09 | v0.3.0-dev: modo Endless com fase infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas, save `endless` e results próprios. |
-| `1.3` | 2026-11-10 | v0.4.0-dev: revisão visual dos blocos, menu Campaign/Endless, fundo animado, seleção de fases temática, settings de som/música/shake, Endless desbloqueado ao concluir a campanha e save `campaignComplete`. |
+| `1.3` | 2026-11-10 | v0.4.0-dev: revisão visual dos blocos, menu Campaign/Endless, fundo animado, seleção de fases temática, settings de som/música/shake, Endless desbloqueado ao concluir a campanha, HUD compacto, How to Play, About Us e save `campaignComplete`. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |

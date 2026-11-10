@@ -106,6 +106,32 @@ test.describe('smoke', () => {
     expect(monitor.pageErrors).toEqual([]);
   });
 
+  test('info: How to Play paginates and About Us shows the studio', async ({ page }) => {
+    await page.goto('/');
+    await waitForMenu(page);
+
+    await page.locator('#how-to-play-button').click();
+    const howTo = page.getByRole('dialog').filter({ hasText: 'How to play' });
+    await expect(howTo).toBeVisible();
+    await expect(howTo.locator('.how-to-play__image')).toHaveAttribute('src', /move-launch/);
+    await expect(howTo.locator('.how-to-play__counter')).toHaveText('1 / 5');
+
+    await howTo.locator('#how-to-play-next').click();
+    await expect(howTo.locator('.how-to-play__image')).toHaveAttribute('src', /level-up/);
+    await expect(howTo.locator('.how-to-play__counter')).toHaveText('2 / 5');
+
+    await page.keyboard.press('Escape');
+    await expect(howTo).toBeHidden();
+
+    await page.locator('#about-button').click();
+    const about = page.getByRole('dialog').filter({ hasText: 'About us' });
+    await expect(about).toBeVisible();
+    await expect(about.locator('.about__logo-image')).toHaveAttribute('src', /logo/);
+    await expect(about).toContainText('Bad Decision Games');
+    await about.locator('#about-close').click();
+    await expect(about).toBeHidden();
+  });
+
   test('level up: +100 XP offers three cards, keyboard choice resumes the run', async ({ page }) => {
     await page.goto('/?debug=1');
     await waitForMenu(page);

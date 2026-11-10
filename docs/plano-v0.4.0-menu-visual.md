@@ -145,4 +145,25 @@ Persistência em `bb.settings`, compatível com saves antigos (campos ausentes =
 - Rewarded ads.
 - Novo conteúdo de fases ou mudanças de balance.
 - Localização.
-- Rebuild dos vídeos de portal (ficam para o ciclo de submissão).
+
+## 6. Execução do P0 (2026-11-10)
+
+| Item | Estado |
+|---|---|
+| Blocos redesenhados | concluído |
+| Menu Campaign/Endless + fundo animado | concluído |
+| Seleção de fases temática | concluído |
+| Endless bloqueado + diálogo | concluído |
+| Settings (som/música/shake) | concluído |
+| HUD legível em 907×510, 800×450, 1216×684, 1280×720 e 1920×1080 | concluído (HUD compacto ≤440 px) |
+| Onboarding via **How to Play** (5 páginas com screenshots) | concluído |
+| **About Us** com logomarca Bad Decision Games | concluído |
+| Metadata atualizada (6 fases, chefes, Endless) | concluído |
+| Screenshots de loja (8) + capas + vídeos | concluído |
+| Testes unitários/E2E | 263 unitários, 21 E2E |
+| Moldura/letterbox desktop dedicada | ainda recomendada para o próximo ciclo |
+
+O **How to Play** usa screenshots reais do build (`public/how-to-play/`) e páginas
+de 390×844. O **About Us** usa a logomarca transparente em
+`public/bad-decision-games/` (WebP + fallback PNG) e o texto em inglês do estúdio.
+

@@ -21,17 +21,17 @@ GameFlare bloqueado por acesso).
       `docs/release/portal-metadata.md`. **Pendente de revisão humana.**
 - [ ] Três capas revisadas e aprovadas em `store/covers/`. **Pendente de revisão
       humana.**
-- [ ] Screenshots atualizados com o novo visual (menu, blocos, chefes, Endless).
-      **Pendente de revisão humana.**
-- [ ] Previews de 18,3 s revisados em `store/video/bricklike-preview.mp4`
+- [x] Screenshots atualizados com o novo visual (menu, blocos, chefes, Endless).
+- [x] How to Play (5 páginas) e About Us (logomarca Bad Decision Games)
+      revisados em 320×568 e 390×844.
+- [ ] Previews de 18,1 s revisados em `store/video/bricklike-preview.mp4`
       (1920×1080) e `store/video/bricklike-preview-portrait.mp4` (1080×1620).
       **Pendente de revisão humana.**
 - [ ] Nome **Bricklike** consistente em todos os portais. **Pendente de revisão
       humana.**
-- [ ] Testar leitura em **907×510**, **1216×684**, **1280×720** e **1920×1080**
-      além de 320×568 e 390×844. **Pendente de revisão humana.**
-- [ ] Onboarding curto na primeira run, visual e pulável. **Pendente de revisão
-      humana.**
+- [x] Testar leitura em **907×510**, **1216×684**, **1280×720**, **800×450**
+      e **1920×1080** além de 320×568 e 390×844 (HUD compacto ≤440 px).
+- [x] Onboarding via **How to Play** no menu (5 páginas com screenshots).
 - [ ] Menu leva ao gameplay em 1 clique (Campaign → seleção → Play). **Pendente
       de revisão humana.**
 
@@ -45,13 +45,18 @@ GameFlare bloqueado por acesso).
 | Capa portrait Playgama | `store/covers/cover-portrait-1080x1920.png` | 1080×1920 PNG | pendente de revisão humana |
 | Capa 1:1 | `store/covers/cover-square-800x800.png` | 800×800 PNG | pendente de revisão humana |
 | Contact sheet | `store/covers/cover-contact-sheet.png` | revisão interna | pendente de revisão humana |
-| Menu | `store/screenshots/01-menu-390x844.png` | 390×844 PNG | pendente de revisão humana |
-| Gameplay inicial | `store/screenshots/02-gameplay-early-390x844.png` | 390×844 PNG | pendente de revisão humana |
-| Laser + multiball | `store/screenshots/03-gameplay-laser-multiball-390x844.png` | 390×844 PNG | pendente de revisão humana |
-| Level-up | `store/screenshots/04-levelup-three-cards-390x844.png` | 390×844 PNG | pendente de revisão humana |
-| Victory/results | `store/screenshots/05-results-victory-390x844.png` | 390×844 PNG | pendente de revisão humana |
-| Preview landscape | `store/video/bricklike-preview.mp4` | 1920×1080, 18,3 s, H.264 | pendente de revisão humana |
-| Preview portrait | `store/video/bricklike-preview-portrait.mp4` | 1080×1620, 18,3 s, H.264 | pendente de revisão humana |
+| Menu | `store/screenshots/01-menu-390x844.png` | 390×844 PNG | atualizado |
+| Gameplay inicial | `store/screenshots/02-gameplay-early-390x844.png` | 390×844 PNG | atualizado |
+| Laser + multiball | `store/screenshots/03-gameplay-laser-multiball-390x844.png` | 390×844 PNG | atualizado |
+| Level-up | `store/screenshots/04-levelup-three-cards-390x844.png` | 390×844 PNG | atualizado |
+| Victory/results | `store/screenshots/05-results-victory-390x844.png` | 390×844 PNG | atualizado |
+| Special blocks | `store/screenshots/06-special-blocks-390x844.png` | 390×844 PNG | novo |
+| Boss | `store/screenshots/07-boss-frost-sentinel-390x844.png` | 390×844 PNG | novo |
+| Endless | `store/screenshots/08-endless-wave-1-390x844.png` | 390×844 PNG | novo |
+| How to Play | `public/how-to-play/*.png` | 390×844 PNG ×5 | novo |
+| Logo do estúdio | `public/bad-decision-games/logo.webp` + `.png` | 600×307 | novo |
+| Preview landscape | `store/video/bricklike-preview.mp4` | 1920×1080, 18,1 s, H.264 | atualizado |
+| Preview portrait | `store/video/bricklike-preview-portrait.mp4` | 1080×1620, 18,1 s, H.264 | atualizado |
 
 ## itch.io
 
@@ -136,10 +141,10 @@ aceita reenvio se houver melhoria clara. A mensagem deve listar:
 
 - novo visual dos blocos e do menu;
 - legibilidade desktop e HUD revisado;
-- onboarding in-game;
+- **How to Play** com 5 páginas e **About Us** com a logomarca do estúdio;
 - seleção de fases e modo Endless;
 - settings de som/música/screen shake;
-- screenshots, capa e descrição atualizados.
+- screenshots, capas, vídeo e descrição atualizados.
 
 
 ## Sequência manual acordada

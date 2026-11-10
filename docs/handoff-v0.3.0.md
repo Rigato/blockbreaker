@@ -30,8 +30,8 @@
 | Portais | itch.io publicado; GameFlare, Playgama e CrazyGames Basic pendentes |
 | Node | 22.12+ (CI usa Node 24) |
 | Stack | Phaser 3.90, TypeScript 7, Vite 8, Vitest 5, Playwright 1.65, Playgama Bridge 2.4.1 |
-| ZIP local | `release/blockbreaker-web.zip` — 0.3.0, 13 arquivos, ~522,8 KiB |
-| SHA-256 do ZIP 0.3.0 | `05f6bf911e0f27c35a689c5f727dd8547f87054b178d5aecf08169d43cf9cfd1` |
+| ZIP local | `release/blockbreaker-web.zip` — 0.3.0, 20 arquivos, ~1.581 KiB |
+| SHA-256 do ZIP 0.3.0 | `68ac76a4eaf46dabc82e9f9c0eb0546706f152e455ad3a9f4dddbcb69b7dcc82` |
 
 O GitHub Pages acompanha a `main`; todo push roda CI e deploy. O ZIP do itch.io
 não é alterado por pushes.
@@ -202,14 +202,14 @@ Resultados esperados na referência atual:
 | `npm run validate:content` | ✅ 6 fases, 21 ondas, 759 blocos, 1.831 XP |
 | Bridge config | ✅ schema 2.4.1, sem URLs externas/ads indevidos |
 | `npm run build` | ✅ bundle Phaser/Vite |
-| `npm run package` | ✅ ZIP 0.3.0, 13 arquivos, ~522,8 KiB |
-| `npm run test:e2e` | ✅ **20 testes** (5 spec files) |
+| `npm run package` | ✅ ZIP 0.3.0, 20 arquivos, ~1.581 KiB |
+| `npm run test:e2e` | ✅ **21 testes** (5 spec files) |
 | CI + Deploy | ✅ verdes no commit `f8a6c75` |
 
-Cobertura E2E atual: boot/menu, controles, pause, settings, level-up, vitória/unlock,
-Endless bloqueado/desbloqueado, AdMock `show`/`fail`, CDN bloqueado, layout
-320/390/430/1440 + landscape mobile, runtime de chefe/desafio e Multiball entre
-ondas.
+Cobertura E2E atual: boot/menu, controles, pause, settings, How to Play/About,
+level-up, vitória/unlock, Endless bloqueado/desbloqueado, AdMock `show`/`fail`,
+CDN bloqueado, layout 320/390/430/1440 + landscape mobile, runtime de
+chefe/desafio e Multiball entre ondas.
 
 `npm run qa:runs` continua sendo um baseline automatizado da **fase 1** com
 projéteis de debug; não é playtest humano nem cobre balance das fases 4–6 ou do
@@ -247,17 +247,21 @@ Assets prontos:
 
 - Capas: `store/covers/cover-landscape-1920x1080.png`,
   `cover-portrait-800x1200.png`, `cover-portrait-1080x1920.png` (Playgama) e
-  `cover-square-800x800.png`.
-- Vídeos: `store/video/bricklike-preview.mp4` (1920×1080, 18,3 s) e
-  `store/video/bricklike-preview-portrait.mp4` (1080×1620, 18,3 s), sem áudio,
+  `cover-square-800x800.png` — regeradas.
+- Screenshots: 8 imagens em `store/screenshots/` (menu, gameplay, laser,
+  level-up, results, especiais, chefe e Endless).
+- Vídeos: `store/video/bricklike-preview.mp4` (1920×1080, 18,1 s) e
+  `store/video/bricklike-preview-portrait.mp4` (1080×1620, 18,1 s), sem áudio,
   abrindo com a capa.
+- How to Play: `public/how-to-play/*.png` (5 páginas reais).
+- Marca do estúdio: `public/bad-decision-games/logo.webp` + fallback PNG.
 - Metadata: `docs/release/portal-metadata.md`.
 - Checklist: `docs/release/submission-checklist.md`.
 - Status: `docs/release/status.md`.
 
 O upload e a tag `v0.3.0` são **manuais** e dependem de aprovação humana. O ZIP
 0.3.0 local tem SHA-256
-`05f6bf911e0f27c35a689c5f727dd8547f87054b178d5aecf08169d43cf9cfd1`;
+`68ac76a4eaf46dabc82e9f9c0eb0546706f152e455ad3a9f4dddbcb69b7dcc82`;
 confirme o hash antes de cada upload.
 
 ---

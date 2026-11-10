@@ -22,6 +22,9 @@ implementados, não bugs.
 | Settings | som, música e screen shake | implementado neste ciclo |
 | Desbloqueio do Endless | ao concluir a campanha | implementado neste ciclo |
 | Menu/seleção | Campaign/Endless, fundo animado, cards temáticos | implementado neste ciclo |
+| How to Play | diálogo de 5 páginas com screenshots | implementado neste ciclo |
+| About Us | logomarca e texto do estúdio | implementado neste ciclo |
+| HUD legível | compacto em iframes estreitos | implementado neste ciclo |
 | Direção visual dos blocos | revisão de materiais e legibilidade | implementado neste ciclo |
 | Inglês | UI e metadata | implementado |
 | Reduced motion / budgets | partículas e trails limitados | implementado |

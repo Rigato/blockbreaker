@@ -1,0 +1,329 @@
+/* --------------------------------------------------------------------------
+   Compact HUD — narrow portrait shells.
+
+   Desktop iframe review sizes (907x510, 1216x684, 800x450, …) squeeze the
+   9:16 shell down to ~250-440px, which starves the default HUD (6px labels,
+   wave text wrapping into five lines). Below 440px the top bar switches to a
+   compact two-line layout:
+
+     row 1   WAVE 1/4 · CRYSTAL GROVE        Lv 3 · 12/40 XP        [ ⏸ ]
+     row 2   ●●●●●●●●   ▦ 34   ◷ 0:12   ✦ 1,240
+
+   Text labels become small icon glyphs (their text stays in the DOM for
+   screen readers), values switch to the UI sans stack at >= 11px (legible at
+   these sizes and safe for long scores), and the pause button floats at the
+   top-right without inflating the row height.
+
+   Loaded from Hud.ts after style.css, so equal-specificity rules win.
+   -------------------------------------------------------------------------- */
+
+/* Tier A — shells up to 440 px. */
+@container (max-width: 440px) {
+  .hud {
+    padding: clamp(6px, 2.2cqw, 9px);
+  }
+
+  .hud__top {
+    gap: 4px;
+  }
+
+  .hud__bar {
+    flex-wrap: wrap;
+    gap: 3px 6px;
+    padding: 4px 48px 5px 6px; /* right slot for the floating pause button */
+  }
+
+  .hud__wave {
+    flex: 1 1 auto;
+    flex-direction: row;
+    gap: 6px;
+    align-items: baseline;
+    min-width: 0;
+  }
+
+  .hud__wave-kicker {
+    display: none;
+  }
+
+  .hud__wave-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0; /* real text is swapped for the compact line below */
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hud__wave-text::after {
+    content: attr(data-compact);
+    font-size: clamp(11px, 3.6cqw, 13px);
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+  }
+
+  .hud__xp-line {
+    flex: 0 0 auto;
+    font-family: var(--font-ui);
+    font-size: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .hud__pause {
+    position: absolute;
+    top: calc(50% - 20px);
+    right: 4px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .hud__stats {
+    flex: 1 1 100%;
+    gap: 5px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .hud__stat {
+    flex-direction: row;
+    gap: 3px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .hud__stat-label {
+    position: relative;
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    overflow: hidden;
+    font-size: 0; /* text kept for screen readers, glyph drawn below */
+    letter-spacing: 0;
+    line-height: 0;
+  }
+
+  /* Ball dots already read as the ball icon; no extra glyph needed. */
+  .hud__stat--balls .hud__stat-label {
+    display: none;
+  }
+
+  .hud__stat-value {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .hud__stat--score .hud__stat-value,
+  .hud__stat--time .hud__stat-value {
+    font-family: var(--font-ui);
+    font-size: 12px;
+  }
+
+  .hud__balls {
+    gap: 2px;
+  }
+
+  .hud__ball {
+    width: 4px;
+    height: 4px;
+  }
+
+  .hud__respawn {
+    font-size: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Icon glyphs. */
+  .hud__stat--blocks .hud__stat-label::before {
+    position: absolute;
+    inset: 1px;
+    border: 1px solid rgba(126, 231, 255, 0.6);
+    border-radius: 2px;
+    background: linear-gradient(
+      135deg,
+      rgba(100, 231, 255, 0.45),
+      rgba(100, 231, 255, 0.1) 60%
+    );
+    content: '';
+  }
+
+  .hud__stat--time .hud__stat-label::before {
+    position: absolute;
+    inset: 1px;
+    border: 1px solid rgba(126, 231, 255, 0.6);
+    border-radius: 50%;
+    content: '';
+  }
+
+  .hud__stat--time .hud__stat-label::after {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    width: 1px;
+    height: 3px;
+    background: var(--cyan-bright);
+    content: '';
+    transform: rotate(35deg);
+    transform-origin: 50% 100%;
+  }
+
+  .hud__stat--score .hud__stat-label::before {
+    position: absolute;
+    inset: 1px;
+    border-radius: 1px;
+    background: linear-gradient(135deg, #ffe9b8, var(--gold));
+    box-shadow: 0 0 6px rgba(255, 212, 121, 0.65);
+    content: '';
+    transform: rotate(45deg);
+  }
+
+  .hud__xp-track {
+    right: 48px;
+    bottom: 2px;
+    left: 6px;
+  }
+
+  /* Chips float below the bar instead of pushing it into the block field. */
+  .hud__chips {
+    position: absolute;
+    top: 100%;
+    right: 6px;
+    left: 6px;
+    z-index: 2;
+    justify-content: flex-start;
+  }
+
+  /* When the boss bar floats below the bar, chips drop below it. */
+  .hud__boss:not([hidden]) ~ .hud__chips {
+    top: calc(100% + 22px);
+  }
+
+  .hud__chip {
+    padding: 1px 6px;
+    font-size: clamp(8px, 2.4cqw, 10px);
+  }
+
+  .hud__levelup {
+    padding: 2px 8px;
+    font-size: 8px;
+  }
+
+  /* Single-row boss bar floating under the top bar so it never pushes the
+     stats, wave and pause controls into the block field. */
+  .hud__boss {
+    position: absolute;
+    top: 100%;
+    right: 6px;
+    left: 6px;
+    z-index: 2;
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+    padding: 3px 6px;
+  }
+
+  .hud__boss-head {
+    flex: 0 1 auto;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .hud__boss-name {
+    font-family: var(--font-ui);
+    font-size: clamp(9px, 2.6cqw, 11px);
+  }
+
+  .hud__boss-hp {
+    font-family: var(--font-ui);
+    font-size: clamp(8px, 2.2cqw, 9px);
+  }
+
+  .hud__boss-track {
+    flex: 1 1 auto;
+    height: 5px;
+  }
+
+  .hud__boss-foot {
+    flex: 0 0 auto;
+  }
+
+  .hud__boss-pips {
+    display: none;
+  }
+
+  .hud__boss-phase {
+    font-size: clamp(8px, 2.2cqw, 9px);
+  }
+}
+
+/* Tier B — shells up to 330 px (800x450, 907x510 and 320x568 viewports). */
+@container (max-width: 330px) {
+  .hud {
+    padding: 6px;
+  }
+
+  .hud__bar {
+    gap: 2px 5px;
+    min-height: 36px;
+    padding: 3px 44px 4px 5px;
+  }
+
+  .hud__wave {
+    gap: 5px;
+  }
+
+  /* The XP line collapses to the level; the XP bar keeps the progress. */
+  .hud__xp-line {
+    font-size: 0;
+  }
+
+  .hud__xp-line::after {
+    content: attr(data-compact-short);
+    font-size: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .hud__pause {
+    top: calc(50% - 18px);
+    right: 3px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .hud__stat-value,
+  .hud__stat--score .hud__stat-value,
+  .hud__stat--time .hud__stat-value {
+    font-size: 11px;
+  }
+
+  .hud__stats {
+    gap: 4px;
+  }
+
+  .hud__stat {
+    gap: 2px;
+  }
+
+  .hud__stat-label {
+    width: 9px;
+    height: 9px;
+  }
+
+  .hud__balls {
+    gap: 1px;
+  }
+
+  .hud__ball {
+    width: 3px;
+    height: 3px;
+  }
+
+  .hud__xp-track {
+    right: 42px;
+    bottom: 1px;
+    left: 5px;
+  }
+}

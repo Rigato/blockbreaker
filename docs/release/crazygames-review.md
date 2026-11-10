@@ -128,13 +128,17 @@ portal valoriza áudio consistente e música que complementa o visual.
 2. [x] Refazer o menu: Campaign/Endless, fundo animado, sem textos de MVP.
 3. [x] Seleção de fases visual com identidade por fase.
 4. [x] Settings com som, música e screen shake.
-5. [ ] Aumentar legibilidade do HUD em 907×510 e 1920×1080.
-6. [ ] Onboarding in-game curto, pulável e visual.
+5. [x] Aumentar legibilidade do HUD em 907×510, 800×450, 1216×684,
+      1280×720 e 1920×1080 (HUD compacto com ícones e valores maiores).
+6. [x] Onboarding visual via **How to Play** no menu (substitui o tutorial
+      in-game; o jogador pode abrir a qualquer momento).
 7. [ ] Ajustar o shell desktop (moldura/letterbox intencional, não faixa perdida).
-8. [ ] Regerar screenshots/capas com o novo visual.
-9. [x] Revisar a descrição e o vídeo de preview (metadata atualizada; vídeo
-      ainda precisa refletir o novo visual).
-10. [ ] Testar 907×510, 800×450, 320×568 e 390×844.
+8. [x] Regerar screenshots, capas e vídeos com o novo visual.
+9. [x] Revisar a descrição e o vídeo de preview (metadata atualizada e vídeo
+      regravado com o novo menu).
+10. [x] Testar 907×510, 800×450, 320×568 e 390×844 (e a matriz E2E).
+11. [x] Adicionar **About Us** com a logomarca Bad Decision Games e o texto do
+      estúdio.
 
 ### P1 — próxima atualização
 
@@ -143,7 +147,7 @@ portal valoriza áudio consistente e música que complementa o visual.
 13. [ ] Desafio diário/semanal.
 14. [ ] Leaderboard local/global do Endless.
 15. [ ] Mais variação de música e mixagem.
-16. [ ] Tela de “How to play” opcional.
+16. [x] Tela de “How to Play” no menu (neste ciclo).
 17. [ ] Acessibilidade: remapeamento, tamanho de texto, contraste.
 18. [ ] Localização PT-BR/ES (se o portal exigir mercado).
 19. [ ] Suporte landscape jogável.
@@ -197,3 +201,16 @@ Problema atual é acesso à conta, não build. Enquanto o suporte responde:
 - validar o build em modo mock (sem SDK/ads);
 - preparar a mesma metadata usada nos outros portais;
 - não criar conta duplicada sem orientação do suporte.
+
+## 7. Resultado do P0 (2026-11-10)
+
+- Blocos, menu, seleção de fases, settings e desbloqueio do Endless concluídos.
+- HUD compacto validado em 907×510, 800×450, 1216×684, 1280×720 e 1920×1080,
+  sem sobrepor a primeira linha de blocos.
+- **How to Play** com 5 páginas e **About Us** com a logomarca Bad Decision
+  Games concluídos.
+- 8 screenshots de loja, capas e vídeos de 18,1 s regerados.
+- Metadata atualizada; 263 testes unitários e 21 E2E verdes.
+- Restante para o próximo ciclo: moldura/letterbox desktop dedicada,
+  metaprogressão, conquistas/desafios e localização.
+

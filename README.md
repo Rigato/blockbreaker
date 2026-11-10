@@ -30,8 +30,16 @@ replaced by this branch. The GitHub Pages review build tracks the branch.
   card looks disabled and opens an explanation dialog when tapped.
 - **Settings:** Sound, Music and Screen shake toggles in the menu and pause,
   persisted through `bb.settings` with backward-compatible defaults.
+- **How to Play:** a five-page menu dialog with real screenshots and short
+  explanations of the loop, controls, perks, bosses and Endless.
+- **About Us:** a menu footer dialog with the Bad Decision Games logo and a
+  short studio note.
+- **Compact HUD:** below 440px shell width the HUD switches to a two-row layout
+  with icon stats and 11–13px values, keeping 907×510 and 800×450 iframes legible.
 - **Save:** `campaignComplete` marks the phase-6 clear and migrates old saves
   that already have a phase-6 clear.
+- **Store assets:** eight updated screenshots, regenerated covers and fresh
+  18.1 s landscape/portrait preview videos.
 - **Menu backdrop:** the static phase-1 wave is no longer used behind the title
   screen; a presentation-only Phaser layer draws the bouncing balls.
 
@@ -352,11 +360,14 @@ src/
   render/elementArt.ts     Walls, obstacles, deflectors, portals, movers, rotors, gates
   render/bossArt.ts        Frost Sentinel, Ember Warden, Void Herald and shards
   ui/                      Menu, HUD, level-up, overlays, orientation and debug
+  ui/HowToPlayDialog.ts    Five-page screenshot walkthrough
+  ui/AboutDialog.ts        Bad Decision Games studio dialog
+  styles/                  Phase select, HUD compact, dialogs and menu footer CSS
   i18n/                    English strings
 tests/                     Unit tests + tests/e2e Playwright
 scripts/                   Content validator, Bridge config validator and packager
 docs/                      GDD, spec, build/release, plan and docs/qa reports
-public/                    Bridge config, favicon, licenses and static assets
+public/                    Bridge config, favicon, licenses, how-to-play shots and studio logo
 release/                   Generated ZIP + manifest (not committed)
 ```
 

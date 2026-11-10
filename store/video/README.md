@@ -6,8 +6,8 @@ Gerados a partir do build de produção, com gameplay real e sem áudio.
 
 | Arquivo | Especificação | Uso |
 |---|---|---|
-| `bricklike-preview.mp4` | 1920×1080 (16:9), 18,3 s, H.264, ~2,0 MB | CrazyGames landscape / portais |
-| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 18,3 s, H.264, ~3,2 MB | CrazyGames portrait / mobile |
+| `bricklike-preview.mp4` | 1920×1080 (16:9), 18,1 s, H.264, ~1,7 MB | CrazyGames landscape / portais |
+| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 18,1 s, H.264, ~2,8 MB | CrazyGames portrait / mobile |
 
 - Abertura com a capa estática correspondente (landscape ou portrait).
 - Menu, gameplay com Prism Laser/multiball/combo, level-up com três cards e
@@ -18,7 +18,7 @@ Gerados a partir do build de produção, com gameplay real e sem áudio.
 
 ## Requisitos CrazyGames atendidos
 
-- Duração 15–20 s (18,3 s).
+- Duração 15–20 s (18,1 s).
 - Landscape 1080p 16:9 e portrait 1080p 2:3.
 - Tamanho máximo de 50 MB.
 - Capa estática como primeiro frame.

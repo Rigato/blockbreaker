@@ -45,6 +45,9 @@ export const en = {
   menuSettings: 'Settings',
   menuVersion: 'v{{version}}',
   menuSettingsHint: 'Sound, music and screen shake',
+  menuHowToPlay: 'How to play',
+  menuAbout: 'About us',
+  menuFooterNav: 'Menu information',
 
   endlessLockedTitle: 'Endless is locked',
   endlessLockedBody: 'Clear all 6 campaign levels to unlock Endless mode.',
@@ -61,6 +64,42 @@ export const en = {
   settingsClose: 'Close',
   settingsOn: 'On',
   settingsOff: 'Off',
+
+  howToTitle: 'How to play',
+  howToSubtitle: 'Five quick pages',
+  howToPrev: 'Prev',
+  howToNext: 'Next',
+  howToClose: 'Close',
+  howToPage: '{{current}} / {{total}}',
+  howToGoToPage: 'Go to page {{index}}',
+  howToCurrentPage: 'Page {{index}}',
+  howToPage1Title: 'Move & launch',
+  howToPage1Body:
+    'Drag, move the mouse or use the arrow keys to move the paddle. Tap, click or press V to launch the ball.',
+  howToPage1Alt: 'The paddle following the pointer and the ball launching upward',
+  howToPage2Title: 'Break & level up',
+  howToPage2Body:
+    'Every destroyed block gives XP. When you level up, the game pauses and you choose one of three perks.',
+  howToPage2Alt: 'Three perk cards offered at level up',
+  howToPage3Title: 'Build your run',
+  howToPage3Body:
+    'Stack perks into a build: multiball, lasers, a wider paddle, crits and more. Special blocks explode, regenerate, move, multiply XP or link together.',
+  howToPage3Alt: 'A stacked build with special blocks on the field',
+  howToPage4Title: 'Bosses',
+  howToPage4Body:
+    'Levels 4-6 end with a boss. Dodge its shards, break its core and watch the corrosion it applies to your paddle.',
+  howToPage4Alt: 'A boss fight with a shard-splitting core',
+  howToPage5Title: 'Endless',
+  howToPage5Body:
+    'Clear all 6 campaign levels to unlock Endless. Survive procedurally generated waves and a boss every 5 waves.',
+  howToPage5Alt: 'Endless mode waves with a boss every five waves',
+
+  aboutTitle: 'About us',
+  aboutStudio: 'Bad Decision Games',
+  aboutLogoAlt: 'Bad Decision Games logo',
+  aboutBody:
+    'Bad Decision Games is a studio formed by a solo developer based in Brazil. His biggest ambition is to develop games that captivate and entertain people. But, beyond working full time, he has just become a father — and has very little time to dedicate to his dream.\n\nUsing AI tools, he is able to start working on his dream. Please support this effort by playing, giving feedback and sharing the games. Thank you!',
+  aboutClose: 'Close',
 
   rotateKicker: 'Portrait mode',
   rotateTitle: 'Rotate to portrait',

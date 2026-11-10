@@ -8,8 +8,10 @@ import type { BootResult } from '../boot/bridgeBoot';
 import type { BlockBreakerGame } from '../game/Game';
 import { gameEvents } from '../game/events';
 import { en } from '../i18n/en';
+import { AboutDialog } from './AboutDialog';
 import { AdOverlay } from './AdOverlay';
 import { DebugPanel } from './DebugPanel';
+import { HowToPlayDialog } from './HowToPlayDialog';
 import { Hud } from './Hud';
 import { InfoDialog } from './InfoDialog';
 import { LevelUpOverlay } from './LevelUpOverlay';
@@ -64,6 +66,8 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     onEndless: handleEndless,
     onEndlessLocked: handleEndlessLocked,
     onSettings: handleSettings,
+    onHowToPlay: handleHowToPlay,
+    onAbout: handleAbout,
   });
 
   const phaseSelect = new PhaseSelect({
@@ -86,6 +90,16 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   });
 
   const infoDialog = new InfoDialog({
+    root: options.root,
+    onClose: () => menu.focusPlay(),
+  });
+
+  const howToPlay = new HowToPlayDialog({
+    root: options.root,
+    onClose: () => menu.focusPlay(),
+  });
+
+  const about = new AboutDialog({
     root: options.root,
     onClose: () => menu.focusPlay(),
   });
@@ -133,6 +147,8 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   function handleCampaign(): void {
     settings.close();
     infoDialog.close();
+    howToPlay.close();
+    about.close();
     phaseInfo = readPhaseInfo();
     phaseSelect.open(phaseInfo, selectedPhaseId);
   }
@@ -144,12 +160,16 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     }
     settings.close();
     infoDialog.close();
+    howToPlay.close();
+    about.close();
     phaseSelect.close();
     controller.startEndless();
   }
 
   function handleEndlessLocked(): void {
     settings.close();
+    howToPlay.close();
+    about.close();
     infoDialog.open({
       title: en.endlessLockedTitle,
       body: en.endlessLockedBody,
@@ -160,7 +180,25 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   function handleSettings(): void {
     phaseSelect.close();
     infoDialog.close();
+    howToPlay.close();
+    about.close();
     settings.open(lastSnapshot);
+  }
+
+  function handleHowToPlay(): void {
+    phaseSelect.close();
+    settings.close();
+    infoDialog.close();
+    about.close();
+    howToPlay.open();
+  }
+
+  function handleAbout(): void {
+    phaseSelect.close();
+    settings.close();
+    infoDialog.close();
+    howToPlay.close();
+    about.open();
   }
 
   const applySnapshot = (snapshot: HudSnapshot): void => {
@@ -178,6 +216,8 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     if (snapshot.phase !== 'menu') {
       settings.close();
       infoDialog.close();
+      howToPlay.close();
+      about.close();
     }
 
     if (snapshot.phase === 'menu') {
@@ -226,6 +266,8 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       phaseSelect.dispose();
       settings.dispose();
       infoDialog.dispose();
+      howToPlay.dispose();
+      about.dispose();
       hud.dispose();
       overlay.dispose();
       levelUp.dispose();

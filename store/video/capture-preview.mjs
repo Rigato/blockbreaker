@@ -68,6 +68,13 @@ await rm(segmentRoot, { recursive: true, force: true });
 await mkdir(rawDir, { recursive: true });
 await mkdir(segmentRoot, { recursive: true });
 
+async function startCampaign(page) {
+  await page.locator('#campaign-button').click();
+  await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
+  await page.locator('.phase-card:not(:disabled)').first().click();
+  await page.locator('.hud').waitFor({ state: 'visible' });
+}
+
 async function hideDebug(page) {
   await page.addStyleTag({
     content:
@@ -116,9 +123,9 @@ async function setBallSpeed(page, scale) {
 
 async function startRun(page) {
   await page.goto(`${baseUrl}/?debug=1&resetSave=1`, { waitUntil: 'networkidle' });
-  await page.locator('#play-button').waitFor({ state: 'visible' });
+  await page.locator('#campaign-button').waitFor({ state: 'visible' });
   await hideDebug(page);
-  await page.locator('#play-button').click();
+  await startCampaign(page);
   await page.locator('.hud').waitFor({ state: 'visible' });
   await setBallSpeed(page, 0.85);
   await grantPerk(page, 'wide_paddle');
@@ -133,6 +140,7 @@ async function startRun(page) {
 }
 
 async function recordClip(name, prepare, action) {
+  const startedAt = Date.now();
   const context = await browser.newContext({
     viewport,
     deviceScaleFactor: 1,
@@ -142,12 +150,13 @@ async function recordClip(name, prepare, action) {
   });
   const page = await context.newPage();
   await prepare(page);
+  const prepSeconds = (Date.now() - startedAt) / 1000;
   await action(page);
   const video = page.video();
   await context.close();
   const path = await video.path();
-  console.log(`recorded ${name}: ${path}`);
-  return path;
+  console.log(`recorded ${name}: ${path} (prep ${prepSeconds.toFixed(1)}s)`);
+  return { path, prepSeconds };
 }
 
 async function movePaddle(page, elapsed) {
@@ -171,11 +180,15 @@ const menuClip = await recordClip(
   'menu',
   async (page) => {
     await page.goto(`${baseUrl}/?resetSave=1`, { waitUntil: 'networkidle' });
-    await page.locator('#play-button').waitFor({ state: 'visible' });
+    await page.locator('#campaign-button').waitFor({ state: 'visible' });
+    await page.waitForFunction(() => !document.querySelector('#boot-screen'), {
+      timeout: 15000,
+    }).catch(() => null);
     await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(900);
   },
   async (page) => {
-    await page.waitForTimeout(3600);
+    await page.waitForTimeout(3000);
   },
 );
 
@@ -219,10 +232,10 @@ await browser.close();
 
 /** Clip order and durations keep the final video between 15 and 20 seconds. */
 const clips = [
-  { path: menuClip, start: 0.4, duration: 2.0 },
-  { path: gameplayClip, start: 0.7, duration: 9.5 },
-  { path: levelUpClip, start: 3.8, duration: 2.6 },
-  { path: gameplayClip, fromEnd: 4.0, duration: 3.0 },
+  { path: menuClip.path, start: menuClip.prepSeconds + 0.3, duration: 2.0 },
+  { path: gameplayClip.path, start: gameplayClip.prepSeconds + 0.5, duration: 9.5 },
+  { path: levelUpClip.path, start: levelUpClip.prepSeconds + 0.5, duration: 2.4 },
+  { path: gameplayClip.path, fromEnd: 4.0, duration: 3.0 },
 ];
 const coverSeconds = 1.2;
 const totalSeconds =

@@ -43,8 +43,8 @@ removem `data-debug` e escondem o painel antes de cada captura. Veja
 
 | Arquivo | Spec |
 |---|---|
-| `bricklike-preview.mp4` | 1920×1080 (16:9), 18,3 s, H.264, ~2,0 MB, sem áudio |
-| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 18,3 s, H.264, ~3,2 MB, sem áudio |
+| `bricklike-preview.mp4` | 1920×1080 (16:9), 18,1 s, H.264, ~1,7 MB, sem áudio |
+| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 18,1 s, H.264, ~2,8 MB, sem áudio |
 | `capture-preview.mjs` | grava gameplay real e compõe os dois MP4 com ffmpeg |
 
 Os vídeos abrem com a capa estática correspondente e são montados em quatro

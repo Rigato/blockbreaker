@@ -1,5 +1,6 @@
 import type { GameCommands, HudSnapshot, PhaseSelectInfo } from '../game/contracts';
 import { en } from '../i18n/en';
+import '../styles/menu-footer.css';
 
 const APP_VERSION = '0.3.0';
 
@@ -10,6 +11,8 @@ export interface MenuOptions {
   onEndless: () => void;
   onEndlessLocked: () => void;
   onSettings: () => void;
+  onHowToPlay: () => void;
+  onAbout: () => void;
 }
 
 const INFINITY_SVG =
@@ -25,10 +28,26 @@ const LOCK_SVG =
   '<path d="M8 10V7a4 4 0 0 1 8 0v3"/>' +
   '</svg>';
 
+const HELP_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+  '<circle cx="12" cy="12" r="9"/>' +
+  '<path d="M9.1 9.2a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/>' +
+  '<path d="M12 16.8h.01"/>' +
+  '</svg>';
+
+const ABOUT_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+  '<circle cx="12" cy="12" r="9"/>' +
+  '<path d="M12 10.8V16.4"/>' +
+  '<path d="M12 7.6h.01"/>' +
+  '</svg>';
+
 /**
  * Title screen: brand, two mode cards (Campaign primary, Endless secondary)
- * and a footer with the Settings entry point. The menu only renders state;
- * UIRoot decides what each card starts.
+ * and a footer with How to play / Settings / About us entry points. The menu
+ * only renders state; UIRoot decides what each card starts.
  */
 export class Menu {
   private readonly controller: GameCommands;
@@ -36,6 +55,8 @@ export class Menu {
   private readonly onEndless: () => void;
   private readonly onEndlessLocked: () => void;
   private readonly onSettings: () => void;
+  private readonly onHowToPlay: () => void;
+  private readonly onAbout: () => void;
 
   private readonly section: HTMLElement;
   private readonly campaignButton: HTMLButtonElement;
@@ -46,7 +67,9 @@ export class Menu {
   private readonly endlessBadge: HTMLElement;
   private readonly endlessStat: HTMLElement;
   private readonly endlessLockNote: HTMLElement;
+  private readonly howToPlayButton: HTMLButtonElement;
   private readonly settingsButton: HTMLButtonElement;
+  private readonly aboutButton: HTMLButtonElement;
 
   private nodes: HTMLElement[] = [];
   private nodesSignature = '__unset__';
@@ -59,6 +82,8 @@ export class Menu {
     this.onEndless = options.onEndless;
     this.onEndlessLocked = options.onEndlessLocked;
     this.onSettings = options.onSettings;
+    this.onHowToPlay = options.onHowToPlay;
+    this.onAbout = options.onAbout;
 
     const section = document.createElement('section');
     this.section = section;
@@ -209,11 +234,36 @@ export class Menu {
     const footer = document.createElement('footer');
     footer.className = 'menu__footer';
 
+    const footerNav = document.createElement('nav');
+    footerNav.className = 'menu__footer-nav';
+    footerNav.setAttribute('aria-label', en.menuFooterNav);
+
+    // How to play.
+    const howToPlayButton = document.createElement('button');
+    this.howToPlayButton = howToPlayButton;
+    howToPlayButton.type = 'button';
+    howToPlayButton.id = 'how-to-play-button';
+    howToPlayButton.className = 'menu__footer-btn menu__footer-btn--howto';
+    howToPlayButton.setAttribute('aria-label', en.menuHowToPlay);
+    howToPlayButton.addEventListener('click', this.handleHowToPlay);
+
+    const helpIcon = document.createElement('span');
+    helpIcon.className = 'menu__footer-icon';
+    helpIcon.setAttribute('aria-hidden', 'true');
+    helpIcon.innerHTML = HELP_SVG;
+
+    const howToLabel = document.createElement('span');
+    howToLabel.className = 'menu__footer-label';
+    howToLabel.textContent = en.menuHowToPlay;
+
+    howToPlayButton.append(helpIcon, howToLabel);
+
+    // Settings (keeps its stable id so tests and muscle memory hold).
     const settingsButton = document.createElement('button');
     this.settingsButton = settingsButton;
     settingsButton.type = 'button';
     settingsButton.id = 'settings-button';
-    settingsButton.className = 'menu__settings';
+    settingsButton.className = 'menu__footer-btn menu__settings';
     settingsButton.setAttribute('aria-label', `${en.menuSettings}. ${en.menuSettingsHint}`);
     settingsButton.addEventListener('click', this.handleSettings);
 
@@ -222,15 +272,38 @@ export class Menu {
     gear.setAttribute('aria-hidden', 'true');
 
     const settingsLabel = document.createElement('span');
+    settingsLabel.className = 'menu__footer-label';
     settingsLabel.textContent = en.menuSettings;
 
     settingsButton.append(gear, settingsLabel);
+
+    // About us.
+    const aboutButton = document.createElement('button');
+    this.aboutButton = aboutButton;
+    aboutButton.type = 'button';
+    aboutButton.id = 'about-button';
+    aboutButton.className = 'menu__footer-btn menu__footer-btn--about';
+    aboutButton.setAttribute('aria-label', en.menuAbout);
+    aboutButton.addEventListener('click', this.handleAbout);
+
+    const aboutIcon = document.createElement('span');
+    aboutIcon.className = 'menu__footer-icon';
+    aboutIcon.setAttribute('aria-hidden', 'true');
+    aboutIcon.innerHTML = ABOUT_SVG;
+
+    const aboutLabel = document.createElement('span');
+    aboutLabel.className = 'menu__footer-label';
+    aboutLabel.textContent = en.menuAbout;
+
+    aboutButton.append(aboutIcon, aboutLabel);
+
+    footerNav.append(howToPlayButton, settingsButton, aboutButton);
 
     const version = document.createElement('span');
     version.className = 'menu__version';
     version.textContent = en.menuVersion.replace('{{version}}', APP_VERSION);
 
-    footer.append(settingsButton, version);
+    footer.append(footerNav, version);
 
     section.append(brand, modes, footer);
     options.root.append(section);
@@ -254,7 +327,9 @@ export class Menu {
   dispose(): void {
     this.campaignButton.removeEventListener('click', this.handleCampaign);
     this.endlessButton.removeEventListener('click', this.handleEndless);
+    this.howToPlayButton.removeEventListener('click', this.handleHowToPlay);
     this.settingsButton.removeEventListener('click', this.handleSettings);
+    this.aboutButton.removeEventListener('click', this.handleAbout);
     this.section.remove();
   }
 
@@ -379,5 +454,15 @@ export class Menu {
   private readonly handleSettings = (): void => {
     this.settingsButton.blur();
     this.onSettings();
+  };
+
+  private readonly handleHowToPlay = (): void => {
+    this.howToPlayButton.blur();
+    this.onHowToPlay();
+  };
+
+  private readonly handleAbout = (): void => {
+    this.aboutButton.blur();
+    this.onAbout();
   };
 }
