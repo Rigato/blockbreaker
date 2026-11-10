@@ -1,5 +1,9 @@
 # Handoff — Bricklike pós-MVP
 
+> **Documento histórico.** Este handoff cobre o pós-MVP e as primeiras
+> atualizações de 0.2.0/0.3.0. Para onboarding atual, use
+> [`handoff-v0.3.0.md`](handoff-v0.3.0.md). Mantido apenas como registro.
+
 **Documento de transferência para planejar a próxima fase de desenvolvimento**  
 **Data:** 2026-11-09  
 **Versão do jogo:** `0.3.0-dev` (build publicado: `0.1.0-mvp`)  

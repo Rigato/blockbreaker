@@ -348,7 +348,8 @@ release/                   Generated ZIP + manifest (not committed)
 - [MVP implementation plan](docs/plano-implementacao-mvp.md)
 - [v0.2.0 campaign expansion plan](docs/plano-v0.2.0.md)
 - [Endless mode plan](docs/plano-endless.md)
-- [Post-MVP handoff](docs/handoff-proxima-fase.md)
+- [Current handoff — v0.3.0](docs/handoff-v0.3.0.md)
+- [Post-MVP handoff — historical](docs/handoff-proxima-fase.md)
 
 ## Deployment
 
