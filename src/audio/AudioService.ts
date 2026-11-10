@@ -85,6 +85,7 @@ export class AudioService implements AudioController {
   private readonly doc: Document | null;
 
   private enabled: boolean;
+  private musicEnabled = true;
   private platformEnabled: boolean;
   private suspended = false;
   private background: boolean;
@@ -170,6 +171,19 @@ export class AudioService implements AudioController {
     this.applyMute();
     if (enabled) this.startMusicIfEligible();
     this.syncDataset();
+  }
+
+  /** Toggles the ambient loop without touching sound effects. */
+  setMusicEnabled(enabled: boolean): void {
+    if (this.disposed) return;
+    this.musicEnabled = enabled;
+    if (!enabled) this.stopMusic();
+    else this.startMusicIfEligible();
+    this.syncDataset();
+  }
+
+  get musicOn(): boolean {
+    return this.musicEnabled && MUSIC_ENABLED;
   }
 
   setPlatformEnabled(enabled: boolean): void {
@@ -716,7 +730,7 @@ export class AudioService implements AudioController {
   // -------------------------------------------------------------------------
 
   private startMusicIfEligible(): void {
-    if (!MUSIC_ENABLED || this.disposed || this.musicRunning) return;
+    if (!MUSIC_ENABLED || !this.musicEnabled || this.disposed || this.musicRunning) return;
     if (this.state !== 'running' || !this.musicBus) return;
 
     this.musicRunning = true;

@@ -87,12 +87,19 @@ export interface SaveV1 {
   unlockedPhase: number;
   phases: Record<string, PhaseStats>;
   endless: EndlessStats;
+  /** True once phase 6 has been cleared; unlocks Endless mode. */
+  campaignComplete: boolean;
   updatedAt: number;
 }
 
 export interface SettingsV1 {
   version: 1;
+  /** Sound effects. */
   sound: boolean;
+  /** Ambient music loop, independent from SFX. */
+  music: boolean;
+  /** Camera shake feedback. */
+  screenShake: boolean;
 }
 
 export interface SaveSnapshot {
@@ -212,6 +219,18 @@ export interface PhaseSelectInfo {
   bestScore: number | null;
   attempts: number;
   clears: number;
+  /** Short flavour line used by the new campaign screen. */
+  tagline: string;
+  /** Theme id used for the card art (`crystal`, `ruins`, ...). */
+  themeId: string;
+  /** CSS hex accent for the card. */
+  accent: string;
+  /** Human-readable content highlights, e.g. `Moving blocks`, `Boss: ...`. */
+  features: readonly string[];
+  /** Boss name for phases 4-6; null otherwise. */
+  bossName: string | null;
+  /** Number of waves in the phase. */
+  waves: number;
 }
 
 /** Epilogue and rank shown on the results screen. */
@@ -276,6 +295,12 @@ export interface HudSnapshot {
   bestScore: number | null;
   bestTimeMs: number | null;
   soundEnabled: boolean;
+  musicEnabled: boolean;
+  screenShakeEnabled: boolean;
+  /** True once the campaign has been cleared at least once. */
+  campaignComplete: boolean;
+  /** Endless unlocks only after the campaign is complete. */
+  endlessUnlocked: boolean;
   /** Non-null only while the results screen is open. */
   result: PhaseResult | null;
   /** Boss health for the current wave; optional until integrated. */
@@ -419,6 +444,10 @@ export interface GameCommands {
   returnToMenu(): void;
   getPhaseSelectInfo(): readonly PhaseSelectInfo[];
   setSound(enabled: boolean): void;
+  /** Toggles the ambient music loop without touching SFX. */
+  setMusic(enabled: boolean): void;
+  /** Toggles camera shake feedback. */
+  setScreenShake(enabled: boolean): void;
   /** Debug-only: clears the persisted save and resets unlock progress. */
   resetSave(): Promise<void>;
 }

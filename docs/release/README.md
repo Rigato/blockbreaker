@@ -14,6 +14,8 @@ portais. Nenhum upload, tag ou GitHub Release foi feito pelo trabalho de M7.
 4. `docs/release/submission-checklist.md` — campos e passos de cada portal.
 5. `docs/release/technical-validation.md` — evidências do ZIP/build.
 6. `docs/release/status.md` — onde registrar URLs e status depois do upload.
+7. `docs/release/crazygames-review.md` — diagnóstico da reprovação e backlog de
+   qualidade para o reenvio.
 
 ## Assets
 

@@ -8,6 +8,7 @@ import { drawBlock } from './blockArt';
 import { drawBoss, drawBossShard } from './bossArt';
 import { drawElement } from './elementArt';
 import { Effects } from './effects';
+import { MenuBackdrop } from './menuBackdrop';
 import {
   predictBallPath,
   TRAJECTORY_STEPS,
@@ -71,9 +72,13 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   private readonly onFrame: (deltaMs: number) => void;
   private readonly onReady: () => void;
   private readonly effects = new Effects(PARTICLE_BUDGET);
+  private readonly menuBackdrop = new MenuBackdrop();
 
   private theme: PhaseTheme = PHASE_THEMES[0]!;
+  private menuMode = true;
+  private shakeEnabled = true;
   private backdrop?: Phaser.GameObjects.Graphics;
+  private menuGraphics?: Phaser.GameObjects.Graphics;
   private motesGraphics?: Phaser.GameObjects.Graphics;
   private elementsGraphics?: Phaser.GameObjects.Graphics;
   private fieldGraphics?: Phaser.GameObjects.Graphics;
@@ -96,6 +101,7 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   private readonly motionListener = (event: MediaQueryListEvent): void => {
     this.reducedMotion = event.matches;
     this.rebuildMotes();
+    this.resetMenuBackdrop();
   };
 
   private blockDirty = true;
@@ -149,6 +155,39 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     }
   }
 
+  /** Toggles the animated attract-mode background and hides world layers. */
+  setMenuMode(enabled: boolean): void {
+    this.menuMode = enabled;
+    const worldLayers = [
+      this.elementsGraphics,
+      this.fieldGraphics,
+      this.trajectoryGraphics,
+      this.entityGraphics,
+      this.effectsGraphics,
+      this.overlayGraphics,
+    ];
+    for (const layer of worldLayers) layer?.setVisible(!enabled);
+    this.menuGraphics?.setVisible(enabled);
+    this.motesGraphics?.setVisible(!enabled);
+    if (enabled) {
+      this.effects.clear();
+      this.pendingEvents.length = 0;
+      this.blockCache.clear();
+      this.ballCache.clear();
+      this.blockDirty = true;
+      this.cameras?.main?.shakeEffect.reset();
+      this.resetMenuBackdrop();
+    } else {
+      this.blockDirty = true;
+    }
+  }
+
+  /** Enables or disables camera shake without touching other feedback. */
+  setScreenShakeEnabled(enabled: boolean): void {
+    this.shakeEnabled = enabled;
+    if (!enabled) this.cameras?.main?.shakeEffect.reset();
+  }
+
   /** Optional celebration hook for level-up/victory, wired by the integrator. */
   celebrate(): void {
     const theme = this.theme;
@@ -184,6 +223,7 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     this.cameras.main.setBackgroundColor(hexToCss(this.theme.skyTop));
 
     this.backdrop = this.add.graphics().setDepth(-50);
+    this.menuGraphics = this.add.graphics().setDepth(-30);
     this.motesGraphics = this.add.graphics().setDepth(-40);
     // Elements sit above the backdrop/motes but behind the block grid.
     this.elementsGraphics = this.add.graphics().setDepth(-5);
@@ -200,6 +240,8 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     this.rebuildVignette();
     this.drawFrame();
     this.rebuildMotes();
+    this.resetMenuBackdrop();
+    this.setMenuMode(this.menuMode);
 
     if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
       this.motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -214,6 +256,14 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   update(time: number, delta: number): void {
     this.onFrame(delta);
     const dt = Math.max(0, Math.min(50, delta));
+
+    if (this.menuMode) {
+      if (this.menuGraphics) {
+        this.menuBackdrop.update(time, dt);
+        this.menuBackdrop.draw(this.menuGraphics);
+      }
+      return;
+    }
 
     this.syncCaches();
     this.processEvents();
@@ -233,6 +283,7 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
     this.rebuildVignette();
     this.drawFrame();
     this.rebuildMotes();
+    this.resetMenuBackdrop();
   }
 
   private handleShutdown(): void {
@@ -911,10 +962,14 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   }
 
   private shake(pixels: number, durationMs: number): void {
-    if (this.reducedMotion) return;
+    if (this.reducedMotion || !this.shakeEnabled) return;
     const camera = this.cameras.main;
     const width = Math.max(1, camera.width || FIELD_WIDTH);
     camera.shake(durationMs, pixels / width, true);
+  }
+
+  private resetMenuBackdrop(): void {
+    this.menuBackdrop.reset(FIELD_WIDTH, this.world.height, this.reducedMotion);
   }
 
   private updateTimers(dt: number): void {

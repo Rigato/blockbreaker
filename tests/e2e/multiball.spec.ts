@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { clickDebugAction, HUD, monitorPage, waitForMenu } from './helpers';
+import { clickDebugAction, expandDebugPanel, monitorPage, startPlay, waitForMenu } from './helpers';
 
 interface DebugGame {
   debugGrantPerk(perkId: string): void;
@@ -18,8 +18,8 @@ test.describe('multiball wave carry-over', () => {
 
     await page.goto('/?debug=1&resetSave=1');
     await waitForMenu(page);
-    await page.locator('#play-button').click();
-    await page.locator(HUD).waitFor({ state: 'visible' });
+    await startPlay(page);
+    await expandDebugPanel(page);
 
     const grant = await page.evaluate(() => {
       const game = (window as unknown as { __bricklike?: DebugGame }).__bricklike;

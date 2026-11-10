@@ -7,15 +7,17 @@ import type {
 import type { BootResult } from '../boot/bridgeBoot';
 import type { BlockBreakerGame } from '../game/Game';
 import { gameEvents } from '../game/events';
+import { en } from '../i18n/en';
 import { AdOverlay } from './AdOverlay';
 import { DebugPanel } from './DebugPanel';
 import { Hud } from './Hud';
+import { InfoDialog } from './InfoDialog';
 import { LevelUpOverlay } from './LevelUpOverlay';
-import type { MenuBest } from './Menu';
 import { Menu } from './Menu';
 import { HudOverlay } from './Overlay';
 import { Orientation } from './Orientation';
 import { PhaseSelect } from './PhaseSelect';
+import { SettingsDialog } from './SettingsDialog';
 
 export interface UIRootOptions {
   root: HTMLElement;
@@ -58,9 +60,10 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   const menu = new Menu({
     root: options.root,
     controller,
-    onPlay: handlePlay,
+    onCampaign: handleCampaign,
     onEndless: handleEndless,
-    onPhases: handlePhases,
+    onEndlessLocked: handleEndlessLocked,
+    onSettings: handleSettings,
   });
 
   const phaseSelect = new PhaseSelect({
@@ -74,6 +77,17 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       phaseSelect.close();
       menu.focusPlay();
     },
+  });
+
+  const settings = new SettingsDialog({
+    root: options.root,
+    controller,
+    onClose: () => menu.focusPlay(),
+  });
+
+  const infoDialog = new InfoDialog({
+    root: options.root,
+    onClose: () => menu.focusPlay(),
   });
 
   const hud = new Hud({ root: options.root, controller });
@@ -112,69 +126,41 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
 
   function refreshPhaseInfo(): void {
     phaseInfo = readPhaseInfo();
-    const best = bestFor(lastSnapshot);
-    menu.update(lastSnapshot, best);
+    menu.update(lastSnapshot, phaseInfo);
     if (phaseSelect.isOpen) phaseSelect.refresh(phaseInfo, selectedPhaseId);
   }
 
-  function mostAdvancedUnlocked(): PhaseSelectInfo | null {
-    let best: PhaseSelectInfo | null = null;
-    for (const phase of phaseInfo) {
-      if (!phase.unlocked) continue;
-      if (!best || phase.index >= best.index) best = phase;
-    }
-    return best;
-  }
-
-  function playablePhase(): PhaseSelectInfo | null {
-    if (selectedPhaseId !== null) {
-      const selected = phaseInfo.find((phase) => phase.id === selectedPhaseId);
-      if (selected?.unlocked) return selected;
-    }
-    return mostAdvancedUnlocked();
-  }
-
-  function bestFor(snapshot: HudSnapshot): MenuBest {
-    const selected =
-      selectedPhaseId !== null
-        ? phaseInfo.find((phase) => phase.id === selectedPhaseId) ?? null
-        : null;
-    const target =
-      selected ??
-      phaseInfo.find((phase) => phase.id === snapshot.phaseId) ??
-      mostAdvancedUnlocked();
-
-    return {
-      phaseName:
-        target?.name ??
-        (snapshot.bestScore !== null || snapshot.bestTimeMs !== null ? snapshot.phaseName : null),
-      bestScore: target?.bestScore ?? (target ? null : snapshot.bestScore),
-      bestTimeMs: target?.bestTimeMs ?? (target ? null : snapshot.bestTimeMs),
-    };
-  }
-
-  function handlePlay(): void {
-    phaseSelect.close();
+  function handleCampaign(): void {
+    settings.close();
+    infoDialog.close();
     phaseInfo = readPhaseInfo();
-    const target = playablePhase();
-    if (target) {
-      selectedPhaseId = target.id;
-      controller.startPhase(target.id);
-      return;
-    }
-
-    // Stub or no phase data yet: keep the M2 entry point working.
-    controller.startRun();
+    phaseSelect.open(phaseInfo, selectedPhaseId);
   }
 
   function handleEndless(): void {
+    if (!lastSnapshot.endlessUnlocked) {
+      handleEndlessLocked();
+      return;
+    }
+    settings.close();
+    infoDialog.close();
     phaseSelect.close();
     controller.startEndless();
   }
 
-  function handlePhases(): void {
-    phaseInfo = readPhaseInfo();
-    phaseSelect.open(phaseInfo, selectedPhaseId);
+  function handleEndlessLocked(): void {
+    settings.close();
+    infoDialog.open({
+      title: en.endlessLockedTitle,
+      body: en.endlessLockedBody,
+      confirmLabel: en.endlessLockedConfirm,
+    });
+  }
+
+  function handleSettings(): void {
+    phaseSelect.close();
+    infoDialog.close();
+    settings.open(lastSnapshot);
   }
 
   const applySnapshot = (snapshot: HudSnapshot): void => {
@@ -189,6 +175,10 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     if (snapshot.phase !== 'menu' && phaseSelect.isOpen) {
       phaseSelect.close();
     }
+    if (snapshot.phase !== 'menu') {
+      settings.close();
+      infoDialog.close();
+    }
 
     if (snapshot.phase === 'menu') {
       phaseInfo = readPhaseInfo();
@@ -200,7 +190,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     }
 
     menu.setHidden(snapshot.phase !== 'menu');
-    menu.update(snapshot, bestFor(snapshot));
+    menu.update(snapshot, phaseInfo);
     if (
       snapshot.phase === 'menu' &&
       (previousPhase === 'run-complete' || previousPhase === 'defeat')
@@ -208,6 +198,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       menu.focusPlay();
     }
     if (phaseSelect.isOpen) phaseSelect.refresh(phaseInfo, selectedPhaseId);
+    if (settings.isOpen) settings.update(snapshot);
 
     hud.update(snapshot);
     hud.setVisible(
@@ -233,6 +224,8 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       unsubscribeReset();
       menu.dispose();
       phaseSelect.dispose();
+      settings.dispose();
+      infoDialog.dispose();
       hud.dispose();
       overlay.dispose();
       levelUp.dispose();

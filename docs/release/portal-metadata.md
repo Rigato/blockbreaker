@@ -18,29 +18,35 @@ A submissão é **manual**, feita pelo usuário. Nada aqui foi enviado a portal.
 
 ## Short description
 
-> A portrait block breaker with roguelite perks. Smash crystal bricks, choose
-> game-changing upgrades, and clear three themed levels.
+> A portrait block breaker with roguelite perks. Smash themed bricks, build
+> game-changing synergies, beat three bosses and survive the Endless mode.
 
-_(132 characters.)_
+_(≈135 characters.)_
 
 ## Long description (≥ 100 words)
 
 > Bricklike is a portrait block breaker that mixes arcade brick-smashing with
 > short roguelite runs. Move the paddle, control the ball's angle, and break
-> crystal, stone and obsidian blocks across nine hand-authored wave layouts in
-> three themed levels: Crystal Grove, Ruined Halls and Arcane Depths.
+> crystal, stone and obsidian blocks across a six-level campaign with 21
+> hand-authored waves: Crystal Grove, Ruined Halls, Arcane Depths, Frostbound
+> Spire, Emberforge and Void Threshold.
 >
 > Every destroyed block earns XP. When you level up, the action pauses and you
 > choose one of three random perks. Stack Multiball, widen the paddle, add
 > damage, summon an Arcane Turret or fire the Prism Laser to build a different
-> run each time. Some perks are repeatable and grow stronger; others are
-> unique, one-run upgrades.
+> run each time. Special blocks explode, regenerate, move, multiply XP, link
+> together or spawn new bricks, and the later levels add walls, deflectors,
+> portals, moving mechanisms, rotors and timed gates.
 >
-> Runs last a few minutes, and progress is saved between sessions on the device.
+> The last three levels end in boss fights against the Frost Sentinel, Ember
+> Warden and Void Herald. Clear the campaign to unlock Endless mode, an infinite
+> run with escalating speed, procedural waves and a boss every five waves.
+>
+> Runs last a few minutes and progress is saved between sessions on the device.
 > Play with touch, mouse or keyboard. No account, download or install is
 > required — the game runs directly in the browser.
 
-_(≈145 words.)_
+_(≈200 words.)_
 
 ## Controls
 
@@ -49,11 +55,13 @@ _(≈145 words.)_
 - Tap to launch the ball.
 - Tap a perk card to choose it.
 - Use the on-screen Prism Laser button when the perk is active.
+- Tap the pause button for settings, restart or menu.
 
 **Mouse**
 - Move the mouse horizontally to move the paddle.
 - Click to launch the ball.
 - Click a perk card to choose it.
+- Click the pause button for settings, restart or menu.
 
 **Keyboard**
 - `←` / `→`: move the paddle.
@@ -65,7 +73,8 @@ _(≈145 words.)_
 ## Tags
 
 `arcade`, `block breaker`, `brick breaker`, `roguelite`, `pixel art`,
-`html5`, `mobile`, `single player`, `short session`, `perks`
+`html5`, `mobile`, `single player`, `short session`, `perks`, `bosses`,
+`endless`
 
 ## itch.io
 
@@ -111,7 +120,7 @@ _(≈145 words.)_
 **Controls:** Use the Controls section above.
 
 **Tags:** `arcade`, `block breaker`, `roguelite`, `pixel art`, `html5`,
-`mobile`, `single player`
+`mobile`, `single player`, `bosses`, `endless`
 
 **Notes for the submitter:**
 - GameFlare does not require its optional SDK for this build.
@@ -134,7 +143,7 @@ _(≈145 words.)_
 **Controls:** Use the Controls section above.
 
 **Tags:** `arcade`, `block breaker`, `roguelite`, `pixel art`, `html5`,
-`portrait`, `mobile`
+`portrait`, `mobile`, `bosses`, `endless`
 
 **Notes for the submitter:**
 - Upload the ZIP that contains the Playgama Bridge config at the root.
@@ -142,6 +151,8 @@ _(≈145 words.)_
 - The interstitial is requested only when leaving the results screen.
 - Storage and audio lifecycle go through the Bridge; no analytics are enabled.
 - Review the final Bridge behavior in the Playgama environment before submitting.
+- The sandbox requires milestones; track session length, wave completion and
+  retention before promoting to the public catalog.
 
 ## CrazyGames — Basic Launch
 
@@ -156,7 +167,7 @@ _(≈145 words.)_
 **Controls:** Use the Controls section above.
 
 **Tags:** `arcade`, `block breaker`, `roguelite`, `pixel art`, `html5`,
-`mobile`, `single player`, `portrait`
+`mobile`, `single player`, `portrait`, `bosses`, `endless`
 
 **Submission type:** Basic Launch only. Do **not** submit as Full Launch.
 
@@ -166,6 +177,10 @@ _(≈145 words.)_
   `failed`/`skipped` as success.
 - Upload all three covers and the preview video.
 - English metadata is mandatory.
+- **Re-test the iframe sizes 907×510, 1216×684, 1280×720 and 1920×1080** before
+  resubmitting; the portrait frame must remain readable.
+- Screenshots, covers and the preview video must use the current build (six
+  levels, bosses, Endless, new block art).
 - Full Launch requirements (Data/User modules, direct-to-gameplay landing,
   account-linked progress) are **out of scope** for this milestone.
 - Re-check CrazyGames' current Basic Launch rules on the submission date.
@@ -175,5 +190,6 @@ _(≈145 words.)_
 - Keep the name **Bricklike** exactly the same on every portal.
 - Do not mention features that do not exist in the build.
 - Do not claim rankings, achievements, multiplayer, cloud sync, controller
-  support, additional worlds, bosses or a level editor.
+  support, additional worlds or a level editor.
 - Do not use the technical name `blockbreaker` as player-facing marketing copy.
+- Keep the description, screenshots and covers in sync with the current build.

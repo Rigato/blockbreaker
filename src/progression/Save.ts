@@ -101,6 +101,7 @@ export function createDefaultSave(now: number = Date.now()): SaveV1 {
     unlockedPhase: 1,
     phases: {},
     endless: defaultEndlessStats(),
+    campaignComplete: false,
     updatedAt: now,
   };
 }
@@ -109,6 +110,8 @@ export function createDefaultSettings(): SettingsV1 {
   return {
     version: SAVE_VERSION,
     sound: true,
+    music: true,
+    screenShake: true,
   };
 }
 
@@ -135,12 +138,18 @@ export function parseSave(
   const unlockedPhase = isFiniteNumber(parsed.unlockedPhase)
     ? Math.min(MAX_PHASE, Math.max(1, Math.floor(parsed.unlockedPhase)))
     : 1;
+  const phases = sanitizePhases(parsed.phases);
 
   return {
     version: SAVE_VERSION,
     unlockedPhase,
-    phases: sanitizePhases(parsed.phases),
+    phases,
     endless: sanitizeEndlessStats(parsed.endless),
+    // Saves from before the flag existed unlock Endless when phase 6 already
+    // has a recorded clear.
+    campaignComplete:
+      parsed.campaignComplete === true ||
+      (phases['phase-6']?.clears ?? 0) > 0,
     updatedAt: isFiniteNumber(parsed.updatedAt) && parsed.updatedAt >= 0
       ? parsed.updatedAt
       : now,
@@ -156,6 +165,9 @@ export function parseSettings(raw: string | null | undefined): SettingsV1 {
   return {
     version: SAVE_VERSION,
     sound: typeof parsed.sound === 'boolean' ? parsed.sound : true,
+    music: typeof parsed.music === 'boolean' ? parsed.music : true,
+    screenShake:
+      typeof parsed.screenShake === 'boolean' ? parsed.screenShake : true,
   };
 }
 
@@ -263,6 +275,9 @@ export function applyPhaseResult(
       [result.phaseId]: nextStats,
     },
     endless: getEndlessStats(save),
+    campaignComplete:
+      save.campaignComplete === true ||
+      (result.victory && result.phaseIndex >= MAX_PHASE),
     updatedAt: now,
   };
 }

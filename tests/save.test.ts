@@ -64,12 +64,18 @@ describe('save defaults', () => {
       unlockedPhase: 1,
       phases: {},
       endless: { bestWave: 0, bestScore: 0, runs: 0 },
+      campaignComplete: false,
       updatedAt: 42,
     });
   });
 
   it('creates default settings with sound on', () => {
-    expect(createDefaultSettings()).toEqual({ version: 1, sound: true });
+    expect(createDefaultSettings()).toEqual({
+      version: 1,
+      sound: true,
+      music: true,
+      screenShake: true,
+    });
     expect(MAX_PHASE).toBe(6);
   });
 });
@@ -181,8 +187,26 @@ describe('safe parse', () => {
       unlockedPhase: 2,
       phases: {},
       endless: { bestWave: 0, bestScore: 0, runs: 0 },
+      campaignComplete: false,
       updatedAt: 100,
     });
+  });
+
+  it('infers campaign completion from a phase-6 clear in an old save', () => {
+    const raw = JSON.stringify({
+      version: 1,
+      unlockedPhase: 6,
+      phases: {
+        'phase-6': { bestScore: 9000, bestTimeMs: 120_000, attempts: 1, clears: 1, bestLevel: 12 },
+      },
+      updatedAt: 100,
+    });
+
+    expect(parseSave(raw, 100).campaignComplete).toBe(true);
+    expect(
+      parseSave(JSON.stringify({ version: 1, unlockedPhase: 6, phases: {} }), 100)
+        .campaignComplete,
+    ).toBe(false);
   });
 
   it('sanitizes malformed endless stats to non-negative integers', () => {
@@ -214,6 +238,8 @@ describe('safe parse', () => {
     expect(parseSettings(JSON.stringify({ version: 1, sound: false }))).toEqual({
       version: 1,
       sound: false,
+      music: true,
+      screenShake: true,
     });
   });
 });
@@ -235,9 +261,10 @@ describe('StorageSaveRepository', () => {
         },
       },
       endless: { bestWave: 0, bestScore: 0, runs: 0 },
+      campaignComplete: false,
       updatedAt: 777,
     };
-    const settings: SettingsV1 = { version: 1, sound: false };
+    const settings: SettingsV1 = { version: 1, sound: false, music: true, screenShake: false };
 
     await repository.save(save);
     await repository.saveSettings(settings);
@@ -316,7 +343,7 @@ describe('StorageSaveRepository', () => {
     const storage = new MemoryStorage();
     const repository = new StorageSaveRepository(storage, undefined, () => 8);
     await repository.save(makeSave({ unlockedPhase: 3 }));
-    await repository.saveSettings({ version: 1, sound: false });
+    await repository.saveSettings({ version: 1, sound: false, music: true, screenShake: true });
 
     await repository.reset();
 
@@ -353,6 +380,7 @@ describe('applyPhaseResult', () => {
       60,
     );
     expect(save.unlockedPhase).toBe(6);
+    expect(save.campaignComplete).toBe(true);
     expect(save.updatedAt).toBe(60);
   });
 

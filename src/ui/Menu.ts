@@ -1,211 +1,246 @@
-import type { GameCommands, HudSnapshot } from '../game/contracts';
+import type { GameCommands, HudSnapshot, PhaseSelectInfo } from '../game/contracts';
 import { en } from '../i18n/en';
-import { formatScore, formatTime } from './format';
+
+const APP_VERSION = '0.3.0';
 
 export interface MenuOptions {
   root: HTMLElement;
   controller: GameCommands;
-  onPlay: () => void;
+  onCampaign: () => void;
   onEndless: () => void;
-  onPhases: () => void;
+  onEndlessLocked: () => void;
+  onSettings: () => void;
 }
 
-export interface MenuBest {
-  phaseName: string | null;
-  bestScore: number | null;
-  bestTimeMs: number | null;
-}
+const INFINITY_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+  'stroke-linecap="round" aria-hidden="true" focusable="false">' +
+  '<path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/>' +
+  '</svg>';
+
+const LOCK_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+  '<rect width="16" height="10" x="4" y="10" rx="2"/>' +
+  '<path d="M8 10V7a4 4 0 0 1 8 0v3"/>' +
+  '</svg>';
 
 /**
- * Title screen: Play, Phases, sound switch and the best result for the phase
- * the Play button will start. The menu only renders state; UIRoot decides
- * which phase to start.
+ * Title screen: brand, two mode cards (Campaign primary, Endless secondary)
+ * and a footer with the Settings entry point. The menu only renders state;
+ * UIRoot decides what each card starts.
  */
 export class Menu {
   private readonly controller: GameCommands;
-  private readonly onPlay: () => void;
+  private readonly onCampaign: () => void;
   private readonly onEndless: () => void;
-  private readonly onPhases: () => void;
+  private readonly onEndlessLocked: () => void;
+  private readonly onSettings: () => void;
+
   private readonly section: HTMLElement;
-  private readonly playButton: HTMLButtonElement;
+  private readonly campaignButton: HTMLButtonElement;
+  private readonly campaignStatus: HTMLElement;
+  private readonly campaignCta: HTMLElement;
+  private readonly nodesRow: HTMLElement;
   private readonly endlessButton: HTMLButtonElement;
-  private readonly endlessNote: HTMLElement;
-  private readonly phasesButton: HTMLButtonElement;
-  private readonly soundButton: HTMLButtonElement;
-  private readonly soundValue: HTMLElement;
-  private readonly bestPhase: HTMLElement;
-  private readonly bestScore: HTMLElement;
-  private readonly bestTime: HTMLElement;
-  private soundEnabled = true;
+  private readonly endlessBadge: HTMLElement;
+  private readonly endlessStat: HTMLElement;
+  private readonly endlessLockNote: HTMLElement;
+  private readonly settingsButton: HTMLButtonElement;
+
+  private nodes: HTMLElement[] = [];
+  private nodesSignature = '__unset__';
+  private endlessUnlocked = false;
+  private lastCampaignComplete = false;
 
   constructor(options: MenuOptions) {
     this.controller = options.controller;
-    this.onPlay = options.onPlay;
+    this.onCampaign = options.onCampaign;
     this.onEndless = options.onEndless;
-    this.onPhases = options.onPhases;
+    this.onEndlessLocked = options.onEndlessLocked;
+    this.onSettings = options.onSettings;
 
     const section = document.createElement('section');
     this.section = section;
     section.className = 'menu';
     section.setAttribute('aria-label', en.appTitle);
 
-    const top = document.createElement('header');
-    top.className = 'menu__top';
-
-    const kicker = document.createElement('span');
-    kicker.className = 'menu__kicker';
-    kicker.textContent = en.menuKicker;
-
-    const sigil = document.createElement('span');
-    sigil.className = 'menu__sigil';
-    sigil.setAttribute('aria-hidden', 'true');
-
-    top.append(kicker, sigil);
-
-    const hero = document.createElement('div');
-    hero.className = 'menu__hero';
+    // --- Brand -------------------------------------------------------------
+    const brand = document.createElement('header');
+    brand.className = 'menu__brand';
 
     const title = document.createElement('h1');
     title.className = 'menu__title';
     title.textContent = en.appTitle;
 
+    const subtitleRow = document.createElement('div');
+    subtitleRow.className = 'menu__subtitle-row';
+
+    const ruleLeft = document.createElement('span');
+    ruleLeft.className = 'menu__rule';
+    ruleLeft.setAttribute('aria-hidden', 'true');
+
     const subtitle = document.createElement('p');
     subtitle.className = 'menu__subtitle';
     subtitle.textContent = en.appSubtitle;
 
-    hero.append(title, subtitle);
+    const ruleRight = document.createElement('span');
+    ruleRight.className = 'menu__rule';
+    ruleRight.setAttribute('aria-hidden', 'true');
 
-    const best = document.createElement('div');
-    best.className = 'menu__best';
-    best.setAttribute('aria-label', en.menuBest);
+    subtitleRow.append(ruleLeft, subtitle, ruleRight);
+    brand.append(title, subtitleRow);
 
-    const bestPhase = document.createElement('span');
-    this.bestPhase = bestPhase;
-    bestPhase.className = 'menu__best-phase';
-    bestPhase.textContent = en.menuBest;
+    // --- Mode cards --------------------------------------------------------
+    const modes = document.createElement('div');
+    modes.className = 'menu__modes';
 
-    const bestScoreItem = document.createElement('span');
-    bestScoreItem.className = 'menu__best-item';
+    // Campaign card (primary).
+    const campaign = document.createElement('button');
+    this.campaignButton = campaign;
+    campaign.type = 'button';
+    campaign.id = 'campaign-button';
+    campaign.className = 'menu__card menu__card--campaign';
 
-    const bestScoreLabel = document.createElement('span');
-    bestScoreLabel.className = 'menu__best-label';
-    bestScoreLabel.textContent = en.menuBestScore;
+    const campaignBody = document.createElement('span');
+    campaignBody.className = 'menu__card-body';
 
-    const bestScore = document.createElement('strong');
-    this.bestScore = bestScore;
-    bestScore.className = 'menu__best-value';
+    const gem = document.createElement('span');
+    gem.className = 'menu__card-gem';
+    gem.setAttribute('aria-hidden', 'true');
+    const gemCore = document.createElement('span');
+    gemCore.className = 'menu__card-gem-core';
+    gem.append(gemCore);
 
-    bestScoreItem.append(bestScoreLabel, bestScore);
+    const campaignText = document.createElement('span');
+    campaignText.className = 'menu__card-text';
 
-    const bestTimeItem = document.createElement('span');
-    bestTimeItem.className = 'menu__best-item';
+    const campaignKicker = document.createElement('span');
+    campaignKicker.className = 'menu__card-kicker';
+    campaignKicker.textContent = en.menuCampaignKicker;
 
-    const bestTimeLabel = document.createElement('span');
-    bestTimeLabel.className = 'menu__best-label';
-    bestTimeLabel.textContent = en.menuBestTime;
+    const campaignTitle = document.createElement('span');
+    campaignTitle.className = 'menu__card-title';
+    campaignTitle.textContent = en.menuCampaign;
 
-    const bestTime = document.createElement('strong');
-    this.bestTime = bestTime;
-    bestTime.className = 'menu__best-value';
+    const campaignSub = document.createElement('span');
+    campaignSub.className = 'menu__card-sub';
+    campaignSub.textContent = en.menuCampaignSub;
 
-    bestTimeItem.append(bestTimeLabel, bestTime);
+    campaignText.append(campaignKicker, campaignTitle, campaignSub);
+    campaignBody.append(gem, campaignText);
 
-    best.append(bestPhase, bestScoreItem, bestTimeItem);
+    const nodesRow = document.createElement('span');
+    this.nodesRow = nodesRow;
+    nodesRow.className = 'menu__nodes';
+    nodesRow.setAttribute('role', 'img');
 
-    const actions = document.createElement('div');
-    actions.className = 'menu__actions';
+    const campaignFoot = document.createElement('span');
+    campaignFoot.className = 'menu__card-foot';
 
-    const playButton = document.createElement('button');
-    this.playButton = playButton;
-    playButton.type = 'button';
-    playButton.id = 'play-button';
-    playButton.className = 'menu__play';
-    playButton.textContent = en.play;
-    playButton.addEventListener('click', this.handlePlay);
+    const campaignStatus = document.createElement('span');
+    this.campaignStatus = campaignStatus;
+    campaignStatus.className = 'menu__card-status';
 
-    const endlessWrap = document.createElement('div');
-    endlessWrap.className = 'menu__endless-wrap';
+    const campaignCta = document.createElement('span');
+    this.campaignCta = campaignCta;
+    campaignCta.className = 'menu__card-cta';
+    campaignCta.setAttribute('aria-hidden', 'true');
 
-    const endlessButton = document.createElement('button');
-    this.endlessButton = endlessButton;
-    endlessButton.type = 'button';
-    endlessButton.id = 'endless-button';
-    endlessButton.className = 'menu__secondary menu__endless';
-    endlessButton.textContent = en.endless;
-    endlessButton.addEventListener('click', this.handleEndless);
+    campaignFoot.append(campaignStatus, campaignCta);
+    campaign.append(campaignBody, nodesRow, campaignFoot);
+    campaign.addEventListener('click', this.handleCampaign);
 
-    const endlessNote = document.createElement('span');
-    this.endlessNote = endlessNote;
-    endlessNote.className = 'menu__endless-note';
-    endlessNote.textContent = en.endlessNote;
-    endlessNote.hidden = true;
+    // Endless card (secondary).
+    const endless = document.createElement('button');
+    this.endlessButton = endless;
+    endless.type = 'button';
+    endless.id = 'endless-button';
+    endless.className = 'menu__card menu__card--endless';
 
-    endlessWrap.append(endlessButton, endlessNote);
+    const endlessBody = document.createElement('span');
+    endlessBody.className = 'menu__card-body';
 
-    const phasesButton = document.createElement('button');
-    this.phasesButton = phasesButton;
-    phasesButton.type = 'button';
-    phasesButton.id = 'phases-button';
-    phasesButton.className = 'menu__secondary';
-    phasesButton.textContent = en.menuPhases;
-    phasesButton.addEventListener('click', this.handlePhases);
+    const infinity = document.createElement('span');
+    infinity.className = 'menu__card-icon';
+    infinity.setAttribute('aria-hidden', 'true');
+    infinity.innerHTML = INFINITY_SVG;
 
-    const sound = document.createElement('div');
-    sound.className = 'menu__sound';
+    const endlessText = document.createElement('span');
+    endlessText.className = 'menu__card-text';
 
-    const soundLabel = document.createElement('span');
-    soundLabel.className = 'menu__sound-label';
-    soundLabel.textContent = en.menuSound;
+    const endlessKicker = document.createElement('span');
+    endlessKicker.className = 'menu__card-kicker';
+    endlessKicker.textContent = en.menuEndlessKicker;
 
-    const soundButton = document.createElement('button');
-    this.soundButton = soundButton;
-    soundButton.type = 'button';
-    soundButton.className = 'menu__sound-toggle';
-    soundButton.setAttribute('role', 'switch');
-    soundButton.setAttribute('aria-label', en.menuSound);
+    const endlessTitle = document.createElement('span');
+    endlessTitle.className = 'menu__card-title';
+    endlessTitle.textContent = en.endless;
 
-    const soundValue = document.createElement('span');
-    this.soundValue = soundValue;
-    soundValue.className = 'menu__sound-value';
+    const endlessSub = document.createElement('span');
+    endlessSub.className = 'menu__card-sub';
+    endlessSub.textContent = en.menuEndlessSub;
 
-    soundButton.append(soundValue);
-    soundButton.addEventListener('click', this.handleSound);
+    endlessText.append(endlessKicker, endlessTitle, endlessSub);
 
-    sound.append(soundLabel, soundButton);
+    const endlessBadge = document.createElement('span');
+    this.endlessBadge = endlessBadge;
+    endlessBadge.className = 'menu__card-badge';
+    endlessBadge.setAttribute('aria-hidden', 'true');
+    endlessBadge.innerHTML = LOCK_SVG;
 
-    const note = document.createElement('p');
-    note.id = 'menu-note';
-    note.className = 'menu__note';
-    note.setAttribute('role', 'status');
-    note.textContent = en.playNote;
+    endlessBody.append(infinity, endlessText, endlessBadge);
 
-    actions.append(playButton, endlessWrap, phasesButton, sound, note);
+    const endlessStat = document.createElement('span');
+    this.endlessStat = endlessStat;
+    endlessStat.className = 'menu__card-stat';
 
-    const footer = document.createElement('p');
+    const endlessLockNote = document.createElement('span');
+    this.endlessLockNote = endlessLockNote;
+    endlessLockNote.className = 'menu__card-locknote';
+    endlessLockNote.textContent = en.menuEndlessLocked;
+
+    endless.append(endlessBody, endlessStat, endlessLockNote);
+    endless.addEventListener('click', this.handleEndless);
+
+    modes.append(campaign, endless);
+
+    // --- Footer ------------------------------------------------------------
+    const footer = document.createElement('footer');
     footer.className = 'menu__footer';
-    footer.textContent = en.footer;
 
-    section.append(top, hero, best, actions, footer);
+    const settingsButton = document.createElement('button');
+    this.settingsButton = settingsButton;
+    settingsButton.type = 'button';
+    settingsButton.id = 'settings-button';
+    settingsButton.className = 'menu__settings';
+    settingsButton.setAttribute('aria-label', `${en.menuSettings}. ${en.menuSettingsHint}`);
+    settingsButton.addEventListener('click', this.handleSettings);
+
+    const gear = document.createElement('span');
+    gear.className = 'menu__settings-icon';
+    gear.setAttribute('aria-hidden', 'true');
+
+    const settingsLabel = document.createElement('span');
+    settingsLabel.textContent = en.menuSettings;
+
+    settingsButton.append(gear, settingsLabel);
+
+    const version = document.createElement('span');
+    version.className = 'menu__version';
+    version.textContent = en.menuVersion.replace('{{version}}', APP_VERSION);
+
+    footer.append(settingsButton, version);
+
+    section.append(brand, modes, footer);
     options.root.append(section);
-
-    this.applySound(true);
   }
 
-  update(snapshot: HudSnapshot, best: MenuBest): void {
-    this.applySound(snapshot.soundEnabled);
-
-    this.bestPhase.textContent = best.phaseName ?? en.menuBestEmpty;
-    this.bestScore.textContent = formatScore(best.bestScore);
-    this.bestTime.textContent = formatTime(best.bestTimeMs);
-
-    const bestWave = snapshot.endlessBestWave ?? 0;
-    if (bestWave > 0) {
-      this.endlessNote.hidden = false;
-      this.endlessNote.textContent = `${en.endlessBest}: ${bestWave}`;
-    } else {
-      this.endlessNote.hidden = true;
-      this.endlessNote.textContent = en.endlessNote;
-    }
+  update(snapshot: HudSnapshot, phases: readonly PhaseSelectInfo[]): void {
+    this.lastCampaignComplete = snapshot.campaignComplete;
+    this.updateNodes(phases);
+    this.updateCampaign(snapshot, phases);
+    this.updateEndless(snapshot);
   }
 
   setHidden(hidden: boolean): void {
@@ -213,43 +248,136 @@ export class Menu {
   }
 
   focusPlay(): void {
-    this.playButton.focus({ preventScroll: true });
+    this.campaignButton.focus({ preventScroll: true });
   }
 
   dispose(): void {
-    this.playButton.removeEventListener('click', this.handlePlay);
+    this.campaignButton.removeEventListener('click', this.handleCampaign);
     this.endlessButton.removeEventListener('click', this.handleEndless);
-    this.phasesButton.removeEventListener('click', this.handlePhases);
-    this.soundButton.removeEventListener('click', this.handleSound);
+    this.settingsButton.removeEventListener('click', this.handleSettings);
     this.section.remove();
   }
 
-  private applySound(enabled: boolean): void {
-    this.soundEnabled = enabled;
-    this.soundButton.setAttribute('aria-checked', String(enabled));
-    this.soundButton.classList.toggle('is-on', enabled);
-    this.soundValue.textContent = enabled ? en.soundOn : en.soundOff;
+  // -- Rendering ------------------------------------------------------------
+
+  private updateNodes(phases: readonly PhaseSelectInfo[]): void {
+    const signature = phases.map((phase) => phase.id).join('|');
+    if (signature !== this.nodesSignature) {
+      this.nodesSignature = signature;
+      this.nodes = [];
+      const fragment = document.createDocumentFragment();
+      for (let index = 0; index < phases.length; index += 1) {
+        const node = document.createElement('span');
+        node.className = 'menu__node';
+        node.setAttribute('aria-hidden', 'true');
+        this.nodes.push(node);
+        fragment.append(node);
+      }
+      this.nodesRow.replaceChildren(fragment);
+    }
+
+    const hasPhases = phases.length > 0;
+    this.nodesRow.hidden = !hasPhases;
+    if (!hasPhases) return;
+
+    const complete = this.lastCampaignComplete;
+    const cleared = phases.filter((phase) => phase.clears > 0).length;
+    const current = complete
+      ? null
+      : phases.find((phase) => phase.unlocked && phase.clears === 0) ?? null;
+
+    this.nodesRow.setAttribute(
+      'aria-label',
+      en.menuCampaignProgress
+        .replace('{{cleared}}', String(cleared))
+        .replace('{{total}}', String(phases.length)),
+    );
+
+    for (let index = 0; index < phases.length; index += 1) {
+      const phase = phases[index];
+      const node = this.nodes[index];
+      if (!phase || !node) continue;
+      node.classList.toggle('is-cleared', complete || phase.clears > 0);
+      node.classList.toggle('is-current', phase.id === current?.id);
+    }
   }
 
-  private readonly handlePlay = (): void => {
-    this.playButton.blur();
-    this.onPlay();
+  private updateCampaign(snapshot: HudSnapshot, phases: readonly PhaseSelectInfo[]): void {
+    const complete = snapshot.campaignComplete;
+    const cleared = phases.filter((phase) => phase.clears > 0).length;
+    const current = complete
+      ? null
+      : phases.find((phase) => phase.unlocked && phase.clears === 0) ?? null;
+
+    if (complete) {
+      this.campaignStatus.textContent = en.menuCampaignAll;
+    } else if (current) {
+      this.campaignStatus.textContent = en.menuCurrentLevel
+        .replace('{{index}}', String(current.index))
+        .replace('{{name}}', current.name);
+    } else if (phases.length > 0) {
+      const last = phases[phases.length - 1];
+      this.campaignStatus.textContent = last
+        ? en.menuCurrentLevel
+            .replace('{{index}}', String(last.index))
+            .replace('{{name}}', last.name)
+        : en.menuCampaignSub;
+    } else {
+      this.campaignStatus.textContent = en.menuCampaignSub;
+    }
+
+    this.campaignCta.textContent = complete
+      ? en.menuCampaignComplete
+      : cleared > 0
+        ? en.menuCampaignContinue
+        : en.menuCampaignStart;
+
+    this.campaignButton.classList.toggle('is-complete', complete);
+    this.campaignButton.dataset.progress = complete ? 'complete' : cleared > 0 ? 'started' : 'fresh';
+  }
+
+  private updateEndless(snapshot: HudSnapshot): void {
+    this.endlessUnlocked = snapshot.endlessUnlocked;
+    const locked = !snapshot.endlessUnlocked;
+
+    this.endlessButton.classList.toggle('is-locked', locked);
+    this.endlessButton.setAttribute('aria-disabled', String(locked));
+
+    this.endlessBadge.hidden = !locked;
+    this.endlessLockNote.hidden = !locked;
+    this.endlessStat.hidden = locked;
+
+    if (locked) return;
+
+    let runs = 0;
+    try {
+      runs = this.controller.getEndlessStats().runs;
+    } catch {
+      // Stats unavailable; the card still shows the persisted best wave.
+    }
+
+    const bestWave = snapshot.endlessBestWave ?? 0;
+    this.endlessStat.textContent = `${en.menuEndlessBest.replace(
+      '{{wave}}',
+      String(bestWave),
+    )} · ${en.menuEndlessRuns.replace('{{runs}}', String(runs))}`;
+  }
+
+  // -- Handlers -------------------------------------------------------------
+
+  private readonly handleCampaign = (): void => {
+    this.campaignButton.blur();
+    this.onCampaign();
   };
 
   private readonly handleEndless = (): void => {
     this.endlessButton.blur();
-    this.onEndless();
+    if (this.endlessUnlocked) this.onEndless();
+    else this.onEndlessLocked();
   };
 
-  private readonly handlePhases = (): void => {
-    this.phasesButton.blur();
-    this.onPhases();
-  };
-
-  private readonly handleSound = (): void => {
-    const next = !this.soundEnabled;
-    this.applySound(next);
-    this.controller.setSound(next);
-    this.soundButton.blur();
+  private readonly handleSettings = (): void => {
+    this.settingsButton.blur();
+    this.onSettings();
   };
 }

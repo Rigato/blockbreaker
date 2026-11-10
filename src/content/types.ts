@@ -108,5 +108,7 @@ export interface PhaseDef {
   readonly id: string;
   readonly index: number;
   readonly name: string;
+  /** Short flavour line shown on the campaign selection screen. */
+  readonly tagline?: string;
   readonly waves: readonly WaveDef[];
 }

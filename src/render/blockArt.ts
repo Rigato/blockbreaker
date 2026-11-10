@@ -1,20 +1,30 @@
 import type Phaser from 'phaser';
 import type { Block } from '../sim/World';
-import { BLOCK_TYPES } from '../sim/blocks';
+import { BLOCK_TYPES, type BlockTypeId } from '../sim/blocks';
 
 /**
- * Procedural pixel-art block rendering.
+ * Procedural pixel-art block rendering — "polished arcade tiles".
  *
- * Each block type owns a distinct silhouette and interior pattern so the grid
- * stays readable in grayscale: crystal facets, stone masonry and obsidian
- * angular runes. All variation is derived from `block.id`, never from
- * `Math.random`, so a block looks identical every time it is redrawn.
+ * Every block shares one tile frame (soft drop shadow, crisp 2px outline,
+ * stepped corners, pronounced top-left bevel, bottom-right shade, inner gloss
+ * and a phase-accent rim light). On top of that frame each block type owns one
+ * clear material signature that reads in 2-3 shapes at thumbnail size:
+ *
+ *   crystal      bright faceted gem
+ *   stone        two/three chiselled brick courses
+ *   obsidian     near-black tile with a hot rune sigil
+ *   explosive    charred crate, hazard stripes and a molten core
+ *   regenerative living belly with a healing cross and leaf sprigs
+ *   moving       recessed rail bed with bold outward arrows
+ *   multiplier   gold plate with a pixel "×2" stamp
+ *   generator    gear ring around a luminous portal core
+ *   linked       two interlocking chain links and corner studs
+ *
+ * All variation is derived from `block.id` via FNV-1a hashing, never from
+ * `Math.random`, so a block looks identical every time it is redrawn. Colours
+ * come from `BLOCK_TYPES` plus deterministic blends, so the phase tint in
+ * `BlockDrawOptions` keeps working and the whole set stays on one palette.
  */
-
-const CRYSTAL_LIGHT = 0xd8fbff;
-const CRYSTAL_MID = 0x8cf3ff;
-const STONE_MORTAR = 0x120e1e;
-const OBSIDIAN_RUNE = 0xffd6f7;
 
 type Point = { x: number; y: number };
 
@@ -111,6 +121,64 @@ export interface BlockDrawOptions {
   accent?: number;
 }
 
+/**
+ * Deep shade per block family: shading pushes toward a saturated dark of the
+ * same hue family instead of plain grey, which keeps bodies juicy.
+ */
+const DEEP_SHADE: Partial<Record<BlockTypeId, number>> = {
+  crystal: 0x0b4a5e,
+  stone: 0x241640,
+  obsidian: 0x140616,
+  explosive: 0x2a0d04,
+  regenerative: 0x0a2a18,
+  moving: 0x0a1a30,
+  multiplier: 0x3a2a06,
+  generator: 0x1e0f38,
+  linked: 0x05323a,
+};
+
+export interface BlockPalette {
+  /** Main body fill. */
+  body: number;
+  /** Near-white, hue-tinted highlight for bevels and gloss. */
+  light: number;
+  /** Deep saturated shade for the bottom-right bevel. */
+  shade: number;
+  /** Darkest interior colour used by materials. */
+  deep: number;
+  /** Hue-tinted near-black used for the 2px outline. */
+  outline: number;
+}
+
+/**
+ * Palette for a block type derived from its base colour. Exported so tests
+ * can assert the grayscale value ladder (crystal bright > stone mid >
+ * obsidian dark) without booting Phaser.
+ */
+export function blockPalette(type: BlockTypeId, base: number): BlockPalette {
+  const deep = DEEP_SHADE[type] ?? 0x0a0a14;
+  // Value ladder for the basic trio (bright gem / mid masonry / dark glass);
+  // crystal keeps its saturated body instead of drifting towards white.
+  const body =
+    type === 'obsidian'
+      ? blend(base, deep, 0.58)
+      : type === 'stone'
+        ? blend(base, deep, 0.2)
+        : type === 'regenerative'
+          ? blend(base, deep, 0.1)
+          : type === 'crystal'
+            ? base
+            : blend(base, 0xffffff, 0.05);
+  const light = blend(body, 0xffffff, type === 'stone' ? 0.42 : 0.55);
+  return {
+    body,
+    light,
+    shade: blend(body, deep, 0.6),
+    deep,
+    outline: blend(body, 0x080a16, 0.82),
+  };
+}
+
 export function drawBlock(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
@@ -125,390 +193,481 @@ export function drawBlock(
   const top = block.top;
   const width = block.width;
   const height = block.height;
+  const minDim = Math.min(width, height);
+  // Corner step scales with the block so 46px cells and 350px boss tiles both
+  // keep the same chunky proportions.
+  const step = Math.max(4, Math.min(12, Math.round(minDim * 0.13)));
+  const palette = blockPalette(block.type, base);
   const flash = block.flashMs > 0;
-  // Obsidian is deliberately darker than its rune colour.
-  const body =
-    block.type === 'obsidian' ? blend(base, 0x06040e, 0.76) : base;
-  const bodyLight = blend(body, 0xffffff, block.type === 'stone' ? 0.24 : 0.34);
-  const bodyDark = blend(body, 0x03040a, 0.5);
 
-  // Soft drop shadow, two pixels of offset so blocks sit on the lane instead
-  // of floating above it.
-  graphics.fillStyle(0x02040a, 0.42);
-  graphics.fillPoints(steppedRect(left + 3, top + 4, width, height, 0, 6), true);
+  drawTileBase(graphics, left, top, width, height, step, palette, hash);
 
-  // Dark outer frame: a two-pixel pixel-art border.
-  graphics.fillStyle(0x04050c, 0.98);
-  graphics.fillPoints(steppedRect(left - 2, top - 2, width + 4, height + 4, 0, 7), true);
-  graphics.fillStyle(0x010208, 0.9);
-  graphics.fillPoints(steppedRect(left - 1, top - 1, width + 2, height + 2, 0, 6), true);
-
-  // Body.
-  graphics.fillStyle(body, 1);
-  graphics.fillPoints(steppedRect(left, top, width, height, 0, 6), true);
-
-  // Bevel: light top/left, shade bottom/right, plus a crisp inner rim.
-  graphics.fillStyle(bodyLight, block.type === 'stone' ? 0.3 : 0.42);
-  graphics.fillRect(left + 4, top + 2, width - 8, 2);
-  graphics.fillRect(left + 2, top + 4, 2, height - 8);
-  graphics.fillStyle(bodyDark, 0.55);
-  graphics.fillRect(left + 4, top + height - 4, width - 8, 2);
-  graphics.fillRect(left + width - 4, top + 4, 2, height - 8);
-  graphics.fillStyle(0xffffff, block.type === 'stone' ? 0.12 : 0.2);
-  graphics.fillRect(left + 5, top + 2, width - 12, 1);
-  graphics.fillRect(left + 2, top + 5, 1, height - 12);
-  // Phase accent catches the top lip; subtle, never a full recolour.
-  graphics.fillStyle(blend(accent, 0xffffff, 0.4), 0.15);
-  graphics.fillRect(left + 9, top + 1, width - 18, 1);
-
-  if (block.type === 'crystal') {
-    drawCrystal(graphics, left, top, width, height, base, accent, hash);
-  } else if (block.type === 'stone') {
-    drawStone(graphics, left, top, width, height, base, accent, hash);
-  } else if (block.type === 'explosive') {
-    drawExplosive(graphics, block, base, accent, hash);
-  } else if (block.type === 'regenerative') {
-    drawRegenerative(graphics, block, base, accent, hash);
-  } else if (block.type === 'moving') {
-    drawMoving(graphics, block, base, accent, hash);
-  } else if (block.type === 'multiplier') {
-    drawMultiplier(graphics, block, base, accent, hash);
-  } else if (block.type === 'generator') {
-    drawGenerator(graphics, block, base, accent, hash);
-  } else if (block.type === 'linked') {
-    drawLinked(graphics, block, base, accent, hash);
-  } else {
-    drawObsidian(graphics, left, top, width, height, base, accent, hash);
+  switch (block.type) {
+    case 'crystal':
+      drawCrystal(graphics, left, top, width, height, palette, hash);
+      break;
+    case 'stone':
+      drawStone(graphics, left, top, width, height, palette, hash);
+      break;
+    case 'obsidian':
+      drawObsidian(graphics, left, top, width, height, palette, accent, hash);
+      break;
+    case 'explosive':
+      drawExplosive(graphics, block, palette, hash);
+      break;
+    case 'regenerative':
+      drawRegenerative(graphics, block, palette, accent, hash);
+      break;
+    case 'moving':
+      drawMoving(graphics, block, palette, accent, hash);
+      break;
+    case 'multiplier':
+      drawMultiplier(graphics, block, palette, hash);
+      break;
+    case 'generator':
+      drawGenerator(graphics, block, palette, accent, hash);
+      break;
+    case 'linked':
+      drawLinked(graphics, block, palette, accent, hash);
+      break;
   }
+
+  // The gloss layer sits above every material: sheen, accent rim, sparkle.
+  drawTileGlass(graphics, left, top, width, height, step, accent, hash);
 
   drawDamageCracks(graphics, block, hash);
 
   if (flash) {
     const strength = Math.min(1, block.flashMs / 80);
-    graphics.fillStyle(0xffffff, 0.22 + strength * 0.45);
-    graphics.fillPoints(steppedRect(left + 1, top + 1, width - 2, height - 2, 0, 4), true);
+    graphics.fillStyle(0xffffff, 0.2 + strength * 0.42);
+    graphics.fillPoints(steppedRect(left + 1, top + 1, width - 2, height - 2, 0, step), true);
+    graphics.fillStyle(blend(accent, 0xffffff, 0.4), 0.4);
+    graphics.fillRect(left + step, top + 2, width - step * 2, 1);
     // Re-assert the silhouette so the flash never washes the block out.
     graphics.lineStyle(1, 0x04050c, 0.9);
-    graphics.strokePoints(steppedRect(left, top, width, height, 0, 4), true);
+    graphics.strokePoints(steppedRect(left, top, width, height, 0, step), true);
   }
 
   drawHpPips(graphics, block, accent);
 }
 
+/** Shadow, outline, body fill and bevels shared by all nine block types. */
+function drawTileBase(
+  graphics: Phaser.GameObjects.Graphics,
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+  step: number,
+  palette: BlockPalette,
+  hash: number,
+): void {
+  // Soft drop shadow: two offset passes read as a blurred edge.
+  graphics.fillStyle(0x01040e, 0.2);
+  graphics.fillPoints(steppedRect(left + 3, top + 5, width, height, 0, step + 2), true);
+  graphics.fillStyle(0x01040e, 0.32);
+  graphics.fillPoints(steppedRect(left + 2, top + 3, width, height, 0, step + 1), true);
+
+  // Crisp 2px outline, hue-tinted so the family stays on the block's colour.
+  graphics.fillStyle(palette.outline, 0.96);
+  graphics.fillPoints(steppedRect(left - 2, top - 2, width + 4, height + 4, 0, step), true);
+
+  // Body.
+  graphics.fillStyle(palette.body, 1);
+  graphics.fillPoints(steppedRect(left, top, width, height, 0, step), true);
+
+  // Per-block tone jitter: a whisper of shade or light so a full grid of the
+  // same material reads as siblings, never clones.
+  const tone = (hashUnit(hash, 93) - 0.5) * 0.12;
+  if (Math.abs(tone) > 0.012) {
+    graphics.fillStyle(tone >= 0 ? 0xffffff : 0x000000, Math.abs(tone));
+    graphics.fillPoints(steppedRect(left + 1, top + 1, width - 2, height - 2, 0, step - 1), true);
+  }
+
+  const bev = Math.max(2, Math.round(Math.min(width, height) * 0.05));
+
+  // Pronounced top-left light bevel.
+  graphics.fillStyle(0xffffff, 0.42);
+  graphics.fillRect(left + 2, top + 2, width - 4, bev);
+  graphics.fillRect(left + 2, top + 2, bev, height - 4);
+  // Softer inner lip below the bevel so the edge reads as two tones.
+  graphics.fillStyle(0xffffff, 0.13);
+  graphics.fillRect(left + bev + 1, top + bev + 1, width - (bev + 1) * 2, 1);
+  graphics.fillRect(left + bev + 1, top + bev + 1, 1, Math.max(2, height - (bev + 2) * 2));
+
+  // Bottom-right shade bevel.
+  graphics.fillStyle(0x000000, 0.3);
+  graphics.fillRect(left + 2, top + height - bev - 2, width - 4, bev);
+  graphics.fillRect(left + width - bev - 2, top + 2, bev, height - 4);
+  graphics.fillStyle(0x000000, 0.13);
+  graphics.fillRect(left + bev + 1, top + height - bev - 3, width - (bev + 1) * 2, 1);
+
+  // Grounding band: a wider soft shade hugging the bottom of the tile.
+  graphics.fillStyle(0x000000, 0.12);
+  graphics.fillRect(left + bev + 2, top + height - bev * 3, width - (bev + 2) * 2, bev);
+}
+
+/** Gloss, accent rim light and deterministic sparkle over the material. */
+function drawTileGlass(
+  graphics: Phaser.GameObjects.Graphics,
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+  step: number,
+  accent: number,
+  hash: number,
+): void {
+  const bev = Math.max(2, Math.round(Math.min(width, height) * 0.05));
+
+  // Diagonal glass sheen from a corner; half the blocks catch the light on
+  // the right instead of the left so the grid never reads as wallpaper.
+  const sheenRight = hashUnit(hash, 94) > 0.5;
+  graphics.fillStyle(0xffffff, 0.09);
+  graphics.fillPoints(
+    sheenRight
+      ? [
+          { x: left + width - bev - 1, y: top + bev + 1 },
+          { x: left + Math.round(width * 0.48), y: top + bev + 1 },
+          { x: left + width - bev - 1, y: top + Math.round(height * 0.4) },
+        ]
+      : [
+          { x: left + bev + 1, y: top + bev + 1 },
+          { x: left + Math.round(width * 0.52), y: top + bev + 1 },
+          { x: left + bev + 1, y: top + Math.round(height * 0.4) },
+        ],
+    true,
+  );
+
+  // Phase accent catches the top lip and one corner; a rim, never a wash.
+  const rim = blend(accent, 0xffffff, 0.3);
+  graphics.fillStyle(rim, 0.55);
+  graphics.fillRect(left + step, top + 1, width - step * 2, 1);
+  const kissLeft = hashUnit(hash, 90) > 0.5;
+  graphics.fillRect(
+    kissLeft ? left + step : left + width - step - 3,
+    top + 2,
+    3,
+    1,
+  );
+  graphics.fillStyle(rim, 0.2);
+  graphics.fillRect(left + 1, top + step, 1, height - step * 2);
+
+  // Deterministic four-point sparkle near the top of the tile.
+  if (Math.min(width, height) >= 26) {
+    const sx = Math.round(left + bev + 3 + hashUnit(hash, 91) * Math.max(4, width * 0.3));
+    const sy = Math.round(top + bev + 3 + hashUnit(hash, 92) * Math.max(3, height * 0.16));
+    graphics.fillStyle(0xffffff, 0.9);
+    graphics.fillRect(sx, sy, 1, 3);
+    graphics.fillRect(sx - 1, sy + 1, 3, 1);
+  }
+}
+
+/**
+ * Crystal: a faceted gem with three deterministic cuts (vertical, horizontal
+ * or diagonal) so sibling gems read as individually cut stones. A small
+ * white-hot core diamond anchors the centre of every cut.
+ */
 function drawCrystal(
   graphics: Phaser.GameObjects.Graphics,
   left: number,
   top: number,
   width: number,
   height: number,
-  base: number,
-  accent: number,
+  palette: BlockPalette,
   hash: number,
 ): void {
-  const bottom = top + height - 5;
-  const centreX = left + width / 2;
-  const jitter = (hashUnit(hash, 1) - 0.5) * 5;
-  const coreY = top + height * (0.42 + hashUnit(hash, 2) * 0.1);
-  const coldRim = blend(accent, CRYSTAL_LIGHT, 0.55);
+  const bottom = top + height - 3;
+  const lit = blend(palette.body, 0xffffff, 0.24);
+  const shaded = blend(palette.body, palette.deep, 0.5);
+  const layout = hashUnit(hash, 1);
 
-  // Inner geode panel, slightly darker than the body but still luminous.
-  graphics.fillStyle(blend(base, 0x031018, 0.35), 0.55);
-  graphics.fillPoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 4), true);
-
-  // Three crystal shards: shorter flanking spires behind a tall central one.
-  const shards = [
-    {
-      apex: { x: left + width * (0.19 + hashUnit(hash, 3) * 0.07), y: top + height * 0.3 },
-      leftBase: left + 4,
-      rightBase: left + width * 0.46,
-      light: CRYSTAL_MID,
-      alpha: 0.34,
-    },
-    {
-      apex: { x: left + width * (0.78 + hashUnit(hash, 4) * 0.06), y: top + height * 0.34 },
-      leftBase: left + width * 0.56,
-      rightBase: left + width - 4,
-      light: CRYSTAL_MID,
-      alpha: 0.28,
-    },
-    {
-      apex: { x: centreX + jitter, y: top + 5 },
-      leftBase: left + width * 0.28,
-      rightBase: left + width * 0.72,
-      light: CRYSTAL_LIGHT,
-      alpha: 0.48,
-    },
-  ];
-
-  for (const shard of shards) {
-    const apex = shard.apex;
-    // Left facet catches the light, right facet falls into shadow.
-    graphics.fillStyle(shard.light, shard.alpha);
-    graphics.fillTriangle(apex.x, apex.y, shard.leftBase, bottom, apex.x, bottom);
-    graphics.fillStyle(blend(base, 0x08222c, 0.35), 0.5);
-    graphics.fillTriangle(apex.x, apex.y, apex.x, bottom, shard.rightBase, bottom);
-    // Facet seam and outline.
-    graphics.lineStyle(1, 0x082b35, 0.85);
-    graphics.lineBetween(apex.x, apex.y, apex.x, bottom);
-    graphics.lineBetween(apex.x, apex.y, shard.leftBase, bottom);
-    graphics.lineBetween(apex.x, apex.y, shard.rightBase, bottom);
-    // Cold accent rim on the lit edge.
-    graphics.lineStyle(1, coldRim, 0.4);
-    graphics.lineBetween(apex.x, apex.y, shard.leftBase, bottom);
-    // Apex glint.
-    graphics.fillStyle(0xffffff, 0.85);
-    graphics.fillRect(Math.round(apex.x) - 1, Math.round(apex.y), 2, 2);
+  if (layout < 0.34) {
+    // Vertical cut: lit left facet, shaded right facet, bright seam.
+    const splitX = Math.round(left + width * (0.4 + hashUnit(hash, 5) * 0.18));
+    graphics.fillStyle(lit, 0.55);
+    graphics.fillTriangle(left + 3, top + 3, left + width * 0.6, top + 3, splitX, bottom);
+    graphics.fillStyle(shaded, 0.6);
+    graphics.fillTriangle(left + width - 3, top + 3, left + width * 0.52, top + 3, splitX, bottom);
+    graphics.fillStyle(blend(palette.body, 0xffffff, 0.5), 0.8);
+    graphics.fillRect(splitX, top + 3, 1, height - 6);
+  } else if (layout < 0.67) {
+    // Horizontal cut: bright crown, shaded base, bright seam between them.
+    const splitY = Math.round(top + height * (0.4 + hashUnit(hash, 6) * 0.18));
+    graphics.fillStyle(lit, 0.5);
+    graphics.fillRect(left + 3, top + 3, width - 6, splitY - top - 3);
+    graphics.fillStyle(shaded, 0.6);
+    graphics.fillRect(left + 3, splitY, width - 6, bottom - splitY);
+    graphics.fillStyle(blend(palette.body, 0xffffff, 0.5), 0.8);
+    graphics.fillRect(left + 3, splitY, width - 6, 1);
+  } else {
+    // Diagonal cut: one lit triangle across the whole gem.
+    const slantUp = hashUnit(hash, 7) > 0.5;
+    graphics.fillStyle(lit, 0.5);
+    graphics.fillTriangle(
+      left + 3,
+      slantUp ? top + 3 : bottom,
+      left + width - 3,
+      slantUp ? bottom : top + 3,
+      left + 3,
+      slantUp ? bottom : top + 3,
+    );
+    graphics.fillStyle(shaded, 0.62);
+    graphics.fillTriangle(
+      left + width - 3,
+      slantUp ? bottom : top + 3,
+      left + width - 3,
+      slantUp ? top + 3 : bottom,
+      left + 3,
+      slantUp ? bottom : top + 3,
+    );
   }
 
-  // Faint cleavage seams; damage cracks are separate and much darker.
-  graphics.lineStyle(1, 0x0a3f4b, 0.18);
-  graphics.lineBetween(left + width * 0.3, top + height * 0.72, left + width * 0.72, top + height * 0.7);
-
-  // Luminous core between the shards.
-  graphics.fillStyle(blend(CRYSTAL_LIGHT, accent, 0.35), 0.75);
+  // Core diamond, offset per block.
+  const coreX = Math.round(left + width * (0.5 + (hashUnit(hash, 2) - 0.5) * 0.2));
+  const coreY = Math.round(top + height * (0.52 + (hashUnit(hash, 8) - 0.5) * 0.12));
+  const coreR = Math.max(3, Math.round(Math.min(width, height) * 0.1));
+  graphics.fillStyle(blend(palette.body, 0xffffff, 0.8), 0.95);
   graphics.fillPoints(
     [
-      { x: centreX, y: coreY - 9 },
-      { x: centreX + 5, y: coreY },
-      { x: centreX, y: coreY + 9 },
-      { x: centreX - 5, y: coreY },
+      { x: coreX, y: coreY - coreR },
+      { x: coreX + coreR, y: coreY },
+      { x: coreX, y: coreY + coreR },
+      { x: coreX - coreR, y: coreY },
     ],
     true,
   );
-  graphics.fillStyle(0xffffff, 0.9);
-  graphics.fillRect(Math.round(centreX) - 1, Math.round(coreY) - 2, 2, 3);
-
-  // Specular glints, deterministic per block.
-  graphics.fillStyle(0xffffff, 0.75);
-  graphics.fillRect(left + 5, top + 5, 3, 1);
-  graphics.fillRect(left + 5, top + 5, 1, 4);
-  graphics.fillRect(left + Math.round(width * 0.64), top + Math.round(height * 0.26), 2, 1);
-  graphics.fillStyle(blend(0xffffff, accent, 0.4), 0.5);
-  graphics.fillRect(left + Math.round(width * 0.7), top + Math.round(height * 0.7), 1, 3);
+  graphics.fillStyle(0xffffff, 0.95);
+  graphics.fillRect(coreX - 1, coreY - 1, 2, 2);
 }
 
+/** Stone: two or three chunky brick courses with chiselled edges. */
 function drawStone(
   graphics: Phaser.GameObjects.Graphics,
   left: number,
   top: number,
   width: number,
   height: number,
-  base: number,
-  accent: number,
+  palette: BlockPalette,
   hash: number,
 ): void {
-  const innerLeft = left + 4;
-  const innerTop = top + 4;
-  const innerWidth = width - 8;
-  const innerHeight = height - 8;
+  const innerLeft = left + 3;
+  const innerTop = top + 3;
+  const innerWidth = width - 6;
+  const innerHeight = height - 6;
+  const courses = height >= 100 ? 3 : 2;
+  const courseH = Math.round(innerHeight / courses);
 
-  // Deep mortar bed.
-  graphics.fillStyle(blend(base, STONE_MORTAR, 0.8), 1);
-  graphics.fillPoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 4), true);
-  graphics.lineStyle(1, 0x04030a, 0.7);
-  graphics.strokePoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 4), true);
+  // Deep mortar bed behind the bricks.
+  graphics.fillStyle(blend(palette.body, palette.deep, 0.62), 0.92);
+  graphics.fillPoints(steppedRect(innerLeft, innerTop, innerWidth, innerHeight, 0, 4), true);
 
-  const rows = 3;
-  const rowHeight = innerHeight / rows;
-  for (let row = 0; row < rows; row += 1) {
-    const rowTop = Math.round(innerTop + row * rowHeight) + 1;
-    const rowBottom = Math.round(innerTop + (row + 1) * rowHeight) - 1;
-    const rowSeed = (hash >>> (row * 4)) & 0xff;
-    // Staggered courses: each row has a different brick count and offset.
-    const splitA = 0.22 + hashUnit(hash, row * 9 + 2) * 0.26;
-    const splitB = 0.56 + hashUnit(hash, row * 9 + 5) * 0.24;
+  for (let course = 0; course < courses; course += 1) {
+    const rowTop = innerTop + course * courseH + 1;
+    const rowBottom = innerTop + (course + 1) * courseH - 1;
+    const rowHeight = rowBottom - rowTop;
+    if (rowHeight < 3) continue;
+    // Staggered courses: alternating brick counts and offsets.
     const cuts =
-      rowSeed % 3 === 0 ? [0, splitA, 1] : [0, splitA, splitB, 1];
+      course % 2 === 0
+        ? [0, 0.5 + hashUnit(hash, 5 + course) * 0.14, 1]
+        : [
+            0,
+            0.28 + hashUnit(hash, 8 + course) * 0.2,
+            0.66 + hashUnit(hash, 11 + course) * 0.16,
+            1,
+          ];
     for (let index = 0; index < cuts.length - 1; index += 1) {
-      const x0 = innerLeft + innerWidth * cuts[index]!;
-      const x1 = innerLeft + innerWidth * cuts[index + 1]!;
-      const brickLeft = Math.round(x0) + 1;
-      const brickRight = Math.round(x1) - 1;
-      const brickWidth = brickRight - brickLeft;
+      const x0 = Math.round(innerLeft + innerWidth * cuts[index]!) + 1;
+      const x1 = Math.round(innerLeft + innerWidth * cuts[index + 1]!) - 1;
+      const brickWidth = x1 - x0;
       if (brickWidth < 4) continue;
-      const shade = hashUnit(hash, row * 13 + index * 5);
-      const brickColor = blend(
-        base,
-        shade > 0.5 ? 0xf1e6ff : 0x181026,
-        0.1 + shade * 0.24,
+      const tone = hashUnit(hash, 14 + course * 7 + index);
+      const brick = blend(
+        palette.body,
+        tone > 0.5 ? 0xffffff : palette.deep,
+        0.08 + tone * 0.24,
       );
-      graphics.fillStyle(brickColor, 1);
-      graphics.fillRect(brickLeft, rowTop, brickWidth, rowBottom - rowTop);
-      // Chiselled top-face highlight and bottom shade.
-      graphics.fillStyle(0xffffff, 0.2);
-      graphics.fillRect(brickLeft + 1, rowTop, brickWidth - 2, 1);
-      graphics.fillStyle(0xd8c7ff, 0.1);
-      graphics.fillRect(brickLeft + 2, rowTop + 1, brickWidth - 4, 1);
-      graphics.fillStyle(0x04040a, 0.38);
-      graphics.fillRect(brickLeft + 1, rowBottom - 1, brickWidth - 2, 1);
-      graphics.fillStyle(0x04040a, 0.22);
-      graphics.fillRect(brickRight - 1, rowTop + 1, 1, rowBottom - rowTop - 2);
-      // Chipped corners and missing chunks.
-      if (shade > 0.62) {
-        graphics.fillStyle(0x0a0714, 0.85);
-        graphics.fillRect(brickRight - 3, rowTop, 3, 2);
-        graphics.fillRect(brickLeft, rowBottom - 2, 2, 2);
-      }
+      graphics.fillStyle(brick, 1);
+      graphics.fillRect(x0, rowTop, brickWidth, rowHeight);
+      // Chiselled edges: lit top, shaded bottom.
+      graphics.fillStyle(0xffffff, 0.3);
+      graphics.fillRect(x0, rowTop, brickWidth, 1);
+      graphics.fillStyle(0x000000, 0.32);
+      graphics.fillRect(x0, rowBottom - 1, brickWidth, 1);
     }
   }
 
-  // Speckles and quartz flakes; fixed per block id.
-  const speckles = 8;
+  // Quartz speckles, fixed per block id.
+  const speckles = 4 + (hash % 3);
   for (let index = 0; index < speckles; index += 1) {
-    const sx = innerLeft + 2 + hashUnit(hash, 40 + index * 3) * (innerWidth - 4);
-    const sy = innerTop + 2 + hashUnit(hash, 41 + index * 3) * (innerHeight - 4);
-    const light = index % 3 !== 0;
-    graphics.fillStyle(light ? 0xffffff : 0x080612, light ? 0.3 : 0.5);
-    graphics.fillRect(Math.round(sx), Math.round(sy), light ? 2 : 1, 1);
+    const sx = Math.round(innerLeft + 2 + hashUnit(hash, 24 + index) * (innerWidth - 4));
+    const sy = Math.round(innerTop + 2 + hashUnit(hash, 25 + index) * (innerHeight - 4));
+    const lit = index % 2 === 0;
+    graphics.fillStyle(lit ? 0xffffff : 0x000000, lit ? 0.42 : 0.32);
+    graphics.fillRect(sx, sy, 1, 1);
   }
 
-  // Accent wash on the upper row keeps stone tied to the phase palette.
-  graphics.fillStyle(accent, 0.06);
-  graphics.fillRect(innerLeft, innerTop, innerWidth, Math.round(rowHeight));
+  // Chipped edges: one or two wedges bitten out of the silhouette, keyed by
+  // id so weathered blocks differ across the grid.
+  const chips = hashUnit(hash, 26) > 0.55 ? 2 : 1;
+  for (let index = 0; index < chips; index += 1) {
+    const atRight = hashUnit(hash, 27 + index * 2) > 0.5;
+    const atBottom = hashUnit(hash, 28 + index * 2) > 0.5;
+    const cx = atRight ? left + width - 3 : left + 3;
+    const cy = atBottom ? top + height - 4 : top + 4;
+    graphics.fillStyle(palette.outline, 0.95);
+    if (atRight) {
+      graphics.fillTriangle(cx, cy - 2, cx - 6, cy - 2, cx, cy + 3);
+    } else {
+      graphics.fillTriangle(cx, cy - 2, cx + 6, cy - 2, cx, cy + 3);
+    }
+  }
 }
 
+/** Obsidian: darkest tile, lit by a hot rune sigil and glowing veins. */
 function drawObsidian(
   graphics: Phaser.GameObjects.Graphics,
   left: number,
   top: number,
   width: number,
   height: number,
-  base: number,
+  palette: BlockPalette,
   accent: number,
   hash: number,
 ): void {
   const centreX = left + width / 2;
   const centreY = top + height / 2;
-  const rune = blend(OBSIDIAN_RUNE, accent, 0.32);
+  const rune = blend(0xff9df0, accent, 0.3);
 
-  // Angular planes: faceted volumes read even without colour.
-  graphics.fillStyle(blend(base, 0xffffff, 0.12), 0.22);
-  graphics.fillTriangle(left + 3, top + 3, left + width * 0.7, top + 3, left + 3, top + height * 0.58);
-  graphics.fillStyle(0x010106, 0.5);
-  graphics.fillTriangle(
-    left + width - 3,
-    top + height * 0.32,
-    left + width - 3,
-    top + height - 3,
-    left + width * 0.3,
-    top + height - 3,
-  );
-  graphics.fillStyle(blend(rune, 0x000000, 0.5), 0.12);
-  graphics.fillTriangle(left + 3, top + 3, left + width * 0.7, top + 3, left + width * 0.55, top + height * 0.42);
+  // Soft glow behind the sigil fills the dark body without adding noise.
+  graphics.fillStyle(rune, 0.07);
+  graphics.fillCircle(centreX, centreY, Math.min(width, height) * 0.36);
 
-  // Double angular border.
-  graphics.lineStyle(1, 0x000000, 0.8);
-  graphics.strokePoints(steppedRect(left + 2, top + 2, width - 4, height - 4, 0, 4), true);
-  graphics.lineStyle(1, rune, 0.3);
-  graphics.strokePoints(steppedRect(left + 5, top + 5, width - 10, height - 10, 0, 3), true);
-  // Chamfer ticks at the inner corners.
-  graphics.lineStyle(1, rune, 0.45);
-  graphics.lineBetween(left + 5, top + 11, left + 11, top + 5);
-  graphics.lineBetween(left + width - 11, top + 5, left + width - 5, top + 11);
-  graphics.lineBetween(left + 5, top + height - 11, left + 11, top + height - 5);
-  graphics.lineBetween(left + width - 11, top + height - 5, left + width - 5, top + height - 11);
+  // Angular planes so the dark body still reads as a 3D cut; the lit plane
+  // switches sides per block, like light moving across polished glass.
+  const sheenRight = hashUnit(hash, 24) > 0.5;
+  graphics.fillStyle(0xffffff, 0.14);
+  if (sheenRight) {
+    graphics.fillTriangle(
+      left + width - 3,
+      top + 3,
+      left + width * 0.18,
+      top + 3,
+      left + width - 3,
+      top + height * 0.55,
+    );
+    graphics.fillStyle(0x000000, 0.45);
+    graphics.fillTriangle(
+      left + 3,
+      top + height * 0.28,
+      left + 3,
+      top + height - 3,
+      left + width * 0.7,
+      top + height - 3,
+    );
+  } else {
+    graphics.fillTriangle(left + 3, top + 3, left + width * 0.82, top + 3, left + 3, top + height * 0.55);
+    graphics.fillStyle(0x000000, 0.45);
+    graphics.fillTriangle(
+      left + width - 3,
+      top + height * 0.28,
+      left + width - 3,
+      top + height - 3,
+      left + width * 0.3,
+      top + height - 3,
+    );
+  }
 
-  // Faceted outer diamond.
-  const spanX = Math.max(9, Math.round(width * 0.26));
-  const spanY = Math.max(8, Math.round(height * 0.25));
+  // Rune sigil: filled outer diamond, stroked edge, dark inner diamond, core.
+  // Three proportions per block — diamond, tall rhombus or wide rhombus.
+  const runeVariant = hashUnit(hash, 23);
+  let spanX = Math.max(8, Math.round(width * 0.24));
+  let spanY = Math.max(8, Math.round(height * 0.22));
+  if (runeVariant < 0.34) {
+    spanX = Math.max(7, Math.round(width * 0.18));
+    spanY = Math.max(10, Math.round(height * 0.3));
+  } else if (runeVariant >= 0.67) {
+    spanX = Math.max(10, Math.round(width * 0.3));
+    spanY = Math.max(6, Math.round(height * 0.17));
+  }
   const outer = [
     { x: centreX, y: centreY - spanY },
     { x: centreX + spanX, y: centreY },
     { x: centreX, y: centreY + spanY },
     { x: centreX - spanX, y: centreY },
   ];
-  graphics.fillStyle(blend(rune, base, 0.4), 0.28);
+  graphics.fillStyle(blend(rune, palette.body, 0.35), 0.3);
   graphics.fillPoints(outer, true);
-  graphics.lineStyle(2, rune, 0.92);
+  graphics.lineStyle(2, rune, 0.95);
   graphics.strokePoints(outer, true);
-  // Inner diamond, a different proportion from the outer one.
-  const innerSpanX = Math.max(4, Math.round(spanX * 0.5));
-  const innerSpanY = Math.max(4, Math.round(spanY * 0.55));
-  graphics.fillStyle(0x020108, 0.7);
+  const inX = Math.max(3, Math.round(spanX * 0.5));
+  const inY = Math.max(3, Math.round(spanY * 0.5));
+  graphics.fillStyle(0x0a0410, 0.85);
   graphics.fillPoints(
     [
-      { x: centreX, y: centreY - innerSpanY },
-      { x: centreX + innerSpanX, y: centreY },
-      { x: centreX, y: centreY + innerSpanY },
-      { x: centreX - innerSpanX, y: centreY },
+      { x: centreX, y: centreY - inY },
+      { x: centreX + inX, y: centreY },
+      { x: centreX, y: centreY + inY },
+      { x: centreX - inX, y: centreY },
     ],
     true,
   );
-  graphics.lineStyle(1, rune, 0.8);
-  graphics.strokePoints(
-    [
-      { x: centreX, y: centreY - innerSpanY },
-      { x: centreX + innerSpanX, y: centreY },
-      { x: centreX, y: centreY + innerSpanY },
-      { x: centreX - innerSpanX, y: centreY },
-    ],
-    true,
-  );
-  // Cross-hair ticks and four small rune studs.
-  graphics.lineStyle(1, rune, 0.65);
-  graphics.lineBetween(centreX, centreY - spanY - 3, centreX, centreY - innerSpanY);
-  graphics.lineBetween(centreX, centreY + innerSpanY, centreX, centreY + spanY + 3);
-  graphics.lineBetween(centreX - spanX - 3, centreY, centreX - innerSpanX, centreY);
-  graphics.lineBetween(centreX + innerSpanX, centreY, centreX + spanX + 3, centreY);
-  graphics.fillStyle(rune, 0.9);
-  graphics.fillRect(Math.round(centreX - innerSpanX - 1), Math.round(centreY - 1), 2, 2);
-  graphics.fillRect(Math.round(centreX + innerSpanX - 1), Math.round(centreY - 1), 2, 2);
-  graphics.fillRect(Math.round(centreX - 1), Math.round(centreY - innerSpanY - 1), 2, 2);
-  graphics.fillRect(Math.round(centreX - 1), Math.round(centreY + innerSpanY - 1), 2, 2);
-  // Bright core.
-  graphics.fillStyle(blend(0xffffff, rune, 0.35), 0.95);
-  graphics.fillRect(Math.round(centreX) - 2, Math.round(centreY) - 2, 4, 4);
-  graphics.fillStyle(accent, 0.65);
-  graphics.fillRect(Math.round(centreX) - 1, Math.round(centreY) - 3, 2, 1);
-  graphics.fillRect(Math.round(centreX) + 2, Math.round(centreY) - 1, 1, 2);
+  graphics.fillStyle(0xffffff, 0.95);
+  graphics.fillRect(Math.round(centreX) - 1, Math.round(centreY) - 1, 2, 2);
 
-  // Glowing veins and micro-cracks fan out from the sigil.
-  const veins = 3 + (hash % 2);
-  for (let index = 0; index < veins; index += 1) {
-    const angle = hashUnit(hash, 20 + index) * Math.PI * 2;
-    const reach = Math.min(width, height) * (0.28 + hashUnit(hash, 30 + index) * 0.14);
-    const midX = centreX + Math.cos(angle) * reach * 0.55;
-    const midY = centreY + Math.sin(angle) * reach * 0.55;
-    const vx = centreX + Math.cos(angle) * reach;
-    const vy = centreY + Math.sin(angle) * reach;
-    graphics.lineStyle(1, rune, 0.42);
-    graphics.lineBetween(centreX, centreY, Math.round(midX), Math.round(midY));
-    graphics.lineStyle(1, rune, 0.22);
-    graphics.lineBetween(Math.round(midX), Math.round(midY), Math.round(vx), Math.round(vy));
-    graphics.fillStyle(rune, 0.65);
-    graphics.fillRect(Math.round(vx), Math.round(vy), 1, 1);
-  }
-  for (let index = 0; index < 3; index += 1) {
-    const sx = left + 7 + hashUnit(hash, 50 + index * 7) * (width - 14);
-    const sy = top + 7 + hashUnit(hash, 51 + index * 7) * (height - 14);
-    graphics.lineStyle(1, 0x05030a, 0.8);
-    graphics.lineBetween(Math.round(sx), Math.round(sy), Math.round(sx + 5), Math.round(sy + 3));
-    graphics.lineStyle(1, rune, 0.2);
-    graphics.lineBetween(Math.round(sx + 1), Math.round(sy), Math.round(sx + 6), Math.round(sy + 3));
+  // Chamfer ticks on one diagonal pair of corners, swapped per block.
+  graphics.fillStyle(rune, 0.65);
+  if (hashUnit(hash, 25) > 0.5) {
+    graphics.fillRect(left + 5, top + 9, 4, 1);
+    graphics.fillRect(left + 9, top + 5, 1, 4);
+    graphics.fillRect(left + width - 12, top + height - 6, 4, 1);
+    graphics.fillRect(left + width - 6, top + height - 9, 1, 4);
+  } else {
+    graphics.fillRect(left + width - 9, top + 5, 4, 1);
+    graphics.fillRect(left + width - 6, top + 9, 1, 4);
+    graphics.fillRect(left + 8, top + height - 6, 4, 1);
+    graphics.fillRect(left + 5, top + height - 9, 1, 4);
   }
 
-  // Chipped corners: one or two bites out of the silhouette.
-  const chips = hashUnit(hash, 60) > 0.45 ? 2 : 1;
+  // Angular chips bitten out of the silhouette; one or two per block.
+  const chips = hashUnit(hash, 26) > 0.5 ? 2 : 1;
   for (let index = 0; index < chips; index += 1) {
-    const atRight = hashUnit(hash, 61 + index) > 0.5;
-    const atBottom = hashUnit(hash, 63 + index) > 0.5;
-    const cx = atRight ? left + width - 9 : left + 6;
-    const cy = atBottom ? top + height - 7 : top + 6;
+    const atRight = hashUnit(hash, 28 + index) > 0.5;
+    const atBottom = hashUnit(hash, 29 + index) > 0.5;
+    const cx = atRight ? left + width - 4 : left + 3;
+    const cy = atBottom ? top + height - 4 : top + 4;
     graphics.fillStyle(0x030208, 0.95);
-    graphics.fillTriangle(cx, cy - 4, cx + 4, cy - 1, cx + 1, cy + 3);
+    if (atRight) {
+      graphics.fillTriangle(cx, cy - 3, cx - 5, cy - 1, cx - 1, cy + 3);
+    } else {
+      graphics.fillTriangle(cx, cy - 3, cx + 5, cy - 1, cx + 1, cy + 3);
+    }
+  }
+
+  // Glowing veins fanning out from the sigil; dots read crisper than thin
+  // anti-aliased lines at small sizes.
+  for (let index = 0; index < 3; index += 1) {
+    const angle = hashUnit(hash, 20 + index) * Math.PI * 2;
+    const reach = Math.min(width, height) * (0.24 + hashUnit(hash, 22 + index) * 0.12);
+    for (let dot = 1; dot <= 2; dot += 1) {
+      const d = reach * (dot / 2);
+      const vx = Math.round(centreX + Math.cos(angle) * d);
+      const vy = Math.round(centreY + Math.sin(angle) * d);
+      graphics.fillStyle(rune, dot === 2 ? 0.65 : 0.3);
+      graphics.fillRect(vx, vy, dot === 2 ? 2 : 1, 1);
+    }
   }
 }
 
 /**
- * Unstable crate: scorched inner panel, hazard chevrons, a fuse curling out of
- * the top edge and a hot orange core. Reads as "do not hit" even in grayscale
- * thanks to the heavy dark frame and the bright centre.
+ * Explosive: charred crate with hazard stripes, a short fuse and a molten
+ * core. Reads as "do not hit" even in grayscale thanks to the bright centre.
  */
 function drawExplosive(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
-  base: number,
-  accent: number,
+  palette: BlockPalette,
   hash: number,
 ): void {
   const left = block.left;
@@ -516,89 +675,67 @@ function drawExplosive(
   const width = block.width;
   const height = block.height;
   const centreX = left + width / 2;
-  const coreY = top + height * 0.6;
-  const hot = blend(0xff8a3d, 0xffe6a3, 0.45);
-  const ember = blend(base, 0x2a0a02, 0.55);
+  const coreX = centreX + Math.round((hashUnit(hash, 31) - 0.5) * width * 0.14);
+  const coreY = top + height * (0.56 + hashUnit(hash, 32) * 0.1);
+  const minDim = Math.min(width, height);
+  const hot = blend(0xffb347, 0xffe9c4, 0.4);
 
   // Scorched interior.
-  graphics.fillStyle(ember, 0.85);
+  graphics.fillStyle(blend(palette.body, palette.deep, 0.38), 0.95);
   graphics.fillPoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 4), true);
 
-  // Hazard chevrons along the bottom corners.
-  const chevron = Math.max(3, Math.round(width * 0.08));
-  graphics.fillStyle(blend(0xffd84d, base, 0.25), 0.7);
-  for (let index = 0; index < 2; index += 1) {
-    const cx = left + 7 + index * chevron * 2;
-    graphics.fillTriangle(
-      cx,
-      top + height - 7,
-      cx + chevron,
-      top + height - 7 - chevron,
-      cx + chevron * 2,
-      top + height - 7,
-    );
-    const rx = left + width - 7 - index * chevron * 2;
-    graphics.fillTriangle(
-      rx,
-      top + height - 7,
-      rx - chevron,
-      top + height - 7 - chevron,
-      rx - chevron * 2,
-      top + height - 7,
-    );
+  // Warm ember halo so the interior never reads as an empty dark box.
+  graphics.fillStyle(hot, 0.1);
+  graphics.fillCircle(coreX, coreY, minDim * 0.44);
+
+  // Hazard stripes: four bold diagonal cuts across the top; the slant flips
+  // per block like crates packed in different directions.
+  const stripe = Math.max(4, Math.round(width * 0.09));
+  const slantRight = hashUnit(hash, 33) > 0.5;
+  graphics.fillStyle(blend(0xffe27d, palette.body, 0.15), 0.95);
+  for (let index = 0; index < 4; index += 1) {
+    const sx = left + 4 + index * stripe * 1.6;
+    if (slantRight) {
+      graphics.fillTriangle(sx, top + 3, sx + stripe, top + 3, sx + stripe, top + 3 + stripe);
+      graphics.fillTriangle(sx + stripe, top + 3, sx + stripe * 2, top + 3, sx + stripe, top + 3 + stripe);
+    } else {
+      graphics.fillTriangle(sx, top + 3, sx + stripe, top + 3, sx, top + 3 + stripe);
+      graphics.fillTriangle(sx, top + 3, sx - stripe, top + 3, sx, top + 3 + stripe);
+    }
   }
 
-  // Fuse: a short jagged cord from the top edge into the crate.
-  const fuseStartX = centreX + (hashUnit(hash, 3) - 0.5) * width * 0.18;
-  const fuseY = top + 9;
-  graphics.lineStyle(2, 0x1c0a04, 0.95);
-  graphics.lineBetween(Math.round(fuseStartX), fuseY, Math.round(fuseStartX + 4), top + 5);
-  graphics.lineBetween(Math.round(fuseStartX + 4), top + 5, Math.round(fuseStartX + 9), top + 7);
-  graphics.lineStyle(1, 0xd9a066, 0.8);
-  graphics.lineBetween(Math.round(fuseStartX), fuseY - 1, Math.round(fuseStartX + 4), top + 4);
-  // Spark cluster at the fuse tip.
+  // Short stepped fuse sprouting from the top edge, offset per block.
+  const fuseX = Math.round(centreX + (hashUnit(hash, 30) - 0.5) * width * 0.3);
+  graphics.fillStyle(0x1c0a04, 0.95);
+  graphics.fillRect(fuseX, top + 4, 1, 4);
+  graphics.fillRect(fuseX + 1, top + 3, 2, 1);
+  graphics.fillRect(fuseX + 3, top + 4, 1, 4);
+  graphics.fillStyle(0xd9a066, 0.8);
+  graphics.fillRect(fuseX + 3, top + 3, 2, 1);
+  // Spark at the tip.
   graphics.fillStyle(0xfff2c4, 0.95);
-  graphics.fillRect(Math.round(fuseStartX + 9), top + 4, 2, 2);
-  graphics.fillStyle(0xffb347, 0.8);
-  graphics.fillRect(Math.round(fuseStartX + 12), top + 3, 1, 1);
-  graphics.fillRect(Math.round(fuseStartX + 8), top + 1, 1, 1);
+  graphics.fillRect(fuseX + 4, top + 3, 2, 2);
+  graphics.fillStyle(0xffb347, 0.85);
+  graphics.fillRect(fuseX + 6, top + 2, 1, 1);
 
-  // Unstable core: dark socket, molten ring, white-hot centre.
-  graphics.fillStyle(0x120402, 0.9);
-  graphics.fillCircle(centreX, coreY, Math.min(width, height) * 0.26);
-  graphics.lineStyle(2, hot, 0.9);
-  graphics.strokeCircle(centreX, coreY, Math.min(width, height) * 0.23);
-  graphics.fillStyle(hot, 0.85);
-  graphics.fillCircle(centreX, coreY, Math.min(width, height) * 0.15);
+  // Molten core: dark socket, hot ring, white-hot centre with a star spark.
+  graphics.fillStyle(0x180602, 0.95);
+  graphics.fillCircle(coreX, coreY, minDim * 0.26);
+  graphics.lineStyle(Math.max(2, Math.round(minDim * 0.045)), hot, 0.95);
+  graphics.strokeCircle(coreX, coreY, minDim * 0.19);
+  graphics.fillStyle(blend(0xffcf6b, 0xffffff, 0.35), 0.9);
+  graphics.fillCircle(coreX, coreY, minDim * 0.1);
   graphics.fillStyle(0xffffff, 0.95);
-  graphics.fillRect(Math.round(centreX) - 2, Math.round(coreY) - 2, 3, 3);
-  graphics.fillStyle(accent, 0.35);
-  graphics.fillCircle(centreX, coreY, Math.min(width, height) * 0.31);
-
-  // Rivets in the four corners.
-  graphics.fillStyle(0x2a1206, 0.9);
-  const inset = Math.max(4, Math.round(width * 0.1));
-  for (const [rx, ry] of [
-    [left + inset, top + inset],
-    [left + width - inset, top + inset],
-    [left + inset, top + height - inset],
-    [left + width - inset, top + height - inset],
-  ] as const) {
-    graphics.fillRect(rx - 1, ry - 1, 3, 3);
-    graphics.fillStyle(0xffc38a, 0.5);
-    graphics.fillRect(rx - 1, ry - 1, 1, 1);
-    graphics.fillStyle(0x2a1206, 0.9);
-  }
+  graphics.fillRect(Math.round(coreX) - 2, Math.round(coreY) - 2, 3, 3);
+  graphics.fillRect(Math.round(coreX) - 1, Math.round(coreY) - 5, 1, 2);
+  graphics.fillRect(Math.round(coreX) + 3, Math.round(coreY) - 1, 2, 1);
 }
 
-/**
- * Organic geode: a rounded crystal belly with branching green veins and a
- * bright healing cross at the centre. The cross is the grayscale cue.
- */
+/** Regenerative: living green belly, healing cross, leaf sprigs. */
 function drawRegenerative(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
-  base: number,
+  palette: BlockPalette,
   accent: number,
   hash: number,
 ): void {
@@ -606,65 +743,71 @@ function drawRegenerative(
   const top = block.top;
   const width = block.width;
   const height = block.height;
-  const centreX = left + width / 2;
-  const centreY = top + height * 0.5;
-  const vein = blend(0x6dff9e, 0xffffff, 0.25);
-  const flesh = blend(base, 0x0a2a18, 0.4);
+  const minDim = Math.min(width, height);
+  const centreX = left + width / 2 + Math.round((hashUnit(hash, 40) - 0.5) * minDim * 0.1);
+  const centreY = top + height * 0.52 + Math.round((hashUnit(hash, 41) - 0.5) * minDim * 0.08);
+  const vein = blend(0x7dffb0, 0xffffff, 0.2);
 
-  // Living crystal belly.
-  graphics.fillStyle(flesh, 0.9);
-  graphics.fillPoints(steppedRect(left + 4, top + 4, width - 8, height - 8, 0, 8), true);
-  graphics.lineStyle(1, blend(vein, 0x000000, 0.45), 0.7);
-  graphics.strokePoints(steppedRect(left + 5, top + 5, width - 10, height - 10, 0, 7), true);
+  // Living belly, slightly darker than the tile body.
+  graphics.fillStyle(blend(palette.body, palette.deep, 0.4), 0.95);
+  graphics.fillPoints(steppedRect(left + 4, top + 4, width - 8, height - 8, 0, 6), true);
 
-  // Branching veins radiating from the core.
-  const branches = 5 + (hash % 3);
-  for (let index = 0; index < branches; index += 1) {
-    const angle = (index / branches) * Math.PI * 2 + hashUnit(hash, 12) * 0.5;
-    const reach = Math.min(width, height) * (0.24 + hashUnit(hash, 20 + index) * 0.18);
-    const midX = centreX + Math.cos(angle) * reach * 0.5;
-    const midY = centreY + Math.sin(angle) * reach * 0.5;
-    const tipX = centreX + Math.cos(angle) * reach;
-    const tipY = centreY + Math.sin(angle) * reach;
-    graphics.lineStyle(1, vein, 0.5);
-    graphics.lineBetween(centreX, centreY, Math.round(midX), Math.round(midY));
-    graphics.lineBetween(Math.round(midX), Math.round(midY), Math.round(tipX), Math.round(tipY));
-    // Tiny leaf/spore at the tip.
-    graphics.fillStyle(vein, 0.7);
-    graphics.fillRect(Math.round(tipX), Math.round(tipY), 2, 2);
-  }
+  // Soft glow behind the cross, tied to the phase accent.
+  graphics.fillStyle(vein, 0.1);
+  graphics.fillCircle(centreX, centreY, minDim * 0.3);
+  graphics.fillStyle(accent, 0.08);
+  graphics.fillCircle(centreX, centreY, minDim * 0.38);
 
-  // Healing cross: dark outline then a bright, pixel-stepped plus sign.
-  const arm = Math.max(3, Math.round(Math.min(width, height) * 0.09));
-  const thickness = Math.max(3, Math.round(arm * 1.2));
+  // Healing cross: dark backing, bright stepped plus, white glint. Arm
+  // proportions and position vary per block like living growth; about half
+  // the blocks grow a hollow cross with a bud instead of a solid one.
+  const arm = Math.max(4, Math.round(minDim * 0.11 * (0.95 + hashUnit(hash, 42) * 0.15)));
+  const thick = Math.max(4, Math.round(arm * (1.05 + hashUnit(hash, 43) * 0.2)));
   const crossX = Math.round(centreX - arm);
   const crossY = Math.round(centreY - arm);
-  graphics.fillStyle(0x04120a, 0.9);
-  graphics.fillRect(crossX - 1, crossY - 1, arm * 2 + 2, thickness + 2);
-  graphics.fillRect(crossX + arm - thickness / 2 - 1, crossY - 1, thickness + 2, arm * 2 + 2);
+  const hollow = hashUnit(hash, 44) > 0.55;
+  graphics.fillStyle(blend(vein, 0x000000, 0.55), 0.9);
+  graphics.fillRect(crossX - 1, crossY - 1, arm * 2 + 2, thick + 2);
+  graphics.fillRect(Math.round(centreX - thick / 2) - 1, crossY - 1, thick + 2, arm * 2 + 2);
   graphics.fillStyle(vein, 0.95);
-  graphics.fillRect(crossX, crossY, arm * 2, thickness);
-  graphics.fillRect(crossX + arm - thickness / 2, crossY, thickness, arm * 2);
-  graphics.fillStyle(0xffffff, 0.85);
-  graphics.fillRect(crossX, crossY, Math.max(2, arm - 1), Math.max(1, Math.round(thickness / 2)));
-  graphics.fillRect(
-    crossX + arm - thickness / 2,
-    crossY,
-    Math.max(1, Math.round(thickness / 2)),
-    Math.max(2, arm - 1),
-  );
-  // Soft glow behind the cross.
-  graphics.fillStyle(vein, 0.08);
-  graphics.fillCircle(centreX, centreY, Math.min(width, height) * 0.34);
-  graphics.fillStyle(accent, 0.16);
-  graphics.fillCircle(centreX, centreY, Math.min(width, height) * 0.42);
+  if (hollow) {
+    // Hollow cross: four bright arms around a dark bud socket.
+    graphics.fillRect(Math.round(centreX - thick / 2), crossY, thick, arm - thick / 2);
+    graphics.fillRect(Math.round(centreX - thick / 2), crossY + arm + thick / 2, thick, arm - thick / 2);
+    graphics.fillRect(crossX, Math.round(centreY - thick / 2), arm - thick / 2, thick);
+    graphics.fillRect(crossX + arm + thick / 2, Math.round(centreY - thick / 2), arm - thick / 2, thick);
+    graphics.fillStyle(blend(vein, 0xffffff, 0.35), 0.9);
+    graphics.fillRect(Math.round(centreX) - 2, Math.round(centreY) - 2, 4, 4);
+  } else {
+    graphics.fillRect(crossX, crossY, arm * 2, thick);
+    graphics.fillRect(Math.round(centreX - thick / 2), crossY, thick, arm * 2);
+    graphics.fillStyle(0xffffff, 0.9);
+    graphics.fillRect(crossX, crossY, Math.max(2, arm - 2), Math.max(2, Math.round(thick * 0.4)));
+    graphics.fillRect(
+      Math.round(centreX - thick / 2),
+      crossY,
+      Math.max(2, Math.round(thick * 0.4)),
+      Math.max(2, arm - 2),
+    );
+  }
+
+  // Leaf sprigs orbit the cross; two or three per block, positions fixed.
+  const sprigs = 2 + (hash % 2);
+  for (let index = 0; index < sprigs; index += 1) {
+    const angle = (index / sprigs) * Math.PI * 2 + hashUnit(hash, 40 + index) * 0.9;
+    const dist = minDim * (0.3 + hashUnit(hash, 45 + index) * 0.06);
+    const leafX = Math.round(centreX + Math.cos(angle) * dist);
+    const leafY = Math.round(centreY + Math.sin(angle) * dist);
+    graphics.fillStyle(vein, 0.75);
+    graphics.fillRect(leafX, leafY, 2, 2);
+  }
 }
 
-/** Track block: a rail across the tile with outward arrows on both sides. */
+/** Moving: recessed rail bed with sleepers and bold outward arrows. */
 function drawMoving(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
-  base: number,
+  palette: BlockPalette,
   accent: number,
   hash: number,
 ): void {
@@ -672,54 +815,83 @@ function drawMoving(
   const top = block.top;
   const width = block.width;
   const height = block.height;
-  const centreY = top + height * 0.52;
-  const arrow = blend(0xdff1ff, accent, 0.3);
-  const vertical = block.motion?.axis === 'vertical';
-  const trackColor = blend(base, 0x0a1220, 0.5);
+  // Rail height varies a little per block so the line of movers breathes.
+  const centreY = top + height * (0.5 + (hashUnit(hash, 50) - 0.5) * 0.12);
+  const railDark = blend(palette.body, palette.deep, 0.4);
+  const railLit = blend(0xffffff, accent, 0.35);
+  const arrowL = Math.max(5, Math.round(Math.min(width, height) * (0.16 + hashUnit(hash, 51) * 0.05)));
 
-  // Recessed inner panel.
-  graphics.fillStyle(trackColor, 0.8);
-  graphics.fillPoints(steppedRect(left + 4, top + 4, width - 8, height - 8, 0, 4), true);
+  // Recessed panel.
+  graphics.fillStyle(blend(palette.body, palette.deep, 0.35), 0.85);
+  graphics.fillPoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 4), true);
 
-  if (vertical) {
-    // Vertical rail variant (future-proof; current waves move horizontally).
+  if (block.motion?.axis === 'vertical') {
     const centreX = left + width / 2;
-    graphics.fillStyle(0x08101c, 0.9);
-    graphics.fillRect(centreX - 3, top + 6, 6, height - 12);
-    graphics.fillStyle(blend(accent, 0xffffff, 0.35), 0.55);
-    for (let y = top + 8; y < top + height - 8; y += 7) {
+    graphics.fillStyle(railDark, 0.92);
+    graphics.fillRect(centreX - 3, top + 5, 6, height - 10);
+    graphics.fillStyle(railLit, 0.75);
+    for (let y = top + 8; y < top + height - 8; y += 8) {
       graphics.fillRect(centreX - 2, y, 4, 2);
     }
-    graphics.fillStyle(arrow, 0.9);
-    graphics.fillTriangle(centreX, top + 5, centreX - 5, top + 12, centreX + 5, top + 12);
-    graphics.fillTriangle(centreX, top + height - 5, centreX - 5, top + height - 12, centreX + 5, top + height - 12);
+    graphics.fillStyle(railLit, 0.95);
+    graphics.fillTriangle(centreX, top + 4, centreX - arrowL, top + 4 + arrowL, centreX + arrowL, top + 4 + arrowL);
+    graphics.fillTriangle(
+      centreX,
+      top + height - 4,
+      centreX - arrowL,
+      top + height - 4 - arrowL,
+      centreX + arrowL,
+      top + height - 4 - arrowL,
+    );
     return;
   }
 
-  // Rail bed with sleepers.
-  graphics.fillStyle(0x08101c, 0.9);
-  graphics.fillRect(left + 6, centreY - 3, width - 12, 7);
-  graphics.fillStyle(blend(accent, 0xffffff, 0.35), 0.6);
-  for (let x = left + 8; x < left + width - 8; x += 7) {
-    graphics.fillRect(x, centreY - 2, 4, 2);
+  // Rail band with sleepers.
+  graphics.fillStyle(railDark, 0.92);
+  graphics.fillRect(left + 4, centreY - 3, width - 8, 6);
+  graphics.fillStyle(railLit, 0.7);
+  for (let x = left + 7; x < left + width - 7; x += 9) {
+    graphics.fillRect(x, centreY - 2, 5, 2);
   }
-  graphics.fillStyle(0x1a2636, 1);
-  graphics.fillRect(left + 5, centreY - 4, width - 10, 1);
-  graphics.fillRect(left + 5, centreY + 4, width - 10, 1);
+  graphics.fillStyle(0xffffff, 0.26);
+  graphics.fillRect(left + 4, centreY - 4, width - 8, 1);
+  graphics.fillStyle(0x000000, 0.3);
+  graphics.fillRect(left + 4, centreY + 3, width - 8, 1);
 
-  // Motion streaks above/below the rail, length seeded by id.
-  const streak = 0.4 + hashUnit(hash, 30) * 0.5;
-  graphics.fillStyle(arrow, 0.32);
-  graphics.fillRect(left + 8, centreY - 9 - hashUnit(hash, 31) * 4, (width - 16) * streak, 1);
-  graphics.fillRect(left + width - 8 - (width - 16) * streak, centreY + 8 + hashUnit(hash, 32) * 4, (width - 16) * streak, 1);
+  // Bold outward chevrons, cut for a two-tone arrow.
+  graphics.fillStyle(railLit, 0.95);
+  graphics.fillTriangle(left + 4, centreY, left + 4 + arrowL, centreY - arrowL, left + 4 + arrowL, centreY + arrowL);
+  graphics.fillTriangle(
+    left + width - 4,
+    centreY,
+    left + width - 4 - arrowL,
+    centreY - arrowL,
+    left + width - 4 - arrowL,
+    centreY + arrowL,
+  );
+  graphics.fillStyle(railDark, 1);
+  graphics.fillTriangle(
+    left + 4 + arrowL * 0.4,
+    centreY,
+    left + 4 + arrowL,
+    centreY - arrowL * 0.55,
+    left + 4 + arrowL,
+    centreY + arrowL * 0.55,
+  );
+  graphics.fillTriangle(
+    left + width - 4 - arrowL * 0.4,
+    centreY,
+    left + width - 4 - arrowL,
+    centreY - arrowL * 0.55,
+    left + width - 4 - arrowL,
+    centreY + arrowL * 0.55,
+  );
 
-  // Outward chevrons on both sides.
-  graphics.fillStyle(arrow, 0.9);
-  graphics.fillTriangle(left + 5, centreY, left + 13, centreY - 7, left + 13, centreY + 7);
-  graphics.fillTriangle(left + width - 5, centreY, left + width - 13, centreY - 7, left + width - 13, centreY + 7);
-  graphics.fillStyle(0x08101c, 0.9);
-  graphics.fillTriangle(left + 8, centreY, left + 13, centreY - 4, left + 13, centreY + 4);
-  graphics.fillTriangle(left + width - 8, centreY, left + width - 13, centreY - 4, left + width - 13, centreY + 4);
+  // Motion streaks above and below the rail, length seeded by id.
+  const streak = Math.round((width - 16) * (0.4 + hashUnit(hash, 52) * 0.35));
+  graphics.fillStyle(railLit, 0.4);
+  graphics.fillRect(left + 8, centreY - 8, streak, 1);
+  graphics.fillRect(left + width - 8 - streak, centreY + 7, streak, 1);
 }
 
 /** Pixel glyphs for the multiplier plate: a "×2" stamp in a 5x7 grid. */
@@ -733,7 +905,7 @@ function drawPixelGlyph(
   originY: number,
   scale: number,
 ): number {
-  const width = (pattern[0]?.length ?? 0) * scale;
+  const glyphWidth = (pattern[0]?.length ?? 0) * scale;
   for (let row = 0; row < pattern.length; row += 1) {
     const line = pattern[row]!;
     for (let col = 0; col < line.length; col += 1) {
@@ -742,73 +914,66 @@ function drawPixelGlyph(
       }
     }
   }
-  return width;
+  return glyphWidth;
 }
 
-/** Golden score plate: inset sunken panel and a bright "×2" stamp. */
+/** Multiplier: golden score plate with a bold "×2" stamp. */
 function drawMultiplier(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
-  base: number,
-  accent: number,
+  palette: BlockPalette,
   hash: number,
 ): void {
   const left = block.left;
   const top = block.top;
   const width = block.width;
   const height = block.height;
-  const gold = blend(0xffd84d, 0xfff2c4, 0.35);
-  const shadow = blend(base, 0x2a1e03, 0.55);
+  const gold = blend(0xffd84d, 0xfff2c4, 0.3);
 
-  // Sunken plate.
-  graphics.fillStyle(shadow, 0.95);
+  // Sunken gold plate with a lit top edge.
+  graphics.fillStyle(blend(palette.body, 0x2a1e03, 0.5), 0.95);
   graphics.fillPoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 5), true);
-  graphics.fillStyle(blend(gold, 0x6b4d08, 0.35), 0.9);
+  graphics.fillStyle(blend(gold, 0x7a5708, 0.28), 0.92);
   graphics.fillPoints(steppedRect(left + 5, top + 5, width - 10, height - 10, 0, 4), true);
-  graphics.lineStyle(1, 0xfff8d8, 0.5);
-  graphics.strokePoints(steppedRect(left + 5, top + 5, width - 10, height - 10, 0, 4), true);
+  graphics.fillStyle(0xfff8d8, 0.45);
+  graphics.fillRect(left + 5, top + 5, width - 10, 1);
 
-  // Corner studs.
-  graphics.fillStyle(0xfff2c4, 0.7);
-  graphics.fillRect(left + 3, top + 3, 2, 2);
-  graphics.fillRect(left + width - 5, top + 3, 2, 2);
-  graphics.fillRect(left + 3, top + height - 5, 2, 2);
-  graphics.fillRect(left + width - 5, top + height - 5, 2, 2);
+  // Deterministic gleam streak on the plate.
+  const gleamX = Math.round(left + 8 + hashUnit(hash, 60) * (width - 20));
+  graphics.fillStyle(0xffffff, 0.2);
+  graphics.fillRect(gleamX, top + 7, 1, height - 16);
 
-  // Deterministic gleam on the plate.
-  const gleamX = left + 8 + hashUnit(hash, 40) * (width - 20);
-  graphics.fillStyle(0xffffff, 0.28);
-  graphics.fillRect(Math.round(gleamX), top + 7, 1, height - 16);
-
-  // "×2" stamp.
+  // "×2" stamp: dark ink with a light emboss, centred. Stamp size steps up or
+  // down by one pixel per block, like individually pressed plates.
   const glyphHeight = 7;
-  const scale = Math.max(2, Math.floor(Math.min(width * 0.7, height * 0.6) / glyphHeight));
+  const scale = Math.max(
+    2,
+    Math.floor(Math.min(width * 0.72, height * 0.62) / glyphHeight) +
+      (hashUnit(hash, 61) > 0.5 ? 1 : 0),
+  );
   const glyphWidth = 5 * scale;
   const gap = Math.max(2, Math.round(scale * 0.8));
   const totalWidth = glyphWidth * 2 + gap;
   const originX = Math.round(left + (width - totalWidth) / 2);
   const originY = Math.round(top + (height - glyphHeight * scale) / 2);
-  graphics.fillStyle(0x3a2600, 0.55);
+  graphics.fillStyle(0x3a2600, 0.5);
   drawPixelGlyph(graphics, GLYPH_X, originX + 1, originY + 1, scale);
   drawPixelGlyph(graphics, GLYPH_TWO, originX + glyphWidth + gap + 1, originY + 1, scale);
-  graphics.fillStyle(0xfff8d8, 0.35);
-  drawPixelGlyph(graphics, GLYPH_X, originX - 1, originY - 1, scale);
-  drawPixelGlyph(graphics, GLYPH_TWO, originX + glyphWidth + gap - 1, originY - 1, scale);
   graphics.fillStyle(0x201400, 0.95);
   drawPixelGlyph(graphics, GLYPH_X, originX, originY, scale);
   drawPixelGlyph(graphics, GLYPH_TWO, originX + glyphWidth + gap, originY, scale);
 
-  // Gold aura corners.
-  graphics.fillStyle(accent, 0.2);
-  graphics.fillRect(left + 2, top + 2, width - 4, 1);
-  graphics.fillRect(left + 2, top + height - 3, width - 4, 1);
+  // Corner sparkle on the plate.
+  graphics.fillStyle(0xffffff, 0.8);
+  graphics.fillRect(left + width - 9, top + 6, 1, 3);
+  graphics.fillRect(left + width - 10, top + 7, 3, 1);
 }
 
-/** Gear-portal generator: notched ring, spokes and a luminous core. */
+/** Generator: notched gear ring around a luminous portal core. */
 function drawGenerator(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
-  base: number,
+  palette: BlockPalette,
   accent: number,
   hash: number,
 ): void {
@@ -818,65 +983,63 @@ function drawGenerator(
   const height = block.height;
   const centreX = left + width / 2;
   const centreY = top + height / 2;
-  const radius = Math.min(width, height) * 0.29;
-  const metal = blend(base, 0x1a1030, 0.45);
-  const light = blend(base, 0xffffff, 0.4);
+  const radius = Math.min(width, height) * 0.32;
+  const metal = blend(palette.body, 0x1a1030, 0.3);
+  const lit = blend(palette.body, 0xffffff, 0.45);
 
-  // Dark recess.
-  graphics.fillStyle(0x08050f, 0.9);
-  graphics.fillPoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, 5), true);
+  // Dark socket, kept purple-tinted and inset so the tile frame still shows.
+  graphics.fillStyle(0x140a24, 0.92);
+  graphics.fillPoints(steppedRect(left + 5, top + 5, width - 10, height - 10, 0, 4), true);
 
-  // Gear teeth: eight axis-aligned studs around the ring.
+  // Gear teeth: eight studs around the ring, one rotation per block.
   const tooth = Math.max(3, Math.round(radius * 0.32));
+  const spin = hashUnit(hash, 70) * 0.3;
   graphics.fillStyle(metal, 1);
   for (let index = 0; index < 8; index += 1) {
-    const angle = (index / 8) * Math.PI * 2 + hashUnit(hash, 50) * 0.2;
-    const tx = centreX + Math.cos(angle) * (radius + tooth * 0.55);
-    const ty = centreY + Math.sin(angle) * (radius + tooth * 0.55);
-    graphics.fillRect(Math.round(tx - tooth / 2), Math.round(ty - tooth / 2), tooth, tooth);
-    graphics.fillStyle(light, 0.45);
-    graphics.fillRect(Math.round(tx - tooth / 2), Math.round(ty - tooth / 2), tooth, 1);
-    graphics.fillStyle(metal, 1);
+    const angle = (index / 8) * Math.PI * 2 + spin;
+    const tx = Math.round(centreX + Math.cos(angle) * (radius + tooth * 0.45));
+    const ty = Math.round(centreY + Math.sin(angle) * (radius + tooth * 0.45));
+    graphics.fillRect(tx - tooth / 2, ty - tooth / 2, tooth, tooth);
   }
 
-  // Ring body.
+  // Ring body with light and accent edges.
   graphics.lineStyle(Math.max(2, Math.round(radius * 0.28)), metal, 1);
   graphics.strokeCircle(centreX, centreY, radius);
-  graphics.lineStyle(1, light, 0.6);
+  graphics.lineStyle(1, lit, 0.55);
   graphics.strokeCircle(centreX, centreY, radius + 2);
-  graphics.lineStyle(1, blend(accent, 0xffffff, 0.4), 0.5);
+  graphics.lineStyle(1, blend(accent, 0xffffff, 0.35), 0.6);
   graphics.strokeCircle(centreX, centreY, radius - 3);
 
-  // Spokes.
-  graphics.lineStyle(1, metal, 0.9);
+  // Spokes, rotated per block so no two gears mesh at the same angle.
+  graphics.lineStyle(1, metal, 0.85);
+  const spokeBase = hashUnit(hash, 71) * Math.PI * 0.5;
   for (let index = 0; index < 4; index += 1) {
-    const angle = (index / 4) * Math.PI * 2 + Math.PI / 4;
+    const angle = (index / 4) * Math.PI * 2 + spokeBase;
     graphics.lineBetween(
-      Math.round(centreX + Math.cos(angle) * radius * 0.35),
-      Math.round(centreY + Math.sin(angle) * radius * 0.35),
-      Math.round(centreX + Math.cos(angle) * radius * 0.86),
-      Math.round(centreY + Math.sin(angle) * radius * 0.86),
+      Math.round(centreX + Math.cos(angle) * radius * 0.3),
+      Math.round(centreY + Math.sin(angle) * radius * 0.3),
+      Math.round(centreX + Math.cos(angle) * radius * 0.82),
+      Math.round(centreY + Math.sin(angle) * radius * 0.82),
     );
   }
 
-  // Portal core with concentric pulse rings.
-  graphics.fillStyle(accent, 0.14);
-  graphics.fillCircle(centreX, centreY, radius * 0.85);
-  graphics.fillStyle(blend(accent, 0xffffff, 0.3), 0.5);
-  graphics.fillCircle(centreX, centreY, radius * 0.45);
-  graphics.fillStyle(0x080414, 0.85);
-  graphics.fillCircle(centreX, centreY, radius * 0.25);
+  // Portal core, sized per block.
+  const coreR = radius * (0.2 + hashUnit(hash, 72) * 0.07);
+  graphics.fillStyle(accent, 0.16);
+  graphics.fillCircle(centreX, centreY, radius * 0.8);
+  graphics.fillStyle(blend(accent, 0xffffff, 0.35), 0.5);
+  graphics.fillCircle(centreX, centreY, coreR * 2);
+  graphics.fillStyle(0x0a0518, 0.9);
+  graphics.fillCircle(centreX, centreY, coreR);
   graphics.fillStyle(0xffffff, 0.95);
-  graphics.fillCircle(centreX, centreY, Math.max(2, radius * 0.12));
-  graphics.lineStyle(1, 0xffffff, 0.35);
-  graphics.strokeCircle(centreX, centreY, radius * 0.62);
+  graphics.fillCircle(centreX, centreY, Math.max(2, coreR * 0.45));
 }
 
-/** Chain block: two interlocking links and rune studs. */
+/** Linked: two interlocking chain links, a spark and corner studs. */
 function drawLinked(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
-  base: number,
+  palette: BlockPalette,
   accent: number,
   hash: number,
 ): void {
@@ -884,36 +1047,57 @@ function drawLinked(
   const top = block.top;
   const width = block.width;
   const height = block.height;
+  const centreX = left + width / 2;
   const centreY = top + height / 2;
-  const rune = blend(base, 0xffffff, 0.45);
-  const dark = blend(base, 0x041014, 0.6);
+  const rune = blend(palette.body, 0xffffff, 0.5);
+  const dark = blend(palette.body, palette.deep, 0.5);
   const groupSalt = block.linkGroup ?? 0;
+  // Chain direction follows the link group: even groups hang horizontal,
+  // odd groups hang vertical, so linked waves read as grouped runs.
+  const vertical = groupSalt % 2 === 1;
 
   // Dark inlay.
-  graphics.fillStyle(0x041014, 0.7);
+  graphics.fillStyle(dark, 0.75);
   graphics.fillPoints(steppedRect(left + 4, top + 4, width - 8, height - 8, 0, 6), true);
 
-  // Two interlocking chain links drawn as stepped capsules.
-  const linkWidth = Math.max(9, Math.round(width * 0.3));
-  const linkHeight = Math.max(7, Math.round(height * 0.36));
-  const linkY = Math.round(centreY - linkHeight / 2);
+  // Two interlocking links drawn as stepped capsules.
+  const linkWidth = Math.max(9, Math.round(width * 0.28));
+  const linkHeight = vertical
+    ? Math.max(12, Math.round(height * 0.4))
+    : Math.max(7, Math.round(height * 0.34));
   for (let index = 0; index < 2; index += 1) {
-    const linkX = Math.round(
-      left + width * (0.19 + index * 0.31) + (hashUnit(hash, 60 + index) - 0.5) * 2,
-    );
-    graphics.lineStyle(3, dark, 0.95);
+    let linkX: number;
+    let linkY: number;
+    if (vertical) {
+      linkX = Math.round(
+        centreX - linkWidth / 2 + (index === 0 ? -width * 0.17 : width * 0.17) + (hashUnit(hash, 80 + index) - 0.5) * 2,
+      );
+      linkY = Math.round(centreY - linkHeight / 2);
+    } else {
+      linkX = Math.round(
+        left + width * (0.2 + index * 0.3) + (hashUnit(hash, 80 + index) - 0.5) * 2,
+      );
+      linkY = Math.round(centreY - linkHeight / 2);
+    }
+    graphics.lineStyle(4, dark, 0.95);
     graphics.strokeRoundedRect(linkX, linkY, linkWidth, linkHeight, 4);
-    graphics.lineStyle(2, rune, 0.9);
+    graphics.lineStyle(2, rune, 0.95);
     graphics.strokeRoundedRect(linkX, linkY, linkWidth, linkHeight, 4);
-    graphics.lineStyle(1, 0xffffff, 0.4);
+    graphics.lineStyle(1, 0xffffff, 0.5);
     graphics.strokeRoundedRect(linkX + 1, linkY + 1, linkWidth - 2, linkHeight - 2, 3);
   }
 
-  // Connection spark between the links.
-  graphics.fillStyle(0xffffff, 0.8);
-  graphics.fillRect(Math.round(left + width * 0.5) - 2, Math.round(centreY) - 1, 4, 2);
+  // Connection spark between the links, tinted by the phase.
+  graphics.fillStyle(0xffffff, 0.85);
+  graphics.fillRect(Math.round(centreX) - 1, Math.round(centreY) - 1, 2, 2);
+  graphics.fillStyle(accent, 0.55);
+  if (vertical) {
+    graphics.fillRect(Math.round(centreX), Math.round(centreY) - 3, 1, 6);
+  } else {
+    graphics.fillRect(Math.round(centreX) - 3, Math.round(centreY), 6, 1);
+  }
 
-  // Rune studs at the corners; positions vary by link group.
+  // Corner studs; the lit pattern varies by link group.
   const inset = Math.max(4, Math.round(width * 0.12));
   const studs = [
     [left + inset, top + inset],
@@ -924,25 +1108,13 @@ function drawLinked(
   for (let index = 0; index < studs.length; index += 1) {
     const [sx, sy] = studs[index]!;
     const lit = (index + groupSalt) % 2 === 0;
-    graphics.fillStyle(lit ? rune : dark, lit ? 0.85 : 0.9);
+    graphics.fillStyle(lit ? rune : dark, lit ? 0.9 : 0.95);
     graphics.fillRect(Math.round(sx) - 1, Math.round(sy) - 1, 3, 3);
     if (lit) {
       graphics.fillStyle(0xffffff, 0.7);
       graphics.fillRect(Math.round(sx), Math.round(sy), 1, 1);
     }
   }
-
-  // Faint ties from the chain to the runes.
-  graphics.lineStyle(1, rune, 0.22);
-  graphics.lineBetween(left + inset + 2, top + inset + 2, Math.round(left + width * 0.19), linkY + 2);
-  graphics.lineBetween(
-    left + width - inset - 2,
-    top + height - inset - 2,
-    Math.round(left + width * 0.81),
-    linkY + linkHeight - 2,
-  );
-  graphics.fillStyle(accent, 0.14);
-  graphics.fillCircle(left + width / 2, centreY, Math.min(width, height) * 0.2);
 }
 
 function drawDamageCracks(
@@ -959,106 +1131,112 @@ function drawDamageCracks(
 
   for (let index = 0; index < damage; index += 1) {
     // Each crack is a jagged polyline from an edge towards the centre.
-    const seed = hashUnit(hash, 70 + index * 11);
+    const seed = hashUnit(hash, 100 + index * 11);
     const fromLeft = seed > 0.5;
     const startX = fromLeft
       ? left + 3
-      : left + width * (0.35 + hashUnit(hash, 72 + index * 11) * 0.3);
-    const startY = top + height * (0.18 + hashUnit(hash, 71 + index * 11) * 0.3);
+      : left + width * (0.35 + hashUnit(hash, 102 + index * 11) * 0.3);
+    const startY = top + height * (0.16 + hashUnit(hash, 101 + index * 11) * 0.28);
     const points: Point[] = [{ x: startX, y: startY }];
     let x = startX;
     let y = startY;
     const segments = 4;
     for (let segment = 1; segment <= segments; segment += 1) {
-      const t = segment / segments;
-      x += (fromLeft ? 1 : -1) * (3 + hashUnit(hash, 80 + index * 11 + segment) * 5);
-      y += (height * 0.55) / segments;
+      x += (fromLeft ? 1 : -1) * (3 + hashUnit(hash, 110 + index * 11 + segment) * 5);
+      y += (height * 0.5) / segments;
       points.push({ x: Math.round(x), y: Math.round(y) });
-      if (t > 0.4 && hashUnit(hash, 90 + index * 11 + segment) > 0.6) {
-        // A short branch keeps the crack organic instead of a straight gash.
-        graphics.lineStyle(1, 0x04060b, 0.72);
-        graphics.lineBetween(
-          Math.round(x),
-          Math.round(y),
-          Math.round(x + (fromLeft ? 1 : -1) * 6),
-          Math.round(y + 4),
-        );
-      }
     }
-    // Dark core plus a light upper edge so cracks survive grayscale.
-    graphics.lineStyle(2, 0x04060b, 0.82);
+    // Impact chip where the crack enters the tile.
+    const dir = fromLeft ? 1 : -1;
+    graphics.fillStyle(0x04060b, 0.92);
+    graphics.fillTriangle(
+      Math.round(startX) + dir * 2,
+      Math.round(startY) - 1,
+      Math.round(startX) - dir * 3,
+      Math.round(startY) + 2,
+      Math.round(startX) + dir * 1,
+      Math.round(startY) + 5,
+    );
+    // Dark core plus a light lower edge so cracks survive grayscale.
+    graphics.lineStyle(2, 0x04060b, 0.85);
     graphics.strokePoints(points, false);
-    graphics.lineStyle(1, 0xffffff, 0.2);
+    graphics.lineStyle(1, 0xffffff, 0.35);
     const shifted = points.map((point) => ({ x: point.x + 1, y: point.y + 1 }));
     graphics.strokePoints(shifted, false);
   }
 }
 
+/** Gem colour for filled HP pips, matched to each material family. */
+function pipGemColor(type: BlockTypeId, accent: number): number {
+  switch (type) {
+    case 'crystal':
+      return blend(0xd8fbff, accent, 0.3);
+    case 'stone':
+      return 0xf0e6ff;
+    case 'obsidian':
+      return blend(0xff9df0, accent, 0.4);
+    default:
+      return blend(BLOCK_TYPES[type].color, 0xffffff, 0.4);
+  }
+}
+
+/**
+ * HP pips as faceted gems on a small dark plate (bottom-left corner), so they
+ * stay readable on every material including the bright crystal body.
+ */
 function drawHpPips(
   graphics: Phaser.GameObjects.Graphics,
   block: Block,
   accent: number,
 ): void {
-  const pipSize = Math.max(7, Math.round(block.width * 0.115));
-  const gap = 3;
-  const total = Math.min(4, Math.max(1, block.maxHp));
-  const startX = block.left + 6;
-  const y = block.top + block.height - pipSize - 6;
-  const backingWidth = total * (pipSize + gap) + 1;
+  const width = block.width;
+  const size = Math.max(6, Math.min(8, Math.round(width * 0.14)));
+  const gap = 2;
+  const total = Math.min(3, Math.max(1, block.maxHp));
+  const plateWidth = total * (size + gap) + 3;
+  const x0 = block.left + 5;
+  const y0 = block.top + block.height - size - 5;
 
-  // Recessed socket strip keeps the pips readable over any material.
-  graphics.fillStyle(0x02030a, 0.8);
-  graphics.fillRect(startX - 3, y - 3, backingWidth + 2, pipSize + 6);
-  graphics.fillStyle(0xffffff, 0.16);
-  graphics.fillRect(startX - 3, y - 3, backingWidth + 2, 1);
-  graphics.fillStyle(0x000000, 0.5);
-  graphics.fillRect(startX - 3, y + pipSize + 2, backingWidth + 2, 1);
+  // Recessed plate with a lit top edge and shaded bottom.
+  graphics.fillStyle(0x02040c, 0.78);
+  graphics.fillPoints(steppedRect(x0 - 2, y0 - 2, plateWidth, size + 4, 0, 2), true);
+  graphics.fillStyle(0xffffff, 0.14);
+  graphics.fillRect(x0 - 1, y0 - 1, plateWidth - 2, 1);
+  graphics.fillStyle(0x000000, 0.4);
+  graphics.fillRect(x0 - 1, y0 + size + 1, plateWidth - 2, 1);
 
   for (let index = 0; index < total; index += 1) {
-    const x = startX + index * (pipSize + gap);
-    // Gem socket.
-    graphics.fillStyle(0x010208, 0.9);
-    graphics.fillRect(x - 1, y - 1, pipSize + 2, pipSize + 2);
-    graphics.lineStyle(1, 0xffffff, 0.32);
-    graphics.strokeRect(x - 1.5, y - 1.5, pipSize + 2, pipSize + 2);
-
+    const x = x0 + index * (size + gap);
+    const diamond = [
+      { x: x + size / 2, y: y0 },
+      { x: x + size, y: y0 + size / 2 },
+      { x: x + size / 2, y: y0 + size },
+      { x, y: y0 + size / 2 },
+    ];
     if (index < block.hp) {
-      const gem =
-        block.type === 'crystal'
-          ? blend(CRYSTAL_LIGHT, accent, 0.3)
-          : block.type === 'stone'
-            ? blend(0xffffff, 0xe8ddff, 0.1)
-            : block.type === 'obsidian'
-              ? blend(OBSIDIAN_RUNE, accent, 0.4)
-              : blend(BLOCK_TYPES[block.type].color, 0xffffff, 0.4);
-      // Faceted gem: a bright pixel diamond with a shaded lower-right half.
-      const diamond = [
-        { x: x + pipSize / 2, y },
-        { x: x + pipSize, y: y + pipSize / 2 },
-        { x: x + pipSize / 2, y: y + pipSize },
-        { x, y: y + pipSize / 2 },
-      ];
+      const gem = pipGemColor(block.type, accent);
+      // Faceted gem: bright diamond with a shaded lower-right half.
       graphics.fillStyle(gem, 0.98);
       graphics.fillPoints(diamond, true);
-      graphics.fillStyle(blend(gem, 0x05060c, 0.45), 0.6);
+      graphics.fillStyle(blend(gem, 0x060a12, 0.45), 0.65);
       graphics.fillTriangle(
-        x + pipSize / 2,
-        y + pipSize / 2,
-        x + pipSize,
-        y + pipSize / 2,
-        x + pipSize / 2,
-        y + pipSize,
+        x + size / 2,
+        y0 + size / 2,
+        x + size,
+        y0 + size / 2,
+        x + size / 2,
+        y0 + size,
       );
-      graphics.fillStyle(0xffffff, 0.9);
-      graphics.fillRect(x + Math.round(pipSize * 0.28), y + 1, 2, 1);
+      graphics.fillStyle(0xffffff, 0.95);
+      graphics.fillRect(x + Math.round(size * 0.28), y0 + 1, 2, 1);
       graphics.lineStyle(1, 0xffffff, 0.5);
       graphics.strokePoints(diamond, true);
     } else {
       // Empty socket: a visible engraving, not a blank square.
-      graphics.fillStyle(0x03040a, 0.95);
-      graphics.fillRect(x + 1, y + 1, pipSize - 2, pipSize - 2);
-      graphics.lineStyle(1, 0xffffff, 0.4);
-      graphics.strokeRect(x + 1.5, y + 1.5, pipSize - 3, pipSize - 3);
+      graphics.fillStyle(0x0a0c16, 0.92);
+      graphics.fillRect(x + 1, y0 + 1, size - 2, size - 2);
+      graphics.lineStyle(1, 0xffffff, 0.3);
+      graphics.strokePoints(diamond, true);
     }
   }
 }

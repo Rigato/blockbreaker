@@ -15,6 +15,26 @@ replaced by this branch. The GitHub Pages review build tracks the branch.
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
 
+## v0.4.0-dev — first impression pass
+
+- **New block art:** polished arcade tiles with saturated materials, deeper
+  bevels, softer shadows and clearer HP/crack feedback, designed to match the
+  store covers and remain readable at mobile size.
+- **New title screen:** animated bouncing-ball attract background, Campaign and
+  Endless mode cards, progress nodes and a Settings entry point. The old
+  `XP · Perks · Levels` and controls footer are gone.
+- **Campaign level select:** full-screen themed cards for the six phases, with
+  per-phase icons, accents, taglines, content highlights, boss badges, best
+  scores and lock states.
+- **Endless unlock:** Endless stays locked until the campaign is completed; the
+  card looks disabled and opens an explanation dialog when tapped.
+- **Settings:** Sound, Music and Screen shake toggles in the menu and pause,
+  persisted through `bb.settings` with backward-compatible defaults.
+- **Save:** `campaignComplete` marks the phase-6 clear and migrates old saves
+  that already have a phase-6 clear.
+- **Menu backdrop:** the static phase-1 wave is no longer used behind the title
+  screen; a presentation-only Phaser layer draws the bouncing balls.
+
 ## Stack
 
 - [Phaser 3.90](https://phaser.io/) for scenes, rendering and input
@@ -174,7 +194,7 @@ Development branch: `feat/v0.2.0`. Not published to any portal yet; the
 - The first perk arrives faster: the first level costs **8 XP**, then the curve
   continues at 20/26/33/39…
 - Launching with **V** (or tap/click) works on the first shot: gameplay focus
-  returns to the canvas after Play, Level select, pause resume and perk choice.
+  returns to the canvas after Campaign, level select, pause resume and perk choice.
   **Space** and **E** fire the Prism Laser during gameplay, even when a HUD
   button still owns focus.
 - Hitting a multi-HP block without breaking it plays a distinct, quieter
@@ -270,7 +290,7 @@ Development branch: `feat/v0.2.0`. Not published to any portal yet; the
 | Pause | Pause button → Resume/Restart/Sound/Menu | Pause button / P → Resume/Restart/Sound/Menu |
 | Laser | Laser button (needs a loose ball) | Laser button / Space / E (needs a loose ball) |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
-| Menu / modes | Pause → Menu, Results → Menu; Menu → Endless | Pause → Menu, Results → Menu; Menu → Endless |
+| Menu / modes | Campaign card → level select; Endless card (after campaign); Settings | Campaign card → level select; Endless card (after campaign); Settings |
 | Rotate device | Portrait only (landscape guard) | — |
 
 The Prism Laser is disabled while every ball is stuck (opening serve or Sticky
@@ -348,6 +368,9 @@ release/                   Generated ZIP + manifest (not committed)
 - [MVP implementation plan](docs/plano-implementacao-mvp.md)
 - [v0.2.0 campaign expansion plan](docs/plano-v0.2.0.md)
 - [Endless mode plan](docs/plano-endless.md)
+- [v0.4.0 visual/menu plan](docs/plano-v0.4.0-menu-visual.md)
+- [GDD × current state gap analysis](docs/gdd-gap-analysis.md)
+- [CrazyGames rejection review](docs/release/crazygames-review.md)
 - [Current handoff — v0.3.0](docs/handoff-v0.3.0.md)
 - [Post-MVP handoff — historical](docs/handoff-proxima-fase.md)
 

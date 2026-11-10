@@ -3,6 +3,7 @@ import {
   LAUNCH_HINT,
   MENU_READY,
   clickDebugAction,
+  collapseDebugPanel,
   expandDebugPanel,
   forceDefeat,
   forceVictory,
@@ -14,21 +15,28 @@ import {
 } from './helpers';
 
 test.describe('smoke', () => {
-  test('boot: menu loads with Play and Levels and no platform API calls', async ({ page }) => {
+  test('boot: menu loads with Campaign, Endless and Settings and no platform API calls', async ({
+    page,
+  }) => {
     const monitor = monitorPage(page);
     await page.goto('/');
     await waitForMenu(page);
 
-    await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Levels', exact: true })).toBeVisible();
+    await expect(page.locator('#campaign-button')).toBeVisible();
+    await expect(page.locator('#endless-button')).toBeVisible();
+    await expect(page.locator('#settings-button')).toBeVisible();
     await expect(page.locator('.menu__title')).toHaveText('Bricklike');
+    await expect(page.getByText('XP · Perks · Levels')).toHaveCount(0);
+    await expect(page.getByText('Portrait · Touch · Mouse · Keyboard')).toHaveCount(0);
+    await expect(page.locator('.menu__card--campaign')).toBeVisible();
+    await expect(page.locator('.menu__card--endless')).toBeVisible();
 
     expect(monitor.consoleErrors).toEqual([]);
     expect(monitor.pageErrors).toEqual([]);
     expect(monitor.requests.filter((url) => url.includes('api.playgama.com'))).toEqual([]);
   });
 
-  test('controls: Space does not launch, V launches, pause/resume and sound persist', async ({
+  test('controls: Space does not launch, V launches, pause/resume and settings persist', async ({
     page,
   }) => {
     const monitor = monitorPage(page);
@@ -56,15 +64,44 @@ test.describe('smoke', () => {
     await page.locator('.overlay--pause').getByRole('button', { name: 'Menu' }).click();
     await expect(page.locator(MENU_READY)).toBeVisible();
 
-    const sound = page.locator('.menu__sound-value');
-    await expect(sound).toHaveText('On');
-    await page.locator('.menu__sound-toggle').click();
-    await expect(sound).toHaveText('Off');
+    await page.locator('#settings-button').click();
+    const settings = page.getByRole('dialog').filter({ hasText: 'Tune the experience' });
+    await expect(settings).toBeVisible();
+    const soundSwitch = settings.getByRole('switch', { name: 'Sound effects' });
+    const musicSwitch = settings.getByRole('switch', { name: 'Music' });
+    const shakeSwitch = settings.getByRole('switch', { name: 'Screen shake' });
+    await expect(soundSwitch).toHaveAttribute('aria-checked', 'true');
+    await expect(musicSwitch).toHaveAttribute('aria-checked', 'true');
+    await expect(shakeSwitch).toHaveAttribute('aria-checked', 'true');
+    await soundSwitch.click();
+    await musicSwitch.click();
+    await shakeSwitch.click();
+    await expect(soundSwitch).toHaveAttribute('aria-checked', 'false');
+    await expect(musicSwitch).toHaveAttribute('aria-checked', 'false');
+    await expect(shakeSwitch).toHaveAttribute('aria-checked', 'false');
+    await settings.getByRole('button', { name: 'Close' }).click();
 
     await page.reload();
     await waitForMenu(page);
-    await expect(page.locator('.menu__sound-value')).toHaveText('Off');
+    await page.locator('#settings-button').click();
+    const reloaded = page.getByRole('dialog').filter({ hasText: 'Tune the experience' });
+    await expect(reloaded.getByRole('switch', { name: 'Sound effects' })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
+    await expect(reloaded.getByRole('switch', { name: 'Music' })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
+    await expect(reloaded.getByRole('switch', { name: 'Screen shake' })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
     expect(await page.evaluate(() => localStorage.getItem('bb.settings'))).toContain('"sound":false');
+    expect(await page.evaluate(() => localStorage.getItem('bb.settings'))).toContain('"music":false');
+    expect(await page.evaluate(() => localStorage.getItem('bb.settings'))).toContain(
+      '"screenShake":false',
+    );
 
     expect(monitor.pageErrors).toEqual([]);
   });
@@ -118,7 +155,8 @@ test.describe('smoke', () => {
 
     await page.goto('/?debug=1');
     await waitForMenu(page);
-    await page.getByRole('button', { name: 'Levels', exact: true }).click();
+    await collapseDebugPanel(page);
+    await page.locator('#campaign-button').click();
     const phase2 = page.locator('.phase-card[data-phase-index="2"]');
     await expect(phase2).toBeVisible();
     await expect(phase2).toBeEnabled();

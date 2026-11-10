@@ -232,6 +232,22 @@ describe('AudioService lifecycle', () => {
     service.dispose();
   });
 
+  it('toggles music independently from sound effects', () => {
+    const doc = installDocument();
+    const { service } = createService();
+    doc.dispatch('pointerdown');
+
+    expect(service.musicOn).toBe(true);
+    service.setMusicEnabled(false);
+    expect(service.musicOn).toBe(false);
+    // SFX and the overall audio state stay available.
+    expect(service.state).toBe('running');
+
+    service.setMusicEnabled(true);
+    expect(service.musicOn).toBe(true);
+    service.dispose();
+  });
+
   it('transitions through muted, suspended, background and updates the dataset', () => {
     const doc = installDocument();
     const { service } = createService();

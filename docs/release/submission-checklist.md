@@ -1,12 +1,15 @@
-# Submission checklist — Bricklike MVP
+# Submission checklist — Bricklike
 
-**Versão:** `0.1.0-mvp`.  
+**Versão de desenvolvimento:** `0.3.x` + revisão visual/menu (v0.4.0-dev).  
+**Build publicado:** `0.1.0-mvp` no itch.io (congelado).  
 **Status global:** pendente de revisão humana.  
 **Quem submete:** o usuário, manualmente, em cada portal. Nenhum upload, tag ou
 release pública foi feito por este trabalho.
 
 Revalidar as regras de cada portal **na data da submissão**; elas mudam com
-frequência. O checklist abaixo registra o pacote preparado no M7.
+frequência. O checklist abaixo registra o pacote atual e o aprendizado da
+primeira rodada de submissões (Playgama sandbox, CrazyGames reprovado,
+GameFlare bloqueado por acesso).
 
 ## Pré-requisitos comuns
 
@@ -18,13 +21,20 @@ frequência. O checklist abaixo registra o pacote preparado no M7.
       `docs/release/portal-metadata.md`. **Pendente de revisão humana.**
 - [ ] Três capas revisadas e aprovadas em `store/covers/`. **Pendente de revisão
       humana.**
-- [ ] Cinco screenshots revisados em `store/screenshots/`. **Pendente de revisão
-      humana.**
+- [ ] Screenshots atualizados com o novo visual (menu, blocos, chefes, Endless).
+      **Pendente de revisão humana.**
 - [ ] Previews de 18,3 s revisados em `store/video/bricklike-preview.mp4`
       (1920×1080) e `store/video/bricklike-preview-portrait.mp4` (1080×1620).
       **Pendente de revisão humana.**
 - [ ] Nome **Bricklike** consistente em todos os portais. **Pendente de revisão
       humana.**
+- [ ] Testar leitura em **907×510**, **1216×684**, **1280×720** e **1920×1080**
+      além de 320×568 e 390×844. **Pendente de revisão humana.**
+- [ ] Onboarding curto na primeira run, visual e pulável. **Pendente de revisão
+      humana.**
+- [ ] Menu leva ao gameplay em 1 clique (Campaign → seleção → Play). **Pendente
+      de revisão humana.**
+
 
 ## Assets compartilhados
 
@@ -111,9 +121,26 @@ frequência. O checklist abaixo registra o pacote preparado no M7.
 | Ads | Desligados no Basic; jogo não trava esperando ad | pendente de revisão humana |
 | Inglês | UI e metadata em inglês | pendente de revisão humana |
 | Mobile | Portrait mobile-friendly; testar em Chromebook/Android | pendente de revisão humana |
+| Desktop | HUD legível em 907×510 e 1920×1080; fundo intencional | pendente de revisão humana |
+| Onboarding | Primeiros 30 s explicam mover, lançar e quebrar | pendente de revisão humana |
+| Consistência | Capa, screenshots e blocos usam a mesma linguagem visual | pendente de revisão humana |
+| Qualidade | Sem artefatos, texto cortado, controles ambíguos ou áudio estourado | pendente de revisão humana |
 | Revalidação | Conferir regras atuais do Basic Launch | pendente de revisão humana |
 | Full Launch | Fora do escopo deste MVP | pendente de revisão humana |
 | Publicação | Usuário submete e acompanha 7 dias/500 plays | pendente de revisão humana |
+
+## Reenvio ao CrazyGames
+
+Antes de reenviar, ler `docs/release/crazygames-review.md`. O FAQ do portal só
+aceita reenvio se houver melhoria clara. A mensagem deve listar:
+
+- novo visual dos blocos e do menu;
+- legibilidade desktop e HUD revisado;
+- onboarding in-game;
+- seleção de fases e modo Endless;
+- settings de som/música/screen shake;
+- screenshots, capa e descrição atualizados.
+
 
 ## Sequência manual acordada
 

@@ -76,6 +76,10 @@ export class HudOverlay {
   private readonly restartButton: HTMLButtonElement;
   private readonly soundButton: HTMLButtonElement;
   private readonly soundValue: HTMLElement;
+  private readonly musicButton: HTMLButtonElement;
+  private readonly musicValue: HTMLElement;
+  private readonly shakeButton: HTMLButtonElement;
+  private readonly shakeValue: HTMLElement;
 
   private readonly resultsSection: HTMLElement;
   private readonly resultsPanel: HTMLElement;
@@ -102,6 +106,8 @@ export class HudOverlay {
   private lastResultPhase: string | null = null;
   private perksSignature = '__unset__';
   private soundEnabled = true;
+  private musicEnabled = true;
+  private shakeEnabled = true;
   private readonly unsubscribeKeydown: () => void;
 
   constructor(options: OverlayOptions) {
@@ -128,35 +134,17 @@ export class HudOverlay {
       controller.restartWave(),
     );
 
-    const sound = document.createElement('div');
-    sound.className = 'overlay__setting';
+    const sound = this.buildSetting(en.settingsSound, en.menuSound, this.handleSound);
+    this.soundButton = sound.button;
+    this.soundValue = sound.value;
 
-    const soundLabel = document.createElement('span');
-    soundLabel.className = 'overlay__setting-label';
-    soundLabel.textContent = en.menuSound;
+    const music = this.buildSetting(en.settingsMusic, en.settingsMusic, this.handleMusic);
+    this.musicButton = music.button;
+    this.musicValue = music.value;
 
-    const soundButton = document.createElement('button');
-    this.soundButton = soundButton;
-    soundButton.type = 'button';
-    soundButton.className = 'overlay__switch';
-    soundButton.setAttribute('role', 'switch');
-    soundButton.setAttribute('aria-label', en.menuSound);
-    soundButton.addEventListener('click', this.handleSound);
-
-    const soundTrack = document.createElement('span');
-    soundTrack.className = 'overlay__switch-track';
-    soundTrack.setAttribute('aria-hidden', 'true');
-
-    const soundThumb = document.createElement('span');
-    soundThumb.className = 'overlay__switch-thumb';
-    soundTrack.append(soundThumb);
-
-    const soundValue = document.createElement('span');
-    this.soundValue = soundValue;
-    soundValue.className = 'overlay__switch-value';
-
-    soundButton.append(soundTrack, soundValue);
-    sound.append(soundLabel, soundButton);
+    const shake = this.buildSetting(en.settingsShake, en.settingsShake, this.handleShake);
+    this.shakeButton = shake.button;
+    this.shakeValue = shake.value;
 
     const pauseMenuButton = buildAction(en.overlayMenu, 'overlay__button--ghost', () =>
       controller.returnToMenu(),
@@ -165,11 +153,15 @@ export class HudOverlay {
     pauseActions.append(
       this.resumeButton,
       this.restartButton,
-      sound,
+      sound.row,
+      music.row,
+      shake.row,
       pauseMenuButton,
     );
     pause.panel.append(pauseTitle, pauseBody, pauseActions);
     this.applySound(true);
+    this.applyMusic(true);
+    this.applyShake(true);
 
     const results = buildPanel('overlay-results-title', 'overlay--results');
     this.resultsSection = results.section;
@@ -264,6 +256,8 @@ export class HudOverlay {
 
   update(snapshot: HudSnapshot): void {
     this.applySound(snapshot.soundEnabled);
+    this.applyMusic(snapshot.musicEnabled);
+    this.applyShake(snapshot.screenShakeEnabled);
 
     const pause = snapshot.phase === 'paused';
     if (pause) this.showPause();
@@ -426,10 +420,72 @@ export class HudOverlay {
     this.soundValue.textContent = enabled ? en.soundOn : en.soundOff;
   }
 
+  private applyMusic(enabled: boolean): void {
+    this.musicEnabled = enabled;
+    this.musicButton.classList.toggle('is-on', enabled);
+    this.musicButton.setAttribute('aria-checked', String(enabled));
+    this.musicValue.textContent = enabled ? en.soundOn : en.soundOff;
+  }
+
+  private applyShake(enabled: boolean): void {
+    this.shakeEnabled = enabled;
+    this.shakeButton.classList.toggle('is-on', enabled);
+    this.shakeButton.setAttribute('aria-checked', String(enabled));
+    this.shakeValue.textContent = enabled ? en.soundOn : en.soundOff;
+  }
+
+  /** Builds one labelled switch row for the pause settings. */
+  private buildSetting(
+    label: string,
+    ariaLabel: string,
+    onToggle: () => void,
+  ): { row: HTMLElement; button: HTMLButtonElement; value: HTMLElement } {
+    const row = document.createElement('div');
+    row.className = 'overlay__setting';
+
+    const text = document.createElement('span');
+    text.className = 'overlay__setting-label';
+    text.textContent = label;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'overlay__switch';
+    button.setAttribute('role', 'switch');
+    button.setAttribute('aria-label', ariaLabel);
+    button.addEventListener('click', onToggle);
+
+    const track = document.createElement('span');
+    track.className = 'overlay__switch-track';
+    track.setAttribute('aria-hidden', 'true');
+
+    const thumb = document.createElement('span');
+    thumb.className = 'overlay__switch-thumb';
+    track.append(thumb);
+
+    const value = document.createElement('span');
+    value.className = 'overlay__switch-value';
+
+    button.append(track, value);
+    row.append(text, button);
+    return { row, button, value };
+  }
+
   private readonly handleSound = (): void => {
     const next = !this.soundEnabled;
     this.applySound(next);
     this.controller.setSound(next);
+  };
+
+  private readonly handleMusic = (): void => {
+    const next = !this.musicEnabled;
+    this.applyMusic(next);
+    this.controller.setMusic(next);
+  };
+
+  private readonly handleShake = (): void => {
+    const next = !this.shakeEnabled;
+    this.applyShake(next);
+    this.controller.setScreenShake(next);
   };
 
   private hidePause(): void {

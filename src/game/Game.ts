@@ -25,6 +25,7 @@ import { AudioService } from '../audio';
 import { ENDLESS_PHASE, endlessEnding, endlessWave } from '../content/endless';
 import { endingForResult } from '../content/endings';
 import { PHASES } from '../content/phases';
+import { summarizePhase } from '../content/phasePresentation';
 import type { PhaseDef, WaveDef } from '../content/types';
 import { InputController } from '../input/Input';
 import { MemoryStorage } from '../platform/MemoryStorage';
@@ -39,6 +40,7 @@ import {
 } from '../progression/Save';
 import { RunState } from '../progression/RunState';
 import { GameScene } from '../render/GameScene';
+import { hexToCss, themeForPhase } from '../render/themes';
 import { FixedStepClock } from '../sim/fixedStep';
 import { FIELD_WIDTH, World, type SimEvent } from '../sim/World';
 
@@ -268,6 +270,7 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   startEndless(): void {
+    if (!this.save.campaignComplete) return;
     this.mode = 'endless';
     this.currentPhase = ENDLESS_PHASE;
     this.currentWaveDef = null;
@@ -286,6 +289,7 @@ export class BlockBreakerGame implements GameCommands {
     this.runState.startRun(this.runSeed);
     this.loadEndlessWave(1);
     this.scene.setPhase('phase-6', 5);
+    this.scene.setMenuMode(false);
     this.audio.setSuspended(false);
     this.phase = 'playing';
     this.sendPlatform('level_started', { world: 'endless', level: 1 });
@@ -322,6 +326,7 @@ export class BlockBreakerGame implements GameCommands {
     this.runState.startRun(this.runSeed);
     this.loadPhaseWave(0);
     this.scene.setPhase(phase.id, phase.index);
+    this.scene.setMenuMode(false);
     this.audio.setSuspended(false);
     this.phase = 'playing';
     this.sendPlatform('level_started', {
@@ -394,6 +399,7 @@ export class BlockBreakerGame implements GameCommands {
       this.world.applyRunModifiers(this.runState.modifiers);
     }
     this.scene.setPhase(PHASES[0]!.id, 1);
+    this.scene.setMenuMode(true);
     this.audio.setSuspended(false);
     this.clock.reset();
     this.pendingLaunch = false;
@@ -404,6 +410,8 @@ export class BlockBreakerGame implements GameCommands {
   getPhaseSelectInfo(): readonly PhaseSelectInfo[] {
     return PHASES.map((phase) => {
       const stats = getPhaseStats(this.save, phase.id);
+      const theme = themeForPhase(phase.id, phase.index);
+      const summary = summarizePhase(phase);
       return {
         id: phase.id,
         name: phase.name,
@@ -413,17 +421,41 @@ export class BlockBreakerGame implements GameCommands {
         bestScore: stats.bestScore,
         attempts: stats.attempts,
         clears: stats.clears,
+        tagline: phase.tagline ?? '',
+        themeId: theme.shape,
+        accent: hexToCss(theme.accent),
+        features: summary.features,
+        bossName: summary.bossName,
+        waves: phase.waves.length,
       };
     });
   }
 
   setSound(enabled: boolean): void {
-    this.settings = { version: 1, sound: enabled };
+    this.settings = { ...this.settings, sound: enabled };
     this.audio.setEnabled(enabled);
+    this.persistSettings();
+    this.syncHud(true);
+  }
+
+  setMusic(enabled: boolean): void {
+    this.settings = { ...this.settings, music: enabled };
+    this.audio.setMusicEnabled(enabled);
+    this.persistSettings();
+    this.syncHud(true);
+  }
+
+  setScreenShake(enabled: boolean): void {
+    this.settings = { ...this.settings, screenShake: enabled };
+    this.scene.setScreenShakeEnabled(enabled);
+    this.persistSettings();
+    this.syncHud(true);
+  }
+
+  private persistSettings(): void {
     void this.saveRepository.saveSettings(this.settings).catch((error: unknown) => {
       console.warn('[save] could not persist settings', error);
     });
-    this.syncHud(true);
   }
 
   async resetSave(): Promise<void> {
@@ -455,7 +487,10 @@ export class BlockBreakerGame implements GameCommands {
       this.world.applyRunModifiers(this.runState.modifiers);
     }
     this.scene.setPhase(PHASES[0]!.id, 1);
+    this.scene.setMenuMode(true);
     this.audio.setEnabled(true);
+    this.audio.setMusicEnabled(true);
+    this.scene.setScreenShakeEnabled(true);
     this.audio.setSuspended(false);
     this.syncHud(true);
     gameEvents.emit('save:reset', {
@@ -796,6 +831,8 @@ export class BlockBreakerGame implements GameCommands {
       this.settings = createDefaultSettings();
     }
     this.audio.setEnabled(this.settings.sound);
+    this.audio.setMusicEnabled(this.settings.music);
+    this.scene.setScreenShakeEnabled(this.settings.screenShake);
     this.syncHud(true);
   }
 
@@ -1466,6 +1503,10 @@ export class BlockBreakerGame implements GameCommands {
       bestScore: endless ? endlessStats?.bestScore ?? null : stats?.bestScore ?? null,
       bestTimeMs: endless ? null : stats?.bestTimeMs ?? null,
       soundEnabled: this.settings.sound,
+      musicEnabled: this.settings.music,
+      screenShakeEnabled: this.settings.screenShake,
+      campaignComplete: this.save.campaignComplete,
+      endlessUnlocked: this.save.campaignComplete,
       boss:
         boss && boss.hp > 0
           ? { name: boss.name, hp: boss.hp, maxHp: boss.maxHp, phase: boss.phase }

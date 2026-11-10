@@ -3,8 +3,8 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.2  
-**Data:** 2026-11-09  
+**Versão:** 1.3  
+**Data:** 2026-11-10  
 **Status:** v0.3.0 em desenvolvimento; v0.1.0-mvp no itch.io  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
@@ -66,6 +66,29 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - **Results:** mostram **Wave**, **Best wave**, score, level e perks; **sem botão Next**. Retry recomeça uma run Endless e Menu volta ao menu.
 - **Save:** `endless: { bestWave, bestScore, runs }` dentro de `bb.save` v1; saves antigos caem em zeros.
 - **Progressão:** o Endless **não desbloqueia fases da campanha**; os recordes são apenas pessoais.
+- **Desbloqueio (v0.4.0-dev):** o Endless só é liberado depois que a campanha
+  inteira (fase 6) for concluída. O botão fica visivelmente bloqueado e, ao ser
+  tocado, abre um diálogo explicando o requisito.
+
+### Menu, seleção de fases e configurações (v0.4.0-dev)
+
+- **Menu:** dois caminhos principais — **Campaign** e **Endless** — sem o texto
+  de MVP `XP · Perks · Levels` e sem o rodapé de controles. O rodapé mostra
+  apenas **Settings** e a versão.
+- **Campaign:** card principal com progresso `N / 6`, fase atual, nós de
+  progresso e CTA `Continue`/`Start campaign`. Abre a seleção de fases.
+- **Endless:** card secundário com recorde de onda e runs; bloqueado até o fim
+  da campanha.
+- **Fundo do menu:** camada Phaser de apresentação com bolinhas luminosas
+  quicando, trilhas curtas e partículas discretas. A onda 1 da fase 1 não é
+  mais usada como fundo. Respeita reduced motion.
+- **Seleção de fases:** tela cheia com cards temáticos por fase (ícone, accent,
+  tagline, features, chefe, dificuldade e melhores resultados). Fases 4–6
+  destacam o chefe.
+- **Settings:** diálogo com **Sound**, **Music** e **Screen shake**,
+  persistidos em `bb.settings`. O pause oferece os mesmos três controles.
+- **Blocos:** nova direção visual “arcade tile” — corpo saturado, bisel, sombra,
+  brilho, materiais distintos e leitura em 46 px, alinhada às capas.
 
 ## 3. Regras de gameplay confirmadas
 
@@ -223,7 +246,8 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 
 - Save v1 mantém `phases` por `phaseId` com `bestTimeMs`, `bestScore`, `attempts`, `clears` e `bestLevel`.
 - O mesmo save mantém `endless` com `bestWave`, `bestScore` e `runs`; é opcional no parse e saves antigos recebem zeros.
-- Settings v1 mantém `sound`.
+- `campaignComplete` marca a conclusão da fase 6 e libera o Endless; saves antigos com `clears > 0` na fase 6 são migrados como completos.
+- Settings v1 mantém `sound`, `music` e `screenShake`.
 - A run ativa não é salva.
 
 ## 6. Direção visual e sonora
@@ -353,6 +377,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.0` | 2026-11-07 | GDD do MVP: 3 fases × 3 ondas, 3 blocos, 11 perks, sem chefes. |
 | `1.1` | 2026-11-08 | v0.2.0-dev: campanha de 6 fases / 21 ondas, 9 blocos, 7 elementos, 3 chefes, 19 perks, desafios, zoom de layout, encerramentos e save 1..6. |
 | `1.2` | 2026-11-09 | v0.3.0-dev: modo Endless com fase infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas, save `endless` e results próprios. |
+| `1.3` | 2026-11-10 | v0.4.0-dev: revisão visual dos blocos, menu Campaign/Endless, fundo animado, seleção de fases temática, settings de som/música/shake, Endless desbloqueado ao concluir a campanha e save `campaignComplete`. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |

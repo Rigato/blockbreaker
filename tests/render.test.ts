@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { blend, hashId, hashUnit, steppedRect } from '../src/render/blockArt';
+import {
+  blend,
+  blockPalette,
+  drawBlock,
+  hashId,
+  hashUnit,
+  steppedRect,
+} from '../src/render/blockArt';
+import type { Block } from '../src/sim/World';
 import { bossColor, bossHurtColor } from '../src/render/bossArt';
 import { elementColor, portalColor, portalHue } from '../src/render/elementArt';
 import { Effects } from '../src/render/effects';
@@ -105,6 +113,81 @@ describe('block art helpers', () => {
       expect(point.y).toBeGreaterThanOrEqual(14);
       expect(point.y).toBeLessThanOrEqual(46);
     }
+  });
+
+  it('keeps a grayscale value ladder across the three basic materials', () => {
+    const crystal = blockPalette('crystal', BLOCK_TYPES.crystal.color);
+    const stone = blockPalette('stone', BLOCK_TYPES.stone.color);
+    const obsidian = blockPalette('obsidian', BLOCK_TYPES.obsidian.color);
+    const lum = (color: number): number =>
+      0.2126 * ((color >> 16) & 0xff) +
+      0.7152 * ((color >> 8) & 0xff) +
+      0.0722 * (color & 0xff);
+    expect(lum(crystal.body)).toBeGreaterThan(lum(stone.body) + 60);
+    expect(lum(stone.body)).toBeGreaterThan(lum(obsidian.body) + 60);
+    // Every family keeps a hue-tinted outline and a light bevel tone.
+    for (const type of Object.keys(BLOCK_TYPES) as (keyof typeof BLOCK_TYPES)[]) {
+      const palette = blockPalette(type, BLOCK_TYPES[type].color);
+      expect(palette.light).toBeGreaterThan(palette.body);
+      expect(palette.shade).toBeLessThan(palette.body);
+      expect(palette.outline).toBeLessThan(palette.body);
+    }
+  });
+
+  it('draws all nine block types at two sizes with the stable public API', () => {
+    const calls: string[] = [];
+    const graphics = {
+      fillStyle: () => void calls.push('fillStyle'),
+      fillPoints: () => void calls.push('fillPoints'),
+      fillRect: () => void calls.push('fillRect'),
+      fillTriangle: () => void calls.push('fillTriangle'),
+      fillCircle: () => void calls.push('fillCircle'),
+      lineStyle: () => void calls.push('lineStyle'),
+      strokePoints: () => void calls.push('strokePoints'),
+      strokeCircle: () => void calls.push('strokeCircle'),
+      strokeRoundedRect: () => void calls.push('strokeRoundedRect'),
+      strokeRect: () => void calls.push('strokeRect'),
+      lineBetween: () => void calls.push('lineBetween'),
+    };
+    const ids = Object.keys(BLOCK_TYPES);
+    for (const size of [46, 86]) {
+      for (let index = 0; index < ids.length; index += 1) {
+        const id = ids[index]!;
+        const block = {
+          id: `smoke-${id}`,
+          type: id,
+          left: 10,
+          top: 10,
+          width: size,
+          height: size,
+          hp: BLOCK_TYPES[id as keyof typeof BLOCK_TYPES].hp,
+          maxHp: BLOCK_TYPES[id as keyof typeof BLOCK_TYPES].hp,
+          flashMs: 0,
+          motion: undefined,
+          linkGroup: index,
+        } as unknown as Block;
+        expect(() => drawBlock(graphics as never, block, { accent: 0xffffff })).not.toThrow();
+      }
+    }
+    expect(calls.length).toBeGreaterThan(500);
+    // A wounded obsidian still draws (cracks path) and a flash overlay too.
+    const hurt = {
+      id: 'smoke-hurt',
+      type: 'obsidian',
+      left: 10,
+      top: 10,
+      width: 86,
+      height: 86,
+      hp: 1,
+      maxHp: 3,
+      flashMs: 40,
+      motion: undefined,
+      linkGroup: 0,
+    } as unknown as Block;
+    expect(() => drawBlock(graphics as never, hurt, { accent: 0xffffff })).not.toThrow();
+    expect(() =>
+      drawBlock(graphics as never, hurt, { tint: 0.5, accent: 0xffd27a }),
+    ).not.toThrow();
   });
 });
 

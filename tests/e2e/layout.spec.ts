@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   clickDebugAction,
+  collapseDebugPanel,
   expandDebugPanel,
   forceDefeat,
   startPlay,
@@ -49,7 +50,8 @@ test.describe('layout matrix', () => {
       await expectInsideViewport(page, '.menu');
       await expectInsideViewport(page, '#game-shell');
 
-      await page.getByRole('button', { name: 'Levels', exact: true }).click();
+      await collapseDebugPanel(page);
+      await page.locator('#campaign-button').click();
       await expect(page.locator('.phase-select:not([hidden])')).toBeVisible();
       await expectNoScroll(page);
       await expectInsideViewport(page, '.phase-select__panel');

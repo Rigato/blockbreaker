@@ -30,8 +30,8 @@
 | Portais | itch.io publicado; GameFlare, Playgama e CrazyGames Basic pendentes |
 | Node | 22.12+ (CI usa Node 24) |
 | Stack | Phaser 3.90, TypeScript 7, Vite 8, Vitest 5, Playwright 1.65, Playgama Bridge 2.4.1 |
-| ZIP local | `release/blockbreaker-web.zip` — 0.3.0, 13 arquivos, ~512,7 KiB |
-| SHA-256 do ZIP 0.3.0 | `ce93727bf3266c3c0e8c47d6f2cac0d30e3a697dd5936af8da07804b6fd6ed51` |
+| ZIP local | `release/blockbreaker-web.zip` — 0.3.0, 13 arquivos, ~522,8 KiB |
+| SHA-256 do ZIP 0.3.0 | `05f6bf911e0f27c35a689c5f727dd8547f87054b178d5aecf08169d43cf9cfd1` |
 
 O GitHub Pages acompanha a `main`; todo push roda CI e deploy. O ZIP do itch.io
 não é alterado por pushes.
@@ -59,7 +59,8 @@ não é alterado por pushes.
 
 ### Endless
 
-- Botão **Endless** no menu, separado de Play e Levels.
+- Botão **Endless** no menu, separado de Campaign e Settings; bloqueado até a
+  campanha ser concluída.
 - Fase infinita, sem vitória; termina quando todas as bolas caem.
 - Velocidade **660 + 14/onda**, teto **1100** (passa de 780 na onda 10).
 - Linhas **4 → 12**; densidade e variedade crescem por onda.
@@ -71,8 +72,9 @@ não é alterado por pushes.
 
 ### Save e plataforma
 
-- Save versionado `bb.save` (v1), settings `bb.settings`.
-- `unlockedPhase` 1..6; run ativa não é salva.
+- Save versionado `bb.save` (v1), settings `bb.settings` (sound, music,
+  screenShake).
+- `unlockedPhase` 1..6 e `campaignComplete`; run ativa não é salva.
 - Saves antigos continuam válidos; `endless` ausente cai em zeros.
 - Playgama Bridge 2.4.1 com fallback local, timeout de 10 s, storage com fallback
   em memória, pause/áudio e interstitial apenas na saída dos results.
@@ -196,17 +198,18 @@ Resultados esperados na referência atual:
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | ✅ sem erros |
-| `npm test` | ✅ **255 testes** em 25 arquivos |
+| `npm test` | ✅ **263 testes** em 26 arquivos |
 | `npm run validate:content` | ✅ 6 fases, 21 ondas, 759 blocos, 1.831 XP |
 | Bridge config | ✅ schema 2.4.1, sem URLs externas/ads indevidos |
 | `npm run build` | ✅ bundle Phaser/Vite |
-| `npm run package` | ✅ ZIP 0.3.0, 13 arquivos, ~512,7 KiB |
-| `npm run test:e2e` | ✅ **19 testes** (5 spec files) |
+| `npm run package` | ✅ ZIP 0.3.0, 13 arquivos, ~522,8 KiB |
+| `npm run test:e2e` | ✅ **20 testes** (5 spec files) |
 | CI + Deploy | ✅ verdes no commit `f8a6c75` |
 
-Cobertura E2E atual: boot/menu, controles, pause, som, level-up, vitória/unlock,
-AdMock `show`/`fail`, CDN bloqueado, layout 320/390/430/1440 + landscape mobile,
-runtime de chefe/desafio, Endless e Multiball entre ondas.
+Cobertura E2E atual: boot/menu, controles, pause, settings, level-up, vitória/unlock,
+Endless bloqueado/desbloqueado, AdMock `show`/`fail`, CDN bloqueado, layout
+320/390/430/1440 + landscape mobile, runtime de chefe/desafio e Multiball entre
+ondas.
 
 `npm run qa:runs` continua sendo um baseline automatizado da **fase 1** com
 projéteis de debug; não é playtest humano nem cobre balance das fases 4–6 ou do
@@ -236,9 +239,9 @@ Endless.
 | Portal | Status | Observação |
 |---|---|---|
 | itch.io | **publicado `0.1.0-mvp`** | ZIP congelado; não substituir por engano |
-| GameFlare | não submetido | ZIP/link, sem SDK/ads internos |
-| Playgama | não submetido | Bridge, capa **1080×1920**, review ~24 h |
-| CrazyGames Basic | não submetido | três capas, vídeos, descrição ≥ 100 palavras; não é Full Launch |
+| GameFlare | conta com problema de acesso | suporte acionado; aguardando resposta |
+| Playgama | **em sandbox** | milestones pendentes antes da publicação |
+| CrazyGames Basic | **reprovado** | “below quality standards”; ver `docs/release/crazygames-review.md` |
 
 Assets prontos:
 
@@ -254,7 +257,7 @@ Assets prontos:
 
 O upload e a tag `v0.3.0` são **manuais** e dependem de aprovação humana. O ZIP
 0.3.0 local tem SHA-256
-`ce93727bf3266c3c0e8c47d6f2cac0d30e3a697dd5936af8da07804b6fd6ed51`;
+`05f6bf911e0f27c35a689c5f727dd8547f87054b178d5aecf08169d43cf9cfd1`;
 confirme o hash antes de cada upload.
 
 ---

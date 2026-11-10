@@ -1,6 +1,6 @@
 import type { ConsoleMessage, Page, Request } from '@playwright/test';
 
-export const MENU_READY = '#play-button';
+export const MENU_READY = '#campaign-button';
 export const HUD = '.hud';
 export const LAUNCH_HINT = 'Tap / click / V to launch';
 
@@ -32,9 +32,12 @@ export async function waitForMenu(page: Page): Promise<void> {
   await page.locator(MENU_READY).waitFor({ state: 'visible' });
 }
 
-/** Starts the level the Play button resolves to (phase 1 on a fresh save). */
+/** Opens the campaign screen and starts the most advanced unlocked level. */
 export async function startPlay(page: Page): Promise<void> {
+  await collapseDebugPanel(page);
   await page.locator(MENU_READY).click();
+  await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
+  await page.locator('.phase-card:not(:disabled)').last().click();
   await page.locator(HUD).waitFor({ state: 'visible' });
 }
 
@@ -42,6 +45,15 @@ export async function expandDebugPanel(page: Page): Promise<void> {
   const compact = page.locator('#debug-compact');
   if (await compact.isVisible().catch(() => false)) await compact.click();
   await page.locator('#debug-body').waitFor({ state: 'visible' });
+}
+
+/** Collapses the expanded debug body so it cannot cover menu cards. */
+export async function collapseDebugPanel(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const body = document.querySelector<HTMLElement>('#debug-body');
+    if (!body || body.hidden) return;
+    document.querySelector<HTMLButtonElement>('#debug-panel .debug__toggle')?.click();
+  });
 }
 
 /**
