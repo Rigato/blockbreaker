@@ -148,6 +148,12 @@ export class DebugPanel {
     storageRow.value.textContent = this.platform.diagnostics.storageKind;
     rows.append(storageRow.row);
 
+    const adsRow = makeRow(en.debugAds, 'debug-ads');
+    const interstitial = this.platform.ads.isInterstitialSupported ? 'interstitial' : '—';
+    const rewarded = this.platform.ads.isRewardedSupported ? 'rewarded' : '—';
+    adsRow.value.textContent = `${interstitial} / ${rewarded}`;
+    rows.append(adsRow.row);
+
     const bridgeRow = makeRow(en.debugBridgeInit, 'debug-bridge');
     bridgeRow.value.textContent = this.bridgeInitLabel();
     rows.append(bridgeRow.row);

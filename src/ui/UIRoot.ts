@@ -19,6 +19,7 @@ import { Menu } from './Menu';
 import { HudOverlay } from './Overlay';
 import { Orientation } from './Orientation';
 import { PhaseSelect } from './PhaseSelect';
+import { ReviveDialog } from './ReviveDialog';
 import { SettingsDialog } from './SettingsDialog';
 
 export interface UIRootOptions {
@@ -107,6 +108,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   const hud = new Hud({ root: options.root, controller });
   const overlay = new HudOverlay({ root: options.root, controller });
   const levelUp = new LevelUpOverlay({ root: options.root, controller });
+  const reviveDialog = new ReviveDialog({ root: options.root, controller });
   const orientation = new Orientation({ controller });
   const adOverlay = new AdOverlay({
     fallbackFocus: () => overlay.resultsFocusTarget(),
@@ -248,6 +250,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     );
     overlay.update(snapshot);
     levelUp.update(snapshot);
+    reviveDialog.update(snapshot);
   };
 
   const unsubscribeHud = gameEvents.on('hud:changed', applySnapshot);
@@ -271,6 +274,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       hud.dispose();
       overlay.dispose();
       levelUp.dispose();
+      reviveDialog.dispose();
       orientation.dispose();
       adOverlay.dispose();
       debugPanel?.dispose();

@@ -36,6 +36,11 @@ replaced by this branch. The GitHub Pages review build tracks the branch.
   short studio note.
 - **Compact HUD:** below 440px shell width the HUD switches to a two-row layout
   with icon stats and 11–13px values, keeping 907×510 and 800×450 iframes legible.
+- **Ads:** campaign interstitials after every 3rd wave, Endless after every 4th,
+  plus every results exit (Next/Retry/Menu). A one-per-run **rewarded revive**
+  offer lets the player watch an ad to save a lost run on supported portals.
+- **How to Play / About Us:** wide, short dialogs with localized screenshots and
+  the studio logo (no duplicated studio caption).
 - **Save:** `campaignComplete` marks the phase-6 clear and migrates old saves
   that already have a phase-6 clear.
 - **Store assets:** eight updated screenshots, regenerated covers and fresh

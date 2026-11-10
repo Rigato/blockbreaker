@@ -10,7 +10,11 @@ import { MemoryStorage } from './MemoryStorage';
 
 const SKIPPED_ADS: AdsService = {
   isInterstitialSupported: false,
+  isRewardedSupported: false,
   async showInterstitial(): Promise<'skipped'> {
+    return 'skipped';
+  },
+  async showRewarded(): Promise<'skipped'> {
     return 'skipped';
   },
 };

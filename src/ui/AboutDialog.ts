@@ -60,11 +60,8 @@ export class AboutDialog {
 
     picture.append(source, image);
 
-    const studio = document.createElement('figcaption');
-    studio.className = 'about__studio';
-    studio.textContent = en.aboutStudio;
-
-    logo.append(picture, studio);
+    // The logo artwork already contains the studio name; no extra caption.
+    logo.append(picture);
 
     // --- Body ---------------------------------------------------------------
     const body = document.createElement('div');

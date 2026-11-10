@@ -100,7 +100,8 @@ GameFlare bloqueado por acesso).
 | Bridge | Config validado; sem logo/analytics; safe area ligada | pendente de revisão humana |
 | Eventos | `game_ready`, `level_started/paused/resumed/completed/failed` | pendente de revisão humana |
 | Storage | `bb.save` e `bb.settings` via Bridge; reload preserva | pendente de revisão humana |
-| Interstitial | Solicitado ao sair dos results; `failed`/`skipped` não bloqueia | pendente de revisão humana |
+| Interstitial | Campanha a cada 3 ondas, Endless a cada 4 e saída dos results; `failed`/`skipped` não bloqueia | pendente de revisão humana |
+| Rewarded | Revive opcional 1x por run; recompensa só no estado `rewarded` | pendente de revisão humana |
 | Áudio | Mudo durante ads/background; retoma após gesto | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
 | Descrição | Curta + longa em inglês | pendente de revisão humana |

@@ -95,7 +95,6 @@ export const en = {
   howToPage5Alt: 'Endless mode waves with a boss every five waves',
 
   aboutTitle: 'About us',
-  aboutStudio: 'Bad Decision Games',
   aboutLogoAlt: 'Bad Decision Games logo',
   aboutBody:
     'Bad Decision Games is a studio formed by a solo developer based in Brazil. His biggest ambition is to develop games that captivate and entertain people. But, beyond working full time, he has just become a father — and has very little time to dedicate to his dream.\n\nUsing AI tools, he is able to start working on his dream. Please support this effort by playing, giving feedback and sharing the games. Thank you!',
@@ -202,6 +201,7 @@ export const en = {
   debugFps: 'FPS',
   debugPlatform: 'Platform',
   debugStorage: 'Storage',
+  debugAds: 'Ads',
   debugBridgeInit: 'Bridge init',
   debugLanguage: 'Language',
   debugCanvas: 'Canvas',

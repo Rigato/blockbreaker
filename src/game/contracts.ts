@@ -20,13 +20,16 @@ export interface StorageService {
 }
 
 export type InterstitialResult = 'shown' | 'skipped' | 'failed';
+export type RewardedResult = 'rewarded' | 'closed' | 'failed' | 'skipped';
 
-/** UI state emitted while a results interstitial is requested/finished. */
+/** UI state emitted while a results or mid-run ad is requested/finished. */
 export type AdState = 'requested' | 'finished';
 
 export interface AdsService {
   readonly isInterstitialSupported: boolean;
+  readonly isRewardedSupported: boolean;
   showInterstitial(placement: string): Promise<InterstitialResult>;
+  showRewarded(placement: string): Promise<RewardedResult>;
 }
 
 export type PlatformMessage =
@@ -172,6 +175,7 @@ export type HudPhase =
   | 'paused'
   | 'levelup'
   | 'cleared'
+  | 'revive-offer'
   | 'run-complete'
   | 'defeat';
 
@@ -313,6 +317,8 @@ export interface HudSnapshot {
   combo?: { count: number; multiplier: number } | null;
   /** Wave intro text; optional until integrated. */
   waveIntro?: string | null;
+  /** True when the one-per-run rewarded revive offer was already shown. */
+  adReviveUsed?: boolean;
   /** True while the active run is Endless mode. */
   endless?: boolean;
   /** Persisted best wave for the HUD. */
@@ -442,6 +448,10 @@ export interface GameCommands {
   nextPhase(): void;
   /** Returns to the menu/phase selection state. */
   returnToMenu(): void;
+  /** Accepts the one-per-run rewarded ad revive offer on defeat. */
+  acceptAdRevive(): void;
+  /** Declines the rewarded ad revive offer and finishes the run. */
+  declineAdRevive(): void;
   getPhaseSelectInfo(): readonly PhaseSelectInfo[];
   setSound(enabled: boolean): void;
   /** Toggles the ambient music loop without touching SFX. */

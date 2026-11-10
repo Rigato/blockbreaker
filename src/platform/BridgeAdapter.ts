@@ -6,6 +6,7 @@ import type {
   PlatformService,
   PlatformMessage,
   PlatformMessagePayload,
+  RewardedResult,
   StorageKind,
   StorageService,
   Unsubscribe,
@@ -19,6 +20,7 @@ const STORAGE_EVENT_GET = 'bridge.storage.get';
 const STORAGE_EVENT_SET = 'bridge.storage.set';
 const STORAGE_EVENT_DELETE = 'bridge.storage.delete';
 const INTERSTITIAL_TIMEOUT_MS = 15_000;
+const REWARDED_TIMEOUT_MS = 15_000;
 
 export interface BridgeAdapterOptions {
   initDurationMs?: number;
@@ -72,7 +74,11 @@ export class BridgeAdapter implements PlatformService {
       get isInterstitialSupported(): boolean {
         return sdk.advertisement.isInterstitialSupported;
       },
+      get isRewardedSupported(): boolean {
+        return sdk.advertisement.isRewardedSupported;
+      },
       showInterstitial: (placement) => this.showInterstitial(placement),
+      showRewarded: (placement) => this.showRewarded(placement),
     };
   }
 
@@ -241,6 +247,56 @@ export class BridgeAdapter implements PlatformService {
 
       try {
         this.bridge.advertisement.showInterstitial(placement);
+      } catch {
+        finish('failed');
+      }
+    });
+  }
+
+  private showRewarded(placement: string): Promise<RewardedResult> {
+    if (!this.bridge.advertisement.isRewardedSupported) {
+      return Promise.resolve('skipped');
+    }
+
+    return new Promise<RewardedResult>((resolve) => {
+      let settled = false;
+      let rewarded = false;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+
+      const onState = (state: unknown): void => {
+        if (state === 'rewarded') {
+          rewarded = true;
+          finish('rewarded');
+        } else if (state === 'closed') {
+          finish(rewarded ? 'rewarded' : 'closed');
+        } else if (state === 'failed') {
+          finish('failed');
+        }
+      };
+
+      const finish = (result: RewardedResult): void => {
+        if (settled) return;
+        settled = true;
+        if (timer !== undefined) clearTimeout(timer);
+        try {
+          this.bridge.off('rewarded_state_changed', onState);
+        } catch {
+          // The SDK may already be gone; the promise must still settle.
+        }
+        resolve(result);
+      };
+
+      try {
+        this.bridge.on('rewarded_state_changed', onState);
+      } catch {
+        resolve('failed');
+        return;
+      }
+
+      timer = setTimeout(() => finish('failed'), REWARDED_TIMEOUT_MS);
+
+      try {
+        this.bridge.advertisement.showRewarded(placement);
       } catch {
         finish('failed');
       }

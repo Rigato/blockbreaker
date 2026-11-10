@@ -12,6 +12,7 @@ import type {
   PlatformMessage,
   PlatformMessagePayload,
   PlatformService,
+  RewardedResult,
   SaveRepository,
   SaveSnapshot,
   SaveV1,
@@ -20,6 +21,7 @@ import type {
   TestWaveInfo,
 } from './contracts';
 import { GAME_CONFIG, SIM_TUNING_DEFAULTS, SIM_TUNING_LIMITS } from './config';
+import { shouldShowWaveInterstitial } from './adSchedule';
 import { gameEvents } from './events';
 import { AudioService } from '../audio';
 import { ENDLESS_PHASE, endlessEnding, endlessWave } from '../content/endless';
@@ -58,10 +60,17 @@ const WAVE_TRANSITION_MS = 1200;
 const LEVEL_UP_REVEAL_MS = 450;
 const BALL_RESPAWN_MS = GAME_CONFIG.ball.respawnMs;
 const INTERSTITIAL_PLACEMENT = 'phase_completed';
+const WAVE_INTERSTITIAL_PLACEMENT = 'wave_completed';
+const ENDLESS_INTERSTITIAL_PLACEMENT = 'endless_wave_completed';
+const REVIVE_REWARDED_PLACEMENT = 'revive';
 
 const NO_ADS: AdsService = {
   isInterstitialSupported: false,
+  isRewardedSupported: false,
   async showInterstitial(): Promise<InterstitialResult> {
+    return 'skipped';
+  },
+  async showRewarded(): Promise<RewardedResult> {
     return 'skipped';
   },
 };
@@ -122,6 +131,7 @@ export class BlockBreakerGame implements GameCommands {
   private lastHud = '';
   private waveIntroUntil = 0;
   private reviveUsed = false;
+  private adReviveUsed = false;
 
   constructor(parent: HTMLElement, platform?: PlatformService) {
     let resolveReady: () => void = () => {
@@ -285,6 +295,7 @@ export class BlockBreakerGame implements GameCommands {
     this.ballRespawnLeftMs = 0;
     this.runSeed = this.nextSeed();
     this.reviveUsed = false;
+    this.adReviveUsed = false;
     this.waveIntroUntil = 0;
     this.runState.startRun(this.runSeed);
     this.loadEndlessWave(1);
@@ -322,6 +333,7 @@ export class BlockBreakerGame implements GameCommands {
     this.ballRespawnLeftMs = 0;
     this.runSeed = this.nextSeed();
     this.reviveUsed = false;
+    this.adReviveUsed = false;
     this.waveIntroUntil = 0;
     this.runState.startRun(this.runSeed);
     this.loadPhaseWave(0);
@@ -353,7 +365,7 @@ export class BlockBreakerGame implements GameCommands {
     if (this.phase === 'run-complete' || this.phase === 'defeat') {
       void this.runResultsAction(() => {
         if (this.currentPhase) this.startPhase(this.currentPhase.id);
-        else this.returnToMenu();
+        else this.doReturnToMenu();
       });
       return;
     }
@@ -374,6 +386,14 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   returnToMenu(): void {
+    if (this.phase === 'run-complete' || this.phase === 'defeat') {
+      void this.runResultsAction(() => this.doReturnToMenu());
+      return;
+    }
+    this.doReturnToMenu();
+  }
+
+  private doReturnToMenu(): void {
     this.phase = 'menu';
     this.mode = 'campaign';
     this.currentPhase = null;
@@ -391,6 +411,7 @@ export class BlockBreakerGame implements GameCommands {
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
     this.reviveUsed = false;
+    this.adReviveUsed = false;
     this.waveIntroUntil = 0;
     this.runState.reset();
     const preview = PHASES[0]?.waves[0];
@@ -480,6 +501,7 @@ export class BlockBreakerGame implements GameCommands {
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
     this.reviveUsed = false;
+    this.adReviveUsed = false;
     this.waveIntroUntil = 0;
     const preview = PHASES[0]?.waves[0];
     if (preview) {
@@ -550,6 +572,8 @@ export class BlockBreakerGame implements GameCommands {
 
   nextWave(): void {
     if (this.phase !== 'cleared' || !this.currentPhase) return;
+    // The wave ad owns the transition while it is open.
+    if (this.adBusy) return;
 
     if (this.mode === 'endless') {
       this.currentWaveIndex += 1;
@@ -733,6 +757,15 @@ export class BlockBreakerGame implements GameCommands {
       return;
     }
     this.world.balls.length = 0;
+    if (this.ads.isRewardedSupported && !this.adReviveUsed) {
+      // QA path for the rewarded revive offer. The normal debug shortcut stays
+      // deterministic on mock platforms without rewarded support.
+      this.world.outcome = 'defeat';
+      this.handleDefeat();
+      return;
+    }
+    // QA shortcut: bypass Second Chance and the rewarded revive offer so E2E
+    // always reaches the results screen deterministically.
     this.finishPhase(false);
   }
 
@@ -942,13 +975,8 @@ export class BlockBreakerGame implements GameCommands {
       this.finishWave();
       return;
     }
-    if (this.world.outcome === 'defeat' && this.tryRevive()) {
-      // Second Chance revived the run: keep playing with a fresh stuck ball.
-      this.syncHud(true);
-      return;
-    }
     if (this.world.outcome === 'defeat') {
-      this.finishPhase(false);
+      this.handleDefeat();
       return;
     }
     this.syncHud(true);
@@ -968,34 +996,165 @@ export class BlockBreakerGame implements GameCommands {
     return true;
   }
 
-  private finishWave(): void {
-    if (!this.currentPhase) return;
+  /** Handles a lost run: Second Chance, rewarded revive offer, then results. */
+  private handleDefeat(): void {
+    if (this.phase === 'revive-offer') return;
+    if (this.tryRevive()) return;
+    if (!this.adReviveUsed && this.ads.isRewardedSupported) {
+      this.openAdReviveOffer();
+      return;
+    }
+    this.finishPhase(false);
+  }
 
-    if (this.mode === 'endless') {
-      this.phase = 'cleared';
-      this.nextWaveAt = performance.now() + WAVE_TRANSITION_MS;
+  private openAdReviveOffer(): void {
+    if (this.phase === 'run-complete' || this.phase === 'defeat') return;
+    this.adReviveUsed = true;
+    this.phase = 'revive-offer';
+    this.clock.reset();
+    this.pendingLaunch = false;
+    this.nextWaveAt = 0;
+    this.levelUpRevealAt = 0;
+    this.audio.setSuspended(true);
+    this.sendLevelMessage('level_paused');
+    this.syncHud(true);
+  }
+
+  acceptAdRevive(): void {
+    if (this.phase !== 'revive-offer') return;
+    void this.runRewardedRevive();
+  }
+
+  declineAdRevive(): void {
+    if (this.phase !== 'revive-offer' || this.adBusy) return;
+    this.finishPhase(false);
+  }
+
+  private async runRewardedRevive(): Promise<void> {
+    if (this.phase !== 'revive-offer' || this.adBusy) return;
+    this.adBusy = true;
+    this.audio.setBackground(true);
+    gameEvents.emit('ad:state', { state: 'requested' });
+
+    let result: RewardedResult = 'failed';
+    try {
+      result = await this.ads.showRewarded(REVIVE_REWARDED_PLACEMENT);
+    } catch (error) {
+      console.warn('[ads] rewarded revive failed', error);
+    } finally {
+      // Always release the overlay/mute lock, even if the ad service throws.
+      this.adBusy = false;
+      this.audio.setBackground(false);
+      gameEvents.emit('ad:state', { state: 'finished' });
+    }
+
+    // The UI cannot normally act behind the blocking overlay, but a platform
+    // event or debug command may still have changed the phase mid-ad.
+    if (this.phase !== 'revive-offer') return;
+
+    if (result === 'rewarded' && this.world.revive()) {
+      this.phase = 'playing';
+      this.phaseResult = null;
+      this.nextWaveAt = 0;
       this.levelUpRevealAt = 0;
       this.ballRespawnLeftMs = 0;
+      this.audio.setSuspended(false);
+      this.sendLevelMessage('level_resumed');
+      this.focusGameplay();
       this.clock.reset();
       this.pendingLaunch = false;
-      this.pendingPerkBalls = 0;
+      this.input.resetTarget();
       this.syncHud(true);
       return;
     }
 
-    if (this.currentWaveIndex + 1 >= this.currentPhase.waves.length) {
+    this.finishPhase(false);
+  }
+
+  private finishWave(): void {
+    if (!this.currentPhase) return;
+
+    const waveNumber = this.currentWaveIndex + 1;
+    const lastCampaignWave =
+      this.mode === 'campaign' && waveNumber >= this.currentPhase.waves.length;
+    const adDue = this.shouldShowWaveAd();
+
+    if (lastCampaignWave && !adDue) {
       this.finishPhase(true);
       return;
     }
 
+    this.beginWaveClear();
+
+    if (!adDue) {
+      this.scheduleNextWaveOrResults(lastCampaignWave);
+      return;
+    }
+
+    const placement =
+      this.mode === 'endless'
+        ? ENDLESS_INTERSTITIAL_PLACEMENT
+        : WAVE_INTERSTITIAL_PLACEMENT;
+    this.showWaveInterstitial(placement, () => {
+      this.scheduleNextWaveOrResults(lastCampaignWave);
+    });
+  }
+
+  /** True when the just-cleared wave should trigger a mid-run interstitial. */
+  private shouldShowWaveAd(): boolean {
+    if (!this.ads.isInterstitialSupported || this.adBusy) return false;
+    return shouldShowWaveInterstitial(this.mode, this.currentWaveIndex + 1);
+  }
+
+  private beginWaveClear(): void {
     this.phase = 'cleared';
-    this.nextWaveAt = performance.now() + WAVE_TRANSITION_MS;
+    this.nextWaveAt = 0;
     this.levelUpRevealAt = 0;
     this.ballRespawnLeftMs = 0;
     this.clock.reset();
     this.pendingLaunch = false;
     this.pendingPerkBalls = 0;
     this.syncHud(true);
+  }
+
+  private scheduleNextWaveOrResults(lastCampaignWave: boolean): void {
+    if (this.phase !== 'cleared') return;
+    if (lastCampaignWave) {
+      this.finishPhase(true);
+      return;
+    }
+    this.nextWaveAt = performance.now() + WAVE_TRANSITION_MS;
+    this.syncHud(true);
+  }
+
+  private showWaveInterstitial(placement: string, after: () => void): void {
+    if (this.adBusy) {
+      after();
+      return;
+    }
+
+    const phaseAtStart = this.phase;
+    this.adBusy = true;
+    this.audio.setBackground(true);
+    gameEvents.emit('ad:state', { state: 'requested' });
+
+    void (async () => {
+      let result: InterstitialResult = 'failed';
+      try {
+        result = await this.ads.showInterstitial(placement);
+      } catch (error) {
+        console.warn('[ads] wave interstitial failed', error);
+      } finally {
+        // Always release the overlay/mute lock, even if the ad service throws.
+        this.adBusy = false;
+        this.audio.setBackground(false);
+        gameEvents.emit('ad:state', { state: 'finished', result });
+      }
+
+      // A restart/menu action may have won the race while the ad was open.
+      if (this.phase !== phaseAtStart) return;
+      after();
+    })();
   }
 
   private finishPhase(victory: boolean): void {
@@ -1006,6 +1165,8 @@ export class BlockBreakerGame implements GameCommands {
 
     const phase = this.currentPhase;
     if (!phase) return;
+    // Terminal states are final. `revive-offer` is intentionally allowed so a
+    // declined or failed rewarded revive can finish the run.
     if (this.phase === 'run-complete' || this.phase === 'defeat') return;
 
     const nextPhase = victory
@@ -1135,12 +1296,12 @@ export class BlockBreakerGame implements GameCommands {
       result = await this.ads.showInterstitial(INTERSTITIAL_PLACEMENT);
     } catch (error) {
       console.warn('[ads] interstitial failed', error);
-      result = 'failed';
+    } finally {
+      // Always release the overlay/mute lock, even if the ad service throws.
+      this.adBusy = false;
+      this.audio.setBackground(false);
+      gameEvents.emit('ad:state', { state: 'finished', result });
     }
-
-    this.audio.setBackground(false);
-    this.adBusy = false;
-    gameEvents.emit('ad:state', { state: 'finished', result });
 
     // A menu/pause action may have won the race while the ad was open.
     if (this.phase !== phaseAtStart) return;
@@ -1198,6 +1359,9 @@ export class BlockBreakerGame implements GameCommands {
       return;
     }
 
+    // Only active gameplay advances the run clock. Pause, level-up, results,
+    // wave ads and the revive offer all keep `phase !== 'playing'`, so their
+    // time is never counted in `phaseElapsedMs`.
     this.phaseElapsedMs += Math.max(0, Math.min(deltaMs, 250));
     this.tickBallRespawn(deltaMs);
 
@@ -1229,11 +1393,7 @@ export class BlockBreakerGame implements GameCommands {
     this.armMultiballFromLaunch(actions.launch);
 
     if (this.world.outcome === 'defeat') {
-      if (this.tryRevive()) {
-        this.syncHud(true);
-        return;
-      }
-      this.finishPhase(false);
+      this.handleDefeat();
       return;
     }
     if (leveledUp) {
@@ -1515,6 +1675,7 @@ export class BlockBreakerGame implements GameCommands {
       multiplier,
       combo,
       waveIntro,
+      adReviveUsed: this.adReviveUsed,
       endless,
       endlessBestWave: this.save.endless.bestWave,
       endlessBestScore: this.save.endless.bestScore,

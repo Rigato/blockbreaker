@@ -56,7 +56,9 @@ describe('FallbackAdapter', () => {
     expect(platform.diagnostics.source).toBe('fallback');
     expect(platform.diagnostics.storageKind).toBe('memory');
     expect(platform.ads.isInterstitialSupported).toBe(false);
+    expect(platform.ads.isRewardedSupported).toBe(false);
     await expect(platform.ads.showInterstitial('test')).resolves.toBe('skipped');
+    await expect(platform.ads.showRewarded('test')).resolves.toBe('skipped');
     await expect(platform.sendMessage('game_ready')).resolves.toBeUndefined();
   });
 });

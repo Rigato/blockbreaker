@@ -296,7 +296,7 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 
 ### O que continua fora
 
-- Metaprogressão permanente, rewarded ads, leaderboards e conquistas.
+- Metaprogressão permanente, leaderboards e conquistas.
 - Mundos sci-fi/industrial, localização e landscape jogável.
 - Editor de fases e pipeline procedural.
 - Backend, contas e cloud save.
@@ -324,7 +324,11 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 
 - Jogo totalmente gratuito; receita somente de publicidade.
 - Modelo escolhido: anúncios convencionais conforme cada portal e anúncios recompensados opcionais que concedem uma vantagem ao jogador.
-- **Rewarded ads continuam fora da v0.3.0**; o build atual usa apenas interstitial na saída dos results.
+- **Interstitials em pausas naturais:** após cada 3ª onda da campanha (por fase),
+  após cada 4ª onda do Endless e ao sair dos results por Next/Retry/Menu.
+- **Rewarded revive:** ao ser derrotado, o jogador pode assistir um ad uma vez por
+  run para continuar com uma bola nova. O caminho sem ad continua existindo: a
+  run termina normalmente e o jogador pode tentar de novo.
 - Sem compras, microtransações, cosméticos pagos ou opção paga para remover anúncios.
 - Respeitar a disponibilidade e as regras de cada portal; não inserir anúncios forçados durante a ação do block breaker.
 
@@ -334,7 +338,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 
 - Leaderboard específico do modo Endless (o ranking global continua fora).
 - Metaprogressão permanente com desbloqueios de conteúdo, sem bônus permanentes de atributos iniciais.
-- Rewarded ads com vantagens específicas, após definir benefícios e limites para preservar o equilíbrio.
+- Outros usos de rewarded ads (bônus, rerolls) após definir benefícios e limites para preservar o equilíbrio.
 - Rankings globais e conquistas, condicionados aos recursos dos portais.
 - Mundos temáticos sci-fi/futurista e industrial/pós-apocalíptico.
 - Localização para outros idiomas.
@@ -355,7 +359,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | Regras de onda | `timeLimit` e `noLaser` implementados nas ondas definidas. Novas combinações de desafio ficam para o futuro. |
 | Zoom | Escala 0,68–1,0 implementada e validada no conteúdo. Testar legibilidade em telas pequenas reais. |
 | Balanceamento | Ainda depende de playtest humano; o bot de QA não substitui jogador. |
-| Rewarded ads | Fora do escopo; decidir formato, recompensa e frequência antes de implementar. |
+| Rewarded ads | Revive uma vez por run implementado; outros usos ficam para o futuro. |
 | Metaprogressão | Fora do escopo; decidir se a próxima fase é conteúdo, meta ou plataforma. |
 | Localização | Fora do escopo; o catálogo de strings precisa ser separado por locale antes. |
 | Performance real | Números de hardware real ainda não estão versionados; criar baseline por device. |
@@ -371,7 +375,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 - O zoom é escala de layout, não de câmera; o input não muda.
 - Metaprogressão desbloqueia conteúdo, não bônus permanentes de atributos. A run ativa não é salva.
 - O Endless é uma run separada: não desbloqueia fases, não substitui a campanha e mantém seus próprios recordes no save.
-- A monetização é somente publicidade; rewarded ads continuam opcionais e fora da v0.3.0.
+- A monetização é somente publicidade; o rewarded revive é opcional e tem caminho sem ad.
 - O build `0.1.0-mvp` do itch.io permanece congelado; a v0.3.0 é desenvolvimento.
 
 ---
@@ -383,7 +387,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.0` | 2026-11-07 | GDD do MVP: 3 fases × 3 ondas, 3 blocos, 11 perks, sem chefes. |
 | `1.1` | 2026-11-08 | v0.2.0-dev: campanha de 6 fases / 21 ondas, 9 blocos, 7 elementos, 3 chefes, 19 perks, desafios, zoom de layout, encerramentos e save 1..6. |
 | `1.2` | 2026-11-09 | v0.3.0-dev: modo Endless com fase infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas, save `endless` e results próprios. |
-| `1.3` | 2026-11-10 | v0.4.0-dev: revisão visual dos blocos, menu Campaign/Endless, fundo animado, seleção de fases temática, settings de som/música/shake, Endless desbloqueado ao concluir a campanha, HUD compacto, How to Play, About Us e save `campaignComplete`. |
+| `1.3` | 2026-11-10 | v0.4.0-dev: revisão visual dos blocos, menu Campaign/Endless, fundo animado, seleção de fases temática, settings de som/música/shake, Endless desbloqueado ao concluir a campanha, HUD compacto, How to Play, About Us, interstitials a cada 3/4 ondas, rewarded revive 1x por run e save `campaignComplete`. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |

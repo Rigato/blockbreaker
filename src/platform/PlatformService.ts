@@ -13,6 +13,7 @@ export type {
   PlatformMessage,
   PlatformMessagePayload,
   PlatformService,
+  RewardedResult,
   StorageKind,
   StorageService,
   Unsubscribe,

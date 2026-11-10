@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PlaygamaBridge } from '@playgama/bridge';
 import { BridgeAdapter } from '../src/platform/BridgeAdapter';
 
@@ -17,9 +17,13 @@ interface FakeBridge {
     };
     advertisement: {
       showInterstitial: ReturnType<typeof vi.fn>;
+      showRewarded: ReturnType<typeof vi.fn>;
+      isInterstitialSupported: boolean;
+      isRewardedSupported: boolean;
     };
   };
   emit: (event: string, ...args: unknown[]) => void;
+  listenerCount: (event: string) => number;
 }
 
 function createFakeBridge(storageGet?: () => Promise<unknown>): FakeBridge {
@@ -42,7 +46,9 @@ function createFakeBridge(storageGet?: () => Promise<unknown>): FakeBridge {
     },
     advertisement: {
       isInterstitialSupported: false,
+      isRewardedSupported: false,
       showInterstitial: vi.fn(),
+      showRewarded: vi.fn(),
     },
     on: vi.fn((event: string, handler: Handler) => {
       let bucket = listeners.get(event);
@@ -64,8 +70,15 @@ function createFakeBridge(storageGet?: () => Promise<unknown>): FakeBridge {
     emit(event: string, ...args: unknown[]): void {
       for (const handler of listeners.get(event) ?? []) handler(...args);
     },
+    listenerCount(event: string): number {
+      return listeners.get(event)?.size ?? 0;
+    },
   };
 }
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('BridgeAdapter', () => {
   it('exposes platform identity and diagnostics', () => {
@@ -142,5 +155,81 @@ describe('BridgeAdapter', () => {
 
     expect(adapter.ads.isInterstitialSupported).toBe(false);
     await expect(adapter.ads.showInterstitial('phase_completed')).resolves.toBe('skipped');
+  });
+
+  it('skips rewarded ads when the platform does not support them', async () => {
+    const fake = createFakeBridge();
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    expect(adapter.ads.isRewardedSupported).toBe(false);
+    await expect(adapter.ads.showRewarded('revive')).resolves.toBe('skipped');
+    expect(fake.raw.advertisement.showRewarded).not.toHaveBeenCalled();
+  });
+
+  it('reads rewarded support live from the Bridge', () => {
+    const fake = createFakeBridge();
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    fake.raw.advertisement.isRewardedSupported = true;
+    expect(adapter.ads.isRewardedSupported).toBe(true);
+  });
+
+  it('rewards only after the rewarded state and cleans up', async () => {
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isRewardedSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showRewarded('revive');
+    fake.emit('rewarded_state_changed', 'opened');
+    fake.emit('rewarded_state_changed', 'rewarded');
+
+    await expect(result).resolves.toBe('rewarded');
+    expect(fake.raw.advertisement.showRewarded).toHaveBeenCalledWith('revive');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
+  });
+
+  it('maps closed without a reward to closed and cleans up', async () => {
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isRewardedSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showRewarded('revive');
+    fake.emit('rewarded_state_changed', 'opened');
+    fake.emit('rewarded_state_changed', 'closed');
+
+    await expect(result).resolves.toBe('closed');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
+  });
+
+  it('maps failed and throwing rewarded requests to failed', async () => {
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isRewardedSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showRewarded('revive');
+    fake.emit('rewarded_state_changed', 'failed');
+
+    await expect(result).resolves.toBe('failed');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
+
+    fake.raw.advertisement.showRewarded.mockImplementation(() => {
+      throw new Error('adblock');
+    });
+    await expect(adapter.ads.showRewarded('revive')).resolves.toBe('failed');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
+  });
+
+  it('times out rewarded ads after 15 s and cleans up the listener', async () => {
+    vi.useFakeTimers();
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isRewardedSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showRewarded('revive');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(1);
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    await expect(result).resolves.toBe('failed');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
   });
 });

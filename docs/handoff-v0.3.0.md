@@ -30,8 +30,8 @@
 | Portais | itch.io publicado; GameFlare, Playgama e CrazyGames Basic pendentes |
 | Node | 22.12+ (CI usa Node 24) |
 | Stack | Phaser 3.90, TypeScript 7, Vite 8, Vitest 5, Playwright 1.65, Playgama Bridge 2.4.1 |
-| ZIP local | `release/blockbreaker-web.zip` — 0.3.0, 20 arquivos, ~1.581 KiB |
-| SHA-256 do ZIP 0.3.0 | `68ac76a4eaf46dabc82e9f9c0eb0546706f152e455ad3a9f4dddbcb69b7dcc82` |
+| ZIP local | `release/blockbreaker-web.zip` — 0.3.0, 20 arquivos, ~1.479 KiB |
+| SHA-256 do ZIP 0.3.0 | `d51b89df7f7446e5576f5f6dbcf91550833d2bf1e625638a525821dcc9601ee6` |
 
 O GitHub Pages acompanha a `main`; todo push roda CI e deploy. O ZIP do itch.io
 não é alterado por pushes.
@@ -77,16 +77,17 @@ não é alterado por pushes.
 - `unlockedPhase` 1..6 e `campaignComplete`; run ativa não é salva.
 - Saves antigos continuam válidos; `endless` ausente cai em zeros.
 - Playgama Bridge 2.4.1 com fallback local, timeout de 10 s, storage com fallback
-  em memória, pause/áudio e interstitial apenas na saída dos results.
-- Sem `localStorage` direto no jogo, sem analytics externo, sem banners ou
-  rewarded ads.
+  em memória, pause/áudio, interstitials em pausas naturais e rewarded revive
+  opcional.
+- Sem `localStorage` direto no jogo, sem analytics externo, sem banners.
 
 ---
 
 ## 3. O que está fora de escopo
 
 - Metaprogressão e desbloqueios permanentes entre runs.
-- Rewarded ads, banners e monetização além do interstitial.
+- Outros usos de rewarded ads, banners e monetização além dos interstitials e do
+  revive.
 - Leaderboards, conquistas, tarefas diárias e ranking global.
 - Localização (UI e metadata em inglês).
 - Landscape jogável; mobile landscape apenas pausa e pede portrait.
@@ -142,8 +143,11 @@ A UI fala com o jogo por `GameCommands`; o jogo emite snapshots em
 - **Endless:** `startEndless` → `loadEndlessWave(1)`; `nextWave` gera a próxima
   onda; na derrota, `finishEndless` grava bestWave/bestScore/runs.
 - **Results:** campanha pode ter Next; Endless e fase 6 não têm Next.
-- **Interstitial:** somente ao sair dos results (Next/Retry/Menu), com mute,
-  overlay bloqueante e continuidade em `failed`/`skipped`/timeout.
+- **Interstitial:** campanha a cada 3 ondas, Endless a cada 4 e ao sair dos
+  results (Next/Retry/Menu), com mute, overlay bloqueante e continuidade em
+  `failed`/`skipped`/timeout.
+- **Rewarded revive:** uma oferta por run ao ser derrotado; recompensa só no
+  estado `rewarded`; recusa/falha encerra a run normalmente.
 
 ---
 
@@ -169,8 +173,10 @@ Estas regras não devem ser quebradas sem uma decisão explícita:
    Saves antigos nunca lançam; defaults seguros.
 8. **Conteúdo:** toda onda da campanha passa pelo validador; o Endless tem
    gerador determinístico e testes próprios.
-9. **Ads:** somente interstitial na saída dos results; sem rewarded, banners ou
-   frequência própria. `failed` e `skipped` são caminho normal.
+9. **Ads:** interstitials em pausas naturais (campanha a cada 3 ondas, Endless
+   a cada 4, e saída dos results por Next/Retry/Menu) e um rewarded revive por
+   run. Sem banners ou rewarded fora desse caso. `failed` e `skipped` são
+   caminho normal.
 10. **Debug:** `?debug=1` é apenas para QA. Nunca divulgar URL com debug nos
     portais. O handle `window.__bricklike` só existe em debug.
 11. **Nome:** jogo e loja **Bricklike**; slug técnico `blockbreaker` em repo,
@@ -198,16 +204,17 @@ Resultados esperados na referência atual:
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | ✅ sem erros |
-| `npm test` | ✅ **263 testes** em 26 arquivos |
+| `npm test` | ✅ **280 testes** em 27 arquivos |
 | `npm run validate:content` | ✅ 6 fases, 21 ondas, 759 blocos, 1.831 XP |
 | Bridge config | ✅ schema 2.4.1, sem URLs externas/ads indevidos |
 | `npm run build` | ✅ bundle Phaser/Vite |
-| `npm run package` | ✅ ZIP 0.3.0, 20 arquivos, ~1.581 KiB |
-| `npm run test:e2e` | ✅ **21 testes** (5 spec files) |
+| `npm run package` | ✅ ZIP 0.3.0, 20 arquivos, ~1.479 KiB |
+| `npm run test:e2e` | ✅ **24 testes** (8 spec files) |
 | CI + Deploy | ✅ verdes no commit `f8a6c75` |
 
 Cobertura E2E atual: boot/menu, controles, pause, settings, How to Play/About,
 level-up, vitória/unlock, Endless bloqueado/desbloqueado, AdMock `show`/`fail`,
+rewarded revive/recusa, ad na saída dos results, relógio pausado em pause/level-up,
 CDN bloqueado, layout 320/390/430/1440 + landscape mobile, runtime de
 chefe/desafio e Multiball entre ondas.
 
@@ -261,7 +268,7 @@ Assets prontos:
 
 O upload e a tag `v0.3.0` são **manuais** e dependem de aprovação humana. O ZIP
 0.3.0 local tem SHA-256
-`68ac76a4eaf46dabc82e9f9c0eb0546706f152e455ad3a9f4dddbcb69b7dcc82`;
+`d51b89df7f7446e5576f5f6dbcf91550833d2bf1e625638a525821dcc9601ee6`;
 confirme o hash antes de cada upload.
 
 ---

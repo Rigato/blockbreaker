@@ -98,7 +98,7 @@ retenção, isso o coloca na prateleira dos “block breakers genéricos”.
 - Leaderboard do Endless (mesmo que local no Basic).
 - Eventos e modificadores semanais.
 - Mais um modo (“Boss Rush”, “Daily Challenge”).
-- Rewarded ads opcionais com vantagem clara (após decidir limites).
+- Rewarded revive opcional: uma vez por run para continuar após a derrota.
 
 ### 2.5 Áudio e feedback
 
@@ -151,7 +151,7 @@ portal valoriza áudio consistente e música que complementa o visual.
 17. [ ] Acessibilidade: remapeamento, tamanho de texto, contraste.
 18. [ ] Localização PT-BR/ES (se o portal exigir mercado).
 19. [ ] Suporte landscape jogável.
-20. [ ] Rewarded ads opcionais com recompensa definida.
+20. [x] Rewarded revive opcional, uma vez por run.
 
 ### P2 — conteúdo e retenção
 
@@ -209,8 +209,10 @@ Problema atual é acesso à conta, não build. Enquanto o suporte responde:
   sem sobrepor a primeira linha de blocos.
 - **How to Play** com 5 páginas e **About Us** com a logomarca Bad Decision
   Games concluídos.
+- Ads ampliados: interstitial a cada 3 ondas na campanha, a cada 4 no Endless,
+  saída dos results por Next/Retry/Menu e rewarded revive 1x por run.
 - 8 screenshots de loja, capas e vídeos de 18,1 s regerados.
-- Metadata atualizada; 263 testes unitários e 21 E2E verdes.
+- Metadata atualizada; 280 testes unitários e 24 E2E verdes.
 - Restante para o próximo ciclo: moldura/letterbox desktop dedicada,
   metaprogressão, conquistas/desafios e localização.
 

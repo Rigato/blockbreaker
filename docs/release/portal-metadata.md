@@ -14,7 +14,7 @@ A submissão é **manual**, feita pelo usuário. Nada aqui foi enviado a portal.
 - **Platform:** HTML5 (browser; desktop and mobile)
 - **Language:** English (UI and metadata)
 - **Price:** Free
-- **Business model:** No purchases. Ads only where the hosting portal provides them; no ads on itch.io or GameFlare.
+- **Business model:** No purchases. Interstitial ads where the hosting portal provides them and an optional one-per-run rewarded revive; no ads on itch.io or GameFlare.
 
 ## Short description
 

@@ -30,7 +30,9 @@ aos portais.
 - **About Us** no rodapé: logomarca Bad Decision Games + texto do estúdio.
 - 8 screenshots de loja atualizados, capas regeradas e vídeos de 18,1 s.
 - Metadata de portal atualizada para 6 fases, chefes e Endless.
-- 263 testes unitários e 21 testes E2E verdes.
+- Ads ampliados: interstitial a cada 3 ondas na campanha, a cada 4 no Endless,
+  na saída dos results (Next/Retry/Menu) e rewarded revive 1x por run.
+- 280 testes unitários e 24 testes E2E verdes.
 
 ## Modo Endless
 

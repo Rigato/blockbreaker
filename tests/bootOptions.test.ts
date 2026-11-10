@@ -10,7 +10,7 @@ describe('readBootOptions', () => {
     });
   });
 
-  it('accepts only the two interstitial simulator modes', () => {
+  it('accepts the four ad simulator modes', () => {
     expect(readBootOptions('?debug=1&adMock=show')).toEqual({
       debug: true,
       resetSave: false,
@@ -20,6 +20,16 @@ describe('readBootOptions', () => {
       debug: true,
       resetSave: false,
       adMock: 'fail',
+    });
+    expect(readBootOptions('?debug=1&adMock=rewarded')).toEqual({
+      debug: true,
+      resetSave: false,
+      adMock: 'rewarded',
+    });
+    expect(readBootOptions('?debug=1&adMock=rewarded-fail')).toEqual({
+      debug: true,
+      resetSave: false,
+      adMock: 'rewarded-fail',
     });
     expect(readBootOptions('?debug=1&adMock=1').adMock).toBeNull();
   });

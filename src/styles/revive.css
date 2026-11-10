@@ -1,0 +1,167 @@
+/* Rewarded revive offer — shown once per run on defeat. */
+.revive {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(14px, 4.5cqw, 24px);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 212, 121, 0.12), transparent 54%),
+    rgba(3, 6, 14, 0.78);
+  backdrop-filter: blur(7px);
+  pointer-events: auto;
+}
+
+.revive[hidden] {
+  display: none;
+}
+
+.revive__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 340px);
+  max-height: 92%;
+  padding: clamp(18px, 5cqw, 28px) clamp(16px, 4.4cqw, 24px) clamp(16px, 4.2cqw, 22px);
+  overflow-y: auto;
+  border: 1px solid rgba(255, 212, 121, 0.55);
+  border-radius: 14px;
+  background:
+    radial-gradient(130% 48% at 50% 0%, rgba(255, 212, 121, 0.13), transparent 58%),
+    radial-gradient(80% 36% at 50% 100%, rgba(255, 95, 210, 0.08), transparent 62%),
+    linear-gradient(180deg, rgba(38, 28, 16, 0.97), rgba(10, 10, 22, 0.99));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 42px rgba(255, 212, 121, 0.16),
+    0 26px 64px rgba(0, 0, 0, 0.68);
+  text-align: center;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 212, 121, 0.32) transparent;
+}
+
+.revive__ornament {
+  width: clamp(32px, 9cqw, 42px);
+  aspect-ratio: 1;
+  margin-bottom: clamp(8px, 2.4cqw, 12px);
+  border: 1px solid rgba(255, 212, 121, 0.7);
+  border-radius: 22%;
+  background:
+    linear-gradient(135deg, rgba(255, 244, 207, 0.9), rgba(255, 196, 74, 0.55) 45%, rgba(80, 42, 10, 0.9));
+  box-shadow:
+    0 0 22px rgba(255, 212, 121, 0.5),
+    inset 0 0 10px rgba(255, 255, 255, 0.35);
+  transform: rotate(45deg);
+}
+
+.revive__kicker {
+  margin: 0 0 4px;
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 2.2cqw, 10px);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.revive__title {
+  margin: 0;
+  color: #fff6dd;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 6.4cqw, 28px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  text-shadow:
+    0 0 20px rgba(255, 212, 121, 0.32),
+    0 6px 22px rgba(0, 0, 0, 0.5);
+}
+
+.revive__body {
+  max-width: 30ch;
+  margin: clamp(8px, 2.6cqw, 12px) 0 0;
+  color: #d9d2c4;
+  font-size: clamp(11px, 2.9cqw, 13px);
+  line-height: 1.5;
+}
+
+.revive__note {
+  margin: clamp(6px, 2cqw, 9px) 0 0;
+  color: rgba(255, 212, 121, 0.72);
+  font-family: var(--font-pixel);
+  font-size: clamp(7px, 2cqw, 9px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.revive__actions {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(7px, 2cqw, 10px);
+  width: 100%;
+  margin-top: clamp(14px, 4cqw, 20px);
+}
+
+.revive__watch,
+.revive__decline {
+  width: 100%;
+  min-height: clamp(42px, 11cqw, 48px);
+  padding: 0 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: clamp(10px, 2.6cqw, 12px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.revive__watch {
+  border: 1px solid rgba(255, 240, 190, 0.9);
+  background: linear-gradient(180deg, #ffe8a8, #ffc85e);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 0 20px rgba(255, 212, 121, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+  color: #3a2404;
+}
+
+.revive__watch:hover {
+  background: linear-gradient(180deg, #fff3c8, #ffd479);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 0 28px rgba(255, 212, 121, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.revive__decline {
+  border: 1px solid rgba(126, 231, 255, 0.3);
+  background: rgba(8, 18, 36, 0.78);
+  color: var(--muted);
+}
+
+.revive__decline:hover {
+  border-color: rgba(126, 231, 255, 0.6);
+  background: rgba(16, 38, 66, 0.9);
+  color: var(--ink);
+}
+
+.revive__watch:focus-visible,
+.revive__decline:focus-visible {
+  outline: 2px solid var(--cyan-bright);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .revive__watch,
+  .revive__decline {
+    transition: none;
+  }
+}
