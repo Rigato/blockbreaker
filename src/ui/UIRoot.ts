@@ -59,6 +59,9 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   let phaseInfo: readonly PhaseSelectInfo[] = readPhaseInfo();
   let selectedPhaseId: string | null = null;
   let lastSnapshot: HudSnapshot = controller.getHudState();
+  const storageUnavailable =
+    options.platform.diagnostics.storageKind === 'memory' ||
+    options.platform.diagnostics.source === 'fallback';
 
   const menu = new Menu({
     root: options.root,
@@ -69,6 +72,8 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     onSettings: handleSettings,
     onHowToPlay: handleHowToPlay,
     onAbout: handleAbout,
+    storageWarning: storageUnavailable,
+    onStorageInfo: handleStorageInfo,
   });
 
   const phaseSelect = new PhaseSelect({
@@ -176,6 +181,18 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       title: en.endlessLockedTitle,
       body: en.endlessLockedBody,
       confirmLabel: en.endlessLockedConfirm,
+    });
+  }
+
+  function handleStorageInfo(): void {
+    phaseSelect.close();
+    settings.close();
+    howToPlay.close();
+    about.close();
+    infoDialog.open({
+      title: en.storageWarningTitle,
+      body: en.storageWarningBody,
+      confirmLabel: en.storageWarningConfirm,
     });
   }
 

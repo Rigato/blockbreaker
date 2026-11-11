@@ -87,6 +87,7 @@ export interface EndlessStats {
 /** Persisted save. Active runs are intentionally not saved. */
 export interface SaveV1 {
   version: 1;
+  /** 0 = tutorial only; 1..6 = campaign phases unlocked. */
   unlockedPhase: number;
   phases: Record<string, PhaseStats>;
   endless: EndlessStats;
@@ -217,7 +218,10 @@ export interface LaserHudState {
 export interface PhaseSelectInfo {
   id: string;
   name: string;
+  /** 0 for the optional tutorial, 1..6 for the campaign. */
   index: number;
+  /** True for the tutorial phase that gates the campaign on a fresh save. */
+  tutorial: boolean;
   unlocked: boolean;
   bestTimeMs: number | null;
   bestScore: number | null;
@@ -251,6 +255,8 @@ export interface PhaseResult {
   phaseName: string;
   phaseIndex: number;
   phaseCount: number;
+  /** True when the result belongs to the tutorial phase. */
+  tutorial?: boolean;
   victory: boolean;
   score: number;
   timeMs: number;
@@ -267,6 +273,22 @@ export interface PhaseResult {
   waveReached?: number;
   /** Best wave after recording the result. */
   bestWave?: number;
+}
+
+/** Contextual tutorial coach marks shown only during the tutorial phase. */
+export type TutorialStep =
+  | 'move'
+  | 'levelup'
+  | 'specials'
+  | 'bosses'
+  | 'endless';
+
+export interface TutorialState {
+  step: TutorialStep;
+  /** 1-based position in the three in-run tutorial steps. */
+  stepIndex: number;
+  stepCount: number;
+  canSkip: boolean;
 }
 
 /** Minimal state required by the DOM HUD. Emitted only when it changes. */
@@ -307,6 +329,10 @@ export interface HudSnapshot {
   endlessUnlocked: boolean;
   /** Non-null only while the results screen is open. */
   result: PhaseResult | null;
+  /** True while the active phase is the tutorial. */
+  isTutorial?: boolean;
+  /** Contextual coach marks for the tutorial phase; null outside it. */
+  tutorial?: TutorialState | null;
   /** Boss health for the current wave; optional until integrated. */
   boss?: { name: string; hp: number; maxHp: number; phase: number } | null;
   /** Active wave challenge; optional until integrated. */
@@ -442,6 +468,8 @@ export interface GameCommands {
   // M3 — phases, save and results
   /** Starts a specific content phase from its first wave. */
   startPhase(phaseId: string): void;
+  /** Completes the tutorial immediately and unlocks level 1. */
+  skipTutorial(): void;
   /** Retries the current phase from wave 1 (results screen). */
   restartPhase(): void;
   /** Moves from a victory result to the next unlocked phase. */

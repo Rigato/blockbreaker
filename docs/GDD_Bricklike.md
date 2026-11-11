@@ -3,21 +3,22 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.4  
-**Data:** 2026-11-10  
-**Status:** v0.4.0 publicada no itch.io e no sandbox da Playgama; CrazyGames/GameFlare pendentes  
+**Versão:** 1.5  
+**Data:** 2026-11-11  
+**Status:** v0.5.0 em main, validada e aguardando teste humano; itch.io e Playgama seguem com a 0.4.0; CrazyGames/GameFlare pendentes  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha v0.2.0 tem **6 fases e 21 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. A v0.3.0 adiciona o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adiciona a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A `0.4.0` está publicada no itch.io e no sandbox da Playgama; `0.1.0-mvp` é histórica.
+A campanha atual tem **6 fases e 20 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. Com o **tutorial** da v0.5.0, o seletor mostra **7 cards e 22 ondas** no total. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.0 adiciona o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**; a build está em `main`, aguardando teste humano. A `0.4.0` segue publicada no itch.io e no sandbox da Playgama; `0.1.0-mvp` é histórica.
 
 ### Como ler os status
 
 - **Confirmado:** escolha expressa pelo jogador ou consolidada no design.
-- **v0.4.0:** implementado e validado na expansão atual (apresentação, ads e UX).
+- **v0.5.0:** implementado e validado no ciclo atual (tutorial, controles touch e política de ads).
+- **v0.4.0:** implementado e validado no ciclo anterior (apresentação, ads e UX).
 - **v0.3.0:** implementado e validado na expansão anterior (modo Endless).
 - **v0.2.0:** implementado e validado na expansão da campanha.
 - **MVP:** recorte original de `0.1.0-mvp`.
@@ -41,51 +42,58 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 
 ## 2. Loop principal
 
-1. Mover o rebatedor horizontalmente para posicionar a rebatida.
-2. Controlar ângulo e trajetória para conduzir as bolinhas por corredores e aberturas entre os blocos.
-3. Quebrar blocos comuns e **blocos especiais** (explosivo, regenerativo, móvel, multiplicador, gerador e ligado), usando o comportamento de cada um a favor da run.
-4. Interagir com os **elementos da fase** — paredes, obstáculos, defletores, portais, mecanismos móveis, rotores e portões temporizados.
-5. Receber XP por blocos destruídos e preencher a barra de nível.
-6. Ao subir de nível, pausar a partida e escolher um entre três perks aleatórios.
-7. Retomar a onda com a nova combinação de habilidades; limpar todos os blocos — e o **chefe**, quando houver — para iniciar a próxima onda.
-8. Sobreviver às ondas com **desafio** (`timeLimit`, `noLaser`) e concluir a fase; as fases 4–6 terminam em chefe e a fase 6 fecha a campanha.
+1. No primeiro acesso, jogar o **Tutorial** curto e pulável: mover, lançar, quebrar blocos e ver o primeiro level up.
+2. Mover o rebatedor horizontalmente para posicionar a rebatida.
+3. Controlar ângulo e trajetória para conduzir as bolinhas por corredores e aberturas entre os blocos.
+4. Quebrar blocos comuns e **blocos especiais** (explosivo, regenerativo, móvel, multiplicador, gerador e ligado), usando o comportamento de cada um a favor da run.
+5. Interagir com os **elementos da fase** — paredes, obstáculos, defletores, portais, mecanismos móveis, rotores e portões temporizados.
+6. Receber XP por blocos destruídos e preencher a barra de nível.
+7. Ao subir de nível, pausar a partida e escolher um entre três perks aleatórios.
+8. Retomar a onda com a nova combinação de habilidades; limpar todos os blocos — e o **chefe**, quando houver — para iniciar a próxima onda.
+9. Sobreviver às ondas com **desafio** (`timeLimit`, `noLaser`) e concluir a fase; as fases 4–6 terminam em chefe e a fase 6 fecha a campanha.
 
 **Derrota:** nenhuma bolinha permanece ativa em jogo, ou o tempo de uma onda com `timeLimit` chega a zero.  
 **Vitória de fase:** limpar todas as ondas previstas, incluindo o chefe quando a onda o define.  
-**Campanha:** 6 fases, com ondas por fase 3/3/3/3/4/5 (total 21).
+**Tutorial:** 2 ondas, 48 blocos e 55 XP; concluir ou pular libera o level 1 em save novo.  
+**Campanha:** 6 fases, com ondas por fase 2/3/3/3/4/5 (total 20). Com o tutorial, são 7 cards e 22 ondas.
 
 ### Modo Endless (v0.3.0)
 
-- **Acesso:** botão **Endless** no menu principal, separado de Play e Levels.
+- **Acesso:** botão **Endless** no menu principal, separado de Campaign e da seleção de fases.
 - **Estrutura:** uma run única em uma fase infinita (`endless`), sem vitória; a run termina quando todas as bolas caem.
 - **Velocidade:** base **660**, **+14 por onda**, teto **1100**. A velocidade passa de **780 na onda 10** (786) e satura em **1100 na onda 32**.
 - **Linhas:** começam em **4** e crescem até **12**; a densidade sobe de ~55% para ~92%.
 - **Blocos especiais:** introdução gradual — `moving` (onda 4), `explosive` (5), `regenerative` (7), `multiplier` (9), `linked` (11) e `generator` (13).
 - **Elementos:** `wall` (2), `deflector` (4), `portal` (6), `mover` (8), `gate` (10) e `rotor` (12); a partir da onda 14 a geração combina os **7** tipos.
 - **Chefes:** a cada **5 ondas**, alternando os padrões sentinel/warden/void (Frost Sentinel, Ember Warden e Void Herald), com HP **`40 + wave × 6`**.
-- **XP e perks:** a mesma curva do modo Levels; os perks persistem entre ondas. **Second Chance** continua valendo uma vez por run.
+- **XP e perks:** a mesma curva da campanha; os perks persistem entre ondas. **Second Chance** continua valendo uma vez por run e pode coexistir com o rewarded revive.
 - **Results:** mostram **Wave**, **Best wave**, score, level e perks; **sem botão Next**. Retry recomeça uma run Endless e Menu volta ao menu.
 - **Save:** `endless: { bestWave, bestScore, runs }` dentro de `bb.save` v1; saves antigos caem em zeros.
 - **Progressão:** o Endless **não desbloqueia fases da campanha**; os recordes são apenas pessoais.
-- **Desbloqueio (v0.4.0-dev):** o Endless só é liberado depois que a campanha
+- **Desbloqueio (v0.4.0):** o Endless só é liberado depois que a campanha
   inteira (fase 6) for concluída. O botão fica visivelmente bloqueado e, ao ser
   tocado, abre um diálogo explicando o requisito.
 
-### Menu, seleção de fases e configurações (v0.4.0-dev)
+### Menu, seleção de fases e configurações (v0.5.0)
 
 - **Menu:** dois caminhos principais — **Campaign** e **Endless** — sem o texto
   de MVP `XP · Perks · Levels` e sem o rodapé de controles. O rodapé mostra
-  apenas **Settings** e a versão.
-- **Campaign:** card principal com progresso `N / 6`, fase atual, nós de
-  progresso e CTA `Continue`/`Start campaign`. Abre a seleção de fases.
+  **How to Play**, **Settings**, **About Us** e a versão.
+- **Campaign:** card principal com progresso, fase atual, nós de progresso e CTA
+  `Continue`/`Start campaign`. Abre a seleção de fases.
+- **Tutorial:** card próprio antes das seis fases, com badge “Start here”. Em
+  save novo, o level 1 fica bloqueado até concluir ou pular o tutorial.
 - **Endless:** card secundário com recorde de onda e runs; bloqueado até o fim
   da campanha.
+- **Aviso de storage:** se o diagnóstico da plataforma cai em memória/fallback,
+  o menu mostra **“Progress may not be saved”**; o clique abre um popup
+  explicando que progresso e settings podem ser perdidos ao fechar a página.
 - **Fundo do menu:** camada Phaser de apresentação com bolinhas luminosas
   quicando, trilhas curtas e partículas discretas. A onda 1 da fase 1 não é
   mais usada como fundo. Respeita reduced motion.
 - **Seleção de fases:** tela cheia com cards temáticos por fase (ícone, accent,
-  tagline, features, chefe, dificuldade e melhores resultados). Fases 4–6
-  destacam o chefe.
+  tagline, features, chefe, dificuldade e melhores resultados). Com o tutorial,
+  são 7 cards; fases 4–6 destacam o chefe.
 - **Settings:** diálogo com **Sound**, **Music** e **Screen shake**,
   persistidos em `bb.settings`. O pause oferece os mesmos três controles.
 - **How to Play:** diálogo de cinco páginas com screenshots reais e textos
@@ -94,8 +102,10 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
   texto de apresentação do estúdio.
 - **HUD compacto:** abaixo de 440 px de shell, o HUD troca rótulos por ícones e
   usa valores de 11–13 px; legível em iframes 907×510/800×450.
-- **Blocos:** nova direção visual “arcade tile” — corpo saturado, bisel, sombra,
+- **Blocos:** direção visual “arcade tile” — corpo saturado, bisel, sombra,
   brilho, materiais distintos e leitura em 46 px, alinhada às capas.
+- **Coach marks do tutorial:** painel contextual com cinco passos — mover/lançar,
+  XP/perk, blocos especiais, chefes e Endless — e botão **Skip tutorial**.
 
 ## 3. Regras de gameplay confirmadas
 
@@ -103,10 +113,12 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 
 - Orientação portrait; controle principal por toque e deslize horizontal para mover o rebatedor.
 - Também há mouse absoluto e teclado (setas/A-D) no desktop.
-- A habilidade de mirar e posicionar o rebatedor influencia a trajetória. O jogador aprende por experimentação; não há tutorial tradicional.
+- **Toque:** o drag é relativo e 1:1 no centro do campo. Nos **22% externos** de cada lado, o ganho cresce progressivamente até **2,2×** para o paddle alcançar a borda antes do dedo e evitar o gesto de borda do navegador. O limite de velocidade do paddle não muda.
+- **Mouse e teclado:** mouse continua absoluto; teclado continua igual.
+- **Tutorial:** o primeiro acesso abre uma run guiada e pulável, com coach marks de movimento/lançamento, XP/perk, blocos especiais, chefes e Endless. O **How to Play** no menu complementa, mas não substitui o tutorial.
 - **Zoom de layout:** formações altas reduzem a escala do campo (blocos, elementos e chefe) para manter tudo visível entre o HUD e o paddle. Não é zoom de câmera: o paddle, a bola e o mapeamento de input não mudam.
 - **Sticky Paddle:** prende a bola ao rebatedor e solta com tap/toque; há soltura automática de segurança após 2,5 s.
-- **Prism Laser:** só pode ser disparado quando **pelo menos uma bola está solta** (`!ball.stuck`). Com a única bola presa — no início da onda ou por Sticky — o laser fica bloqueado e o botão indica o motivo.
+- **Prism Laser:** exige **lançamento explícito da bola na onda** e pelo menos uma bola solta (`!ball.stuck`). Bolas criadas por debug ou multiball não substituem o lançamento. Ao resetar a onda, o laser fica bloqueado até o jogador lançar; o HUD mostra **“Launch the ball first”**. Sticky pode bloquear de novo depois do lançamento.
 
 ### Bolinhas, vidas e falha
 
@@ -210,16 +222,19 @@ Regras:
 
 | # | Nome | Ondas | Velocidades de bola | Tema | Novidade |
 |---|---|---:|---|---|---|
-| 1 | Crystal Grove | 3 | 572 / 616 / 660 | crystal | base |
+| 0 | Tutorial | 2 | 520 / 560 | tutorial | mover, lançar, XP/perk e bloco explosivo |
+| 1 | Crystal Grove | 2 | 572 / 616 | crystal | base |
 | 2 | Ruined Halls | 3 | 616 / 660 / 704 | ruins | stone/obsidian |
 | 3 | Arcane Depths | 3 | 638 / 682 / 726 | arcane | densidade |
 | 4 | Frostbound Spire | 3 | 660 / 682 / 704 | frost | moving, explosive, regenerative, wall, deflector, Frost Sentinel |
 | 5 | Emberforge | 4 | 682 / 704 / 726 / 748 | forge | multiplier, linked, portal, gate, mover, rotor, Ember Warden |
 | 6 | Void Threshold | 5 | 704 / 726 / 748 / 770 / 780 | void | generator e todos os especiais, rotor, mover, Void Herald |
 
-- Total: **21 ondas**, **759 blocos**, **1.831 XP** no conteúdo validado.
-- Blocos por fase: 86 / 90 / 94 / 103 / 136 / 250.
-- XP por fase: 130 / 212 / 262 / 229 / 348 / 650.
+- Com o tutorial: **7 cards**, **22 ondas**, **775 blocos**, **1.832 XP** no conteúdo validado.
+- Campanha pura: **6 fases**, **20 ondas**, **727 blocos**, **1.777 XP**.
+- Blocos por fase (sem tutorial): 54 / 90 / 94 / 103 / 136 / 250.
+- XP por fase (sem tutorial): 76 / 212 / 262 / 229 / 348 / 650.
+- Tutorial: 48 blocos, 55 XP, 3 level ups.
 - Cada fase termina em results; a vitória desbloqueia a fase seguinte.
 - A fase 6 termina com o Void Herald e um encerramento de campanha.
 - A fase 6 inclui uma onda alta (12 linhas esparsas) para exercitar o zoom de layout.
@@ -242,19 +257,21 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Momento | Decisão confirmada |
 |---|---|
 | Dentro da run | Perks e níveis formam uma build temporária. A derrota descarta a run. |
-| Entre fases | Progressão sequencial: vencer uma fase desbloqueia a próxima. As fases 4–6 desbloqueiam em sequência, de 4 para 5 e de 5 para 6. |
+| Entre fases | Progressão sequencial: vencer uma fase desbloqueia a próxima. O tutorial libera o level 1; as fases 4–6 desbloqueiam em sequência, de 4 para 5 e de 5 para 6. |
+| Tutorial | Em save novo, `unlockedPhase = 0` (tutorial). Concluir ou pular grava o clear do tutorial e libera o level 1. Save antigo com `unlockedPhase >= 1` continua sem repetir. |
 | Ao perder | Reiniciar a fase perdida imediatamente, sem limite de tentativas; fases já desbloqueadas permanecem disponíveis. |
-| Second Chance | Revive a run uma vez por run, com uma bola. É um perk único; não é uma vida extra por bolinha. |
+| Second Chance | Revive a run uma vez por run, com uma bola. É um perk único; não é uma vida extra por bolinha. Pode coexistir com o rewarded revive (dois revives por run, um de cada). |
 | Modo Endless | Run infinita separada da campanha. O save v1 guarda `endless` com `bestWave`, `bestScore` e `runs`; não altera `unlockedPhase`. |
-| Salvamento | Save schema v1 (`bb.save`), com `unlockedPhase` de 1 a 6 e estatísticas por fase. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
-| Compatibilidade | Saves antigos continuam válidos; `unlockedPhase` é limitado a 1..6 e campos malformados caem em defaults. |
-| Metaprogressão | Fora do escopo da v0.4.0. Desbloqueios permanentes de conteúdo e melhorias de atributos ficam para uma fase futura. |
+| Salvamento | Save schema v1 (`bb.save`), com `unlockedPhase` de 0 a 6 (0 = tutorial) e estatísticas por fase. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
+| Compatibilidade | Saves antigos continuam válidos; `unlockedPhase` é limitado a 0..6 e campos malformados caem em defaults. Saves antigos com clears inferem o unlock. |
+| Metaprogressão | Fora do escopo da v0.5.0. Desbloqueios permanentes de conteúdo e melhorias de atributos ficam para uma fase futura. |
 | Competição | Estatísticas pessoais e recordes por fase; rankings globais e conquistas continuam fora do escopo. |
 
-- Save v1 mantém `phases` por `phaseId` com `bestTimeMs`, `bestScore`, `attempts`, `clears` e `bestLevel`.
+- Save v1 mantém `phases` por `phaseId` com `bestTimeMs`, `bestScore`, `attempts`, `clears` e `bestLevel`; o tutorial usa `phaseId = 'tutorial'`.
 - O mesmo save mantém `endless` com `bestWave`, `bestScore` e `runs`; é opcional no parse e saves antigos recebem zeros.
-- `campaignComplete` marca a conclusão da fase 6 e libera o Endless; saves antigos com `clears > 0` na fase 6 são migrados como completos.
+- `campaignComplete` marca a conclusão da fase 6 e libera o Endless; o tutorial não conta para essa flag. Saves antigos com `clears > 0` na fase 6 são migrados como completos.
 - Settings v1 mantém `sound`, `music` e `screenShake`.
+- Se o storage cair em memória/fallback, o menu mostra o aviso **“Progress may not be saved”** e explica que progresso/settings podem ser perdidos ao fechar a página.
 - A run ativa não é salva.
 
 ## 6. Direção visual e sonora
@@ -281,8 +298,8 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Zoom | Escala de layout 0,68–1,0, sem alterar input |
 | Perks | 19 no catálogo, com níveis e sinergias |
 | Encerramentos | Epílogo por fase, rank S/A/B, final de campanha e derrota |
-| Save | v1 mantido, `unlockedPhase` 1..6 |
-| Correção | Laser só dispara com pelo menos uma bola solta |
+| Save | v1 mantido; `unlockedPhase` 1..6 (a 0.5.0 amplia para 0..6) |
+| Correção | Laser só dispara com pelo menos uma bola solta (regra ampliada na 0.5.0) |
 
 ### O que entrou na v0.3.0
 
@@ -307,14 +324,31 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Endless | Desbloqueio ao concluir a campanha, com diálogo explicativo |
 | How to Play | 5 páginas com screenshots localizados 5:3 |
 | About Us | Logomarca Bad Decision Games + texto do estúdio |
-| Ads | Interstitial a cada 3 ondas (campanha), a cada 4 (Endless) e na saída dos results; rewarded revive 1x por run |
+| Ads | Interstitial a cada 3 ondas (campanha), a cada 4 (Endless) e na saída dos results; rewarded revive 1x por run (política substituída na 0.5.0) |
 | Save | `campaignComplete` e migração de saves antigos |
 | Assets | 8 screenshots de loja, capas e vídeos de 18,1 s atualizados |
+
+### O que entrou na v0.5.0
+
+| Item | Entrega |
+|---|---|
+| Tutorial | Fase 0 `tutorial`, 2 ondas (`tutw1`, `tutw2`), 48 blocos, 55 XP e 3 level ups; gate do level 1 em save novo |
+| Campanha | 6 fases e 20 ondas (2/3/3/3/4/5); com tutorial, 7 cards e 22 ondas |
+| Totais | 775 blocos e 1.832 XP com tutorial; 727 blocos e 1.777 XP na campanha pura |
+| Skip e coach marks | “Skip tutorial” conclui e libera o level 1; coach marks de mover/lançar, XP/perk, blocos especiais, chefes e Endless |
+| Controles touch | Drag relativo 1:1 no centro; ganho progressivo até 2,2× na zona externa de 22%; velocidade do paddle inalterada |
+| Laser | Exige lançamento explícito na onda; reset bloqueia até o jogador lançar; HUD “Launch the ball first” |
+| Ads | Campanha só com próxima onda e onda múltipla de 3; Endless a cada 4; tutorial sem ads; exits com cooldown de 60 s |
+| Revives | Second Chance + rewarded revive podem coexistir; rewarded continua 1x por run |
+| Storage | Aviso “Progress may not be saved” + popup quando o storage é memória/fallback |
+| Save | `unlockedPhase` 0..6; saves antigos com `>= 1` continuam válidos |
+| Gates | 289 testes em 28 arquivos; 29 E2E em 9 spec files; ZIP 0.5.0 local, 20 arquivos |
 
 ### O que continua fora
 
 - Metaprogressão permanente, leaderboards e conquistas.
 - Mundos sci-fi/industrial, localização e landscape jogável.
+- **Moldura/letterbox desktop:** decisão do dono é não fazer nesta linha; o shell portrait centralizado é intencional.
 - Editor de fases e pipeline procedural.
 - Backend, contas e cloud save.
 - Full Launch e submission automática em portais.
@@ -324,14 +358,14 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 ### Distribuição
 
 - Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
-- **Um build, 6 fases:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração.
+- **Um build, 6 fases:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração. O Bridge é **local** no boot (`./playgama-bridge.js`), sem request ao CDN da Playgama.
 - O **itch.io recebeu a `0.4.0`** manualmente; `0.1.0-mvp` é histórica.
-- A v0.4.0 é a linha atual de desenvolvimento/publicação; está no itch.io e no
-  sandbox da Playgama.
-- **Playgama:** build em sandbox, com milestones pendentes.
-- **CrazyGames:** Basic Launch reprovado por qualidade; P0 de apresentação executado, reenvio pendente.
+- A **0.5.0 é a linha atual de desenvolvimento**, mas está em **`main`** para teste e ainda não foi publicada em portal. itch.io e sandbox da Playgama seguem com a **0.4.0**.
+- **Playgama:** build 0.4.0 em sandbox, com milestones pendentes; amostra pequena de stats, sem conclusão de qualidade/retenção.
+- **CrazyGames:** a 0.3.0 e a 0.4.0 foram reprovadas com a mesma mensagem genérica. A 0.5.0 é a próxima tentativa, após teste humano e assets novos. Decisão: **não fazer moldura/letterbox desktop**.
 - **GameFlare:** conta criada, acesso bloqueado; suporte acionado.
 - Os portais restantes continuam com submissão **manual**; revalidar requisitos na data.
+- **Assets de loja:** capas, screenshots e vídeos ainda são os da 0.4.0 e precisam ser regerados antes da submissão da 0.5.0.
 
 ### Stack de desenvolvimento
 
@@ -344,17 +378,22 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 
 - Jogo totalmente gratuito; receita somente de publicidade.
 - Modelo escolhido: anúncios convencionais conforme cada portal e anúncios recompensados opcionais que concedem uma vantagem ao jogador.
-- **Interstitials em pausas naturais:** após cada 3ª onda da campanha (por fase),
-  após cada 4ª onda do Endless e ao sair dos results por Next/Retry/Menu.
+- **Interstitials em pausas naturais (política 0.5.0):**
+  - campanha: somente quando há próxima onda e a onda limpa é múltipla de 3 — na prática, fase 5 após a onda 3 e fase 6 após a onda 3; nunca no fim da fase;
+  - Endless: a cada 4 ondas;
+  - tutorial: nenhum ad;
+  - saída dos results (Next/Retry/Menu): se não houve outro interstitial nos últimos 60 s; após rewarded revive, o ad dos results ainda pode aparecer na segunda morte;
+  - saída pelo menu do pause: suprimida se houve interstitial **ou** rewarded revive nos últimos 60 s.
 - **Rewarded revive:** ao ser derrotado, o jogador pode assistir um ad uma vez por
   run para continuar com uma bola nova. O caminho sem ad continua existindo: a
   run termina normalmente e o jogador pode tentar de novo.
+- **Second Chance + rewarded revive** coexistem de propósito: são dois revives por run, um de cada mecânica.
 - Sem compras, microtransações, cosméticos pagos ou opção paga para remover anúncios.
 - Respeitar a disponibilidade e as regras de cada portal; não inserir anúncios forçados durante a ação do block breaker.
 
 ## 9. Backlog futuro
 
-Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog. O **modo Endless** entrou no escopo da **v0.3.0** com fase infinita, progressão, chefes recorrentes e recordes no save. A **v0.4.0** fechou a lacuna de apresentação/UX e implementou interstitials e rewarded revive.
+Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog. O **modo Endless** entrou no escopo da **v0.3.0** com fase infinita, progressão, chefes recorrentes e recordes no save. A **v0.4.0** fechou a lacuna de apresentação/UX e implementou interstitials e rewarded revive. A **v0.5.0** adicionou tutorial in-game, controles touch com edge assist, gate do laser, política de ads mais conservadora e aviso de storage; a build está em `main`, aguardando teste humano.
 
 - Leaderboard específico do modo Endless (o ranking global continua fora).
 - Metaprogressão permanente com desbloqueios de conteúdo, sem bônus permanentes de atributos iniciais.
@@ -371,9 +410,10 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 
 | Tema | Pendência / observação |
 |---|---|
-| Conteúdo | A campanha de 6 fases / 21 ondas está fechada; não há novas fases da campanha nesta versão. O Endless é gerado proceduralmente. |
+| Conteúdo | A campanha de 6 fases / 20 ondas está fechada; com o tutorial, são 7 cards / 22 ondas. Não há novas fases da campanha nesta versão. O Endless é gerado proceduralmente. |
+| Tutorial | Implementado com 2 ondas, 48 blocos, 55 XP e 3 level ups; skip e coach marks cobertos por testes. Falta validar compreensão em teste humano. |
 | Endless | Uma fase infinita implementada; balanceamento das ondas altas e dos chefes ainda depende de playtest humano. |
-| Ondas | Distribuição decidida: 3/3/3/3/4/5. As ondas novas (3 na fase 4, 4 na fase 5, 5 na fase 6) estão implementadas e validadas. |
+| Ondas | Distribuição decidida: tutorial 2; campanha 2/3/3/3/4/5. A fase 1 encurtada e as ondas 4–6 estão implementadas e validadas. |
 | Perks | Catálogo fechado em 19 perks, com níveis, pré-requisitos e fallback interno. Balanceamento fino ainda depende de playtest humano. |
 | Chefes | Três chefes definidos (Frost Sentinel, Ember Warden, Void Herald) com HP, padrão, shards e corrosão. Ajuste de dificuldade segue aberto para playtest. |
 | Regras de onda | `timeLimit` e `noLaser` implementados nas ondas definidas. Novas combinações de desafio ficam para o futuro. |
@@ -382,10 +422,11 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | Rewarded ads | Revive uma vez por run implementado; outros usos ficam para o futuro. |
 | Metaprogressão | Fora do escopo; decidir se a próxima fase é conteúdo, meta ou plataforma. |
 | Localização | Fora do escopo; o catálogo de strings precisa ser separado por locale antes. |
-| Performance real | Números de hardware real ainda não estão versionados; criar baseline por device. |
-| Distribuição | itch.io e Playgama sandbox com `0.4.0`; CrazyGames reprovado e GameFlare com acesso bloqueado. |
-| Apresentação desktop | HUD compacto implementado; falta moldura/letterbox dedicada para 1366×768+ |
-| Ads | Interstitials e rewarded revive implementados; acompanhar fill/limites reais na Playgama e CrazyGames |
+| Performance real | Protocolo e script prontos (`docs/qa/performance-testing.md`, `scripts/perf-smoke.mjs`); resultados da 0.5.0 pendentes. |
+| Distribuição | itch.io e Playgama sandbox com `0.4.0`; 0.5.0 em main; CrazyGames 0.3.0 e 0.4.0 reprovadas; GameFlare bloqueado. |
+| Apresentação desktop | HUD compacto implementado; **decisão: não fazer moldura/letterbox desktop** nesta linha. Risco residual de iframe desktop. |
+| Ads | Política 0.5.0 implementada e testada com mock; acompanhar fill/limites reais na Playgama e CrazyGames. |
+| Store assets | Capas, screenshots e vídeos ainda são da 0.4.0; regerar antes da submissão da 0.5.0. |
 | Áudio | Novos elementos e chefes usam SFX existentes; mixagem final ainda pode ser refinada. |
 
 ### Checklist de coerência
@@ -393,12 +434,14 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 - A vida compartilhada significa que uma bolinha pode cair sem terminar a run se outra continuar ativa; a derrota ocorre quando todas caem.
 - Perks de bola são passivos/automáticos; perks de ataque pertencem ao rebatedor e podem ser automáticos ou manuais.
 - O level up pausa o jogo para a escolha de um entre três perks; as ondas só avançam após todos os blocos (e o chefe, quando houver) serem destruídos.
-- O laser exige pelo menos uma bola solta; Sticky e a bola inicial presa bloqueiam o disparo.
+- O tutorial libera o level 1 em save novo; skip conclui a fase; save antigo com `unlockedPhase >= 1` não repete.
+- O laser exige lançamento explícito na onda e pelo menos uma bola solta; reset, Sticky e a bola inicial presa bloqueiam o disparo.
+- O toque é relativo 1:1 no centro, com ganho até 2,2× na zona externa de 22%; mouse é absoluto e a velocidade do paddle não mudou.
 - O zoom é escala de layout, não de câmera; o input não muda.
 - Metaprogressão desbloqueia conteúdo, não bônus permanentes de atributos. A run ativa não é salva.
 - O Endless é uma run separada: não desbloqueia fases, não substitui a campanha e mantém seus próprios recordes no save.
-- A monetização é somente publicidade; o rewarded revive é opcional e tem caminho sem ad.
-- O build `0.1.0-mvp` é histórico; a `0.4.0` está publicada no itch.io e no sandbox da Playgama.
+- A monetização é somente publicidade; o rewarded revive é opcional e tem caminho sem ad; tutorial não tem ads.
+- O build `0.1.0-mvp` é histórico; a `0.4.0` está publicada no itch.io e no sandbox da Playgama; a `0.5.0` está em `main` e ainda não publicada.
 
 ---
 
@@ -411,9 +454,11 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.2` | 2026-11-09 | v0.3.0-dev: modo Endless com fase infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas, save `endless` e results próprios. |
 | `1.3` | 2026-11-10 | v0.4.0-dev: revisão visual dos blocos, menu Campaign/Endless, fundo animado, seleção de fases temática, settings de som/música/shake, Endless desbloqueado ao concluir a campanha, HUD compacto, How to Play, About Us, interstitials a cada 3/4 ondas, rewarded revive 1x por run e save `campaignComplete`. |
 | `1.4` | 2026-11-10 | Fechamento da v0.4.0: status, escopo, distribuição, ads e pendências atualizados para a nova sessão; GDD consolidado como fonte de design. |
+| `1.5` | 2026-11-11 | v0.5.0: tutorial jogável/pulável com 2 ondas e gate do level 1; campanha em 20 ondas (2/3/3/3/4/5); 775/1.832 com tutorial; edge assist do toque; gate explícito do laser; nova política de ads; aviso de storage; segunda reprovação da CrazyGames e decisão de não fazer moldura desktop. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |
 | `0.4.0-dev` | 2026-11-10 | Revisão visual/menu, HUD compacto, How to Play/About, ads com rewarded revive, docs reorganizados. |
+| `0.5.0-dev` | 2026-11-11 | Tutorial, campanha de 20 ondas, edge assist, gate do laser, política de ads e aviso de storage; build em main aguardando teste humano. |
 
 Este GDD separa as decisões confirmadas do recorte da versão atual, do backlog futuro e das pendências de design. Use a seção de pendências para fechar parâmetros e critérios de aceite antes de transformar o escopo em tarefas de implementação.

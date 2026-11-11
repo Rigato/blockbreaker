@@ -1,6 +1,6 @@
-# Bricklike — GDD × estado atual (2026-11-10)
+# Bricklike — GDD × estado atual (2026-11-11)
 
-Comparação entre o GDD v1.4 e o build de desenvolvimento `0.4.0` na `main`.
+Comparação entre o GDD v1.5 e o build de desenvolvimento `0.5.0` na `main`.
 Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
@@ -9,25 +9,33 @@ implementados, não bugs.
 
 | Área | GDD | Estado |
 |---|---|---|
-| Campanha | 6 fases, 21 ondas (3/3/3/3/4/5) | implementado e validado |
+| Tutorial | fase 0 `tutorial`, 2 ondas, 48 blocos, 55 XP, 3 level ups | implementado e validado |
+| Gate do tutorial | save novo `unlockedPhase = 0`; concluir/pular libera o level 1 | implementado e testado |
+| Save antigo | `unlockedPhase >= 1` continua sem repetir o tutorial | implementado e testado no parse |
+| Coach marks | mover/lançar, XP/perk, blocos especiais, chefes e Endless | implementado |
+| Campanha | 6 fases, 20 ondas (2/3/3/3/4/5) | implementado e validado |
+| Totais | 775 blocos / 1.832 XP com tutorial; 727 / 1.777 na campanha pura | validado |
 | Blocos | 9 tipos, incluindo 6 especiais | implementado |
 | Elementos | 7 tipos (wall, obstacle, deflector, portal, mover, rotor, gate) | implementado |
 | Chefes | Frost Sentinel, Ember Warden, Void Herald | implementado |
 | Desafios | `timeLimit` e `noLaser` | implementado |
 | Zoom de layout | escala 0,68–1,0 | implementado |
 | Perks | 19, com níveis e sinergias | implementado |
-| Encerramentos | epílogos, rank S/A/B, final de campanha | implementado |
+| Encerramentos | epílogos, rank S/A/B, final de campanha e epílogo do tutorial | implementado |
 | Endless | run infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas | implementado |
-| Save | schema v1, `unlockedPhase` 1..6, `endless` | implementado |
-| Settings | som, música e screen shake | implementado neste ciclo |
-| Desbloqueio do Endless | ao concluir a campanha | implementado neste ciclo |
-| Menu/seleção | Campaign/Endless, fundo animado, cards temáticos | implementado neste ciclo |
-| How to Play | diálogo de 5 páginas com screenshots | implementado neste ciclo |
-| About Us | logomarca e texto do estúdio | implementado neste ciclo |
-| HUD legível | compacto em iframes estreitos | implementado neste ciclo |
-| Ads | interstitials 3/4 ondas + results e rewarded revive | implementado neste ciclo |
-| Ads reais | Bridge interstitial/rewarded + fallback/mock + testes | implementado neste ciclo |
-| Direção visual dos blocos | revisão de materiais e legibilidade | implementado neste ciclo |
+| Save | schema v1, `unlockedPhase` 0..6, `campaignComplete`, `endless` | implementado |
+| Settings | som, música e screen shake | implementado |
+| Aviso de storage | “Progress may not be saved” + popup em memória/fallback | implementado |
+| Desbloqueio do Endless | ao concluir a campanha; tutorial não conta | implementado |
+| Menu/seleção | Campaign/Endless, 7 cards com tutorial, fundo animado | implementado |
+| How to Play | diálogo de 5 páginas com screenshots | implementado |
+| About Us | logomarca e texto do estúdio | implementado |
+| HUD legível | compacto em iframes estreitos | implementado |
+| Controles touch | drag relativo 1:1; edge assist até 2,2× na zona de 22% | implementado e testado |
+| Laser | exige lançamento explícito na onda; reset bloqueia; HUD explica | implementado e testado |
+| Ads | política 0.5.0 (campanha só com próxima onda e múltiplo de 3; tutorial zero; exits com 60 s) | implementado e testado |
+| Ads reais | Bridge interstitial/rewarded + fallback/mock + testes | implementado |
+| Direção visual dos blocos | revisão de materiais e legibilidade | implementado |
 | Inglês | UI e metadata | implementado |
 | Reduced motion / budgets | partículas e trails limitados | implementado |
 | Portrait | layout mobile-first | implementado |
@@ -42,7 +50,7 @@ implementados, não bugs.
 | Mundos sci-fi/industrial | backlog | novos temas e conteúdo |
 | Localização | backlog | catálogo de strings por locale antes |
 | Landscape jogável | backlog | hoje só portrait + guarda de rotação |
-| Moldura/letterbox desktop | pendência | HUD compacto resolveu leitura; shell 9:16 ainda centralizado |
+| Moldura/letterbox desktop | decisão | **não fazer nesta linha**; shell portrait centralizado é intencional. Risco residual em iframe desktop. |
 | Editor de fases / pipeline procedural | backlog | fora do Endless |
 | Backend, contas e cloud save | backlog | sem servidor próprio |
 | Full Launch CrazyGames | backlog | Data/User modules, entrada direta no gameplay, progresso na conta |
@@ -54,25 +62,31 @@ implementados, não bugs.
 
 | Item | Estado |
 |---|---|
+| Playtest humano da 0.5.0 | pendente |
+| Compreensão do tutorial/skip e dos coach marks | pendente |
+| Edge assist em celular real (borda, gesto do navegador) | pendente |
 | Playtest humano das fases 4–6 | pendente |
 | Balance dos chefes, timers e densidade | pendente |
 | Playtest do Endless (ondas 5, 10, 15, 20+) | pendente |
 | Legibilidade do zoom em telas pequenas reais | pendente |
-| Performance em hardware real / 4 GB RAM | pendente |
+| Performance em hardware real / 4 GB RAM | pendente; protocolo em `docs/qa/performance-testing.md` e script `scripts/perf-smoke.mjs` |
 | Teste de save antigo no navegador | pendente (parse coberto por testes) |
+| Aviso de storage em fallback real | pendente |
 | Mixagem final de áudio | pendente |
-| Screenshots/capas/vídeos atualizados para o build atual | concluído em 2026-11-10 |
+| Screenshots/capas/vídeos da 0.5.0 | pendente; assets atuais são os da 0.4.0 |
 | Fill/limites reais de ads na Playgama/CrazyGames | pendente |
+| Playgama sandbox stats | amostra pequena (17/100 qualifying plays; 5:42; 1,70 ad/play); não concluir qualidade/retenção |
+| CrazyGames | 0.3.0 e 0.4.0 reprovadas; 0.5.0 aguarda teste humano e assets novos |
 | Tag e GitHub Release | pendente de decisão |
 | Submissão manual nos portais | usuário |
 
 ## Leitura rápida
 
-O GDD **não está atrasado em conteúdo de campanha**: as 6 fases, 9 blocos, 7
-elementos, 3 chefes, 19 perks e o Endless estão implementados. O que falta é
-majoritariamente **meta-sistemas de retenção** (metaprogressão, conquistas,
-leaderboards, desafios), **distribuição** (Full Launch, novos portais,
-localização, landscape) e **validação humana** de balance/performance. O ciclo
-v0.4.0 fechou a lacuna de primeira impressão, consistência visual, HUD,
-How to Play/About e ads. O próximo ciclo pode atacar retenção ou a moldura
-desktop.
+O GDD **não está atrasado em conteúdo de campanha**: as 6 fases, o tutorial, os
+9 blocos, 7 elementos, 3 chefes, 19 perks e o Endless estão implementados. O que
+falta é majoritariamente **validação humana** do novo tutorial/controles/ads,
+**meta-sistemas de retenção** (metaprogressão, conquistas, leaderboards),
+**distribuição** (Full Launch, novos portais, localização, landscape) e
+**assets de loja da 0.5.0**. A moldura desktop foi deliberadamente descartada;
+o risco de apresentação em iframe desktop continua registrado, mas não será
+resolvido por letterbox nesta linha.

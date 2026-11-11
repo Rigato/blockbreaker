@@ -215,7 +215,23 @@ test.describe('smoke', () => {
     });
   }
 
-  test('CDN blocked: local bridge fallback still boots and starts a run', async ({ page }) => {
+  test('storage fallback: the menu warns that progress may not persist', async ({ page }) => {
+    await page.route('**/playgama-bridge.js', (route) => route.abort());
+
+    await page.goto('/?resetSave=1');
+    await waitForMenu(page);
+    const warning = page.locator('#storage-warning-button');
+    await expect(warning).toBeVisible();
+    await warning.click();
+
+    const dialog = page.getByRole('dialog').filter({ hasText: 'Progress may not be saved' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText('progress and settings may be lost');
+    await dialog.getByRole('button', { name: 'Got it' }).click();
+    await expect(dialog).toBeHidden();
+  });
+
+  test('CDN blocked: the local bridge boots without a network dependency', async ({ page }) => {
     const monitor = monitorPage(page);
     await page.route('**://bridge.playgama.com/**', (route) => route.abort());
 
@@ -227,8 +243,7 @@ test.describe('smoke', () => {
     await expect(page.locator('#debug-platform')).toContainText('mock');
 
     expect(monitor.pageErrors).toEqual([]);
-    expect(monitor.failedRequests.some((url) => url.includes('bridge.playgama.com'))).toBe(true);
-    expect(monitor.consoleErrors).toHaveLength(1);
-    expect(monitor.consoleErrors[0]).toMatch(/ERR_FAILED|Failed to load resource/i);
+    expect(monitor.failedRequests).toEqual([]);
+    expect(monitor.consoleErrors).toEqual([]);
   });
 });

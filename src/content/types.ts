@@ -106,8 +106,11 @@ export interface WaveDef {
 /** One campaign phase. Wave count varies per phase in v0.2.0. */
 export interface PhaseDef {
   readonly id: string;
+  /** 0 for the tutorial, 1..6 for campaign phases. */
   readonly index: number;
   readonly name: string;
+  /** Marks the optional first-run tutorial phase. */
+  readonly tutorial?: boolean;
   /** Short flavour line shown on the campaign selection screen. */
   readonly tagline?: string;
   readonly waves: readonly WaveDef[];

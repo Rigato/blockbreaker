@@ -32,12 +32,59 @@ export async function waitForMenu(page: Page): Promise<void> {
   await page.locator(MENU_READY).waitFor({ state: 'visible' });
 }
 
-/** Opens the campaign screen and starts the most advanced unlocked level. */
+/**
+ * Ensures level 1 is unlocked for the gameplay-focused specs. New saves start
+ * at the tutorial by design; seeding the save keeps those specs independent of
+ * the tutorial flow.
+ */
+async function ensureLevelOneUnlocked(page: Page): Promise<void> {
+  const unlocked = await page.evaluate(() => {
+    try {
+      const raw = localStorage.getItem('bb.save');
+      return raw ? Number(JSON.parse(raw).unlockedPhase ?? 0) : 0;
+    } catch {
+      return 0;
+    }
+  });
+  if (unlocked >= 1) return;
+
+  await page.evaluate(() => {
+    const raw = localStorage.getItem('bb.save');
+    const save = raw
+      ? JSON.parse(raw)
+      : {
+          version: 1,
+          phases: {},
+          endless: { bestWave: 0, bestScore: 0, runs: 0 },
+          campaignComplete: false,
+          updatedAt: Date.now(),
+        };
+    save.unlockedPhase = 1;
+    localStorage.setItem('bb.save', JSON.stringify(save));
+  });
+
+  const url = new URL(page.url());
+  url.searchParams.delete('resetSave');
+  await page.goto(url.toString());
+  await waitForMenu(page);
+}
+
+/** Opens the campaign screen and starts level 1 (seeding the save if needed). */
 export async function startPlay(page: Page): Promise<void> {
+  await ensureLevelOneUnlocked(page);
   await collapseDebugPanel(page);
   await page.locator(MENU_READY).click();
   await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
-  await page.locator('.phase-card:not(:disabled)').last().click();
+  await page.locator('.phase-card[data-phase-id="phase-1"]').click();
+  await page.locator(HUD).waitFor({ state: 'visible' });
+}
+
+/** Opens the campaign screen and starts the tutorial from a fresh save. */
+export async function startTutorial(page: Page): Promise<void> {
+  await collapseDebugPanel(page);
+  await page.locator(MENU_READY).click();
+  await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
+  await page.locator('.phase-card[data-phase-id="tutorial"]').click();
   await page.locator(HUD).waitFor({ state: 'visible' });
 }
 

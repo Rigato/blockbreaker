@@ -10,7 +10,7 @@ import type {
 } from '../game/contracts';
 import { GAME_CONFIG } from '../game/config';
 
-/** Highest phase in the campaign; `unlockedPhase` is clamped to 1..MAX_PHASE. */
+/** Highest campaign phase; `unlockedPhase` is clamped to 0..MAX_PHASE (0 = tutorial). */
 export const MAX_PHASE = 6;
 
 const SAVE_VERSION = 1 as const;
@@ -98,7 +98,7 @@ function sanitizePhases(value: unknown): Record<string, PhaseStats> {
 export function createDefaultSave(now: number = Date.now()): SaveV1 {
   return {
     version: SAVE_VERSION,
-    unlockedPhase: 1,
+    unlockedPhase: 0,
     phases: {},
     endless: defaultEndlessStats(),
     campaignComplete: false,
@@ -135,21 +135,40 @@ export function parseSave(
     return createDefaultSave(now);
   }
 
-  const unlockedPhase = isFiniteNumber(parsed.unlockedPhase)
-    ? Math.min(MAX_PHASE, Math.max(1, Math.floor(parsed.unlockedPhase)))
-    : 1;
+  let unlockedPhase = isFiniteNumber(parsed.unlockedPhase)
+    ? Math.min(MAX_PHASE, Math.max(0, Math.floor(parsed.unlockedPhase)))
+    : 0;
   const phases = sanitizePhases(parsed.phases);
+
+  // Old or partial saves can have clears without a valid unlockedPhase. Infer
+  // the unlock from the recorded clears instead of stranding the player at 0.
+  for (const [phaseId, stats] of Object.entries(phases)) {
+    if (stats.clears <= 0) continue;
+    if (phaseId === 'tutorial') {
+      unlockedPhase = Math.max(unlockedPhase, 1);
+      continue;
+    }
+    const match = /^phase-(\d+)$/.exec(phaseId);
+    if (match) {
+      unlockedPhase = Math.max(
+        unlockedPhase,
+        Math.min(MAX_PHASE, Number(match[1]) + 1),
+      );
+    }
+  }
+
+  // Saves from before the flag existed unlock Endless when phase 6 already
+  // has a recorded clear.
+  const campaignComplete =
+    parsed.campaignComplete === true || (phases['phase-6']?.clears ?? 0) > 0;
+  if (campaignComplete) unlockedPhase = MAX_PHASE;
 
   return {
     version: SAVE_VERSION,
     unlockedPhase,
     phases,
     endless: sanitizeEndlessStats(parsed.endless),
-    // Saves from before the flag existed unlock Endless when phase 6 already
-    // has a recorded clear.
-    campaignComplete:
-      parsed.campaignComplete === true ||
-      (phases['phase-6']?.clears ?? 0) > 0,
+    campaignComplete,
     updatedAt: isFiniteNumber(parsed.updatedAt) && parsed.updatedAt >= 0
       ? parsed.updatedAt
       : now,

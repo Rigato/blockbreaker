@@ -55,8 +55,16 @@ const VICTORY_EPILOGUES: Readonly<Record<number, Epilogue>> = {
 };
 
 const CAMPAIGN_ID = 'campaign-complete';
+const TUTORIAL_ID = 'tutorial-complete';
 
 const DEFEAT_TITLE = 'The field falls silent';
+
+const TUTORIAL_EPILOGUE: Epilogue = {
+  title: 'Tutorial complete',
+  body:
+    'You know the rhythm: move, launch, break and build. Bosses guard the last ' +
+    'waves of levels 4–6, and clearing all six levels unlocks Endless mode.',
+};
 
 function victoryRank(phaseIndex: number, score: number): 'S' | 'A' | 'B' {
   const target = 1000 + phaseIndex * 400;
@@ -80,6 +88,14 @@ export function endingForResult(input: EndingInput): EndingSummary | null {
       body:
         `The tower reclaims ${phaseName}. Its stones close over the light, ` +
         'and the dark leans in.',
+      rank: 'B',
+    };
+  }
+
+  if (phaseIndex === 0) {
+    return {
+      id: TUTORIAL_ID,
+      ...TUTORIAL_EPILOGUE,
       rank: 'B',
     };
   }

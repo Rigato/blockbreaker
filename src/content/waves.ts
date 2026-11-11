@@ -15,6 +15,28 @@ import type { WaveDef } from './types';
  * because their challenge comes from the boss, not from grid density.
  */
 
+/**
+ * First-run tutorial: two short waves that teach movement, the launch,
+ * XP/level-ups and one special block. It is intentionally lighter than the
+ * campaign opener and gates level 1 on a fresh save.
+ */
+export const TUTORIAL_WAVES: readonly WaveDef[] = [
+  {
+    id: 'tutw1',
+    name: 'First Steps',
+    rows: ['..1111..', '.111111.', '11111111', '..1111..'],
+    legend: CONTENT_LEGEND,
+    ballSpeed: 520,
+  },
+  {
+    id: 'tutw2',
+    name: 'Spark Practice',
+    rows: ['..1e11..', '.112211.', '11111111', '11222211'],
+    legend: CONTENT_LEGEND,
+    ballSpeed: 560,
+  },
+];
+
 export const PHASE_1_WAVES: readonly WaveDef[] = [
   {
     id: 'p1w1',
@@ -29,13 +51,6 @@ export const PHASE_1_WAVES: readonly WaveDef[] = [
     rows: ['11....11', '12211221', '12222221', '11222211'],
     legend: CONTENT_LEGEND,
     ballSpeed: 616,
-  },
-  {
-    id: 'p1w3',
-    name: 'Crystal Crown',
-    rows: ['12222221', '12222221', '12222221', '11222211'],
-    legend: CONTENT_LEGEND,
-    ballSpeed: 660,
   },
 ];
 

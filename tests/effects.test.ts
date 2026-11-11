@@ -11,7 +11,11 @@ function withMods(overrides: Partial<RunModifiers>): RunModifiers {
 }
 
 function keepAlive(world: World): void {
-  // A still ball far from the action prevents the "no balls" defeat check.
+  // Launch once so the laser is armed, then keep a still ball far from the
+  // action to prevent the "no balls" defeat check.
+  if (world.blocks.length === 0) world.blocks.push(keeperBlock());
+  if (!world.balls.some((ball) => ball.stuck)) world.spawnStuckBall();
+  world.step({ ...NO_INPUT, launch: true }, STEP_MS);
   addBall(world, { x: 100, y: 1100, vx: 0, vy: 0 });
 }
 

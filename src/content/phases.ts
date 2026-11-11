@@ -11,10 +11,19 @@ import {
   PHASE_4_WAVES,
   PHASE_5_WAVES,
   PHASE_6_WAVES,
+  TUTORIAL_WAVES,
 } from './waves';
 
 /** Stable phase order consumed by the game and by the content validator. */
 export const PHASES: readonly PhaseDef[] = [
+  {
+    id: 'tutorial',
+    index: 0,
+    name: 'Tutorial',
+    tagline: 'Learn the rhythm of the field.',
+    tutorial: true,
+    waves: TUTORIAL_WAVES,
+  },
   {
     id: 'phase-1',
     index: 1,
@@ -59,8 +68,11 @@ export const PHASES: readonly PhaseDef[] = [
   },
 ];
 
-/** Waves per phase in campaign order. */
-export const EXPECTED_WAVE_COUNTS = [3, 3, 3, 3, 4, 5] as const;
+/** Waves per phase in display order: tutorial + six campaign phases. */
+export const EXPECTED_WAVE_COUNTS = [2, 2, 3, 3, 3, 4, 5] as const;
+
+/** Number of campaign phases (the tutorial is not counted). */
+export const CAMPAIGN_PHASE_COUNT = 6;
 
 /** Conservative validation viewport. Matches the real minimum world height. */
 export const CONTENT_EVALUATION_HEIGHT = 1280;
@@ -275,8 +287,9 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
   phases.forEach((phase, phaseIndex) => {
     const phasePath = `${phase.id || `phase[${phaseIndex}]`}`;
 
-    if (phase.index !== phaseIndex + 1) {
-      push(phasePath, `index must be ${phaseIndex + 1}, found ${phase.index}`);
+    // The tutorial occupies index 0; campaign phases keep their 1..6 ids.
+    if (phase.index !== phaseIndex) {
+      push(phasePath, `index must be ${phaseIndex}, found ${phase.index}`);
     }
     if (phaseIds.has(phase.id)) {
       push(phasePath, `duplicate phase id "${phase.id}"`);
@@ -563,8 +576,9 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     });
 
     const stats = phaseStats(phase);
-    if (stats.levelUps < 4 || stats.levelUps > 16) {
-      push(phasePath, `expected 4-16 level ups, found ${stats.levelUps}`);
+    // The tutorial and the shortened opener intentionally deliver fewer perks.
+    if (stats.levelUps < 2 || stats.levelUps > 16) {
+      push(phasePath, `expected 2-16 level ups, found ${stats.levelUps}`);
     }
 
     // Block-density pace only compares boss-less waves, so a final boss wave
@@ -635,8 +649,9 @@ export function formatContentReport(phases: readonly PhaseDef[] = PHASES): strin
   let totalXp = 0;
 
   for (const stats of phases.map((phase) => phaseStats(phase))) {
+    const label = stats.phase.tutorial ? 'Tutorial' : `Level ${stats.phase.index}`;
     lines.push(
-      `Level ${stats.phase.index} - ${stats.phase.name} (${stats.phase.id}) | ` +
+      `${label} - ${stats.phase.name} (${stats.phase.id}) | ` +
         `waves=${stats.waves.length} blocks=${stats.blocks} xp=${stats.hp} ` +
         `avgHp=${stats.avgHp.toFixed(2)} density=${stats.density.toFixed(2)} ` +
         `levelUps=${stats.levelUps}`,

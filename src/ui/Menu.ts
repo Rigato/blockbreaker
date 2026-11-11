@@ -2,7 +2,7 @@ import type { GameCommands, HudSnapshot, PhaseSelectInfo } from '../game/contrac
 import { en } from '../i18n/en';
 import '../styles/menu-footer.css';
 
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.5.0';
 
 export interface MenuOptions {
   root: HTMLElement;
@@ -13,6 +13,8 @@ export interface MenuOptions {
   onSettings: () => void;
   onHowToPlay: () => void;
   onAbout: () => void;
+  storageWarning: boolean;
+  onStorageInfo: () => void;
 }
 
 const INFINITY_SVG =
@@ -57,6 +59,7 @@ export class Menu {
   private readonly onSettings: () => void;
   private readonly onHowToPlay: () => void;
   private readonly onAbout: () => void;
+  private readonly onStorageInfo: () => void;
 
   private readonly section: HTMLElement;
   private readonly campaignButton: HTMLButtonElement;
@@ -70,6 +73,7 @@ export class Menu {
   private readonly howToPlayButton: HTMLButtonElement;
   private readonly settingsButton: HTMLButtonElement;
   private readonly aboutButton: HTMLButtonElement;
+  private readonly storageButton: HTMLButtonElement;
 
   private nodes: HTMLElement[] = [];
   private nodesSignature = '__unset__';
@@ -84,6 +88,7 @@ export class Menu {
     this.onSettings = options.onSettings;
     this.onHowToPlay = options.onHowToPlay;
     this.onAbout = options.onAbout;
+    this.onStorageInfo = options.onStorageInfo;
 
     const section = document.createElement('section');
     this.section = section;
@@ -230,6 +235,27 @@ export class Menu {
 
     modes.append(campaign, endless);
 
+    // Discreet storage notice. Only mounted when the platform reports memory
+    // storage, so normal players never see it.
+    const storageButton = document.createElement('button');
+    this.storageButton = storageButton;
+    storageButton.type = 'button';
+    storageButton.id = 'storage-warning-button';
+    storageButton.className = 'menu__storage-warning';
+    storageButton.hidden = !options.storageWarning;
+    storageButton.setAttribute('aria-label', en.menuStorageWarning);
+    storageButton.addEventListener('click', this.handleStorageInfo);
+
+    const storageMark = document.createElement('span');
+    storageMark.className = 'menu__storage-mark';
+    storageMark.setAttribute('aria-hidden', 'true');
+    storageMark.textContent = '!';
+
+    const storageLabel = document.createElement('span');
+    storageLabel.textContent = en.menuStorageWarning;
+
+    storageButton.append(storageMark, storageLabel);
+
     // --- Footer ------------------------------------------------------------
     const footer = document.createElement('footer');
     footer.className = 'menu__footer';
@@ -305,7 +331,7 @@ export class Menu {
 
     footer.append(footerNav, version);
 
-    section.append(brand, modes, footer);
+    section.append(brand, modes, storageButton, footer);
     options.root.append(section);
   }
 
@@ -330,6 +356,7 @@ export class Menu {
     this.howToPlayButton.removeEventListener('click', this.handleHowToPlay);
     this.settingsButton.removeEventListener('click', this.handleSettings);
     this.aboutButton.removeEventListener('click', this.handleAbout);
+    this.storageButton.removeEventListener('click', this.handleStorageInfo);
     this.section.remove();
   }
 
@@ -387,9 +414,11 @@ export class Menu {
     if (complete) {
       this.campaignStatus.textContent = en.menuCampaignAll;
     } else if (current) {
-      this.campaignStatus.textContent = en.menuCurrentLevel
-        .replace('{{index}}', String(current.index))
-        .replace('{{name}}', current.name);
+      this.campaignStatus.textContent = current.tutorial
+        ? en.menuCurrentTutorial
+        : en.menuCurrentLevel
+            .replace('{{index}}', String(current.index))
+            .replace('{{name}}', current.name);
     } else if (phases.length > 0) {
       const last = phases[phases.length - 1];
       this.campaignStatus.textContent = last
@@ -464,5 +493,10 @@ export class Menu {
   private readonly handleAbout = (): void => {
     this.aboutButton.blur();
     this.onAbout();
+  };
+
+  private readonly handleStorageInfo = (): void => {
+    this.storageButton.blur();
+    this.onStorageInfo();
   };
 }

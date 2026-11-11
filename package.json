@@ -1,9 +1,9 @@
 {
   "name": "blockbreaker",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
-  "description": "Bricklike — portrait HTML5 MVP",
+  "description": "Bricklike — portrait HTML5 arcade roguelite",
   "engines": {
     "node": ">=22.12.0"
   },

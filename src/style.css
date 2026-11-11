@@ -2212,6 +2212,94 @@ button {
   color: rgba(255, 182, 232, 0.85);
 }
 
+/* Tutorial coach card: readable, out of the paddle line, and never blocks input. */
+.hud__tutorial {
+  position: absolute;
+  right: 8px;
+  bottom: clamp(94px, 15cqw, 126px);
+  left: 8px;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  align-items: center;
+  max-width: 390px;
+  margin: 0 auto;
+  padding: clamp(8px, 2.4cqw, 12px) clamp(10px, 3cqw, 14px);
+  border: 1px solid rgba(100, 231, 255, 0.38);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(10, 28, 52, 0.94), rgba(4, 10, 22, 0.92));
+  box-shadow:
+    0 0 20px rgba(100, 231, 255, 0.14),
+    0 12px 26px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.hud__tutorial[hidden] {
+  display: none;
+}
+
+.hud__tutorial-step {
+  grid-column: 1 / -1;
+  color: var(--cyan);
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 2.1cqw, 10px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hud__tutorial-title {
+  color: var(--cyan-bright);
+  font-family: var(--font-display);
+  font-size: clamp(12px, 3.2cqw, 17px);
+  line-height: 1.2;
+}
+
+.hud__tutorial-body {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(9px, 2.25cqw, 12px);
+  line-height: 1.35;
+}
+
+.hud__tutorial-skip {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 4px 8px;
+  border: 1px solid rgba(126, 231, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(8, 24, 42, 0.8);
+  color: var(--muted);
+  font: inherit;
+  font-size: clamp(8px, 2.1cqw, 10px);
+  letter-spacing: 0.04em;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.hud__tutorial-skip:hover,
+.hud__tutorial-skip:focus-visible {
+  border-color: var(--cyan);
+  color: var(--cyan-bright);
+}
+
+.hud__tutorial.is-new {
+  animation: hud-tutorial-in 220ms ease-out both;
+}
+
+@keyframes hud-tutorial-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .hud__wave-intro {
   position: absolute;
   top: 38%;

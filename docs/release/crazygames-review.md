@@ -1,10 +1,40 @@
 # CrazyGames — diagnóstico da reprovação e plano de melhoria
 
-**Data:** 2026-11-10  
-**Build avaliado:** v0.3.0 (Endless), submetido como CrazyGames Basic Launch  
-**Build atual para reenvio:** v0.4.0 (revisão visual/menu, HUD, How to Play/About e ads)  
-**Resultado:** reprovado por “abaixo dos padrões de qualidade do portal”, sem
-detalhamento.
+**Data:** 2026-11-11  
+**Builds avaliados:** v0.3.0 (Endless) e v0.4.0 (revisão visual/menu, HUD,
+How to Play/About e ads), ambos submetidos como CrazyGames Basic Launch  
+**Build candidato:** v0.5.0 (tutorial in-game, controles mobile e nova política
+de ads), local e ainda não submetido  
+**Resultado:** as duas builds foram reprovadas por “abaixo dos padrões de
+qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
+
+## 0. Atualização 2026-11-11 — segunda reprovação da 0.4.0
+
+- A `0.4.0` foi reenviada como **nova submissão** e **reprovada novamente** com
+  a mesma mensagem genérica. Não veio lista de requisitos, screenshot, nota nem
+  confirmação de etapa (QA inicial × Basic Launch).
+- O dono decidiu **não fazer moldura/letterbox desktop**. O shell portrait
+  centralizado é intencional; a legibilidade desktop continua apoiada no HUD
+  compacto. O risco de apresentação em iframe desktop permanece registrado, mas
+  não será resolvido por letterbox nesta linha.
+- A próxima tentativa é a **0.5.0**, que muda o que a 0.4.0 não mudou:
+  - **tutorial in-game** pulável, com coach marks, em vez de onboarding só no
+    menu;
+  - **controles touch** com edge assist para o paddle alcançar as bordas sem o
+    gesto de borda do navegador;
+  - **gate explícito do laser** e HUD mais claro;
+  - **política de ads mais conservadora** (tutorial sem ads; campanha só com
+    próxima onda e múltiplo de 3; exits com cooldown de 60 s);
+  - **aviso de storage** em fallback/memória;
+  - campanha ajustada para 20 ondas e fase 1 com 2 ondas.
+- A 0.5.0 **ainda depende de teste humano** e de assets novos. Capas,
+  screenshots e vídeos atuais são os da 0.4.0 e não devem ser reutilizados.
+- Para pedir detalhes, use o Support do Developer Portal ou o e-mail técnico e o
+  rascunho de mensagem de
+  [`docs/research/crazygames-feedback.md`](../research/crazygames-feedback.md).
+  O QA tool/Preview é ambiente de teste, não canal de apelação.
+- Não reenviar a 0.5.0 antes de o teste humano e a regeneração de assets
+  terminarem; a CrazyGames só aceita reenvio com melhoria clara.
 
 ## 1. O que o portal exige publicamente
 
@@ -43,7 +73,12 @@ Isso atende “portrait aceito se mobile-friendly”, mas não atende bem
 “Readable Content” nem “display layout comfortable” em desktop. É o achado mais
 objetivo e o que mais explica uma reprovação genérica de qualidade.
 
-**Correções:**
+> **Decisão de 2026-11-11:** o dono optou por **não fazer moldura/letterbox
+> desktop** nesta linha. O shell portrait centralizado permanece; o HUD compacto
+> é a mitigação. O risco residual deve ser considerado em qualquer nova
+> reprovação e reavaliado com o feedback do suporte.
+
+**Correções consideradas (não todas executadas):**
 
 - Aumentar o teto do shell (ex.: 540 → 640/720 px) e usar a altura disponível.
 - Criar um **modo desktop** com moldura lateral decorativa, HUD maior e área de
@@ -69,21 +104,21 @@ depois uma arte diferente. Os requisitos pedem estilo coerente e alta qualidade.
 
 ### 2.3 Primeira impressão e onboarding
 
-Hoje o jogador cai em um menu com três botões e uma nota de controles pequena.
-Não há tutorial dentro do gameplay, nem feedback visual de “o que fazer agora”.
-A fase 1 é fácil, mas o jogador precisa descobrir sozinho arrastar, lançar,
-laser e perks.
+Na 0.4.0, o jogador caía em um menu e o onboarding dependia do **How to Play**,
+um modal de cinco páginas. A fase 1 era fácil, mas o jogador ainda precisava
+descobrir sozinho arrastar, lançar, laser e perks.
 
-**Correções:**
+**O que a 0.5.0 mudou:** tutorial in-game curto e pulável, com cinco coach marks
+(mover/lançar, XP/perk, blocos especiais, chefes e Endless), card próprio antes das seis fases e
+gate do level 1 em save novo. O menu continua com How to Play como referência.
 
-- Primeira run com onboarding curto e pulável: “Drag to move”, “Tap to launch”,
-  “Break all blocks”.
-- Destaque o primeiro bloco, a primeira bola e o primeiro level-up com setas/
-  pulses.
-- No menu, CTA principal leva à campanha em **1 clique**; a seleção de fases é
-  opcional.
-- Mostrar objetivo e recompensa na tela de fase (“Clear 3 waves”, “Boss at the
-  end”).
+**O que ainda pode pesar:** o avaliador precisa jogar o tutorial para ver a
+promessa; se ele pular direto, a primeira impressão volta a depender do menu.
+Testar o caminho “Skip tutorial” e o caminho completo no Preview.
+
+**Correções adicionais consideradas:** CTA principal levando direto à campanha
+em 1 clique e objetivo/recompensa na tela de fase (“Clear 2 waves”, “Boss at the
+end”).
 
 ### 2.4 Retenção e profundidade percebida
 
@@ -131,15 +166,19 @@ portal valoriza áudio consistente e música que complementa o visual.
 4. [x] Settings com som, música e screen shake.
 5. [x] Aumentar legibilidade do HUD em 907×510, 800×450, 1216×684,
       1280×720 e 1920×1080 (HUD compacto com ícones e valores maiores).
-6. [x] Onboarding visual via **How to Play** no menu (substitui o tutorial
-      in-game; o jogador pode abrir a qualquer momento).
-7. [ ] Ajustar o shell desktop (moldura/letterbox intencional, não faixa perdida).
-8. [x] Regerar screenshots, capas e vídeos com o novo visual.
-9. [x] Revisar a descrição e o vídeo de preview (metadata atualizada e vídeo
-      regravado com o novo menu).
+6. [x] Onboarding jogável na primeira run: tutorial in-game pulável, card
+      próprio antes das seis fases, coach marks e gate do level 1 (0.5.0).
+7. [—] Ajustar o shell desktop (moldura/letterbox intencional). **Decisão:
+      não fazer nesta linha**; risco residual registrado.
+8. [ ] Regerar screenshots, capas e vídeos a partir da **0.5.0**. Os assets
+      atuais são os da 0.4.0 e ainda não foram atualizados.
+9. [ ] Revisar a descrição e o vídeo de preview para tutorial + 6 níveis/20
+      ondas; o vídeo atual é o da 0.4.0.
 10. [x] Testar 907×510, 800×450, 320×568 e 390×844 (e a matriz E2E).
 11. [x] Adicionar **About Us** com a logomarca Bad Decision Games e o texto do
       estúdio.
+12. [x] Controles touch com edge assist, gate do laser, política de ads e aviso
+      de storage (0.5.0).
 
 ### P1 — próxima atualização
 
@@ -165,18 +204,23 @@ portal valoriza áudio consistente e música que complementa o visual.
 
 ## 4. Checklist de reenvio
 
-- [ ] Build 0.4.x com o novo visual e HUD legível.
-- [ ] Testar no iframe 907×510 e 1920×1080, não só no celular.
-- [ ] Onboarding visível na primeira run.
-- [ ] Menu em 1 clique para o gameplay.
-- [ ] Screenshots/capas coerentes com o jogo.
-- [ ] Descrição com ≥ 100 palavras e controles.
-- [ ] Sem erros no console, sem 404, sem assets externos.
+- [ ] Build **0.5.0** local testada por humano, com o tutorial completo e o skip.
+- [ ] Testar no iframe 907×510 e 1920×1080, não só no celular; o shell portrait
+      centralizado é decisão de produto, não um bug pendente.
+- [ ] Onboarding visível na primeira run; conferir os cinco coach marks.
+- [ ] Menu leva ao gameplay em Campaign → card → Play (2 cliques); o tutorial é
+      o caminho de entrada em save novo.
+- [ ] Screenshots/capas/vídeos **regerados a partir da 0.5.0**; os atuais são da
+      0.4.0.
+- [ ] Descrição com ≥ 100 palavras, tutorial + 6 níveis/20 ondas e controles.
+- [ ] Sem erros no console, sem 404, sem requests externos no boot.
 - [ ] Áudio mutado em background/ads.
 - [ ] Save via SDK e `game_ready` no momento certo.
-- [ ] Reenviar com a mensagem: “Visual overhaul, desktop readability, in-game
-      onboarding, new campaign/endless structure”. O FAQ permite reenvio após
-      melhorias claras.
+- [ ] Ads: tutorial sem ads; campanha só em onda múltipla de 3 com próxima onda;
+      exits com cooldown de 60 s; `failed`/`skipped` não bloqueiam.
+- [ ] Reenviar com a mensagem: “Playable in-game tutorial with skip, mobile touch
+      edge assist, explicit laser launch, revised ad cadence and storage
+      warning”. O FAQ permite reenvio após melhorias claras.
 
 ## 5. Playgama (sandbox)
 
@@ -192,7 +236,12 @@ para:
 
 Ações: medir sessões no dashboard, reduzir atrito do primeiro minuto, garantir
 `game_ready`/`level_started` corretos, interstitial só em pausa natural e
-progresso salvo. O novo menu e o onboarding devem ajudar diretamente.
+progresso salvo. O tutorial in-game da 0.5.0 deve ajudar diretamente.
+
+**Amostra do sandbox (0.4.0, pequena):** 17/100 qualifying plays; avg play time
+5:42 contra meta 5:00; ad shows/play 1,70 contra meta 0,30; 116 launches, 31
+plays, 5m45s, 3/2 likes. Não concluir qualidade/retenção com essa amostra; medir
+de novo depois da 0.5.0.
 
 ## 6. GameFlare
 
@@ -203,36 +252,51 @@ Problema atual é acesso à conta, não build. Enquanto o suporte responde:
 - preparar a mesma metadata usada nos outros portais;
 - não criar conta duplicada sem orientação do suporte.
 
-## 7. Resultado do P0 (2026-11-10)
+## 7. Resultado do P0 e segunda reprovação (2026-11-11)
 
-- Blocos, menu, seleção de fases, settings e desbloqueio do Endless concluídos.
+- Blocos, menu, seleção de fases, settings e desbloqueio do Endless concluídos
+  na 0.4.0.
 - HUD compacto validado em 907×510, 800×450, 1216×684, 1280×720 e 1920×1080,
   sem sobrepor a primeira linha de blocos.
 - **How to Play** com 5 páginas e **About Us** com a logomarca Bad Decision
   Games concluídos.
-- Ads ampliados: interstitial a cada 3 ondas na campanha, a cada 4 no Endless,
-  saída dos results por Next/Retry/Menu e rewarded revive 1x por run.
-- 8 screenshots de loja, capas e vídeos de 18,1 s regerados.
-- Metadata atualizada; 280 testes unitários e 24 E2E verdes.
-- Restante para o próximo ciclo: moldura/letterbox desktop dedicada,
-  metaprogressão, conquistas/desafios e localização.
+- A 0.4.0 ampliou os ads (interstitial a cada 3 ondas na campanha, a cada 4 no
+  Endless, saída dos results e rewarded revive 1x por run), mas **foi reprovada
+  de novo** com a mesma mensagem genérica.
+- 8 screenshots, capas e vídeos de 18,1 s foram regerados para a 0.4.0; **não
+  servem como assets da 0.5.0**.
+- 280 testes unitários e 24 E2E verdes na 0.4.0; a 0.5.0 tem 289 unitários e 29
+  E2E.
+- Decisão para o próximo ciclo: **não fazer moldura/letterbox desktop**.
+  Restam tutorial in-game (feito), controles mobile (feito), política de ads
+  (feita), teste humano e assets novos.
 
-## 8. Como reenviar a 0.4.0
+## 8. Como pedir detalhes e reenviar a 0.5.0
 
-Fonte: FAQ oficial da CrazyGames (2026-11-10).
+Fonte: FAQ oficial da CrazyGames, Developer Portal e
+[`docs/research/crazygames-feedback.md`](../research/crazygames-feedback.md)
+(2026-11-11).
 
-- A `0.3.0` foi rejeitada antes de ser publicada, então **não existe um jogo
-  publicado para “atualizar”**. O reenvio deve ser feito como **nova submissão**
-  (“submit as a new submission”), com melhorias claras.
-- O fluxo de **update** do Developer Portal vale para jogo já publicado; não é o
-  caso.
-- No Developer Portal, usar **Submit a game** com a build `0.4.0`, metadata,
-  3 capas e vídeo atuais.
-- Se o portal impedir por já existir um registro da `0.3.0`, abrir
-  <https://developer.crazygames.com/support> e pedir orientação. Não criar conta
-  duplicada sem resposta.
-- A mensagem de reenvio deve listar: novo visual de blocos/menu, HUD legível,
-  How to Play/About, seleção de fases, ads/rewarded revive e screenshots/assets
-  atualizados.
+- A `0.3.0` e a `0.4.0` foram rejeitadas antes de qualquer publicação; **não
+  existe um jogo publicado para “atualizar”**. O reenvio é sempre **nova
+  submissão** (“submit as a new submission”), com melhorias claras.
+- Antes de reenviar, pedir detalhes pelo **Support do Developer Portal**
+  (<https://developer.crazygames.com/support>) ou por
+  **technical-support@crazygames.com**. Incluir título, game ID/submission ID,
+  build, data e e-mail da conta. Perguntar:
+  1. a reprovação foi da **QA inicial** ou de um **Basic Launch**?
+  2. quais requisitos específicos falharam (iframe desktop, onboarding,
+     originalidade, áudio, performance, controles mobile, metadata)?
+  3. há notas de QA, screenshots ou checklist da submissão?
+  4. quais 2–3 mudanças teriam mais impacto no reenvio?
+- Usar o rascunho em inglês do research doc; não abrir tickets duplicados nem
+  criar conta nova.
+- Se o portal impedir por já existir um registro, pedir orientação no mesmo
+  canal.
+- A mensagem de reenvio da 0.5.0 deve listar: tutorial in-game pulável com coach
+  marks, gate do level 1, edge assist touch, gate explícito do laser, nova
+  política de ads, aviso de storage, campanha de 20 ondas e 289/29 testes.
+- Só depois de teste humano e assets da 0.5.0; não reutilizar capas,
+  screenshots ou vídeo da 0.4.0.
 
 

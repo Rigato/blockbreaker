@@ -3,7 +3,9 @@ import { playgamaBridge } from '@playgama/bridge/vite';
 
 export default defineConfig({
   base: './',
-  plugins: [playgamaBridge()],
+  // Local-only Bridge: no external script on the boot path. The official
+  // 2.4.1 runtime still detects Playgama/CrazyGames at runtime.
+  plugins: [playgamaBridge({ mode: 'local' })],
   build: {
     target: 'es2020',
     sourcemap: false,

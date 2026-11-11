@@ -30,13 +30,14 @@ export const en = {
 
   menuCampaign: 'Campaign',
   menuCampaignKicker: 'Story mode',
-  menuCampaignSub: '6 levels · 21 waves',
+  menuCampaignSub: 'Tutorial + 6 levels · 22 waves',
   menuCampaignStart: 'Start campaign',
   menuCampaignContinue: 'Continue',
   menuCampaignComplete: 'Campaign complete',
   menuCampaignAll: 'All levels cleared',
   menuCampaignProgress: '{{cleared}} / {{total}} levels cleared',
   menuCurrentLevel: 'Level {{index}} · {{name}}',
+  menuCurrentTutorial: 'Tutorial · Learn the basics',
   menuEndlessKicker: 'Infinite mode',
   menuEndlessSub: 'Survive endless waves',
   menuEndlessLocked: 'Finish the campaign to unlock',
@@ -48,6 +49,28 @@ export const en = {
   menuHowToPlay: 'How to play',
   menuAbout: 'About us',
   menuFooterNav: 'Menu information',
+  menuStorageWarning: 'Progress may not be saved',
+  storageWarningTitle: 'Progress may not be saved',
+  storageWarningBody:
+    'This browser or portal is blocking persistent storage. You can play normally, but progress and settings may be lost when you close this page.',
+  storageWarningConfirm: 'Got it',
+
+  tutorialSkip: 'Skip tutorial',
+  tutorialStep: 'Tutorial · {{current}} / {{total}}',
+  tutorialMoveTitle: 'Move & launch',
+  tutorialMoveBody: 'Drag to move the paddle. Tap the field to launch the ball.',
+  tutorialLevelTitle: 'Break & level up',
+  tutorialLevelBody:
+    'Every destroyed block gives XP. When the bar fills, choose one of three perks.',
+  tutorialSpecialsTitle: 'Special blocks',
+  tutorialSpecialsBody:
+    'Explosive blocks damage nearby bricks. Use them to clear the field faster.',
+  tutorialBossesTitle: 'Bosses',
+  tutorialBossesBody:
+    'Levels 4–6 end with a boss. Dodge its shards and break its core before it corrodes your paddle.',
+  tutorialEndlessTitle: 'Endless',
+  tutorialEndlessBody:
+    'Clear all six campaign levels to unlock Endless: infinite waves and a boss every five waves.',
 
   endlessLockedTitle: 'Endless is locked',
   endlessLockedBody: 'Clear all 6 campaign levels to unlock Endless mode.',
@@ -111,6 +134,8 @@ export const en = {
   phaseLocked: 'Locked',
   phaseBoss: 'Boss',
   phaseLabel: 'Level',
+  phaseTutorial: 'Tutorial',
+  phaseTutorialBadge: 'Start here',
   phaseOf: 'of',
   phaseAttempts: 'Attempts',
   phaseClears: 'Clears',
@@ -177,6 +202,7 @@ export const en = {
   overlayMenu: 'Menu',
   resultVictory: 'Victory',
   resultDefeat: 'Defeat',
+  resultTutorial: 'Tutorial complete',
   resultCampaign: 'Campaign complete',
   resultEndless: 'Endless run',
   overlayBestWave: 'Best wave',

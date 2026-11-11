@@ -60,13 +60,39 @@ describe('prism laser gate', () => {
     expect(world.fireLaser()).toBe(false);
   });
 
-  it('allows firing when one of two balls is free', () => {
+  it('allows firing when one of two balls is free after the player launches', () => {
     const world = laserWorld();
+    world.step({ paddleTargetX: null, paddleDirection: 0, launch: true }, STEP_MS);
     world.spawnBall();
 
-    expect(world.balls.filter((ball) => !ball.stuck)).toHaveLength(1);
+    expect(world.balls.filter((ball) => !ball.stuck)).toHaveLength(2);
     expect(world.laserReady).toBe(true);
     expect(world.fireLaser()).toBe(true);
+  });
+
+  it('keeps the laser blocked after a wave reset until the new ball is launched', () => {
+    const world = laserWorld();
+    world.step({ paddleTargetX: null, paddleDirection: 0, launch: true }, STEP_MS);
+    expect(world.fireLaser()).toBe(true);
+
+    world.applyRunModifiers(
+      withMods({
+        laserCooldown: GAME_CONFIG.perks.laserCooldownMs,
+        laserLevel: 1,
+      }),
+    );
+    world.loadWave(TEST_WAVES[0]!);
+    world.applyRunModifiers(
+      withMods({
+        laserCooldown: GAME_CONFIG.perks.laserCooldownMs,
+        laserLevel: 1,
+      }),
+    );
+    world.reset();
+
+    expect(world.balls[0]!.stuck).toBe(true);
+    expect(world.laserBlockedReason).toBe('stuck');
+    expect(world.fireLaser()).toBe(false);
   });
 
   it('reports the no-laser rule instead of stuck and blocks firing', () => {

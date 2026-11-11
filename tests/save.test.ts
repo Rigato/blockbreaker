@@ -58,10 +58,10 @@ class ThrowingStorage implements StorageService {
 }
 
 describe('save defaults', () => {
-  it('creates a version 1 save at phase 1', () => {
+  it('creates a version 1 save at the tutorial', () => {
     expect(createDefaultSave(42)).toEqual({
       version: 1,
-      unlockedPhase: 1,
+      unlockedPhase: 0,
       phases: {},
       endless: { bestWave: 0, bestScore: 0, runs: 0 },
       campaignComplete: false,
@@ -129,8 +129,9 @@ describe('safe parse', () => {
     expect(save).toEqual(createDefaultSave(3));
   });
 
-  it('clamps unlockedPhase into 1..6', () => {
-    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 0 })).unlockedPhase).toBe(1);
+  it('clamps unlockedPhase into 0..6', () => {
+    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 0 })).unlockedPhase).toBe(0);
+    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: -3 })).unlockedPhase).toBe(0);
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 2 })).unlockedPhase).toBe(2);
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 4 })).unlockedPhase).toBe(4);
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 7 })).unlockedPhase).toBe(6);
@@ -171,6 +172,24 @@ describe('safe parse', () => {
       bestLevel: 0,
     });
     expect(getPhaseStats(save, 'phase-6').clears).toBe(0);
+  });
+
+  it('infers unlockedPhase from clears when the field is missing', () => {
+    const raw = JSON.stringify({
+      version: 1,
+      phases: {
+        tutorial: { clears: 1 },
+        'phase-1': { clears: 1 },
+        'phase-2': { clears: 1 },
+        'phase-3': { clears: 1 },
+        'phase-4': { clears: 1 },
+        'phase-5': { clears: 1 },
+      },
+    });
+
+    const save = parseSave(raw, 100);
+    expect(save.unlockedPhase).toBe(6);
+    expect(save.campaignComplete).toBe(false);
   });
 
   it('fills endless stats for a save written before the Endless field existed', () => {
@@ -358,6 +377,24 @@ describe('StorageSaveRepository', () => {
 });
 
 describe('applyPhaseResult', () => {
+  it('unlocks level 1 when the tutorial is cleared', () => {
+    const next = applyPhaseResult(
+      createDefaultSave(),
+      makeResult({
+        phaseId: 'tutorial',
+        phaseName: 'Tutorial',
+        phaseIndex: 0,
+        tutorial: true,
+        nextPhaseId: 'phase-1',
+      }),
+      5,
+    );
+
+    expect(next.unlockedPhase).toBe(1);
+    expect(next.phases['tutorial']?.clears).toBe(1);
+    expect(next.campaignComplete).toBe(false);
+  });
+
   it('unlocks phases sequentially up to phase 6 and clamps there', () => {
     let save = createDefaultSave();
 
@@ -403,7 +440,7 @@ describe('applyPhaseResult', () => {
       99,
     );
 
-    expect(next.unlockedPhase).toBe(1);
+    expect(next.unlockedPhase).toBe(0);
     expect(next.phases['phase-1']).toEqual({
       bestTimeMs: 30_000,
       bestScore: 900,

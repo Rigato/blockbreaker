@@ -26,7 +26,7 @@ se `dist/` não existir, se `index.html` ou `playgama-bridge-config.json`
 estiverem fora da raiz, se houver path absoluto, URL externa não permitida,
 mais de 1.000 arquivos, mais de 250 MB ou caminho acima de 240 caracteres.
 
-## Conteúdo esperado do ZIP (0.4.0)
+## Conteúdo esperado do ZIP (0.5.0)
 
 ```text
 index.html
@@ -44,9 +44,10 @@ Regras verificadas por `scripts/package.mjs`:
 - `index.html` e o config do Bridge na raiz;
 - assets com caminhos relativos (`./assets/...`, `./favicon.svg`);
 - nenhum `src="/..."`, `href="/..."`, `url(/...)` ou import absoluto;
-- nenhuma URL externa no conteúdo do jogo. A exceção é o CDN do Bridge
-  (`https://bridge.playgama.com`). O fallback local (`./playgama-bridge.js`) é
-  permitido. O runtime vendorizado `playgama-bridge.js` não é escaneado;
+- nenhuma URL externa no conteúdo do jogo. O build 0.5.0 usa o Bridge **local**
+  (`./playgama-bridge.js`) e não faz request ao CDN `bridge.playgama.com` no
+  boot. O validador ainda permite a URL do CDN como exceção, mas ela não é usada
+  pelo build atual; o runtime vendorizado `playgama-bridge.js` não é escaneado;
 - `https://phaser.io` e namespaces `www.w3.org` são strings não-request e estão
   na allowlist do validador.
 
@@ -63,10 +64,13 @@ ZIP. `node scripts/validate-bridge-config.mjs` confere o schema do Bridge 2.4.1:
 - `platforms.mock` sem logo/analytics;
 - nenhuma URL externa no config.
 
-O jogo pede interstitials em pausas naturais e não implementa frequência própria
-além da cadência de ondas; o Bridge aplica o mínimo de 60 s. Em Basic Launch do
-CrazyGames os ads ficam desligados e o fluxo retorna `skipped`/`failed` sem
-bloquear a navegação.
+O jogo pede interstitials em pausas naturais: na campanha, somente quando há
+próxima onda e a onda limpa é múltipla de 3 (na prática, fase 5 após a onda 3 e
+fase 6 após a onda 3); no Endless, a cada 4 ondas; o tutorial não tem ads. A
+saída dos results pede interstitial se não houve outro nos últimos 60 s; a
+saída pelo pause também é suprimida após rewarded revive. O Bridge aplica o
+mínimo de 60 s. Em Basic Launch do CrazyGames os ads ficam desligados e o fluxo
+retorna `skipped`/`failed` sem bloquear a navegação.
 
 ## Ads sem portal (QA)
 
@@ -117,48 +121,62 @@ unzip -t release/blockbreaker-web.zip
 
 - [ ] `unzip -l` mostra `index.html` e `playgama-bridge-config.json` na raiz.
 - [ ] Abrir o build em subpasta sem 404 e com paths relativos.
-- [ ] Network sem requests externas além do CDN do Bridge/fallback local.
+- [ ] Network sem requests externas; o Bridge é local e não há chamada ao CDN
+      da Playgama no boot. No host CrazyGames, o adapter nativo carrega o SDK
+      do próprio portal.
 - [ ] Mock/adblock: com SDK bloqueado, o jogo cai no `FallbackAdapter` e abre.
 - [ ] Rede lenta: boot não passa de 10 s; storage tem timeout e cai em memória.
+- [ ] Aviso “Progress may not be saved” aparece e abre o popup quando o storage
+      é memória/fallback.
 - [ ] `game_ready` enviado uma vez só depois do menu interativo.
 - [ ] `level_started`, `level_paused`, `level_resumed`, `level_completed` e
       `level_failed` chegam ao Bridge nos momentos certos.
 - [ ] Storage via Bridge (`bb.save`/`bb.settings`), sem `localStorage` direto;
       reload preserva progresso e `?resetSave=1` limpa.
-- [ ] Ads: interstitials a cada 3/4 ondas e na saída dos results; `failed`/
-      `skipped`/timeout de 15 s retomam o jogo; rewarded revive só em `rewarded`.
+- [ ] Ads: tutorial sem ads; campanha só em onda múltipla de 3 com próxima onda;
+      Endless a cada 4; exits com cooldown de 60 s; `failed`/`skipped`/timeout
+      de 15 s retomam o jogo; rewarded revive só em `rewarded`.
+- [ ] Save antigo com `unlockedPhase >= 1` não repete o tutorial; save novo
+      começa em 0 e o skip libera o level 1.
+- [ ] Laser bloqueado até o lançamento explícito da bola; HUD mostra
+      “Launch the ball first”.
+- [ ] Edge assist do toque ativo no celular; mouse continua absoluto.
 - [ ] Áudio mutado em ads/background; `AUDIO_STATE_CHANGED` aplicado no boot.
 - [ ] Relógio da run não conta pause, level-up, ads ou revive offer.
 - [ ] Responsivo de 320 px ao desktop, sem scrollbar; toque, mouse e teclado.
 - [ ] Rotação preserva progresso (pausa + overlay).
 - [ ] ZIP ≤ 250 MB, ≤ 1.500 arquivos, paths ≤ 240 caracteres.
 - [ ] Sem logo do Bridge no mock; modo mock sem analytics.
-- [ ] Screenshots/capas/vídeos conferidos contra o build atual.
+- [ ] Screenshots/capas/vídeos regerados a partir da 0.5.0; os assets atuais
+      ainda são os da 0.4.0.
 
 ## Pacote atual
 
-Referência de 2026-11-10, versão **0.4.0**:
+Referência de 2026-11-11, versão **0.5.0**, build em **main** (sem upload, tag ou
+GitHub Release):
 
 | Item | Valor |
 |---|---|
 | ZIP | `release/blockbreaker-web.zip` |
-| Tamanho | 1.514.701 bytes (~1.479 KiB) |
+| Tamanho | 1.517.039 bytes (~1.481 KiB) |
 | Arquivos | 20 |
-| SHA-256 | `af3e55e847cacf7e8828ad7b0de8eb65e87b0c1a07613ebf93dc50bdb299f793` |
+| SHA-256 | `010bcfc3f9b09cbef5ff20c8d8e4c1fb8a56b0ad8c4ce460530819d7f879c32b` |
 | Raiz | `index.html` + `playgama-bridge-config.json` |
-| Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge |
+| Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge local |
 
-O hash muda a cada build; confirme o valor em `release/manifest.json` antes de
-qualquer upload.
+O hash pode mudar no build final; confirme o valor em `release/manifest.json`
+antes de qualquer upload.
 
 ## Release por tag — somente após aprovação humana
 
-**Não crie tag ou release sem decisão explícita.** A submissão em itch.io,
-GameFlare, Playgama e CrazyGames é manual e feita pelo responsável.
+**Não crie tag ou release sem decisão explícita.** A `0.5.0` está em main e ainda
+não foi tagueada nem publicada. A submissão em itch.io, GameFlare, Playgama e
+CrazyGames é manual e feita pelo responsável.
 
 Pré-requisitos:
 
-1. CI verde no commit que receberá a tag; o `release.yml` não roda E2E.
+1. Teste humano da 0.5.0 concluído e CI verde no commit que receberá a tag; o
+   `release.yml` não roda E2E.
 2. `npm run package` local limpo, com `unzip -t` OK.
 3. `package.json` e `release/manifest.json` na mesma versão da tag.
 
@@ -169,15 +187,15 @@ git switch main
 git pull --ff-only
 git status                      # deve estar limpo
 
-git tag -a v0.4.0 -m "Bricklike v0.4.0"
-git push origin v0.4.0
+git tag -a v0.5.0 -m "Bricklike v0.5.0"
+git push origin v0.5.0
 ```
 
 Conferência:
 
 ```bash
 gh run list --workflow Release --limit 1
-gh release view v0.4.0 --json name,assets,url
+gh release view v0.5.0 --json name,assets,url
 ```
 
 Fallback manual **somente** se o workflow falhar e o build local estiver
@@ -185,9 +203,9 @@ validado:
 
 ```bash
 npm run build && npm run package
-gh release create v0.4.0 \
+gh release create v0.5.0 \
   release/blockbreaker-web.zip release/manifest.json \
-  --title "Bricklike v0.4.0" \
+  --title "Bricklike v0.5.0" \
   --generate-notes
 ```
 

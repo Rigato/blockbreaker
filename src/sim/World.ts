@@ -309,6 +309,8 @@ export class World {
   private turretTimerMs = 0;
   private laserCooldownLeftMs = 0;
   private laserBeamFx: LaserBeamFx | null = null;
+  /** The player must launch this wave's ball before the laser is armed. */
+  private ballLaunched = false;
   private readonly explosionFx: ExplosionFx[] = [];
   private destroyedBlocks = 0;
   private explosionDepth = 0;
@@ -418,6 +420,9 @@ export class World {
   /** Why the laser cannot fire right now, or null when it can. */
   get laserBlockedReason(): 'stuck' | 'rule' | null {
     if (this.noLaserValue) return 'rule';
+    // A freshly loaded wave starts with a parked ball. Require an explicit
+    // launch so a laser build cannot chip blocks before the serve.
+    if (!this.ballLaunched) return 'stuck';
     return this.balls.some((ball) => !ball.stuck) ? null : 'stuck';
   }
 
@@ -513,6 +518,7 @@ export class World {
     this.turretTimerMs = 0;
     this.laserCooldownLeftMs = 0;
     this.laserBeamFx = null;
+    this.ballLaunched = false;
     this.explosionFx.length = 0;
     this.destroyedBlocks = 0;
     this.explosionDepth = 0;
@@ -1391,6 +1397,7 @@ export class World {
     ball.vx = Math.sin(angle) * speed;
     ball.vy = -Math.cos(angle) * speed;
     ball.stuck = false;
+    this.ballLaunched = true;
     ball.sticky = false;
     ball.stickyHoldRemainingMs = 0;
     ball.spawnGraceMs = BALL_SPAWN_GRACE_MS;

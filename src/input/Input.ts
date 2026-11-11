@@ -1,4 +1,5 @@
 import { FIELD_WIDTH } from '../sim/World';
+import { applyTouchDelta } from './touchAssist';
 
 export interface SampledInput {
   paddleTargetX: number | null;
@@ -23,10 +24,10 @@ function isUiElement(target: EventTarget | null): boolean {
 }
 
 /**
- * DOM input for the playable field. Touch uses relative 1:1 drag (no
- * teleport), mouse uses absolute position, and the keyboard accelerates the
- * paddle. Listeners live on the canvas only, so DOM UI buttons never leak into
- * gameplay input.
+ * DOM input for the playable field. Touch uses relative drag (no teleport)
+ * with a gentle edge-assist gain, mouse uses absolute position, and the
+ * keyboard accelerates the paddle. Listeners live on the canvas only, so DOM
+ * UI buttons never leak into gameplay input.
  */
 export class InputController {
   private target: number | null = null;
@@ -137,7 +138,8 @@ export class InputController {
     const delta = (event.clientX - this.lastClientX) * this.logicalPerCss();
     this.lastClientX = event.clientX;
     const base = this.target ?? this.getPaddleX();
-    this.target = Math.max(0, Math.min(FIELD_WIDTH, base + delta));
+    // Edge assist is touch/pen-only; mouse stays absolute and exact.
+    this.target = applyTouchDelta(base, delta);
     event.preventDefault();
   };
 

@@ -19,6 +19,7 @@ import type {
   SettingsV1,
   SimTuning,
   TestWaveInfo,
+  TutorialStep,
 } from './contracts';
 import { GAME_CONFIG, SIM_TUNING_DEFAULTS, SIM_TUNING_LIMITS } from './config';
 import { shouldShowWaveInterstitial } from './adSchedule';
@@ -26,7 +27,7 @@ import { gameEvents } from './events';
 import { AudioService } from '../audio';
 import { ENDLESS_PHASE, endlessEnding, endlessWave } from '../content/endless';
 import { endingForResult } from '../content/endings';
-import { PHASES } from '../content/phases';
+import { CAMPAIGN_PHASE_COUNT, PHASES } from '../content/phases';
 import { summarizePhase } from '../content/phasePresentation';
 import type { PhaseDef, WaveDef } from '../content/types';
 import { InputController } from '../input/Input';
@@ -59,7 +60,10 @@ const MAX_SUBSTEPS = GAME_CONFIG.maxStepsPerFrame;
 const WAVE_TRANSITION_MS = 1200;
 const LEVEL_UP_REVEAL_MS = 450;
 const BALL_RESPAWN_MS = GAME_CONFIG.ball.respawnMs;
+/** Avoid stacking an exit ad immediately after a wave/rewarded ad. */
+const AD_EXIT_COOLDOWN_MS = 60_000;
 const INTERSTITIAL_PLACEMENT = 'phase_completed';
+const PAUSE_EXIT_INTERSTITIAL_PLACEMENT = 'pause_menu';
 const WAVE_INTERSTITIAL_PLACEMENT = 'wave_completed';
 const ENDLESS_INTERSTITIAL_PLACEMENT = 'endless_wave_completed';
 const REVIVE_REWARDED_PLACEMENT = 'revive';
@@ -132,6 +136,9 @@ export class BlockBreakerGame implements GameCommands {
   private waveIntroUntil = 0;
   private reviveUsed = false;
   private adReviveUsed = false;
+  private tutorialStep: TutorialStep | null = null;
+  private lastInterstitialAt = Number.NEGATIVE_INFINITY;
+  private lastRewardedAt = Number.NEGATIVE_INFINITY;
 
   constructor(parent: HTMLElement, platform?: PlatformService) {
     let resolveReady: () => void = () => {
@@ -296,6 +303,7 @@ export class BlockBreakerGame implements GameCommands {
     this.runSeed = this.nextSeed();
     this.reviveUsed = false;
     this.adReviveUsed = false;
+    this.tutorialStep = null;
     this.waveIntroUntil = 0;
     this.runState.startRun(this.runSeed);
     this.loadEndlessWave(1);
@@ -334,6 +342,7 @@ export class BlockBreakerGame implements GameCommands {
     this.runSeed = this.nextSeed();
     this.reviveUsed = false;
     this.adReviveUsed = false;
+    this.tutorialStep = phase.tutorial ? 'move' : null;
     this.waveIntroUntil = 0;
     this.runState.startRun(this.runSeed);
     this.loadPhaseWave(0);
@@ -377,6 +386,14 @@ export class BlockBreakerGame implements GameCommands {
     }
   }
 
+  /** Completes the tutorial immediately; only valid during its run. */
+  skipTutorial(): void {
+    if (this.mode !== 'campaign' || !this.currentPhase?.tutorial) return;
+    if (this.phase === 'run-complete' || this.phase === 'defeat') return;
+    this.tutorialStep = null;
+    this.finishPhase(true);
+  }
+
   nextPhase(): void {
     if (this.mode === 'endless') return;
     if (this.phase !== 'run-complete') return;
@@ -388,6 +405,10 @@ export class BlockBreakerGame implements GameCommands {
   returnToMenu(): void {
     if (this.phase === 'run-complete' || this.phase === 'defeat') {
       void this.runResultsAction(() => this.doReturnToMenu());
+      return;
+    }
+    if (this.phase === 'paused') {
+      void this.runPauseExitAction(() => this.doReturnToMenu());
       return;
     }
     this.doReturnToMenu();
@@ -412,6 +433,7 @@ export class BlockBreakerGame implements GameCommands {
     this.ballRespawnLeftMs = 0;
     this.reviveUsed = false;
     this.adReviveUsed = false;
+    this.tutorialStep = null;
     this.waveIntroUntil = 0;
     this.runState.reset();
     const preview = PHASES[0]?.waves[0];
@@ -437,6 +459,7 @@ export class BlockBreakerGame implements GameCommands {
         id: phase.id,
         name: phase.name,
         index: phase.index,
+        tutorial: phase.tutorial === true,
         unlocked: phase.index <= this.save.unlockedPhase,
         bestTimeMs: stats.bestTimeMs,
         bestScore: stats.bestScore,
@@ -502,6 +525,7 @@ export class BlockBreakerGame implements GameCommands {
     this.ballRespawnLeftMs = 0;
     this.reviveUsed = false;
     this.adReviveUsed = false;
+    this.tutorialStep = null;
     this.waveIntroUntil = 0;
     const preview = PHASES[0]?.waves[0];
     if (preview) {
@@ -558,8 +582,14 @@ export class BlockBreakerGame implements GameCommands {
     this.loadCurrentWave();
     if (this.mode === 'endless') {
       this.scene.setPhase('phase-6', 5);
+      this.tutorialStep = null;
     } else {
       this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
+      this.tutorialStep = this.currentPhase.tutorial
+        ? this.currentWaveIndex === 0
+          ? 'move'
+          : 'specials'
+        : null;
     }
     this.audio.setSuspended(false);
     this.phase = 'playing';
@@ -584,6 +614,7 @@ export class BlockBreakerGame implements GameCommands {
       this.ballRespawnLeftMs = 0;
       this.loadEndlessWave(this.currentWaveIndex + 1);
       this.scene.setPhase('phase-6', 5);
+      this.tutorialStep = null;
       this.audio.setSuspended(false);
       this.phase = 'playing';
       this.focusGameplay();
@@ -607,6 +638,7 @@ export class BlockBreakerGame implements GameCommands {
     this.ballRespawnLeftMs = 0;
     this.loadPhaseWave(this.currentWaveIndex);
     this.scene.setPhase(this.currentPhase.id, this.currentPhase.index);
+    if (this.currentPhase.tutorial) this.tutorialStep = 'specials';
     this.audio.setSuspended(false);
     this.phase = 'playing';
     this.focusGameplay();
@@ -826,6 +858,7 @@ export class BlockBreakerGame implements GameCommands {
     this.ballRespawnLeftMs = 0;
     this.loadPhaseWave(index);
     this.scene.setPhase(phase.id, phase.index);
+    if (phase.tutorial) this.tutorialStep = index === 0 ? 'move' : 'specials';
     this.phase = 'playing';
     this.pendingLaunch = false;
     this.input.resetTarget();
@@ -932,6 +965,9 @@ export class BlockBreakerGame implements GameCommands {
 
   private startLevelUp(): void {
     if (this.phase !== 'playing') return;
+    if (this.currentPhase?.tutorial && this.tutorialStep === 'move') {
+      this.tutorialStep = 'levelup';
+    }
     this.phase = 'levelup';
     this.clock.reset();
     this.pendingLaunch = false;
@@ -1033,6 +1069,7 @@ export class BlockBreakerGame implements GameCommands {
   private async runRewardedRevive(): Promise<void> {
     if (this.phase !== 'revive-offer' || this.adBusy) return;
     this.adBusy = true;
+    this.lastRewardedAt = performance.now();
     this.audio.setBackground(true);
     gameEvents.emit('ad:state', { state: 'requested' });
 
@@ -1077,17 +1114,29 @@ export class BlockBreakerGame implements GameCommands {
     const waveNumber = this.currentWaveIndex + 1;
     const lastCampaignWave =
       this.mode === 'campaign' && waveNumber >= this.currentPhase.waves.length;
-    const adDue = this.shouldShowWaveAd();
 
-    if (lastCampaignWave && !adDue) {
+    // The tutorial finishes with two short "what's next" coach marks before
+    // the results screen. Everyone else goes straight to the phase results.
+    if (lastCampaignWave && this.currentPhase.tutorial) {
+      this.beginWaveClear();
+      this.tutorialStep = 'bosses';
+      this.nextWaveAt = performance.now() + 2600;
+      this.syncHud(true);
+      return;
+    }
+
+    // Never put a wave interstitial between the last block and the phase
+    // results. The natural break belongs after the player leaves the results.
+    if (lastCampaignWave) {
       this.finishPhase(true);
       return;
     }
 
+    const adDue = this.shouldShowWaveAd();
     this.beginWaveClear();
 
     if (!adDue) {
-      this.scheduleNextWaveOrResults(lastCampaignWave);
+      this.scheduleNextWaveOrResults(false);
       return;
     }
 
@@ -1096,14 +1145,24 @@ export class BlockBreakerGame implements GameCommands {
         ? ENDLESS_INTERSTITIAL_PLACEMENT
         : WAVE_INTERSTITIAL_PLACEMENT;
     this.showWaveInterstitial(placement, () => {
-      this.scheduleNextWaveOrResults(lastCampaignWave);
+      this.scheduleNextWaveOrResults(false);
     });
   }
 
   /** True when the just-cleared wave should trigger a mid-run interstitial. */
   private shouldShowWaveAd(): boolean {
     if (!this.ads.isInterstitialSupported || this.adBusy) return false;
-    return shouldShowWaveInterstitial(this.mode, this.currentWaveIndex + 1);
+    if (this.currentPhase?.tutorial) return false;
+    // Campaign ads only appear before a following wave. Endless has no final
+    // wave, so its every-fourth-wave cadence remains unchanged.
+    const phaseComplete =
+      this.mode === 'campaign' &&
+      this.currentWaveIndex + 1 >= this.currentPhase!.waves.length;
+    return shouldShowWaveInterstitial(
+      this.mode,
+      this.currentWaveIndex + 1,
+      phaseComplete,
+    );
   }
 
   private beginWaveClear(): void {
@@ -1135,6 +1194,7 @@ export class BlockBreakerGame implements GameCommands {
 
     const phaseAtStart = this.phase;
     this.adBusy = true;
+    this.lastInterstitialAt = performance.now();
     this.audio.setBackground(true);
     gameEvents.emit('ad:state', { state: 'requested' });
 
@@ -1177,7 +1237,7 @@ export class BlockBreakerGame implements GameCommands {
     const ending = endingForResult({
       phaseIndex: phase.index,
       phaseName: phase.name,
-      phaseCount: PHASES.length,
+      phaseCount: CAMPAIGN_PHASE_COUNT,
       victory,
       score,
       timeMs,
@@ -1187,7 +1247,8 @@ export class BlockBreakerGame implements GameCommands {
       phaseId: phase.id,
       phaseName: phase.name,
       phaseIndex: phase.index,
-      phaseCount: PHASES.length,
+      phaseCount: CAMPAIGN_PHASE_COUNT,
+      tutorial: phase.tutorial === true,
       victory,
       score,
       timeMs,
@@ -1277,23 +1338,40 @@ export class BlockBreakerGame implements GameCommands {
     });
   }
 
-  /** Pauses audio, blocks the results UI and shows at most one interstitial. */
-  private async runResultsAction(action: () => void): Promise<void> {
-    if (this.adBusy) return;
+  /**
+   * True when an exit ad is supported and not stacked on a recent one.
+   * Pause-menu exits also avoid a rewarded revive that just happened; results
+   * exits only avoid another interstitial, so a second death can still offer
+   * the normal results ad.
+   */
+  private canShowExitAd(pauseExit: boolean): boolean {
+    if (!this.ads.isInterstitialSupported || this.adBusy) return false;
+    if (this.currentPhase?.tutorial) return false;
+    const now = performance.now();
+    if (now - this.lastInterstitialAt < AD_EXIT_COOLDOWN_MS) return false;
+    if (pauseExit && now - this.lastRewardedAt < AD_EXIT_COOLDOWN_MS) return false;
+    return true;
+  }
 
-    if (!this.ads.isInterstitialSupported) {
+  private async showExitAd(
+    placement: string,
+    action: () => void,
+    pauseExit = false,
+  ): Promise<void> {
+    if (!this.canShowExitAd(pauseExit)) {
       action();
       return;
     }
 
     const phaseAtStart = this.phase;
     this.adBusy = true;
+    this.lastInterstitialAt = performance.now();
     this.audio.setBackground(true);
     gameEvents.emit('ad:state', { state: 'requested' });
 
     let result: InterstitialResult = 'failed';
     try {
-      result = await this.ads.showInterstitial(INTERSTITIAL_PLACEMENT);
+      result = await this.ads.showInterstitial(placement);
     } catch (error) {
       console.warn('[ads] interstitial failed', error);
     } finally {
@@ -1306,6 +1384,18 @@ export class BlockBreakerGame implements GameCommands {
     // A menu/pause action may have won the race while the ad was open.
     if (this.phase !== phaseAtStart) return;
     action();
+  }
+
+  /** Pauses audio, blocks the results UI and shows at most one interstitial. */
+  private async runResultsAction(action: () => void): Promise<void> {
+    if (this.adBusy) return;
+    await this.showExitAd(INTERSTITIAL_PLACEMENT, action);
+  }
+
+  /** Natural pause: leaving a live run through the pause menu. */
+  private async runPauseExitAction(action: () => void): Promise<void> {
+    if (this.adBusy) return;
+    await this.showExitAd(PAUSE_EXIT_INTERSTITIAL_PLACEMENT, action, true);
   }
 
   private sendLevelMessage(message: 'level_paused' | 'level_resumed'): void {
@@ -1344,6 +1434,17 @@ export class BlockBreakerGame implements GameCommands {
       performance.now() >= this.nextWaveAt
     ) {
       this.nextWaveAt = 0;
+      if (this.currentPhase?.tutorial && this.tutorialStep === 'bosses') {
+        this.tutorialStep = 'endless';
+        this.nextWaveAt = performance.now() + 2600;
+        this.syncHud(true);
+        return;
+      }
+      if (this.currentPhase?.tutorial && this.tutorialStep === 'endless') {
+        this.tutorialStep = null;
+        this.finishPhase(true);
+        return;
+      }
       this.nextWave();
       return;
     }
@@ -1464,6 +1565,11 @@ export class BlockBreakerGame implements GameCommands {
           break;
         case 'paddle:hit':
           this.audio.play('paddle');
+          break;
+        case 'ball:launched':
+          if (this.currentPhase?.tutorial && this.tutorialStep === 'move') {
+            this.tutorialStep = 'levelup';
+          }
           break;
         case 'ball:lost':
           this.audio.play('ball-lost');
@@ -1634,13 +1740,23 @@ export class BlockBreakerGame implements GameCommands {
       performance.now() < this.waveIntroUntil
         ? wave?.intro ?? null
         : null;
+    const tutorial =
+      !endless && phase?.tutorial === true
+        ? {
+            step: this.tutorialStep ?? 'move',
+            stepIndex: this.tutorialStepIndex(),
+            stepCount: 5,
+            canSkip: true,
+          }
+        : null;
 
     return {
       phase: this.phase,
       phaseId: phase?.id ?? '',
       phaseName: phase?.name ?? '',
       phaseIndex: phase?.index ?? 0,
-      phaseCount: endless ? 0 : PHASES.length,
+      phaseCount: endless ? 0 : CAMPAIGN_PHASE_COUNT,
+      isTutorial: phase?.tutorial === true,
       waveId: wave?.id ?? '',
       waveName: wave?.name ?? '',
       waveIndex: phase ? this.currentWaveIndex + 1 : 0,
@@ -1675,6 +1791,7 @@ export class BlockBreakerGame implements GameCommands {
       multiplier,
       combo,
       waveIntro,
+      tutorial,
       adReviveUsed: this.adReviveUsed,
       endless,
       endlessBestWave: this.save.endless.bestWave,
@@ -1684,6 +1801,23 @@ export class BlockBreakerGame implements GameCommands {
           ? this.phaseResult
           : null,
     };
+  }
+
+  private tutorialStepIndex(): number {
+    switch (this.tutorialStep ?? 'move') {
+      case 'move':
+        return 1;
+      case 'levelup':
+        return 2;
+      case 'specials':
+        return 3;
+      case 'bosses':
+        return 4;
+      case 'endless':
+        return 5;
+      default:
+        return 1;
+    }
   }
 
   private syncHud(force = false): void {

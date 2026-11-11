@@ -301,7 +301,7 @@ export class PhaseSelect {
     card.className = 'phase-card';
     card.dataset.phaseId = phase.id;
 
-    const phaseIndex = phase.index || index + 1;
+    const phaseIndex = phase.index;
     card.dataset.phaseIndex = String(phaseIndex);
 
     const themeId = THEME_CLASS_PATTERN.test(phase.themeId) ? phase.themeId : 'crystal';
@@ -322,7 +322,7 @@ export class PhaseSelect {
     const body = document.createElement('span');
     body.className = 'phase-card__body';
     body.append(
-      this.buildHead(phaseIndex, total),
+      phase.tutorial ? this.buildTutorialHead() : this.buildHead(phaseIndex, total),
       this.buildName(phase.name),
       this.buildTagline(phase.tagline),
     );
@@ -331,13 +331,13 @@ export class PhaseSelect {
       card.disabled = true;
       card.setAttribute(
         'aria-label',
-        `${phase.name} · ${en.phaseLabel} ${phaseIndex} · ${en.phaseLocked}`,
+        `${phase.name} · ${phase.tutorial ? en.phaseTutorial : `${en.phaseLabel} ${phaseIndex}`} · ${en.phaseLocked}`,
       );
       body.append(this.buildLockNote());
     } else {
       card.setAttribute(
         'aria-label',
-        `${phase.name} · ${en.phaseLabel} ${phaseIndex} · ${en.play}`,
+        `${phase.name} · ${phase.tutorial ? en.phaseTutorial : `${en.phaseLabel} ${phaseIndex}`} · ${en.play}`,
       );
       body.append(this.buildFeatures(phase));
       if (phase.bossName) body.append(this.buildBoss(phase.bossName));
@@ -363,6 +363,24 @@ export class PhaseSelect {
       icon.append(badge);
     }
     return icon;
+  }
+
+  private buildTutorialHead(): HTMLElement {
+    const head = document.createElement('span');
+    head.className = 'phase-card__head';
+
+    const label = document.createElement('span');
+    label.className = 'phase-card__index';
+    label.textContent = en.phaseTutorial;
+
+    const badge = document.createElement('span');
+    badge.className = 'phase-card__difficulty';
+    badge.textContent = en.phaseTutorialBadge;
+    badge.setAttribute('role', 'img');
+    badge.setAttribute('aria-label', en.phaseTutorialBadge);
+
+    head.append(label, badge);
+    return head;
   }
 
   private buildHead(index: number, total: number): HTMLElement {

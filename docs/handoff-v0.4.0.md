@@ -1,5 +1,10 @@
 # Handoff — Bricklike v0.4.0
 
+> **Arquivo histórico.** A fonte atual é
+> [`handoff-v0.5.0.md`](handoff-v0.5.0.md). Este documento descreve a 0.4.0,
+> publicada no itch.io e no sandbox da Playgama; não use os números de testes,
+> ads ou conteúdo daqui como estado atual.
+
 **Fonte única de onboarding para a próxima sessão.**  
 **Data:** 2026-11-10  
 **Branch:** `main`  
@@ -255,8 +260,8 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
 |---|---|---|---|
 | itch.io | **0.4.0** | **publicado** | atualização manual; `0.1.0-mvp` histórica |
 | Playgama | **0.4.0** | **sandbox** | milestones pendentes antes da publicação |
-| CrazyGames Basic | 0.3.0 rejeitada / 0.4.0 pronta | **não submetida** | reenviar como **nova submissão** (FAQ), não como update |
-| GameFlare | 0.4.0 pronta | **bloqueado** | sem resposta do suporte sobre login |
+| CrazyGames Basic | 0.3.0 e 0.4.0 rejeitadas / 0.5.0 local | **não submetida** | a 0.4.0 foi reenviada e recusada de novo com a mesma mensagem genérica; 0.5.0 é a próxima tentativa |
+| GameFlare | 0.4.0 (não publicada) | **bloqueado** | sem resposta do suporte sobre login |
 
 Assets prontos:
 

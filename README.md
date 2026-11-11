@@ -2,18 +2,60 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.4.0 — presentation, UX and ads**: the **v0.2.0 campaign** (6 phases,
-21 waves, 9 block types, 7 phase elements, 3 bosses, 19 perks), the **v0.3.0
-Endless mode**, and the v0.4.0 visual/menu/HUD/How-to-Play/ads pass. Version
-0.4.0 is published manually on itch.io and in the Playgama sandbox; the
-historical `0.1.0-mvp` build is no longer the live itch.io build.
+line is **v0.5.0 — tutorial, touch controls and ads policy**: the **v0.2.0
+campaign** (6 phases, 20 waves, 9 block types, 7 phase elements, 3 bosses, 19
+perks), the **v0.3.0 Endless mode**, the **v0.4.0 presentation/menu/HUD/ads**
+pass, and the **v0.5.0 tutorial, touch edge assist, laser gate and revised ad
+cadence**. The v0.5.0 build is **on main for manual testing**; it has **not** been
+uploaded to any portal. Version 0.4.0 remains
+published on itch.io and in the Playgama sandbox.
 
-The v0.4.0 work is implemented and published manually on itch.io/Playgama.
-CrazyGames still needs a new submission for 0.4.0; GameFlare remains blocked by
-account access. The GitHub Pages review build tracks the branch.
+The historical `0.1.0-mvp` build is no longer the live itch.io build.
+CrazyGames rejected the 0.3.0 and rejected the resubmitted 0.4.0 again with the
+same generic quality message; the 0.5.0 is the next attempt. GameFlare remains
+blocked by account access. The GitHub Pages review build tracks `main` after a
+push.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
+
+## v0.5.0 — tutorial, touch controls and ads
+
+- **Tutorial:** new phase 0, id `tutorial`, with two waves (`tutw1`, `tutw2`),
+  48 blocks, 55 XP and 3 level ups. A fresh save now starts at
+  `unlockedPhase = 0`; clearing or skipping the tutorial unlocks level 1. Old
+  saves with `unlockedPhase >= 1` keep working without replaying it.
+- **Skip tutorial:** the HUD button completes the tutorial and unlocks level 1.
+- **Coach marks:** contextual prompts for move/launch, XP/perk, special blocks, bosses
+  and Endless.
+- **Campaign:** 6 phases and 20 waves (2 / 3 / 3 / 3 / 4 / 5). With the
+  tutorial, the level select shows 7 cards and 22 waves. Totals: 775 blocks and
+  1,832 XP including the tutorial; campaign-only: 727 blocks and 1,777 XP.
+- **Touch controls:** relative drag is 1:1 in the centre and gains up to 2.2×
+  in the outer 22% of the field, so the paddle can reach the edge before the
+  finger triggers the browser's edge gesture. Mouse stays absolute, keyboard is
+  unchanged and the paddle speed cap did not change.
+- **Laser gate:** Prism Laser requires an explicit ball launch in the current
+  wave; debug/multiball balls alone do not unlock it. A wave reset blocks it
+  until the player launches, and the HUD shows “Launch the ball first”.
+- **Ads:** the tutorial has no ads. Campaign wave interstitials run only when a
+  next wave exists and the cleared wave is a multiple of 3 — in practice, phase
+  5 after wave 3 and phase 6 after wave 3; never at the end of a phase. Endless
+  runs one every 4 waves. Leaving Results (Next/Retry/Menu) may show one if no
+  interstitial ran in the last 60 seconds; a pause-menu exit is also suppressed
+  after a rewarded revive in the last 60 seconds. Rewarded revive stays 1×/run.
+  Second Chance and the rewarded revive may coexist by design (two revives per
+  run, one each).
+- **Storage warning:** if platform diagnostics fall back to memory, the menu
+  shows a discreet “Progress may not be saved” notice; tapping it opens a popup
+  explaining that progress and settings may be lost when the page closes.
+- **Tests and package:** 289 unit tests in 28 files, 29 E2E tests in 9 spec
+  files, content validation with 7 levels / 22 waves / 775 blocks / 1,832 XP,
+  and a local ZIP with 20 files, 1,517,039 bytes (~1,481 KiB), SHA-256
+  `010bcfc3f9b09cbef5ff20c8d8e4c1fb8a56b0ad8c4ce460530819d7f879c32b`
+  (the hash may change on the final build).
+- **Store assets:** covers, screenshots and videos are still the 0.4.0 assets
+  and must be regenerated before the 0.5.0 submission.
 
 ## v0.4.0 — presentation, UX and ads
 
@@ -36,9 +78,12 @@ account access. The GitHub Pages review build tracks the branch.
   short studio note.
 - **Compact HUD:** below 440px shell width the HUD switches to a two-row layout
   with icon stats and 11–13px values, keeping 907×510 and 800×450 iframes legible.
-- **Ads:** campaign interstitials after every 3rd wave, Endless after every 4th,
-  plus every results exit (Next/Retry/Menu). A one-per-run **rewarded revive**
-  offer lets the player watch an ad to save a lost run on supported portals.
+- **Ads (0.4.0 policy, superseded by 0.5.0):** campaign interstitials after every
+  3rd wave, Endless after every 4th, plus every results exit (Next/Retry/Menu).
+  A one-per-run **rewarded revive** offer lets the player watch an ad to save a
+  lost run on supported portals. The 0.5.0 reduces campaign wave ads to phases
+  with a following wave and removes ads from the tutorial; see the v0.5.0
+  section above.
 - **How to Play / About Us:** wide, short dialogs with localized screenshots and
   the studio logo (no duplicated studio caption).
 - **Save:** `campaignComplete` marks the phase-6 clear and migrates old saves
@@ -81,10 +126,10 @@ npm run preview   # serves dist/ locally
 
 ## v0.3.0 — Endless mode
 
-Development line: `main`. This work is now part of v0.4.0, published on itch.io
-and in the Playgama sandbox.
+Development line: `main`. This work is part of v0.4.0 (published on itch.io and
+in the Playgama sandbox) and remains in the v0.5.0 build on main.
 
-- **Endless button** in the main menu, separate from Play and Levels.
+- **Endless button** in the main menu, separate from Campaign and the level select.
 - **Infinite run:** no victory condition; the run ends when every ball is lost.
   Waves are generated procedurally from the run seed.
 - **Speed ramp:** starts at **660**, gains **+14 per wave** and caps at **1100**.
@@ -96,7 +141,7 @@ and in the Playgama sandbox.
   `rotor` (12); wave 14+ combines all seven.
 - **Bosses every 5 waves**, alternating Frost Sentinel, Ember Warden and Void
   Herald patterns, with HP `40 + wave × 6`.
-- **XP and perks** use the same curve as Levels and persist between waves.
+- **XP and perks** use the same curve as the campaign and persist between waves.
   Second Chance still revives once per run.
 - **Results** show Wave, Best wave, score, level and perks, with **no Next
   button**. Retry starts a new Endless run and Menu returns to the menu.
@@ -112,9 +157,11 @@ and in the Playgama sandbox.
 Development branch: `feat/v0.2.0` (historical). This work is now part of
 v0.4.0, published on itch.io and in the Playgama sandbox.
 
-- **Campaign:** 6 phases with waves per phase **3 / 3 / 3 / 3 / 4 / 5 = 21**.
-  Phases 4–6 are **Frostbound Spire** (3), **Emberforge** (4) and
-  **Void Threshold** (5). Validated content: **759 blocks**, **1.831 XP**.
+- **Campaign:** 6 phases with waves per phase **3 / 3 / 3 / 3 / 4 / 5 = 21** as
+  shipped in v0.2.0. The **v0.5.0** shortens phase 1 to two waves, for **20
+  campaign waves** (22 with the tutorial), **727 blocks** and **1,777 XP**
+  campaign-only; with the tutorial, 775 blocks and 1,832 XP. Phases 4–6 are
+  **Frostbound Spire** (3), **Emberforge** (4) and **Void Threshold** (5).
 - **9 block types:** crystal, stone, obsidian plus explosive, regenerative,
   moving, multiplier, generator and linked. Each special block has simulation
   behaviour, not just different HP.
@@ -159,14 +206,14 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 - `docs/release/submission-checklist.md` lists every manual field, asset and
   step per portal, all marked **pending human review**.
 - `docs/old/release/g7-review.md` inventories the historical MVP package and
-  defines the G7 review checklist. The current line is `0.4.0`; no tag or GitHub
-  Release was created, and the user performs all submissions.
+  defines the G7 review checklist. The current line is `0.5.0` (main); no tag
+  or GitHub Release was created, and the user performs all submissions.
 
 ## M6 — QA, performance and balance
 
 - Playwright E2E (`tests/e2e`) covers boot/menu, Space vs V controls, pause,
   sound persistence, level up, phase-1 victory/unlock/reload, AdMock
-  show/fail, CDN fallback and layout at 320/390/430/1440 + mobile landscape.
+  show/fail, Bridge fallback and layout at 320/390/430/1440 + mobile landscape.
 - CI runs the E2E suite in a separate job with Chromium.
 - `npm run qa:runs -- --runs=10` produces `docs/qa/run-log.csv`: an automated
   debug-projectile baseline for duration/levels/perks regression, explicitly
@@ -188,8 +235,9 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   the platform at the correct moments.
 - **At M5, interstitial only on Results exit** (Next/Retry): the game pauses and
   hard mutes audio, shows a blocking loading overlay, and continues on
-  `closed`/`failed`/15 s timeout. v0.4.0 adds wave interstitials and rewarded
-  revive; no banners or own frequency logic.
+  `closed`/`failed`/15 s timeout. v0.4.0 added wave interstitials and rewarded
+  revive; v0.5.0 revised the cadence. No banners or own frequency logic beyond
+  the documented breakpoints.
 - Validated Bridge 2.4.1 config: no Bridge loading logo, no analytics,
   safe-area adaptation and interstitial placement.
 - `npm run package` builds `release/blockbreaker-web.zip` with `index.html` at
@@ -197,14 +245,17 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   (≤ 1.000 files, ≤ 250 MB, paths ≤ 240 chars).
 - CI uploads `dist` and the ZIP; a `v*` tag workflow creates a GitHub Release
   with the ZIP and manifest. GitHub Pages remains the review build.
-- Tested in a subfolder, with the Bridge CDN blocked/fallback, mock/no-ads,
+- Tested in a subfolder, with the Bridge blocked/fallback, mock/no-ads,
   failed/timed-out interstitial and no external requests to `api.playgama.com`.
+  The current v0.5.0 build loads the Bridge **locally** and makes no request to
+  the Playgama CDN at boot.
 - See [docs/build-release.md](docs/build-release.md) for the build, ZIP and
   portal checklist.
 
 ### M5.1 — review polish
 
-- UI terminology uses **Levels** throughout (menu, HUD, select, results).
+- UI terminology uses **Campaign** for the six-phase campaign and **Endless**
+  for the separate mode (the old “Levels” label is historical).
 - The first perk arrives faster: the first level costs **8 XP**, then the curve
   continues at 20/26/33/39…
 - Launching with **V** (or tap/click) works on the first shot: gameplay focus
@@ -258,7 +309,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 - New unique perk **Foresight**: a subtle dotted line predicts each ball’s short
   path with wall reflections.
 
-## M3 — Levels, progression and persistence
+## M3 — campaign progression and persistence
 
 - Three levels with three waves each: **Crystal Grove** (572/616/660),
   **Ruined Halls** (616/660/704) and **Arcane Depths** (638/682/726).
@@ -299,30 +350,37 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 
 | Action | Touch | Desktop |
 |---|---|---|
-| Move paddle | Relative 1:1 drag | Mouse absolute / arrows / A-D |
+| Move paddle | Relative 1:1 drag, edge assist up to 2.2× in the outer 22% | Mouse absolute / arrows / A-D |
 | Launch | Tap the field | Click / V |
-| Pause | Pause button → Resume/Restart/Sound/Menu | Pause button / P → Resume/Restart/Sound/Menu |
-| Laser | Laser button (needs a loose ball) | Laser button / Space / E (needs a loose ball) |
+| Pause | Pause button → Resume/Restart/Settings/Menu | Pause button / P → Resume/Restart/Settings/Menu |
+| Laser | Laser button (needs an explicit launch and a loose ball) | Laser button / Space / E (needs an explicit launch and a loose ball) |
 | Perk choice | Tap a card | Click a card / 1-2-3 |
-| Menu / modes | Campaign card → level select; Endless card (after campaign); Settings | Campaign card → level select; Endless card (after campaign); Settings |
+| Menu / modes | Campaign card → level select (tutorial + 6 levels); Endless card (after campaign); How to Play / Settings / About Us | Campaign card → level select (tutorial + 6 levels); Endless card (after campaign); How to Play / Settings / About Us |
 | Rotate device | Portrait only (landscape guard) | — |
 
-The Prism Laser is disabled while every ball is stuck (opening serve or Sticky
-Paddle). Sticky releases on tap or automatically after 2.5 s.
+The Prism Laser requires an explicit ball launch in the current wave; debug or
+multiball balls alone do not unlock it. A reset blocks it until the player
+launches, and the HUD shows “Launch the ball first”. Sticky releases on tap or
+automatically after 2.5 s.
 
 ## Platform boot
 
-- Bridge CDN script first in `<head>`, local file fallback, 10 s initialization
-  timeout and an in-memory fallback adapter.
+- The v0.5.0 build uses the **local Bridge** (`playgamaBridge({ mode: 'local' })`):
+  `index.html` loads `./playgama-bridge.js`, with a 10 s initialization timeout
+  and an in-memory fallback adapter. There is no request to
+  `bridge.playgama.com` at boot. The native CrazyGames adapter still loads the
+  CrazyGames SDK when it detects that host.
 - The Bridge loading screen is disabled in `playgama-bridge-config.json`
   (`loadingScreenType: "none"`) so no Bridge branding is shown; the game uses
   its own boot screen and progress bar.
 - `game_ready` is sent only after the menu is rendered and interactive.
-- Ads are interstitial-only on the Results exit; unsupported platforms skip
-  without UI breakage. The player setting and platform audio state both mute
-  the audio service.
+- Ads follow the v0.5.0 policy: no tutorial ads; campaign wave ads only with a
+  following wave and a multiple of 3; Endless every 4 waves; Results and pause
+  exits use a 60 s cooldown. Unsupported platforms skip without UI breakage. The
+  player setting and platform audio state both mute the audio service.
 - No direct `localStorage` access in game code; storage always goes through
-  `PlatformService`.
+  `PlatformService`. If it falls back to memory, the menu shows “Progress may
+  not be saved”.
 
 ### Debug
 
@@ -333,10 +391,11 @@ to a compact FPS/platform strip while playing. For audio QA,
 `document.documentElement.dataset.audioState` reports
 `locked`/`running`/`suspended`/`muted`/`background`.
 
-For the results interstitial without a portal, use **`?debug=1&adMock=show`**
-to simulate a 1.4 s successful ad (spinner, mute, continuation) or
-**`?debug=1&adMock=fail`** to simulate a failed ad. This flag never runs outside
-debug.
+For ads without a portal, use **`?debug=1&adMock=show`** to simulate a 1.4 s
+successful interstitial (spinner, mute, continuation), **`?debug=1&adMock=fail`**
+to simulate a failed interstitial, **`?debug=1&adMock=rewarded`** for a
+successful rewarded revive, and **`?debug=1&adMock=rewarded-fail`** for a failed
+one. This flag never runs outside debug.
 
 ## Assets and licenses
 
@@ -356,24 +415,26 @@ src/
   content/endings.ts       Per-phase epilogues, ranks and campaign finale
   content/endless.ts       Endless wave generator, speed ramp and bosses
   assets/fonts/            Bundled Silkscreen OFL font files
-  game/                    Game orchestration, contracts, events and config
+  game/                    Game orchestration, contracts, events, ads and config
+  game/adSchedule.ts       Campaign/Endless interstitial breakpoints
   sim/                     Pure fixed-step simulation, collision and layout scale
   sim/layout.ts            computeFieldScale (0.68–1.0 layout zoom)
   progression/             XP curve, perks, level save/stats and run modifiers
   input/                   Touch, mouse and keyboard input
+  input/touchAssist.ts     Touch edge assist (1:1 centre, up to 2.2× at edges)
   platform/                PlatformService + Bridge/Fallback adapters
   render/                  Themes, block/element/boss art, effects and scene
   render/elementArt.ts     Walls, obstacles, deflectors, portals, movers, rotors, gates
   render/bossArt.ts        Frost Sentinel, Ember Warden, Void Herald and shards
-  ui/                      Menu, HUD, level-up, overlays, orientation and debug
+  ui/                      Menu, HUD/tutorial, level-up, overlays, orientation and debug
   ui/HowToPlayDialog.ts    Five-page screenshot walkthrough
   ui/AboutDialog.ts        Bad Decision Games studio dialog
-  styles/                  Phase select, HUD compact, dialogs and menu footer CSS
+  styles/                  Phase select, HUD compact, dialogs, tutorial and menu footer CSS
   i18n/                    English strings
 tests/                     Unit tests + tests/e2e Playwright
-scripts/                   Content validator, Bridge config validator and packager
+scripts/                   Content validator, Bridge config validator, packager and perf smoke
 docs/                      GDD, spec, build/release, plan and docs/qa reports
-public/                    Bridge config, favicon, licenses, how-to-play shots and studio logo
+public/                    Bridge config/runtime, favicon, licenses, how-to-play shots and studio logo
 release/                   Generated ZIP + manifest (not committed)
 ```
 
@@ -382,7 +443,8 @@ release/                   Generated ZIP + manifest (not committed)
 - [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
-- [Current handoff — v0.4.0](docs/handoff-v0.4.0.md)
+- [Current handoff — v0.5.0](docs/handoff-v0.5.0.md)
+- [Archived handoff — v0.4.0](docs/handoff-v0.4.0.md)
 - [Technical publishing spec](docs/spec-tecnica-publicacao.md)
 - [Low-friction publishing plan](docs/plano-baixa-fricao.md)
 - [Build and release runbook](docs/build-release.md)
@@ -390,7 +452,10 @@ release/                   Generated ZIP + manifest (not committed)
 - [Submission checklist](docs/release/submission-checklist.md)
 - [Publication status](docs/release/status.md)
 - [CrazyGames rejection review](docs/release/crazygames-review.md)
+- [CrazyGames feedback research](docs/research/crazygames-feedback.md)
 - [Playtest kit](docs/qa/playtest-kit.md)
+- [Performance testing](docs/qa/performance-testing.md)
+- [Performance smoke script](scripts/perf-smoke.mjs)
 - [Historical docs archive](docs/old/README.md)
 
 ## Deployment

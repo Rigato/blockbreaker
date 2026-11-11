@@ -107,9 +107,32 @@ async function runOnce(browser, index) {
   const startedAt = Date.now();
   let levelUps = 0;
 
-  await page.goto(`${baseURL}/?debug=1&resetSave=1`);
-  await page.locator('#play-button').waitFor({ state: 'visible' });
-  await page.locator('#play-button').click();
+  await page.addInitScript(() => {
+    if (!localStorage.getItem('bb.save')) {
+      localStorage.setItem(
+        'bb.save',
+        JSON.stringify({
+          version: 1,
+          unlockedPhase: 1,
+          phases: {},
+          endless: { bestWave: 0, bestScore: 0, runs: 0 },
+          campaignComplete: false,
+          updatedAt: Date.now(),
+        }),
+      );
+    }
+  });
+  await page.goto(`${baseURL}/?debug=1`);
+  await page.locator('#campaign-button').waitFor({ state: 'visible' });
+  await page.evaluate(() => {
+    const body = document.querySelector('#debug-body');
+    if (body && !body.hidden) {
+      document.querySelector('#debug-panel .debug__toggle')?.click();
+    }
+  });
+  await page.locator('#campaign-button').click();
+  await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
+  await page.locator('.phase-card[data-phase-id="phase-1"]').click();
   await page.locator('.hud').waitFor({ state: 'visible' });
 
   const compact = page.locator('#debug-compact');

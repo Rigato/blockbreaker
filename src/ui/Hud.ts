@@ -1,4 +1,10 @@
-import type { GameCommands, HudSnapshot, LaserHudState, PerkState } from '../game/contracts';
+import type {
+  GameCommands,
+  HudSnapshot,
+  LaserHudState,
+  PerkState,
+  TutorialState,
+} from '../game/contracts';
 import { GAME_CONFIG } from '../game/config';
 import { en } from '../i18n/en';
 import { formatTime } from './format';
@@ -63,6 +69,12 @@ export class Hud {
   private readonly multiplierChip: HTMLElement;
   private readonly comboChip: HTMLElement;
   private readonly waveIntro: HTMLElement;
+  private readonly tutorialPanel: HTMLElement;
+  private readonly tutorialStepLabel: HTMLElement;
+  private readonly tutorialTitle: HTMLElement;
+  private readonly tutorialBody: HTMLElement;
+  private readonly tutorialSkip: HTMLButtonElement;
+  private tutorialSignature = '';
 
   private perksSignature = '';
   private laser: LaserHudState | null = null;
@@ -364,6 +376,35 @@ export class Hud {
     waveIntro.setAttribute('aria-live', 'polite');
     waveIntro.setAttribute('aria-atomic', 'true');
 
+    const tutorialPanel = document.createElement('aside');
+    this.tutorialPanel = tutorialPanel;
+    tutorialPanel.className = 'hud__tutorial';
+    tutorialPanel.hidden = true;
+    tutorialPanel.setAttribute('role', 'status');
+    tutorialPanel.setAttribute('aria-live', 'polite');
+
+    const tutorialStepLabel = document.createElement('span');
+    this.tutorialStepLabel = tutorialStepLabel;
+    tutorialStepLabel.className = 'hud__tutorial-step';
+
+    const tutorialTitle = document.createElement('strong');
+    this.tutorialTitle = tutorialTitle;
+    tutorialTitle.className = 'hud__tutorial-title';
+
+    const tutorialBody = document.createElement('p');
+    this.tutorialBody = tutorialBody;
+    tutorialBody.className = 'hud__tutorial-body';
+
+    const tutorialSkip = document.createElement('button');
+    this.tutorialSkip = tutorialSkip;
+    tutorialSkip.type = 'button';
+    tutorialSkip.id = 'tutorial-skip';
+    tutorialSkip.className = 'hud__tutorial-skip';
+    tutorialSkip.textContent = en.tutorialSkip;
+    tutorialSkip.addEventListener('click', this.handleSkipTutorial);
+
+    tutorialPanel.append(tutorialStepLabel, tutorialTitle, tutorialBody, tutorialSkip);
+
     const perksPopover = document.createElement('div');
     this.perksPopover = perksPopover;
     perksPopover.id = 'hud-perks-panel';
@@ -382,7 +423,7 @@ export class Hud {
 
     perksPopover.append(perksTitle, perksList);
 
-    section.append(top, footer, perksPopover, waveIntro);
+    section.append(top, tutorialPanel, footer, perksPopover, waveIntro);
     options.root.append(section);
 
     document.addEventListener('keydown', this.handleKeydown);
@@ -404,6 +445,11 @@ export class Hud {
       this.waveText.textContent = `${en.endless} · ${en.hudWave} ${snapshot.waveIndex}`;
       this.waveText.dataset.compact = `${en.endless} · ${en.hudWave} ${snapshot.waveIndex}`;
       this.waveText.dataset.compactShort = `${en.endless} · ${snapshot.waveIndex}`;
+    } else if (snapshot.isTutorial) {
+      this.waveKicker.textContent = `${en.phaseTutorial} · ${snapshot.waveName}`;
+      this.waveText.textContent = `${en.phaseTutorial} · ${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount}`;
+      this.waveText.dataset.compact = `${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
+      this.waveText.dataset.compactShort = `${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
     } else {
       this.waveKicker.textContent = `${en.phaseLabel} ${snapshot.phaseIndex}/${Math.max(
         1,
@@ -442,6 +488,7 @@ export class Hud {
     this.blocksGroup.title = `${en.hudBlocks}: ${this.blocksValue.textContent}`;
     this.timeGroup.title = `${en.hudTime}: ${this.timeValue.textContent}`;
     this.scoreGroup.title = `${en.hudScore}: ${this.scoreValue.textContent}`;
+    this.hint.hidden = snapshot.tutorial != null;
     this.hint.textContent =
       snapshot.phase === 'cleared'
         ? en.hudWaveTransition
@@ -468,6 +515,7 @@ export class Hud {
     this.updateCombo(snapshot.combo ?? null);
     this.updateWaveIntro(snapshot.waveIntro ?? null);
     this.updateLaser(snapshot.laser);
+    this.updateTutorial(snapshot.tutorial ?? null);
   }
 
   setVisible(visible: boolean): void {
@@ -496,6 +544,7 @@ export class Hud {
     this.pauseButton.removeEventListener('click', this.handlePause);
     this.perksButton.removeEventListener('click', this.handlePerksToggle);
     this.laserButton.removeEventListener('click', this.handleLaser);
+    this.tutorialSkip.removeEventListener('click', this.handleSkipTutorial);
     this.section.remove();
   }
 
@@ -741,6 +790,40 @@ export class Hud {
     this.waveIntro.classList.add('is-visible');
   }
 
+  private updateTutorial(tutorial: TutorialState | null): void {
+    if (!tutorial) {
+      this.tutorialPanel.hidden = true;
+      this.tutorialSignature = '';
+      return;
+    }
+
+    const signature = `${tutorial.step}:${tutorial.stepIndex}:${tutorial.canSkip}`;
+    this.tutorialPanel.hidden = false;
+    if (signature === this.tutorialSignature) return;
+    this.tutorialSignature = signature;
+
+    const copy =
+      tutorial.step === 'move'
+        ? { title: en.tutorialMoveTitle, body: en.tutorialMoveBody }
+        : tutorial.step === 'levelup'
+          ? { title: en.tutorialLevelTitle, body: en.tutorialLevelBody }
+          : tutorial.step === 'specials'
+            ? { title: en.tutorialSpecialsTitle, body: en.tutorialSpecialsBody }
+            : tutorial.step === 'bosses'
+              ? { title: en.tutorialBossesTitle, body: en.tutorialBossesBody }
+              : { title: en.tutorialEndlessTitle, body: en.tutorialEndlessBody };
+
+    this.tutorialStepLabel.textContent = en.tutorialStep
+      .replace('{{current}}', String(tutorial.stepIndex))
+      .replace('{{total}}', String(tutorial.stepCount));
+    this.tutorialTitle.textContent = copy.title;
+    this.tutorialBody.textContent = copy.body;
+    this.tutorialSkip.hidden = !tutorial.canSkip;
+    this.tutorialPanel.classList.remove('is-new');
+    void this.tutorialPanel.offsetWidth;
+    this.tutorialPanel.classList.add('is-new');
+  }
+
   private updateLaser(laser: LaserHudState | null): void {
     this.laser = laser;
     this.laserBlocked = laser?.blocked ?? null;
@@ -837,6 +920,11 @@ export class Hud {
     const open = this.perksPopover.hidden;
     this.perksPopover.hidden = !open;
     this.perksButton.setAttribute('aria-expanded', String(open));
+  };
+
+  private readonly handleSkipTutorial = (): void => {
+    this.tutorialSkip.blur();
+    this.controller.skipTutorial();
   };
 
   private readonly handleLaser = (): void => {

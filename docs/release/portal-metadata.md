@@ -14,21 +14,23 @@ A submissão é **manual**, feita pelo usuário. Nada aqui foi enviado a portal.
 - **Platform:** HTML5 (browser; desktop and mobile)
 - **Language:** English (UI and metadata)
 - **Price:** Free
-- **Business model:** No purchases. Interstitial ads where the hosting portal provides them and an optional one-per-run rewarded revive; no ads on itch.io or GameFlare.
+- **Business model:** No purchases. Interstitial ads at natural breaks where the hosting portal provides them (never in the tutorial) and an optional one-per-run rewarded revive; no ads on itch.io or GameFlare.
 
 ## Short description
 
-> A portrait block breaker with roguelite perks. Smash themed bricks, build
-> game-changing synergies, beat three bosses and survive the Endless mode.
+> A portrait block breaker with roguelite perks. Learn the ropes in a short
+> playable tutorial, smash themed bricks, build game-changing synergies, beat
+> three bosses and survive Endless mode.
 
-_(≈135 characters.)_
+_(≈190 characters.)_
 
 ## Long description (≥ 100 words)
 
 > Bricklike is a portrait block breaker that mixes arcade brick-smashing with
-> short roguelite runs. Move the paddle, control the ball's angle, and break
-> crystal, stone and obsidian blocks across a six-level campaign with 21
-> hand-authored waves: Crystal Grove, Ruined Halls, Arcane Depths, Frostbound
+> short roguelite runs. A short playable tutorial teaches you to move, launch,
+> break blocks and choose your first perk; it can be skipped at any time. Then
+> comes a six-level campaign with 20 hand-authored waves — 22 waves in total
+> including the tutorial: Crystal Grove, Ruined Halls, Arcane Depths, Frostbound
 > Spire, Emberforge and Void Threshold.
 >
 > Every destroyed block earns XP. When you level up, the action pauses and you
@@ -46,15 +48,18 @@ _(≈135 characters.)_
 > Play with touch, mouse or keyboard. No account, download or install is
 > required — the game runs directly in the browser.
 
-_(≈200 words.)_
+_(≈220 words.)_
 
 ## Controls
 
 **Touch**
-- Drag horizontally to move the paddle.
+- Drag horizontally to move the paddle. The drag is 1:1 in the centre and
+  gently accelerates near the side edges so the paddle can reach the wall
+  without triggering the browser's edge gesture.
 - Tap to launch the ball.
 - Tap a perk card to choose it.
-- Use the on-screen Prism Laser button when the perk is active.
+- Use the on-screen Prism Laser button when the perk is active and a ball has
+  been launched.
 - Tap the pause button for settings, restart or menu.
 
 **Mouse**
@@ -146,9 +151,17 @@ _(≈200 words.)_
 `portrait`, `mobile`, `bosses`, `endless`
 
 **Notes for the submitter:**
-- Upload the ZIP that contains the Playgama Bridge config at the root.
+- Upload the ZIP that contains the Playgama Bridge config and the local
+  `playgama-bridge.js` at the root.
 - `game_ready` is sent once after the menu becomes interactive.
-- The interstitial is requested only when leaving the results screen.
+- **Ads:** the tutorial has no ads. Campaign wave interstitials only run when a
+  next wave exists and the cleared wave is a multiple of 3 (in practice, level 5
+  after wave 3 and level 6 after wave 3); never at the end of a level. Endless
+  runs an interstitial every 4 waves. Leaving Results (Next/Retry/Menu) may show
+  one if no interstitial ran in the last 60 seconds; a pause-menu exit is also
+  suppressed after a rewarded revive in the last 60 seconds. A rewarded revive is
+  offered once per run and only pays out on the `rewarded` state. Second Chance
+  and the rewarded revive may coexist by design (two revives per run, one each).
 - Storage and audio lifecycle go through the Bridge; no analytics are enabled.
 - Review the final Bridge behavior in the Playgama environment before submitting.
 - The sandbox requires milestones; track session length, wave completion and
@@ -173,14 +186,23 @@ _(≈200 words.)_
 
 **Notes for the submitter:**
 - Basic Launch uses the same HTML5 ZIP; ads are disabled on the CrazyGames side.
-- The build must not wait for an ad that will not arrive; the results flow treats
+  The build must not wait for an ad that will not arrive; every ad path treats
   `failed`/`skipped` as success.
+- **Ads policy:** the tutorial has no ads; campaign interstitials only when a
+  next wave exists and the cleared wave is a multiple of 3; never at the end of a
+  level; Endless every 4 waves; Results exits respect a 60-second cooldown. A
+  pause-menu exit is suppressed after a rewarded revive in the last 60 seconds.
+  The rewarded revive is once per run.
 - Upload all three covers and the preview video.
 - English metadata is mandatory.
 - **Re-test the iframe sizes 907×510, 1216×684, 1280×720 and 1920×1080** before
-  resubmitting; the portrait frame must remain readable.
-- Screenshots, covers and the preview video must use the current build (six
-  levels, bosses, Endless, new block art).
+  resubmitting; the portrait frame must remain readable. The portrait shell is
+  intentional; there is no desktop letterbox by owner decision.
+- The 0.4.0 submission was rejected again with the same generic message. The
+  0.5.0 is the next attempt and still needs a human test.
+- **Screenshots, covers and the preview video are still the 0.4.0 assets.** They
+  must be regenerated from the 0.5.0 build (tutorial, level 1 with two waves,
+  touch controls) before submitting. Do not claim they are updated.
 - Full Launch requirements (Data/User modules, direct-to-gameplay landing,
   account-linked progress) are **out of scope** for this milestone.
 - Re-check CrazyGames' current Basic Launch rules on the submission date.
@@ -193,3 +215,10 @@ _(≈200 words.)_
   support, additional worlds or a level editor.
 - Do not use the technical name `blockbreaker` as player-facing marketing copy.
 - Keep the description, screenshots and covers in sync with the current build.
+- The store covers, screenshots and videos are still the **0.4.0** assets; the
+  0.5.0 submission requires regenerated assets. Do not describe them as updated
+  until they are.
+- Do not promise ads on itch.io or GameFlare: those portals do not serve the
+  in-game interstitials used on Playgama/CrazyGames.
+- Do not claim the 0.5.0 is published; only 0.4.0 is live on itch.io and in the
+  Playgama sandbox.

@@ -296,6 +296,7 @@ export class HudOverlay {
       phaseName: snapshot.phaseName,
       phaseIndex: snapshot.phaseIndex,
       phaseCount: snapshot.phaseCount,
+      tutorial: snapshot.isTutorial === true,
       victory,
       score: snapshot.score,
       timeMs: snapshot.elapsedMs,
@@ -310,8 +311,10 @@ export class HudOverlay {
 
   private renderResult(result: PhaseResult): void {
     const endless = result.endless === true;
+    const tutorial = result.tutorial === true;
     const campaignComplete =
       !endless &&
+      !tutorial &&
       result.victory &&
       result.nextPhaseId === null &&
       result.phaseIndex === result.phaseCount;
@@ -320,23 +323,29 @@ export class HudOverlay {
       ? en.resultEndless
       : campaignComplete
         ? en.resultCampaign
-        : result.victory
-          ? en.resultVictory
-          : en.resultDefeat;
+        : tutorial
+          ? en.resultTutorial
+          : result.victory
+            ? en.resultVictory
+            : en.resultDefeat;
     this.resultsKicker.dataset.kind = endless
       ? 'endless'
       : campaignComplete
         ? 'campaign'
-        : result.victory
-          ? 'victory'
-          : 'defeat';
+        : tutorial
+          ? 'tutorial'
+          : result.victory
+            ? 'victory'
+            : 'defeat';
     this.resultsTitle.textContent = result.phaseName;
     this.resultsPhase.textContent = endless
       ? `${en.endless} · ${en.hudWave} ${Math.max(1, result.waveReached ?? 1)}`
-      : `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
-          1,
-          result.phaseCount,
-        )}`;
+      : tutorial
+        ? en.phaseTutorial
+        : `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
+            1,
+            result.phaseCount,
+          )}`;
 
     this.resultsEndless.hidden = !endless;
     if (endless) {

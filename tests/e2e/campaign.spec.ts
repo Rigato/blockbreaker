@@ -8,7 +8,7 @@ interface DebugGame {
 /**
  * v0.2.0 runtime smoke for the new campaign systems. The debug jump lets the
  * suite load boss/challenge waves directly, so rendering and HUD wiring are
- * exercised without replaying 21 waves.
+ * exercised without replaying the full campaign.
  */
 test.describe('v0.2 campaign runtime', () => {
   test.use({ viewport: { width: 390, height: 844 } });
@@ -52,7 +52,7 @@ test.describe('v0.2 campaign runtime', () => {
 
     await jump('phase-1', 0);
     expect(await clickDebugAction(page, 'Next wave')).toBe(true);
-    await expect(page.locator('.hud__wave-text')).toContainText('Wave 2/3');
+    await expect(page.locator('.hud__wave-text')).toContainText('Wave 2/2');
 
     await jump('phase-4', 1);
     await expect(page.locator('.hud__chip--rule')).toContainText('TIME');

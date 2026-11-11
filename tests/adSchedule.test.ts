@@ -16,6 +16,14 @@ describe('wave interstitial schedule', () => {
     expect(due).toEqual([4, 8, 12, 16]);
   });
 
+  it('never shows a campaign wave ad on the final wave of a phase', () => {
+    expect(shouldShowWaveInterstitial('campaign', 3, true)).toBe(false);
+    expect(shouldShowWaveInterstitial('campaign', 2, true)).toBe(false);
+    expect(shouldShowWaveInterstitial('campaign', 3, false)).toBe(true);
+    // Endless has no phase-complete state.
+    expect(shouldShowWaveInterstitial('endless', 4, true)).toBe(false);
+  });
+
   it('rejects invalid wave numbers', () => {
     for (const wave of [0, -1, 1.5, 3.5, Number.NaN, Number.POSITIVE_INFINITY]) {
       expect(shouldShowWaveInterstitial('campaign', wave)).toBe(false);
