@@ -1,27 +1,36 @@
-# Preview videos — Bricklike
+# Preview videos — Bricklike v0.5.0
 
-Gerados a partir do build de produção, com gameplay real e sem áudio.
+Gerados a partir do build de produção `0.5.0`, com gameplay real e sem áudio.
 
 ## Arquivos
 
 | Arquivo | Especificação | Uso |
 |---|---|---|
-| `bricklike-preview.mp4` | 1920×1080 (16:9), 18,1 s, H.264, ~1,7 MB | CrazyGames landscape / portais |
-| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 18,1 s, H.264, ~2,8 MB | CrazyGames portrait / mobile |
+| `bricklike-preview.mp4` | 1920×1080 (16:9), 19,1 s, H.264, ~2,4 MB | CrazyGames landscape / portais |
+| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 19,1 s, H.264, ~4,3 MB | CrazyGames portrait / mobile |
 
-- Abertura com a capa estática correspondente (landscape ou portrait).
-- Menu, gameplay com Prism Laser/multiball/combo, level-up com três cards e
-  results da mesma run.
-- Sem áudio, sem cursor, sem UI de debug e sem barras pretas.
-- O gameplay portrait é composto sobre a capa desfocada; o HUD e o paddle não
-  são cortados.
+## Conteúdo
 
-## Requisitos CrazyGames atendidos
+- Menu inicial com o tutorial como passo atual.
+- Seletor de campanha com o card do tutorial e os 7 cards (scroll real).
+- Tutorial com coach mark, lançamento e o passo “Break & level up”.
+- Gameplay com 4 bolas, Prism Laser e o HUD atual.
+- Level-up com três cards.
+- Frost Sentinel com HP reduzido, fase 2 e shards.
+- Fecho na capa correspondente, com o logo **BRICKLIKE**.
 
-- Duração 15–20 s (18,1 s).
-- Landscape 1080p 16:9 e portrait 1080p 2:3.
+- Sem áudio, sem cursor, sem UI de debug e sem telas pretas.
+- O gameplay portrait é composto sobre a capa desfocada; HUD e paddle não são
+  cortados.
+- O beam do laser é mantido por ~0,9 s durante o preview para leitura; o efeito
+  e o gameplay são os do build.
+
+## Requisitos atendidos
+
+- Duração 15–20 s (19,1 s).
+- Landscape 1080p 16:9 e portrait 1080×1620.
 - Tamanho máximo de 50 MB.
-- Capa estática como primeiro frame.
+- H.264, yuv420p, 30 fps, faststart.
 - Sem transição de logo, texto promocional ou som.
 
 ## Como regravar
@@ -38,10 +47,10 @@ O script:
 
 1. abre o build de produção em 390×844;
 2. esconde o debug, o cursor e remove `data-debug`;
-3. grava menu, gameplay assistido, level-up e results da mesma run;
+3. grava menu, seletor, tutorial, gameplay, level-up e boss;
 4. compõe os dois formatos com `ffmpeg` usando a capa correspondente como
    backdrop e o gameplay portrait como card central;
-5. abre com a capa estática, concatena os trechos e aplica fade out no final.
+5. concatena os trechos e finaliza na capa estática.
 
 Requisitos: `ffmpeg` no PATH e Chromium do Playwright instalado.
 

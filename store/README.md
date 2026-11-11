@@ -1,7 +1,7 @@
-# Store assets — Bricklike
+# Store assets — Bricklike v0.5.0
 
-Assets de loja da versão `0.4.0`. Todos são drafts para revisão humana; a
-submissão nos portais é manual.
+Assets de loja regenerados a partir do build de produção `0.5.0`. Todos são
+drafts para revisão humana; a submissão nos portais continua manual.
 
 ## Capas — `store/covers/`
 
@@ -14,20 +14,31 @@ submissão nos portais é manual.
 | `cover-contact-sheet.png` | 1608×674 | revisão interna |
 | `cover-*.svg` | vetor | fonte editável |
 
-Regras: mesmo visual nas três proporções, título **BRICKLIKE** como único texto,
-sem bordas, sem logos de loja e sem screenshot puro. Veja `covers/README.md`.
+Regras atendidas: mesma linguagem visual nas quatro proporções, título
+**BRICKLIKE** como único texto, sem bordas, sem logos de loja e sem screenshot
+puro. A arte usa os tiles quadrados, o paddle, as bolas com trail e a paleta
+teal/violeta do build atual. Veja `covers/README.md`.
 
 ## Screenshots — `store/screenshots/`
 
-Oito capturas reais do build de produção em 390×844: menu, gameplay inicial,
-laser + multiball, level-up, results, blocos especiais, chefe Frost Sentinel e
-Endless. Veja `screenshots/README.md`.
+Oito capturas reais do build de produção em 390×844:
+
+| Arquivo | Cena |
+|---|---|
+| `01-menu-390x844.png` | menu inicial com o tutorial como passo atual e os 7 nós da campanha |
+| `02-gameplay-early-390x844.png` | tutorial jogável com coach mark e bola em jogo |
+| `03-gameplay-laser-multiball-390x844.png` | Prism Laser + Multiball |
+| `04-levelup-three-cards-390x844.png` | level-up com três cards |
+| `05-results-victory-390x844.png` | vitória / results |
+| `06-special-blocks-390x844.png` | fase 6 com todos os blocos especiais |
+| `07-boss-frost-sentinel-390x844.png` | Frost Sentinel em fase 2, com shards |
+| `08-endless-wave-1-390x844.png` | modo Endless |
 
 ## How to Play — `public/how-to-play/`
 
-Cinco capturas em 390×844 usadas pelo diálogo **How to Play** do jogo:
+Cinco recortes 5:3 em **780×468**, gerados do mesmo build:
+
 `move-launch.png`, `level-up.png`, `specials.png`, `boss.png` e `endless.png`.
-Elas também alimentam as screenshots de loja 02, 04 e 06–08.
 
 ## Marca do estúdio — `public/bad-decision-games/`
 
@@ -37,17 +48,19 @@ Elas também alimentam as screenshots de loja 02, 04 e 06–08.
 
 ## Vídeo — `store/video/`
 
-- `bricklike-preview.mp4`: 1920×1080 (16:9), 18,1 s, H.264, silencioso.
-- `bricklike-preview-portrait.mp4`: 1080×1620 (2:3), 18,1 s, H.264, silencioso.
+- `bricklike-preview.mp4`: 1920×1080 (16:9), 19,1 s, H.264, silencioso.
+- `bricklike-preview-portrait.mp4`: 1080×1620 (2:3), 19,1 s, H.264, silencioso.
 
-Os dois abrem com a capa estática e mostram menu, gameplay com laser/multiball,
-level-up e results da mesma run. Veja `video/README.md`.
+Os dois mostram menu, seletor de 7 cards, tutorial, gameplay com laser e
+multiball, level-up e Frost Sentinel. Terminam na capa correspondente, com o
+logo **BRICKLIKE**. Veja `video/README.md`.
 
 ## Uso por portal
 
 - **itch.io:** ZIP HTML5, capa 16:9 ou 2:3, screenshots, descrição e controles.
 - **GameFlare:** ZIP/link, capa e screenshots, descrição e categoria.
-- **Playgama:** ZIP, capa, screenshots, descrição; Bridge já integrado.
+- **Playgama:** ZIP, capa portrait 1080×1920, screenshots, descrição; Bridge já
+  integrado.
 - **CrazyGames Basic:** ZIP, três capas, preview video e descrição ≥ 100
   palavras. Não usar Full Launch.
 

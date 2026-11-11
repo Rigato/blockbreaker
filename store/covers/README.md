@@ -1,6 +1,6 @@
-# Store covers — Bricklike
+# Store covers — Bricklike v0.5.0
 
-Draft de arte de capa para revisão e refino do agente principal.
+Arte de capa original gerada para o build `0.5.0`, pendente de revisão humana.
 
 ## Arquivos finais
 
@@ -14,29 +14,23 @@ Draft de arte de capa para revisão e refino do agente principal.
 
 ## Regras atendidas
 
-- Visual consistente entre todas as proporções: mesma paleta, blocos de cristal,
-  paddle, bola com trail, glow arcade e fundo teal/violeta.
-- Título **BRICKLIKE** na fonte Silkscreen; nenhum outro texto.
+- Mesma linguagem visual nas quatro proporções: paleta teal/violeta, tiles
+  quadrados de cristal, blocos especiais, paddle com caps de cristal, bolas com
+  trail e glow arcade.
+- Título **BRICKLIKE** na fonte Silkscreen; nenhum outro texto de capa.
 - Sem bordas, sem logos de loja, sem screenshot puro, sem material de terceiro.
-- Elementos originais, inspirados na linguagem visual do jogo.
 - PNG 8-bit sRGB, sem transparência.
+- A composição é key art vetorial; não é uma captura de tela.
 
 ## Fontes e regeneração
 
 Os SVG em `cover-*.svg` contêm a fonte Silkscreen embutida em base64 e podem ser
 editados no Inkscape ou em qualquer editor vetorial. `generate-covers.mjs`
-regenera os SVGs e rasteriza os PNGs com o Chromium do Playwright, nas
-dimensões exatas:
+regenera os SVGs, rasteriza os PNGs com o Chromium do Playwright nas dimensões
+exatas e monta o contact sheet:
 
 ```bash
 node store/covers/generate-covers.mjs
 ```
 
 O script lê `src/assets/fonts/Silkscreen-Bold.ttf` e não adiciona dependências.
-
-## Nota para o refino
-
-Este é um draft de alta qualidade, não a arte final aprovada. O agente principal
-pode refinar facetas dos blocos, composição, profundidade e glow mantendo a
-consistência entre todas as capas. Qualquer texto novo além de **BRICKLIKE** deve
-ser evitado nas capas de portal.
