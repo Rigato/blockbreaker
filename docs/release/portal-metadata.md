@@ -201,7 +201,7 @@ _(≈220 words.)_
   intentional; landscape desktop viewports get procedural side art, not a
   letterbox shell.
 - The 0.4.0 submission was rejected again with the same generic message. The
-  0.5.1 is the next attempt and still needs a human test.
+  0.5.1 was submitted on 2026-11-11 and is under review.
 - **Screenshots, covers and the preview video were regenerated from the 0.5.1
   build** (tutorial, level 1 with two waves, touch controls). They still need
   human review before submitting; do not claim they are published.
@@ -222,5 +222,6 @@ _(≈220 words.)_
   submitting.
 - Do not promise ads on itch.io or GameFlare: those portals do not serve the
   in-game interstitials used on Playgama/CrazyGames.
-- Do not claim the 0.5.1 is published; only 0.4.0 is live on itch.io and in the
+- Do not claim CrazyGames approved the 0.5.1; it is under review. The 0.5.1 is
+  live on itch.io and in the
   Playgama sandbox.

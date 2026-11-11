@@ -1,11 +1,12 @@
 # Pacote de publicação
 
-Versão do pacote: **`0.5.1`** (local, não publicada)  
-Versão publicada: **`0.4.0`** no itch.io e no sandbox da Playgama  
-Tag planejada: **`v0.5.1`** (não criada; depende de teste humano e aprovação)
+Versão do pacote: **`0.5.1`** (publicada no itch.io e no sandbox da Playgama)  
+CrazyGames: **`0.5.1` submetida** em 2026-11-11; aguardando review  
+Tag planejada: **`v0.5.1`** (não criada; depende de aprovação humana)
 
 Este diretório reúne o material para revisão humana e submissão **manual** nos
-portais. Nenhum upload, tag ou GitHub Release é feito automaticamente.
+portais. Os uploads de itch.io/Playgama e a submissão ao CrazyGames foram feitos
+pelo responsável; a tag e o GitHub Release continuam manuais.
 
 ## Comece por aqui
 
@@ -39,10 +40,10 @@ pendentes.
 - A tag e o GitHub Release só devem ser criados depois de teste humano e
   aprovação.
 - Revalidar as regras de cada portal na data do upload.
-- A `0.4.0` está publicada no itch.io e no sandbox da Playgama; a `0.5.1` é
-  local e não foi publicada.
-- CrazyGames reprovou a 0.3.0 e a 0.4.0; a 0.5.1 é a próxima tentativa. O dono
-  decidiu não fazer moldura/letterbox desktop.
+- A `0.5.1` está publicada no itch.io e no sandbox da Playgama; no CrazyGames
+  está em review.
+- CrazyGames reprovou a 0.3.0 e a 0.4.0; a 0.5.1 foi submetida em 2026-11-11.
+  O dono decidiu não fazer moldura/letterbox desktop; a 0.5.1 usa side art.
 - GameFlare está bloqueada por login.
 - A `0.1.0-mvp` é apenas histórica.
 

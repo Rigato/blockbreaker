@@ -453,6 +453,29 @@ leaderboard, mais conteúdo), não só polimento visual.
 
 ---
 
+## 5.1 Orientação — confirmado no formulário (2026-11-11)
+
+O Developer Portal do CrazyGames não tem campo de orientação para desktop. O
+único controle é **Mobile orientation**, e o Bricklike está corretamente marcado
+como **PORTRAIT**. O portal assume **landscape no PC**; a página pública/preview
+ainda mostra “Landscape / Portrait” de forma genérica, mas isso não é um campo
+configurável. Portanto:
+
+- mobile portrait: correto;
+- desktop: o jogo é exibido num iframe landscape, com black bars/side art;
+- não adianta procurar um ajuste de “portrait no PC” no formulário;
+- a side art da 0.5.1 é a resposta de apresentação para esse container, mas não
+  aumenta o shell portrait.
+
+No envio, o formulário também deve selecionar **“Yes, using the Data Module”**
+para save (o adapter usa `sdk.data`, não LocalStorage; a opção LocalStorage em
+iframe gera aviso de que o Automatic Progress Save não funciona) e marcar
+“supports CrazyGames muting audio through SDK”, que o adapter implementa.
+
+Preview 0.5.1 medido em 2026-11-11: boot ~340 ms; nenhum request Playgama;
+apenas `sdk.crazygames.com`; side art visível; shell 167×297 em 907×510 e
+442×786 em 1920×1080. O `BannerError` do SDK continua e não vem da Playgama.
+
 ## 6. Plano de ação sugerido (próximo ciclo)
 
 ### P0 — antes de qualquer reenvio

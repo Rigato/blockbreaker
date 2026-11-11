@@ -1,31 +1,33 @@
 # Status de publicação — Bricklike
 
-Versão em desenvolvimento: **`0.5.1`** (em main para teste; sem upload)  
-Versão publicada: **`0.4.0`** no **itch.io** e no **sandbox da Playgama**  
+Versão publicada: **`0.5.1`** no **itch.io** e no **sandbox da Playgama**  
+CrazyGames: **`0.5.1` submetida** em 2026-11-11; aguardando review  
 Atualizado em: 2026-11-11  
 Responsável pela submissão: **usuário (manual)**
 
 Este arquivo é o registro de publicação. O `0.1.0-mvp` foi a primeira versão
-publicada no itch.io; ele foi substituído manualmente pela `0.4.0`. A `0.4.0`
-também está no sandbox da Playgama. A **0.5.1 está em main**, implementada e
-validada para teste, mas **não foi publicada, tagueada nem enviada a portal**. Nenhuma tag
-ou GitHub Release foi criada.
+publicada no itch.io; ele foi substituído manualmente pela `0.5.1`. A `0.5.1`
+também está no sandbox da Playgama e foi submetida ao CrazyGames em 2026-11-11.
+Nenhuma tag ou GitHub Release foi criada.
 
 ## Estado em 2026-11-11
 
-- **itch.io:** `0.4.0` publicada manualmente. A `0.1.0-mvp` fica apenas como
+- **itch.io:** `0.5.1` publicada manualmente. A `0.1.0-mvp` fica apenas como
   histórico.
-- **Playgama:** `0.4.0` no **sandbox**; precisa cumprir milestones de
+- **Playgama:** `0.5.1` no **sandbox**; precisa cumprir milestones de
   retenção/qualidade antes da publicação no catálogo.
 - **CrazyGames:** a `0.3.0` foi **reprovada** por “abaixo dos padrões de
   qualidade”. A `0.4.0` foi reenviada como nova submissão e **reprovada de novo
-  com a mesma mensagem genérica**, sem detalhamento. A `0.5.1` é a próxima
-  tentativa, ainda dependente de teste humano e assets novos. Diagnóstico e
+  com a mesma mensagem genérica**, sem detalhamento. A `0.5.1` foi submetida em
+  2026-11-11 e está **aguardando review**; diagnóstico e
   canais de suporte em [`crazygames-review.md`](crazygames-review.md) e
   [`../research/crazygames-feedback.md`](../research/crazygames-feedback.md).
+- **Orientação:** o formulário do CrazyGames só permite configurar **Mobile
+  orientation**; o Bricklike está como **PORTRAIT**. O desktop é assumido
+  landscape pelo portal. Não existe campo para declarar portrait no PC.
 - **GameFlare:** conta criada, mas acesso bloqueado; suporte acionado e **sem
-  resposta**. A `0.4.0` não foi publicada lá.
-- **GitHub Pages:** acompanha a `main`; a `0.5.1` aparece após o push.
+  resposta**. A `0.5.1` não foi publicada lá.
+- **GitHub Pages:** acompanha a `main`; a `0.5.1` já aparece no build de review.
 - **ZIP 0.5.1:** local, 20 arquivos, 1.508.491 bytes (~1.481 KiB), SHA-256
   atual `f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce`
   (pode mudar no build final).
@@ -91,10 +93,10 @@ ads da 0.5.1 deve ser medida novamente depois da publicação.
 
 | Portal | Versão | Status | URL pública | Data | Observação |
 |---|---|---|---|---|---|
-| itch.io | **0.4.0** | **publicado** | — | 2026-11-10 | atualização manual; `0.1.0-mvp` histórica |
-| Playgama | **0.4.0** | **sandbox** | — | 2026-11-10 | milestones pendentes; amostra pequena |
-| CrazyGames Basic | 0.3.0 e 0.4.0 (reprovadas) / 0.5.1 (main) | **não submetida** | — | — | 0.4.0 recusada de novo com mensagem genérica; 0.5.1 após teste humano |
-| GameFlare | 0.4.0 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login |
+| itch.io | **0.5.1** | **publicado** | — | 2026-11-11 | atualização manual; `0.1.0-mvp` histórica |
+| Playgama | **0.5.1** | **sandbox** | — | 2026-11-11 | milestones pendentes; amostra pequena |
+| CrazyGames Basic | 0.3.0 e 0.4.0 (reprovadas) / 0.5.1 | **submetida** | — | 2026-11-11 | aguardando review; reenvio como nova submissão |
+| GameFlare | 0.5.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login |
 
 ### CrazyGames — como pedir detalhes e reenviar
 
@@ -122,8 +124,9 @@ Fonte: <https://docs.crazygames.com/faq/> e
 - [ ] Screenshots/capas/vídeos da 0.5.1 revisados e aprovados.
 - [ ] Título **Bricklike** consistente.
 - [ ] Descrição, controles e tags revisados para tutorial + 20 ondas.
-- [ ] Publicar 0.5.1 no itch.io e no sandbox da Playgama após aprovação.
-- [ ] Pedir detalhes à CrazyGames e reenviar a 0.5.1 como nova submissão.
+- [x] Publicar 0.5.1 no itch.io e no sandbox da Playgama.
+- [x] Reenviar a 0.5.1 ao CrazyGames como nova submissão.
+- [ ] Acompanhar o review da 0.5.1 no CrazyGames.
 - [ ] Resolver GameFlare com o suporte.
 - [ ] Acompanhar milestones da Playgama com amostra maior.
 - [ ] Nenhum portal recebeu URL com `?debug=1` ou `?resetSave=1`.

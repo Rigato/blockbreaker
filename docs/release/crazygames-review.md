@@ -3,8 +3,8 @@
 **Data:** 2026-11-11  
 **Builds avaliados:** v0.3.0 (Endless) e v0.4.0 (revisão visual/menu, HUD,
 How to Play/About e ads), ambos submetidos como CrazyGames Basic Launch  
-**Build candidato:** v0.5.1 (tutorial in-game, controles mobile e nova política
-de ads), local e ainda não submetido  
+**Build candidato:** v0.5.1 (tutorial in-game, controles mobile, side art e
+adapter nativo), submetida em 2026-11-11 e em review  
 **Resultado:** as duas builds foram reprovadas por “abaixo dos padrões de
 qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
 
@@ -29,7 +29,7 @@ qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
   - **side art** em viewports desktop landscape, sem alterar o mobile portrait;
   - **adapter nativo do CrazyGames**, sem carregar a Playgama no host do portal;
   - campanha ajustada para 20 ondas e fase 1 com 2 ondas.
-- A 0.5.1 **ainda depende de teste humano** e de assets novos. Capas,
+- A 0.5.1 foi **submetida em 2026-11-11** e está em review. Capas,
   screenshots e vídeos atuais são os da 0.4.0 e não devem ser reutilizados.
 - Para pedir detalhes, use o Support do Developer Portal ou o e-mail técnico e o
   rascunho de mensagem de
@@ -56,6 +56,29 @@ O preview de QA da 0.4.0 foi aberto com o build antigo (21 ondas, v0.4.0):
 A 0.5.1 remove o Playgama do host CrazyGames (adapter nativo direto) e adiciona
 side art em viewports landscape, mas **não aumenta o campo portrait** nem garante
 aprovação. O QA real deve ser refeito com a 0.5.1.
+
+## 0.2 Preview QA da 0.5.1 (medição de 2026-11-11)
+
+O preview novo (`6c47b8b1...`) carregou a 0.5.1:
+
+- Em 907×510, o iframe continuou **606×297** e o shell **167×297**.
+- Em 1920×1080, o iframe **1476×786** e o shell **442×786**.
+- A **side art** apareceu nas laterais (display `block`) em ambos.
+- O boot caiu para **~340 ms** (era ~9 s na 0.4.0).
+- Network: apenas **`sdk.crazygames.com`**; **nenhum** request `playgama`.
+- O `[BannerError] bannersDisabled` **continua**, agora sem Playgama no build:
+  é ruído do SDK do CrazyGames, não uma chamada da Playgama.
+- O preview mostrou **“Progress may not be saved”** porque o `getItem` do SDK
+  falhou no ambiente de QA; em produção, o form deve usar o **Data Module**, não
+  LocalStorage.
+- A página continua exibindo **Orientation: Landscape / Portrait**. O formulário
+  só tem **Mobile orientation**, marcada como **PORTRAIT**. Não existe campo de
+  orientação para desktop: o PC é assumido landscape pelo portal.
+
+Conclusão: a questão de orientação está fechada — mobile portrait está correto e
+não há como declarar portrait para desktop. A side art é a aposta de apresentação;
+o shell portrait continua pequeno em 907×510, então a legibilidade desktop ainda
+é o risco principal.
 
 ## 1. O que o portal exige publicamente
 

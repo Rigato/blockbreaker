@@ -6,15 +6,13 @@ line is **v0.5.1 — tutorial, touch controls and ads policy**: the **v0.2.0
 campaign** (6 phases, 20 waves, 9 block types, 7 phase elements, 3 bosses, 19
 perks), the **v0.3.0 Endless mode**, the **v0.4.0 presentation/menu/HUD/ads**
 pass, and the **v0.5.1 tutorial, touch edge assist, laser gate and revised ad
-cadence**. The v0.5.1 build is **on main for manual testing**; it has **not** been
-uploaded to any portal. Version 0.4.0 remains
-published on itch.io and in the Playgama sandbox.
+cadence**. The v0.5.1 build is **published on itch.io and in the Playgama sandbox**
+and was **submitted to CrazyGames** on 2026-11-11; the review is pending.
 
 The historical `0.1.0-mvp` build is no longer the live itch.io build.
 CrazyGames rejected the 0.3.0 and rejected the resubmitted 0.4.0 again with the
-same generic quality message; the 0.5.1 is the next attempt. GameFlare remains
-blocked by account access. The GitHub Pages review build tracks `main` after a
-push.
+same generic quality message; the 0.5.1 is now under review. GameFlare remains
+blocked by account access. The GitHub Pages review build tracks `main`.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>

@@ -4,16 +4,16 @@
 **Data:** 2026-11-11  
 **Branch:** `main`  
 **Versão do package:** `0.5.1`  
-**Build:** local/CI para teste; ainda não publicado em portal  
-**Publicado em portal:** `0.4.0` no itch.io e no sandbox da Playgama  
+**Build:** publicado no itch.io e no sandbox da Playgama; CrazyGames em review  
+**Publicado em portal:** `0.5.1` no itch.io e no sandbox da Playgama; `0.5.1` submetida ao CrazyGames  
 **Review build:** <https://rigato.github.io/blockbreaker/> (reflete o último push;
 a 0.5.1 só aparece depois do push)  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>  
 **Repositório:** <https://github.com/Rigato/blockbreaker>  
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`
 
-> Este documento substitui o handoff da v0.5.1 como fonte atual. O handoff
-> anterior fica como histórico em `docs/handoff-v0.5.1.md`. O GDD
+> Este documento substitui o handoff da v0.5.0 como fonte atual. O handoff
+> anterior fica como histórico em `docs/handoff-v0.5.0.md`. O GDD
 > (`docs/GDD_Bricklike.md`, v1.6) continua sendo a fonte de design; o gap
 > analysis (`docs/gdd-gap-analysis.md`) mostra o que falta.
 
@@ -25,18 +25,17 @@ a 0.5.1 só aparece depois do push)
 |---|---|
 | Branch de desenvolvimento | `main` |
 | Versão em desenvolvimento | `0.5.1` |
-| Versão publicada | `0.4.0` (itch.io + Playgama sandbox) |
-| Build 0.5.1 | em `main` para teste; sem upload, tag ou GitHub Release |
-| Tag / GitHub Release | nenhuma para 0.2.x, 0.3.x, 0.4.0, 0.5.1 ou 0.5.1 |
-| Portais | itch.io 0.4.0; Playgama 0.4.0 em sandbox; CrazyGames 0.3.0 e 0.4.0 reprovadas; GameFlare bloqueado |
+| Versão publicada | `0.5.1` (itch.io + Playgama sandbox); CrazyGames submetida em review |
+| Build 0.5.1 | publicado no itch.io/Playgama; submetido ao CrazyGames em 2026-11-11 |
+| Tag / GitHub Release | nenhuma para 0.2.x, 0.3.x, 0.4.0, 0.5.0 ou 0.5.1 |
+| Portais | itch.io 0.5.1; Playgama 0.5.1 sandbox; CrazyGames 0.3.0/0.4.0 reprovadas e 0.5.1 em review; GameFlare bloqueado |
 | Node | 22.12+ (CI usa Node 24) |
 | Stack | Phaser 3.90, TypeScript estrito, Vite 8, Vitest, Playwright, Playgama Bridge 2.4.1 + adapter nativo do CrazyGames |
 | ZIP local | `release/blockbreaker-web.zip` — 0.5.1, 20 arquivos, 1.508.491 bytes |
 | SHA-256 atual do ZIP | `f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce` |
 
 O hash pode mudar no build final; confirme em `release/manifest.json` antes de
-qualquer upload. O GitHub Pages acompanha a `main`; enquanto a 0.5.1 não for
-enviada, a revisão pública continua sendo o último build publicado.
+qualquer upload. O GitHub Pages acompanha a `main` e já serve a 0.5.1.
 
 ---
 
@@ -370,32 +369,40 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
 
 | Portal | Versão | Status | Observação |
 |---|---|---|---|
-| itch.io | **0.4.0** | **publicado** | atualização manual; `0.1.0-mvp` histórica |
-| Playgama | **0.4.0** | **sandbox** | milestones pendentes antes da publicação |
-| CrazyGames Basic | 0.3.0 e 0.4.0 | **reprovadas** | 0.4.0 reenviada e recusada de novo com a mesma mensagem genérica; 0.5.1 é a próxima tentativa |
-| GameFlare | 0.4.0 (não publicada) | **bloqueado** | sem resposta do suporte sobre login |
+| itch.io | **0.5.1** | **publicado** | atualização manual; `0.1.0-mvp` histórica |
+| Playgama | **0.5.1** | **sandbox** | milestones pendentes antes da publicação |
+| CrazyGames Basic | 0.3.0 e 0.4.0 reprovadas / 0.5.1 | **em review** | submissão nova em 2026-11-11; aguardando resultado |
+| GameFlare | 0.5.1 (não publicada) | **bloqueado** | sem resposta do suporte sobre login |
 
-- **CrazyGames — preview 0.4.0 medido pelo dono:** em **907×510** (iframe
-  **606×297**) o shell ficou **167×297**; em **1920×1080** ficou **442×786**;
-  o load levou **~9 s** e o Network mostrou requests a **`bridge.playgama.com`**.
-  A 0.5.1 tenta corrigir a dependência externa com o **adapter nativo**
-  (`sdk.crazygames.com` apenas no host do portal, sem `playgama-bridge.js`) e
-  adiciona **side art** nas laterais. **Isso ainda não é garantia de aprovação**;
-  a legibilidade desktop continua sendo um risco e precisa ser testada no QA
-  real. Ver [`docs/release/crazygames-review.md`](release/crazygames-review.md)
-  e [`docs/research/crazygames-feedback.md`](research/crazygames-feedback.md).
+- **CrazyGames — preview 0.5.1 medido:** em **907×510** (iframe
+  **606×297**) o shell ficou **167×297**; em **1920×1080** ficou **442×786**.
+  O boot caiu para **~340 ms**, o Network mostrou apenas **`sdk.crazygames.com`**
+  (nenhum request Playgama) e a **side art** apareceu nas laterais. O shell
+  portrait não cresceu; a legibilidade desktop segue como risco. O
+  `BannerError` ainda aparece no console, agora comprovadamente do SDK do
+  CrazyGames, não da Playgama. Ver
+  [`docs/release/crazygames-review.md`](release/crazygames-review.md) e
+  [`docs/research/crazygames-feedback.md`](research/crazygames-feedback.md).
 - **Playgama sandbox (amostra pequena):** 17/100 qualifying plays; avg play time
   **5:42** contra meta **5:00**; ad shows/play **1,70** contra meta **0,30**;
   116 launches, 31 plays, 5m45s e 3/2 likes. A amostra é pequena demais para
   concluir qualidade ou retenção; use os números como sinal, não veredito.
 - **GameFlare:** conta criada, acesso bloqueado; suporte acionado e sem
   resposta. Não criar conta duplicada sem orientação.
-- **Assets de loja:** capas, screenshots e vídeos continuam sendo os da
-  **0.4.0**. Precisam ser regerados a partir da 0.5.1 (tutorial de 16 blocos,
-  coach marks modais, side art desktop, controles touch) **antes** de qualquer
-  submissão. Nada foi atualizado nesta rodada.
-- O ZIP 0.5.1 é **local**. Nenhum upload, tag ou GitHub Release foi feito.
-  A 0.5.1 **não foi publicada**.
+- **Orientação no portal:** o formulário do CrazyGames só oferece **Mobile
+  orientation**; não há campo de orientação desktop. A orientação mobile está
+  **PORTRAIT**, que é o correto. O portal assume **landscape no PC**; a página de
+  preview ainda exibe “Landscape / Portrait” de forma genérica. Não é possível
+  declarar portrait para desktop no formulário.
+- **Formulário CrazyGames:** a opção de save aparecia como **LocalStorage**, com
+  aviso de que o Automatic Progress Save não funciona em iframe. Como o adapter
+  usa o **Data Module** do SDK, a opção correta é “Yes, using the Data Module”.
+  O checkbox “supports CrazyGames muting audio through SDK” também deve ser
+  marcado; o adapter implementa o listener de áudio.
+- **Assets de loja:** capas, screenshots, vídeos e How to Play foram gerados na
+  sessão paralela; revisão humana pendente antes de qualquer submissão.
+- O ZIP 0.5.1 foi publicado no itch.io e no sandbox da Playgama; a submissão ao
+  CrazyGames está em review. Nenhuma tag ou GitHub Release foi criada.
 
 ---
 
@@ -404,7 +411,7 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
 | Área | Estado | Risco / ação |
 |---|---|---|
 | Teste humano da 0.5.1 | pendente | validar tutorial de 16 blocos/32 XP, fluxo dos 5 modais, skip, travel gain, side art, save antigo e ads |
-| CrazyGames | 0.4.0 reprovada de novo | motivo genérico; pedir detalhes pelo suporte e reenviar a 0.5.1 após o teste humano |
+| CrazyGames | 0.5.1 submetida em 2026-11-11 | aguardando review; motivo das reprovações anteriores segue genérico |
 | Apresentação desktop | side art adicionada; shell portrait intencional | risco residual de legibilidade em iframe desktop; medir 606×297, 907×510 e 1920×1080 no QA real |
 | Adapter CrazyGames | implementado com timeout/fallback | validar no Preview que não há request a `bridge.playgama.com` nem a `api.playgama.com` |
 | Balance 4–6 | validado estruturalmente | falta playtest humano de timers, HP e densidade |

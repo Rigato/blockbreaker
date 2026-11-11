@@ -2,16 +2,15 @@
 
 Escopo: **itch.io, GameFlare, Playgama e CrazyGames**. Um único build HTML5, um único ZIP, quatro portais. As regras abaixo são as que afetam a implementação; regras de negócio (payout, revenue share, review comercial) não são objeto deste documento.
 
-> **Estado do build em 2026-11-11:** versão `0.5.1` local, implementada e
-> validada, aguardando teste humano e push. itch.io e o sandbox da Playgama
-> seguem com a `0.4.0`; a `0.5.1` não foi publicada, tagueada nem enviada a
-> portal. O jogo tem tutorial in-game sem ads, campanha com 20 ondas e
+> **Estado do build em 2026-11-11:** versão `0.5.1` publicada no itch.io e no sandbox da Playgama; submetida ao
+> CrazyGames em 2026-11-11 e aguardando review. Nenhuma tag ou GitHub Release
+> foi criada. O jogo tem tutorial in-game sem ads, campanha com 20 ondas e
 > interstitials apenas quando há próxima onda e a onda limpa é múltipla de 3
 > (na prática, fase 5 após a onda 3 e fase 6 após a onda 3), Endless a cada 4
 > ondas e exits com cooldown de 60 s; o rewarded revive é oferecido uma vez por
 > run. CrazyGames reprovou a `0.3.0` e novamente a `0.4.0` com a mesma mensagem
-> genérica; a `0.5.1` é a próxima tentativa. GameFlare está bloqueado por acesso
-> à conta. Ver `docs/handoff-v0.5.1.md` e `docs/release/status.md`.
+> genérica; a `0.5.1` foi submetida e está em review. GameFlare está bloqueado por
+> acesso à conta. Ver `docs/handoff-v0.5.1.md` e `docs/release/status.md`.
 
 ---
 

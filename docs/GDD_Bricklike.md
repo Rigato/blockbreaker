@@ -5,14 +5,14 @@ técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
 **Versão:** 1.6  
 **Data:** 2026-11-11  
-**Status:** v0.5.1 em main, validada e aguardando teste humano; itch.io e Playgama seguem com a 0.4.0; CrazyGames/GameFlare pendentes  
+**Status:** v0.5.1 publicada no itch.io e no sandbox da Playgama; CrazyGames em review desde 2026-11-11; GameFlare pendente  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha atual tem **6 fases e 20 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. Com o **tutorial** da v0.5.1, o seletor mostra **7 cards e 22 ondas** no total. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adiciona o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**; a build está em `main`, aguardando teste humano. A `0.4.0` segue publicada no itch.io e no sandbox da Playgama; `0.1.0-mvp` é histórica.
+A campanha atual tem **6 fases e 20 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. Com o **tutorial** da v0.5.1, o seletor mostra **7 cards e 22 ondas** no total. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adiciona o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**; a build está em `main`, aguardando teste humano. A `0.5.1` está publicada no itch.io e no sandbox da Playgama; `0.1.0-mvp` é histórica.
 
 ### Como ler os status
 

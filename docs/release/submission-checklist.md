@@ -1,14 +1,14 @@
 # Submission checklist — Bricklike
 
-**Versão em desenvolvimento:** `0.5.1` (em main para teste; sem upload).  
-**Build publicado:** `0.4.0` no itch.io e no sandbox da Playgama.  
-**Status global:** assets da 0.5.1 regerados; pendente de teste humano, revisão dos assets e push.  
-**Quem submete:** o usuário, manualmente, em cada portal. Nenhum upload, tag ou
-release pública da 0.5.1 foi feito por este trabalho.
+**Versão em desenvolvimento:** `0.5.1` (publicada no itch.io e no sandbox da Playgama).  
+**CrazyGames:** `0.5.1` submetida em 2026-11-11; aguardando review.  
+**Status global:** assets da 0.5.1 regerados; revisão humana e resultado do CrazyGames pendentes.  
+**Quem submete:** o usuário, manualmente, em cada portal. Nenhuma tag ou GitHub
+Release foi criada.
 
 Revalidar as regras de cada portal **na data da submissão**; elas mudam com
 frequência. O checklist registra o pacote atual e o aprendizado das submissões
-(Playgama sandbox, CrazyGames com 0.3.0 e 0.4.0 reprovadas, GameFlare bloqueado
+(Playgama sandbox, CrazyGames com 0.3.0 e 0.4.0 reprovadas e 0.5.1 em review, GameFlare bloqueado
 por acesso).
 
 ## Pré-requisitos comuns
