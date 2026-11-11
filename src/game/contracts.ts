@@ -8,7 +8,7 @@
 
 export type Unsubscribe = () => void;
 
-export type PlatformSource = 'bridge' | 'fallback';
+export type PlatformSource = 'bridge' | 'fallback' | 'crazygames';
 export type StorageKind = 'bridge' | 'memory';
 
 export interface StorageService {
@@ -175,6 +175,7 @@ export type HudPhase =
   | 'playing'
   | 'paused'
   | 'levelup'
+  | 'tutorial'
   | 'cleared'
   | 'revive-offer'
   | 'run-complete'
@@ -283,12 +284,16 @@ export type TutorialStep =
   | 'bosses'
   | 'endless';
 
+export type TutorialPosition = 'bottom' | 'top' | 'center';
+
 export interface TutorialState {
   step: TutorialStep;
-  /** 1-based position in the three in-run tutorial steps. */
+  /** 1-based position in the five tutorial steps. */
   stepIndex: number;
   stepCount: number;
   canSkip: boolean;
+  /** Where the coach card is anchored; the game is paused while it is open. */
+  position: TutorialPosition;
 }
 
 /** Minimal state required by the DOM HUD. Emitted only when it changes. */
@@ -468,6 +473,8 @@ export interface GameCommands {
   // M3 — phases, save and results
   /** Starts a specific content phase from its first wave. */
   startPhase(phaseId: string): void;
+  /** Acknowledges the open tutorial coach mark and resumes/advances it. */
+  acknowledgeTutorial(): void;
   /** Completes the tutorial immediately and unlocks level 1. */
   skipTutorial(): void;
   /** Retries the current phase from wave 1 (results screen). */

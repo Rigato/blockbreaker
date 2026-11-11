@@ -613,6 +613,9 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     if (index === 0) return;
     const previous = phaseStatsList[index - 1];
     if (!previous) return;
+    // The tutorial deliberately uses only a few tougher blocks; it is not a
+    // difficulty step for the campaign curve.
+    if (stats.phase.tutorial || previous.phase.tutorial) return;
     const currentPeak = phasePeaks(stats);
     const previousPeak = phasePeaks(previous);
     if (!didNotRegress(currentPeak.avgHp, previousPeak.avgHp)) {

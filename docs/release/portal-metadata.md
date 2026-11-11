@@ -186,8 +186,9 @@ _(≈220 words.)_
 
 **Notes for the submitter:**
 - Basic Launch uses the same HTML5 ZIP; ads are disabled on the CrazyGames side.
-  The build must not wait for an ad that will not arrive; every ad path treats
-  `failed`/`skipped` as success.
+  The build detects the CrazyGames host and uses the native SDK adapter, without
+  loading the Playgama runtime. The build must not wait for an ad that will not
+  arrive; every ad path treats `failed`/`skipped` as success.
 - **Ads policy:** the tutorial has no ads; campaign interstitials only when a
   next wave exists and the cleared wave is a multiple of 3; never at the end of a
   level; Endless every 4 waves; Results exits respect a 60-second cooldown. A
@@ -197,12 +198,13 @@ _(≈220 words.)_
 - English metadata is mandatory.
 - **Re-test the iframe sizes 907×510, 1216×684, 1280×720 and 1920×1080** before
   resubmitting; the portrait frame must remain readable. The portrait shell is
-  intentional; there is no desktop letterbox by owner decision.
+  intentional; landscape desktop viewports get procedural side art, not a
+  letterbox shell.
 - The 0.4.0 submission was rejected again with the same generic message. The
-  0.5.0 is the next attempt and still needs a human test.
-- **Screenshots, covers and the preview video are still the 0.4.0 assets.** They
-  must be regenerated from the 0.5.0 build (tutorial, level 1 with two waves,
-  touch controls) before submitting. Do not claim they are updated.
+  0.5.1 is the next attempt and still needs a human test.
+- **Screenshots, covers and the preview video were regenerated from the 0.5.1
+  build** (tutorial, level 1 with two waves, touch controls). They still need
+  human review before submitting; do not claim they are published.
 - Full Launch requirements (Data/User modules, direct-to-gameplay landing,
   account-linked progress) are **out of scope** for this milestone.
 - Re-check CrazyGames' current Basic Launch rules on the submission date.
@@ -215,10 +217,10 @@ _(≈220 words.)_
   support, additional worlds or a level editor.
 - Do not use the technical name `blockbreaker` as player-facing marketing copy.
 - Keep the description, screenshots and covers in sync with the current build.
-- The store covers, screenshots and videos are still the **0.4.0** assets; the
-  0.5.0 submission requires regenerated assets. Do not describe them as updated
-  until they are.
+- The store covers, screenshots and videos were regenerated from the **0.5.1**
+  build and are pending human review. Review them against the final build before
+  submitting.
 - Do not promise ads on itch.io or GameFlare: those portals do not serve the
   in-game interstitials used on Playgama/CrazyGames.
-- Do not claim the 0.5.0 is published; only 0.4.0 is live on itch.io and in the
+- Do not claim the 0.5.1 is published; only 0.4.0 is live on itch.io and in the
   Playgama sandbox.

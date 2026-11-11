@@ -5,6 +5,7 @@ import {
   TOUCH_EDGE_MAX_GAIN,
   TOUCH_EDGE_ZONE_RATIO,
   touchEdgeGain,
+  touchTravelGain,
 } from '../src/input/touchAssist';
 
 const CENTRE = FIELD_WIDTH / 2;
@@ -37,5 +38,15 @@ describe('touch edge assist', () => {
   it('clamps to the playable field', () => {
     expect(applyTouchDelta(FIELD_WIDTH - 1, 100)).toBe(FIELD_WIDTH);
     expect(applyTouchDelta(1, -100)).toBe(0);
+  });
+
+  it('adds gain for long swipes so one finger can cross the field', () => {
+    expect(touchTravelGain(0)).toBe(1);
+    expect(touchTravelGain(100)).toBeGreaterThan(1);
+    expect(touchTravelGain(300)).toBeCloseTo(TOUCH_EDGE_MAX_GAIN, 5);
+
+    const fromLeft = 50;
+    const oneLongSwipe = applyTouchDelta(fromLeft, 360, FIELD_WIDTH, 360);
+    expect(oneLongSwipe).toBe(FIELD_WIDTH);
   });
 });

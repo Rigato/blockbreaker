@@ -56,6 +56,7 @@ export const en = {
   storageWarningConfirm: 'Got it',
 
   tutorialSkip: 'Skip tutorial',
+  tutorialAck: 'Got it',
   tutorialStep: 'Tutorial · {{current}} / {{total}}',
   tutorialMoveTitle: 'Move & launch',
   tutorialMoveBody: 'Drag to move the paddle. Tap the field to launch the ball.',

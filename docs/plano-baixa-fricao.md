@@ -5,11 +5,11 @@
 > **Atualização 2026-11-11:** o plano original foi executado. itch.io está com a
 > `0.4.0`; a Playgama está em sandbox com a `0.4.0`; a CrazyGames reprovou o
 > Basic Launch com a `0.3.0` e rejeitou a `0.4.0` novamente com a mesma mensagem
-> genérica; a GameFlare segue bloqueada por acesso à conta. A `0.5.0` está
+> genérica; a GameFlare segue bloqueada por acesso à conta. A `0.5.1` está
 > **local**, validada e aguardando teste humano/push: traz tutorial in-game,
 > controles touch com edge assist, gate do laser e uma política de ads mais
-> conservadora. Nada da `0.5.0` foi publicado. Ver
-> `docs/handoff-v0.5.0.md`.
+> conservadora. Nada da `0.5.1` foi publicado. Ver
+> `docs/handoff-v0.5.1.md`.
 
 ---
 

@@ -11,6 +11,9 @@ import { FIELD_WIDTH } from '../sim/World';
  */
 export const TOUCH_EDGE_ZONE_RATIO = 0.22;
 export const TOUCH_EDGE_MAX_GAIN = 2.2;
+/** Long swipes become slightly stronger so one finger can cross the field. */
+export const TOUCH_TRAVEL_FREE = 24;
+export const TOUCH_TRAVEL_FULL = 260;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -36,14 +39,30 @@ export function touchEdgeGain(
   return 1 + (TOUCH_EDGE_MAX_GAIN - 1) * proximity * proximity;
 }
 
-/** Applies a relative touch delta with edge assist and clamps to the field. */
+/**
+ * Long-swipe gain. Short adjustments stay precise; a finger that has already
+ * travelled a good part of the screen can cross the whole field without
+ * lifting and re-anchoring.
+ */
+export function touchTravelGain(travel: number): number {
+  if (!Number.isFinite(travel) || travel <= TOUCH_TRAVEL_FREE) return 1;
+  const progress = clamp(
+    (travel - TOUCH_TRAVEL_FREE) / (TOUCH_TRAVEL_FULL - TOUCH_TRAVEL_FREE),
+    0,
+    1,
+  );
+  return 1 + (TOUCH_EDGE_MAX_GAIN - 1) * progress * progress;
+}
+
+/** Applies a relative touch delta with edge/travel assist and clamps to the field. */
 export function applyTouchDelta(
   target: number,
   delta: number,
   fieldWidth: number = FIELD_WIDTH,
+  travel = 0,
 ): number {
   if (!Number.isFinite(target) || !Number.isFinite(delta)) return target;
   const base = clamp(target, 0, fieldWidth);
-  const gain = touchEdgeGain(base, fieldWidth);
+  const gain = Math.max(touchEdgeGain(base, fieldWidth), touchTravelGain(travel));
   return clamp(base + delta * gain, 0, fieldWidth);
 }

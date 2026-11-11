@@ -82,6 +82,16 @@ describe('v0.2.0 content structure', () => {
     expect(new Set(waveIds).size).toBe(22);
   });
 
+  it('keeps the tutorial short: 8 blocks per wave, first perk after four', () => {
+    const tutorial = PHASES.find((phase) => phase.tutorial);
+    expect(tutorial).toBeDefined();
+    const stats = phaseStats(tutorial!);
+    expect(stats.waves.map((wave) => wave.blocks)).toEqual([8, 8]);
+    expect(stats.blocks).toBe(16);
+    expect(stats.hp).toBe(32);
+    expect(stats.levelUps).toBe(2);
+  });
+
   it('produces no validator issues', () => {
     expect(validateContent()).toEqual([]);
   });
@@ -248,7 +258,7 @@ describe('v0.2.0 content pacing', () => {
   });
 
   it('keeps each phase peak at or above the previous phase peak', () => {
-    const peaks = PHASES.map((phase) => {
+    const peaks = PHASES.filter((phase) => !phase.tutorial).map((phase) => {
       const paced = pacedWaves(phaseStats(phase).waves);
       return {
         avgHp: Math.max(...paced.map((stats) => stats.avgHp)),

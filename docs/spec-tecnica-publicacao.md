@@ -2,16 +2,16 @@
 
 Escopo: **itch.io, GameFlare, Playgama e CrazyGames**. Um único build HTML5, um único ZIP, quatro portais. As regras abaixo são as que afetam a implementação; regras de negócio (payout, revenue share, review comercial) não são objeto deste documento.
 
-> **Estado do build em 2026-11-11:** versão `0.5.0` local, implementada e
+> **Estado do build em 2026-11-11:** versão `0.5.1` local, implementada e
 > validada, aguardando teste humano e push. itch.io e o sandbox da Playgama
-> seguem com a `0.4.0`; a `0.5.0` não foi publicada, tagueada nem enviada a
+> seguem com a `0.4.0`; a `0.5.1` não foi publicada, tagueada nem enviada a
 > portal. O jogo tem tutorial in-game sem ads, campanha com 20 ondas e
 > interstitials apenas quando há próxima onda e a onda limpa é múltipla de 3
 > (na prática, fase 5 após a onda 3 e fase 6 após a onda 3), Endless a cada 4
 > ondas e exits com cooldown de 60 s; o rewarded revive é oferecido uma vez por
 > run. CrazyGames reprovou a `0.3.0` e novamente a `0.4.0` com a mesma mensagem
-> genérica; a `0.5.0` é a próxima tentativa. GameFlare está bloqueado por acesso
-> à conta. Ver `docs/handoff-v0.5.0.md` e `docs/release/status.md`.
+> genérica; a `0.5.1` é a próxima tentativa. GameFlare está bloqueado por acesso
+> à conta. Ver `docs/handoff-v0.5.1.md` e `docs/release/status.md`.
 
 ---
 
@@ -51,7 +51,7 @@ O mock implementa o contrato completo do `PlatformBridgeBase`: `initialize()` re
 
 ### 1.3 Contrato de código
 
-**Inicialização** — a promise pode **não resolver**: o adapter nativo do CrazyGames carrega o script do SDK via `addJavaScript()` encadeando `.then()` sem `.catch()`. Se o script for bloqueado (adblocker em `sdk.crazygames.com` é comum), ela fica pendurada indefinidamente. Com o Bridge local da 0.5.0, a Playgama não faz request ao CDN no boot. Use timeout e entre no jogo de qualquer forma.
+**Inicialização** — a promise pode **não resolver**: o adapter nativo do CrazyGames carrega o script do SDK via `addJavaScript()` encadeando `.then()` sem `.catch()`. Se o script for bloqueado (adblocker em `sdk.crazygames.com` é comum), ela fica pendurada indefinidamente. Com o Bridge local da 0.5.1, a Playgama não faz request ao CDN no boot. Use timeout e entre no jogo de qualquer forma.
 
 ```javascript
 await Promise.race([
@@ -91,9 +91,9 @@ Três regras não negociáveis:
 | CDN — `<script src="https://bridge.playgama.com/v2/stable/playgama-bridge.js">` | 116 KB | bundle + 1 chunk por plataforma detectada | Padrão na Playgama; a ferramenta de build dela reescreve a tag |
 | Local — `playgama-bridge.js` do pacote npm ao lado do `index.html` | 307 KB | 0 | itch.io/GameFlare sem dependência de rede |
 | CDN + fallback local — plugin Vite, modo `cdn` | 116 KB + 307 KB no ZIP | 1, com fallback | Recomendado para build único |
-| **Local — `playgamaBridge({ mode: 'local' })`** | 307 KB no ZIP | **0** | **Build atual da 0.5.0**: `index.html` carrega só `./playgama-bridge.js`; nenhum request ao CDN da Playgama no boot |
+| **Local — `./playgama-bridge.js`** | 372 KB no ZIP | **0** | **Build atual da 0.5.1**: carregado dinamicamente fora do CrazyGames; nenhum request ao CDN da Playgama no boot |
 
-A 0.5.0 usa **modo local**. O adapter nativo do CrazyGames ainda pode carregar o
+A 0.5.1 escolhe o runtime pelo host: CrazyGames usa o adapter nativo direto e não carrega a Playgama; os demais portais carregam o Bridge local. O adapter nativo do CrazyGames pode carregar o
 SDK do próprio portal quando detecta o host (`sdk.crazygames.com`), mas isso é
 uma dependência da plataforma de destino, não do CDN da Playgama. Em itch.io,
 GameFlare e GitHub Pages o boot não faz request ao `bridge.playgama.com`.
@@ -177,7 +177,7 @@ Valem para os quatro portais. Violar qualquer um reprova em todo mundo.
 | Formato | HTML5 puro no browser. Sem wrapper nativo, plugin ou Flash |
 | Entry point | `index.html` na **raiz** do ZIP |
 | Caminhos | **Relativos** em todos os assets — cada portal serve do próprio domínio/subpath |
-| Recursos externos | **Zero** para o jogo. Fonte, textura, áudio, WASM, lib e dado vão dentro do ZIP. O Bridge pode vir do CDN da Playgama em teoria, mas o build atual da 0.5.0 usa o runtime **local** e não faz request no boot |
+| Recursos externos | **Zero** para o jogo, exceto o SDK do próprio portal. Fonte, textura, áudio, WASM, lib e dado vão dentro do ZIP. Fora do CrazyGames o Bridge local é usado; no CrazyGames, o SDK nativo do portal é a única dependência externa |
 | Threading | Export **single-threaded**. `SharedArrayBuffer` exige headers COOP/COEP nos embeddings e o dev não controla o iframe do portal. Em Godot 4.3+ já é o default |
 | Analytics | Nada de GA4 ou equivalente — as requisições podem ser bloqueadas. Use o módulo `analytics` do Bridge (≥ 2.3.0) |
 | Persistência | Só via `bridge.storage`. Nunca `localStorage` direto |
@@ -250,7 +250,7 @@ Bridge obrigatório; review em ~24h. Além do §1:
 
 O Bricklike teve a `0.3.0` e a `0.4.0` reprovadas na revisão inicial com a
 mensagem genérica de qualidade, sem detalhamento. A `0.4.0` foi reenviada como
-nova submissão e recusada de novo. Para a `0.5.0`, o dono decidiu **não fazer
+nova submissão e recusada de novo. Para a `0.5.1`, o dono decidiu **não fazer
 moldura/letterbox desktop**; a aposta é tutorial in-game, controles mobile e
 política de ads mais conservadora, ainda dependente de teste humano. O roteiro
 de suporte e os canais estão em
@@ -306,7 +306,7 @@ O CrazyGames Basic Launch é o gargalo do plano — os demais portais aceitam o 
 ## 5. Checklist de verificação
 
 **Build**
-- [ ] `index.html` na raiz do ZIP; zero paths absolutos; zero recursos externos (o build 0.5.0 usa o Bridge local; o adapter do CrazyGames carrega o SDK do portal apenas no host dele)
+- [ ] `index.html` na raiz do ZIP; zero paths absolutos; zero recursos externos (o build 0.5.1 usa o Bridge local; o adapter do CrazyGames carrega o SDK do portal apenas no host dele)
 - [ ] Export single-threaded; sem GA4 em nenhuma biblioteca
 - [ ] `playgama-bridge-config.json` ao lado do `index.html`, com os ajustes de §1.5
 - [ ] Bridge carregado localmente (`./playgama-bridge.js`); `initialize()` com timeout; nenhum request ao CDN da Playgama no boot

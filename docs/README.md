@@ -5,9 +5,9 @@ o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
 
 ## Comece por aqui
 
-1. **[Handoff v0.5.0](handoff-v0.5.0.md)** — estado do jogo, tutorial,
+1. **[Handoff v0.5.1](handoff-v0.5.1.md)** — estado do jogo, tutorial,
    arquitetura, invariantes, gates, portais, riscos e próximos passos.
-2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.5).
+2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.6).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente.
 4. **[Spec técnica de publicação](spec-tecnica-publicacao.md)** — requisitos de
    itch.io, GameFlare, Playgama e CrazyGames.
@@ -21,7 +21,7 @@ o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
 - [Checklist de submissão](release/submission-checklist.md) — passo a passo.
 - [Status de publicação](release/status.md) — versões, portais e pendências.
 - [Diagnóstico CrazyGames](release/crazygames-review.md) — duas reprovações da
-  0.4.0, decisão sobre desktop e plano da 0.5.0.
+  0.4.0, decisão sobre desktop e plano da 0.5.1.
 - [Índice do pacote de release](release/README.md).
 
 ## QA
@@ -46,8 +46,8 @@ o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
 - `bad-decision-games-logo/` — fontes originais da logomarca do estúdio.
 - Assets usados pelo jogo: `../public/bad-decision-games/` e
   `../public/how-to-play/`.
-- Assets de loja: `../store/` — **ainda são os da 0.4.0** e precisam ser
-  regerados antes da submissão da 0.5.0.
+- Assets de loja: `../store/` — regenerados na sessão paralela; revisão humana
+  pendente antes da submissão da 0.5.1.
 
 ## Histórico
 

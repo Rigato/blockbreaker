@@ -1,6 +1,6 @@
 # Bricklike — GDD × estado atual (2026-11-11)
 
-Comparação entre o GDD v1.5 e o build de desenvolvimento `0.5.0` na `main`.
+Comparação entre o GDD v1.6 e o build de desenvolvimento `0.5.1` na `main`.
 Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
@@ -9,12 +9,12 @@ implementados, não bugs.
 
 | Área | GDD | Estado |
 |---|---|---|
-| Tutorial | fase 0 `tutorial`, 2 ondas, 48 blocos, 55 XP, 3 level ups | implementado e validado |
+| Tutorial | fase 0 `tutorial`, 2 ondas, 16 blocos, 32 XP, 2 level ups | implementado e validado |
 | Gate do tutorial | save novo `unlockedPhase = 0`; concluir/pular libera o level 1 | implementado e testado |
 | Save antigo | `unlockedPhase >= 1` continua sem repetir o tutorial | implementado e testado no parse |
-| Coach marks | mover/lançar, XP/perk, blocos especiais, chefes e Endless | implementado |
+| Coach marks | 5 modais pausados com Got it: mover/lançar, XP/perk, blocos especiais, chefes e Endless | implementado |
 | Campanha | 6 fases, 20 ondas (2/3/3/3/4/5) | implementado e validado |
-| Totais | 775 blocos / 1.832 XP com tutorial; 727 / 1.777 na campanha pura | validado |
+| Totais | 743 blocos / 1.809 XP com tutorial; 727 / 1.777 na campanha pura | validado |
 | Blocos | 9 tipos, incluindo 6 especiais | implementado |
 | Elementos | 7 tipos (wall, obstacle, deflector, portal, mover, rotor, gate) | implementado |
 | Chefes | Frost Sentinel, Ember Warden, Void Herald | implementado |
@@ -31,9 +31,11 @@ implementados, não bugs.
 | How to Play | diálogo de 5 páginas com screenshots | implementado |
 | About Us | logomarca e texto do estúdio | implementado |
 | HUD legível | compacto em iframes estreitos | implementado |
-| Controles touch | drag relativo 1:1; edge assist até 2,2× na zona de 22% | implementado e testado |
+| Controles touch | drag relativo 1:1; edge assist e ganho de swipe longo até 2,2× | implementado e testado |
+| Side art desktop | arte lateral em viewport landscape; mobile portrait inalterado | implementado neste ciclo |
+| CrazyGames | adapter nativo sem Playgama no host do portal | implementado neste ciclo |
 | Laser | exige lançamento explícito na onda; reset bloqueia; HUD explica | implementado e testado |
-| Ads | política 0.5.0 (campanha só com próxima onda e múltiplo de 3; tutorial zero; exits com 60 s) | implementado e testado |
+| Ads | política 0.5.1 (campanha só com próxima onda e múltiplo de 3; tutorial zero; exits com 60 s) | implementado e testado |
 | Ads reais | Bridge interstitial/rewarded + fallback/mock + testes | implementado |
 | Direção visual dos blocos | revisão de materiais e legibilidade | implementado |
 | Inglês | UI e metadata | implementado |
@@ -62,7 +64,7 @@ implementados, não bugs.
 
 | Item | Estado |
 |---|---|
-| Playtest humano da 0.5.0 | pendente |
+| Playtest humano da 0.5.1 | pendente |
 | Compreensão do tutorial/skip e dos coach marks | pendente |
 | Edge assist em celular real (borda, gesto do navegador) | pendente |
 | Playtest humano das fases 4–6 | pendente |
@@ -73,10 +75,10 @@ implementados, não bugs.
 | Teste de save antigo no navegador | pendente (parse coberto por testes) |
 | Aviso de storage em fallback real | pendente |
 | Mixagem final de áudio | pendente |
-| Screenshots/capas/vídeos da 0.5.0 | pendente; assets atuais são os da 0.4.0 |
+| Screenshots/capas/vídeos da 0.5.1 | gerados na sessão paralela; revisão humana pendente |
 | Fill/limites reais de ads na Playgama/CrazyGames | pendente |
 | Playgama sandbox stats | amostra pequena (17/100 qualifying plays; 5:42; 1,70 ad/play); não concluir qualidade/retenção |
-| CrazyGames | 0.3.0 e 0.4.0 reprovadas; 0.5.0 aguarda teste humano e assets novos |
+| CrazyGames | 0.3.0 e 0.4.0 reprovadas; 0.5.1 aguarda teste humano e assets novos |
 | Tag e GitHub Release | pendente de decisão |
 | Submissão manual nos portais | usuário |
 
@@ -87,6 +89,6 @@ O GDD **não está atrasado em conteúdo de campanha**: as 6 fases, o tutorial, 
 falta é majoritariamente **validação humana** do novo tutorial/controles/ads,
 **meta-sistemas de retenção** (metaprogressão, conquistas, leaderboards),
 **distribuição** (Full Launch, novos portais, localização, landscape) e
-**assets de loja da 0.5.0**. A moldura desktop foi deliberadamente descartada;
+**assets de loja da 0.5.1**. A moldura desktop foi deliberadamente descartada;
 o risco de apresentação em iframe desktop continua registrado, mas não será
 resolvido por letterbox nesta linha.

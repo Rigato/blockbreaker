@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-label="">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#04070f"/>
+      <stop offset=".42" stop-color="#081523"/>
+      <stop offset=".58" stop-color="#081523"/>
+      <stop offset="1" stop-color="#04070f"/>
+    </linearGradient>
+    <radialGradient id="halo" cx=".5" cy=".48" r=".46">
+      <stop offset="0" stop-color="#3bd8f4" stop-opacity=".14"/>
+      <stop offset=".55" stop-color="#1a6f94" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#04070f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="crystalL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9f8ff" stop-opacity=".5"/>
+      <stop offset=".45" stop-color="#42c7e8" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#0b3044" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="crystalR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d5c6ff" stop-opacity=".42"/>
+      <stop offset=".45" stop-color="#8c72d8" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#241542" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#69e7ff" stroke-opacity=".035" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <rect width="1920" height="1080" fill="url(#halo)"/>
+
+  <g fill="none" stroke="#6ce8ff" stroke-linecap="round" opacity=".22">
+    <circle cx="960" cy="510" r="310" stroke-opacity=".11"/>
+    <circle cx="960" cy="510" r="410" stroke-opacity=".07"/>
+    <circle cx="960" cy="510" r="520" stroke-opacity=".045"/>
+    <path d="M118 850C310 780 365 645 346 470" stroke-opacity=".2"/>
+    <path d="M1802 850c-192-70-247-205-228-390" stroke-opacity=".16"/>
+  </g>
+
+  <g opacity=".8">
+    <path d="M150 850 258 470l96 240 72-136 62 276z" fill="url(#crystalL)"/>
+    <path d="m258 470 38 196-38 44-38-44z" fill="#8ff4ff" opacity=".16"/>
+    <path d="M58 890 132 700l52 118 34-70 38 142z" fill="url(#crystalL)" opacity=".55"/>
+    <path d="M170 920 216 790l48 80 32-54 44 104z" fill="url(#crystalL)" opacity=".4"/>
+    <path d="M1770 850 1662 470l-96 240-72-136-62 276z" fill="url(#crystalR)"/>
+    <path d="m1662 470-38 196 38 44 38-44z" fill="#e9ddff" opacity=".13"/>
+    <path d="M1862 890 1788 700l-52 118-34-70-38 142z" fill="url(#crystalR)" opacity=".55"/>
+    <path d="m1750 920-46-130-48 80-32-54-44 104z" fill="url(#crystalR)" opacity=".4"/>
+  </g>
+
+  <g fill="#b9f8ff" opacity=".5">
+    <circle cx="300" cy="240" r="3"/><circle cx="380" cy="330" r="2"/>
+    <circle cx="220" cy="410" r="2"/><circle cx="420" cy="200" r="1.6"/>
+    <circle cx="1620" cy="240" r="3"/><circle cx="1540" cy="330" r="2"/>
+    <circle cx="1700" cy="410" r="2"/><circle cx="1500" cy="200" r="1.6"/>
+  </g>
+  <g fill="#cbb8ff" opacity=".4">
+    <circle cx="500" cy="160" r="2"/><circle cx="560" cy="420" r="1.5"/>
+    <circle cx="1420" cy="160" r="2"/><circle cx="1360" cy="420" r="1.5"/>
+  </g>
+
+  <path d="M80 980h1760" stroke="#6ce8ff" stroke-opacity=".12"/>
+  <path d="M0 80h1920M0 1000h1920" stroke="#6ce8ff" stroke-opacity=".04"/>
+</svg>

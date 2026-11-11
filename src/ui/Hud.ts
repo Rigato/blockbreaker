@@ -73,6 +73,7 @@ export class Hud {
   private readonly tutorialStepLabel: HTMLElement;
   private readonly tutorialTitle: HTMLElement;
   private readonly tutorialBody: HTMLElement;
+  private readonly tutorialAck: HTMLButtonElement;
   private readonly tutorialSkip: HTMLButtonElement;
   private tutorialSignature = '';
 
@@ -395,6 +396,14 @@ export class Hud {
     this.tutorialBody = tutorialBody;
     tutorialBody.className = 'hud__tutorial-body';
 
+    const tutorialAck = document.createElement('button');
+    this.tutorialAck = tutorialAck;
+    tutorialAck.type = 'button';
+    tutorialAck.id = 'tutorial-ack';
+    tutorialAck.className = 'hud__tutorial-ack';
+    tutorialAck.textContent = en.tutorialAck;
+    tutorialAck.addEventListener('click', this.handleAckTutorial);
+
     const tutorialSkip = document.createElement('button');
     this.tutorialSkip = tutorialSkip;
     tutorialSkip.type = 'button';
@@ -403,7 +412,13 @@ export class Hud {
     tutorialSkip.textContent = en.tutorialSkip;
     tutorialSkip.addEventListener('click', this.handleSkipTutorial);
 
-    tutorialPanel.append(tutorialStepLabel, tutorialTitle, tutorialBody, tutorialSkip);
+    tutorialPanel.append(
+      tutorialStepLabel,
+      tutorialTitle,
+      tutorialBody,
+      tutorialAck,
+      tutorialSkip,
+    );
 
     const perksPopover = document.createElement('div');
     this.perksPopover = perksPopover;
@@ -430,6 +445,7 @@ export class Hud {
   }
 
   update(snapshot: HudSnapshot): void {
+    this.pauseButton.disabled = snapshot.phase === 'tutorial';
     if (snapshot.phase === 'levelup') {
       if (!this.levelUpPhase) {
         this.levelUpPhase = true;
@@ -544,6 +560,7 @@ export class Hud {
     this.pauseButton.removeEventListener('click', this.handlePause);
     this.perksButton.removeEventListener('click', this.handlePerksToggle);
     this.laserButton.removeEventListener('click', this.handleLaser);
+    this.tutorialAck.removeEventListener('click', this.handleAckTutorial);
     this.tutorialSkip.removeEventListener('click', this.handleSkipTutorial);
     this.section.remove();
   }
@@ -797,7 +814,7 @@ export class Hud {
       return;
     }
 
-    const signature = `${tutorial.step}:${tutorial.stepIndex}:${tutorial.canSkip}`;
+    const signature = `${tutorial.step}:${tutorial.stepIndex}:${tutorial.canSkip}:${tutorial.position}`;
     this.tutorialPanel.hidden = false;
     if (signature === this.tutorialSignature) return;
     this.tutorialSignature = signature;
@@ -818,7 +835,10 @@ export class Hud {
       .replace('{{total}}', String(tutorial.stepCount));
     this.tutorialTitle.textContent = copy.title;
     this.tutorialBody.textContent = copy.body;
+    this.tutorialAck.hidden = !tutorial.canSkip;
     this.tutorialSkip.hidden = !tutorial.canSkip;
+    this.tutorialPanel.classList.remove('is-bottom', 'is-top', 'is-center', 'is-new');
+    this.tutorialPanel.classList.add(`is-${tutorial.position}`);
     this.tutorialPanel.classList.remove('is-new');
     void this.tutorialPanel.offsetWidth;
     this.tutorialPanel.classList.add('is-new');
@@ -920,6 +940,11 @@ export class Hud {
     const open = this.perksPopover.hidden;
     this.perksPopover.hidden = !open;
     this.perksButton.setAttribute('aria-expanded', String(open));
+  };
+
+  private readonly handleAckTutorial = (): void => {
+    this.tutorialAck.blur();
+    this.controller.acknowledgeTutorial();
   };
 
   private readonly handleSkipTutorial = (): void => {

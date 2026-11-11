@@ -37,6 +37,18 @@ async function expectInsideViewport(page: Page, selector: string): Promise<void>
   expect(box.y + box.height).toBeLessThanOrEqual(viewport.height + 1);
 }
 
+test.describe('desktop side art', () => {
+  test('is visible on a landscape viewport and hidden on mobile portrait', async ({ page }) => {
+    await page.setViewportSize({ width: 907, height: 510 });
+    await page.goto('/?resetSave=1');
+    await waitForMenu(page);
+    await expect(page.locator('#desktop-side-art')).toBeVisible();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.locator('#desktop-side-art')).toBeHidden();
+  });
+});
+
 test.describe('layout matrix', () => {
   for (const viewport of VIEWPORTS) {
     test(`${viewport.name}: menu, levels, gameplay, pause, level up and results fit`, async ({

@@ -37,6 +37,7 @@ export class InputController {
   private laserRequested = false;
   private activePointerId: number | null = null;
   private lastClientX = 0;
+  private touchStartClientX = 0;
   private readonly keys = new Set<string>();
   private readonly canvas: HTMLCanvasElement;
   private readonly isGameplayActive: () => boolean;
@@ -123,6 +124,7 @@ export class InputController {
     // teleports the paddle under the finger.
     this.activePointerId = event.pointerId;
     this.lastClientX = event.clientX;
+    this.touchStartClientX = event.clientX;
     this.target = this.getPaddleX();
     this.launchRequested = true;
     this.canvas.setPointerCapture?.(event.pointerId);
@@ -135,11 +137,13 @@ export class InputController {
       return;
     }
     if (this.activePointerId !== event.pointerId) return;
-    const delta = (event.clientX - this.lastClientX) * this.logicalPerCss();
+    const perCss = this.logicalPerCss();
+    const delta = (event.clientX - this.lastClientX) * perCss;
+    const travel = Math.abs(event.clientX - this.touchStartClientX) * perCss;
     this.lastClientX = event.clientX;
     const base = this.target ?? this.getPaddleX();
-    // Edge assist is touch/pen-only; mouse stays absolute and exact.
-    this.target = applyTouchDelta(base, delta);
+    // Edge/travel assist is touch/pen-only; mouse stays absolute and exact.
+    this.target = applyTouchDelta(base, delta, FIELD_WIDTH, travel);
     event.preventDefault();
   };
 

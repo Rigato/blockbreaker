@@ -24,14 +24,15 @@ export const TUTORIAL_WAVES: readonly WaveDef[] = [
   {
     id: 'tutw1',
     name: 'First Steps',
-    rows: ['..1111..', '.111111.', '11111111', '..1111..'],
+    // Eight stone bricks: the first four destroyed grant the first perk (8 XP).
+    rows: ['..2222..', '22....22'],
     legend: CONTENT_LEGEND,
     ballSpeed: 520,
   },
   {
     id: 'tutw2',
     name: 'Spark Practice',
-    rows: ['..1e11..', '.112211.', '11111111', '11222211'],
+    rows: ['..2e22..', '.22..22.'],
     legend: CONTENT_LEGEND,
     ballSpeed: 560,
   },

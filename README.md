@@ -2,39 +2,38 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.5.0 — tutorial, touch controls and ads policy**: the **v0.2.0
+line is **v0.5.1 — tutorial, touch controls and ads policy**: the **v0.2.0
 campaign** (6 phases, 20 waves, 9 block types, 7 phase elements, 3 bosses, 19
 perks), the **v0.3.0 Endless mode**, the **v0.4.0 presentation/menu/HUD/ads**
-pass, and the **v0.5.0 tutorial, touch edge assist, laser gate and revised ad
-cadence**. The v0.5.0 build is **on main for manual testing**; it has **not** been
+pass, and the **v0.5.1 tutorial, touch edge assist, laser gate and revised ad
+cadence**. The v0.5.1 build is **on main for manual testing**; it has **not** been
 uploaded to any portal. Version 0.4.0 remains
 published on itch.io and in the Playgama sandbox.
 
 The historical `0.1.0-mvp` build is no longer the live itch.io build.
 CrazyGames rejected the 0.3.0 and rejected the resubmitted 0.4.0 again with the
-same generic quality message; the 0.5.0 is the next attempt. GameFlare remains
+same generic quality message; the 0.5.1 is the next attempt. GameFlare remains
 blocked by account access. The GitHub Pages review build tracks `main` after a
 push.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
 
-## v0.5.0 — tutorial, touch controls and ads
+## v0.5.1 — tutorial, touch controls and ads
 
 - **Tutorial:** new phase 0, id `tutorial`, with two waves (`tutw1`, `tutw2`),
-  48 blocks, 55 XP and 3 level ups. A fresh save now starts at
+  16 blocks, 32 XP and 2 level ups. Wave 1 has eight stone blocks; the first
+  perk arrives after four of them. A fresh save now starts at
   `unlockedPhase = 0`; clearing or skipping the tutorial unlocks level 1. Old
   saves with `unlockedPhase >= 1` keep working without replaying it.
 - **Skip tutorial:** the HUD button completes the tutorial and unlocks level 1.
-- **Coach marks:** contextual prompts for move/launch, XP/perk, special blocks, bosses
-  and Endless.
+- **Coach marks:** five paused modals with **Got it**, anchored to the relevant HUD area: move/launch (bottom), XP/perk (top), special blocks (centre), bosses and Endless (centre).
 - **Campaign:** 6 phases and 20 waves (2 / 3 / 3 / 3 / 4 / 5). With the
-  tutorial, the level select shows 7 cards and 22 waves. Totals: 775 blocks and
-  1,832 XP including the tutorial; campaign-only: 727 blocks and 1,777 XP.
-- **Touch controls:** relative drag is 1:1 in the centre and gains up to 2.2×
-  in the outer 22% of the field, so the paddle can reach the edge before the
-  finger triggers the browser's edge gesture. Mouse stays absolute, keyboard is
-  unchanged and the paddle speed cap did not change.
+  tutorial, the level select shows 7 cards and 22 waves. Totals: 743 blocks and
+  1,809 XP including the tutorial; campaign-only: 727 blocks and 1,777 XP.
+- **Touch controls:** relative drag is 1:1 in the centre; the outer 22% gets edge assist and long swipes gain up to 2.2×, so one finger can cross the field without lifting and re-anchoring. Mouse stays absolute, keyboard is unchanged and the paddle speed cap did not change.
+- **Side art:** landscape desktop viewports get the procedural side artwork around the portrait field; mobile portrait is unchanged.
+- **CrazyGames:** a direct native SDK adapter is selected by hostname, so CrazyGames does not load the Playgama runtime; Playgama/itch.io still use the local `playgama-bridge.js`. The same build serves all portals.
 - **Laser gate:** Prism Laser requires an explicit ball launch in the current
   wave; debug/multiball balls alone do not unlock it. A wave reset blocks it
   until the player launches, and the HUD shows “Launch the ball first”.
@@ -49,13 +48,12 @@ push.
 - **Storage warning:** if platform diagnostics fall back to memory, the menu
   shows a discreet “Progress may not be saved” notice; tapping it opens a popup
   explaining that progress and settings may be lost when the page closes.
-- **Tests and package:** 289 unit tests in 28 files, 29 E2E tests in 9 spec
-  files, content validation with 7 levels / 22 waves / 775 blocks / 1,832 XP,
-  and a local ZIP with 20 files, 1,517,039 bytes (~1,481 KiB), SHA-256
-  `010bcfc3f9b09cbef5ff20c8d8e4c1fb8a56b0ad8c4ce460530819d7f879c32b`
+- **Tests and package:** 329 unit tests in 29 files, 31 E2E tests in 9 spec
+  files, content validation with 7 levels / 22 waves / 743 blocks / 1,809 XP,
+  and a local ZIP with 20 files, 1,508,491 bytes (~1,481 KiB), SHA-256
+  `f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce`
   (the hash may change on the final build).
-- **Store assets:** covers, screenshots and videos are still the 0.4.0 assets
-  and must be regenerated before the 0.5.0 submission.
+- **Store assets:** covers, screenshots, videos and How to Play images were regenerated in the parallel asset session; human review is still required before submitting.
 
 ## v0.4.0 — presentation, UX and ads
 
@@ -78,11 +76,11 @@ push.
   short studio note.
 - **Compact HUD:** below 440px shell width the HUD switches to a two-row layout
   with icon stats and 11–13px values, keeping 907×510 and 800×450 iframes legible.
-- **Ads (0.4.0 policy, superseded by 0.5.0):** campaign interstitials after every
+- **Ads (0.4.0 policy, superseded by 0.5.1):** campaign interstitials after every
   3rd wave, Endless after every 4th, plus every results exit (Next/Retry/Menu).
   A one-per-run **rewarded revive** offer lets the player watch an ad to save a
-  lost run on supported portals. The 0.5.0 reduces campaign wave ads to phases
-  with a following wave and removes ads from the tutorial; see the v0.5.0
+  lost run on supported portals. The 0.5.1 reduces campaign wave ads to phases
+  with a following wave and removes ads from the tutorial; see the v0.5.1
   section above.
 - **How to Play / About Us:** wide, short dialogs with localized screenshots and
   the studio logo (no duplicated studio caption).
@@ -127,7 +125,7 @@ npm run preview   # serves dist/ locally
 ## v0.3.0 — Endless mode
 
 Development line: `main`. This work is part of v0.4.0 (published on itch.io and
-in the Playgama sandbox) and remains in the v0.5.0 build on main.
+in the Playgama sandbox) and remains in the v0.5.1 build on main.
 
 - **Endless button** in the main menu, separate from Campaign and the level select.
 - **Infinite run:** no victory condition; the run ends when every ball is lost.
@@ -158,9 +156,9 @@ Development branch: `feat/v0.2.0` (historical). This work is now part of
 v0.4.0, published on itch.io and in the Playgama sandbox.
 
 - **Campaign:** 6 phases with waves per phase **3 / 3 / 3 / 3 / 4 / 5 = 21** as
-  shipped in v0.2.0. The **v0.5.0** shortens phase 1 to two waves, for **20
+  shipped in v0.2.0. The **v0.5.1** shortens phase 1 to two waves, for **20
   campaign waves** (22 with the tutorial), **727 blocks** and **1,777 XP**
-  campaign-only; with the tutorial, 775 blocks and 1,832 XP. Phases 4–6 are
+  campaign-only; with the tutorial, 743 blocks and 1,809 XP. Phases 4–6 are
   **Frostbound Spire** (3), **Emberforge** (4) and **Void Threshold** (5).
 - **9 block types:** crystal, stone, obsidian plus explosive, regenerative,
   moving, multiplier, generator and linked. Each special block has simulation
@@ -206,7 +204,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 - `docs/release/submission-checklist.md` lists every manual field, asset and
   step per portal, all marked **pending human review**.
 - `docs/old/release/g7-review.md` inventories the historical MVP package and
-  defines the G7 review checklist. The current line is `0.5.0` (main); no tag
+  defines the G7 review checklist. The current line is `0.5.1` (main); no tag
   or GitHub Release was created, and the user performs all submissions.
 
 ## M6 — QA, performance and balance
@@ -236,7 +234,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 - **At M5, interstitial only on Results exit** (Next/Retry): the game pauses and
   hard mutes audio, shows a blocking loading overlay, and continues on
   `closed`/`failed`/15 s timeout. v0.4.0 added wave interstitials and rewarded
-  revive; v0.5.0 revised the cadence. No banners or own frequency logic beyond
+  revive; v0.5.1 revised the cadence. No banners or own frequency logic beyond
   the documented breakpoints.
 - Validated Bridge 2.4.1 config: no Bridge loading logo, no analytics,
   safe-area adaptation and interstitial placement.
@@ -247,7 +245,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   with the ZIP and manifest. GitHub Pages remains the review build.
 - Tested in a subfolder, with the Bridge blocked/fallback, mock/no-ads,
   failed/timed-out interstitial and no external requests to `api.playgama.com`.
-  The current v0.5.0 build loads the Bridge **locally** and makes no request to
+  The current v0.5.1 build loads the Bridge **locally** and makes no request to
   the Playgama CDN at boot.
 - See [docs/build-release.md](docs/build-release.md) for the build, ZIP and
   portal checklist.
@@ -365,16 +363,12 @@ automatically after 2.5 s.
 
 ## Platform boot
 
-- The v0.5.0 build uses the **local Bridge** (`playgamaBridge({ mode: 'local' })`):
-  `index.html` loads `./playgama-bridge.js`, with a 10 s initialization timeout
-  and an in-memory fallback adapter. There is no request to
-  `bridge.playgama.com` at boot. The native CrazyGames adapter still loads the
-  CrazyGames SDK when it detects that host.
+- The v0.5.1 build loads `./playgama-bridge.js` dynamically only outside CrazyGames; the CrazyGames host uses the direct native SDK adapter. There is no request to `bridge.playgama.com` at boot. Both paths keep a timeout and an in-memory fallback.
 - The Bridge loading screen is disabled in `playgama-bridge-config.json`
   (`loadingScreenType: "none"`) so no Bridge branding is shown; the game uses
   its own boot screen and progress bar.
 - `game_ready` is sent only after the menu is rendered and interactive.
-- Ads follow the v0.5.0 policy: no tutorial ads; campaign wave ads only with a
+- Ads follow the v0.5.1 policy: no tutorial ads; campaign wave ads only with a
   following wave and a multiple of 3; Endless every 4 waves; Results and pause
   exits use a 60 s cooldown. Unsupported platforms skip without UI breakage. The
   player setting and platform audio state both mute the audio service.
@@ -443,7 +437,7 @@ release/                   Generated ZIP + manifest (not committed)
 - [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
-- [Current handoff — v0.5.0](docs/handoff-v0.5.0.md)
+- [Current handoff — v0.5.1](docs/handoff-v0.5.1.md)
 - [Archived handoff — v0.4.0](docs/handoff-v0.4.0.md)
 - [Technical publishing spec](docs/spec-tecnica-publicacao.md)
 - [Low-friction publishing plan](docs/plano-baixa-fricao.md)

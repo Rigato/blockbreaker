@@ -26,7 +26,7 @@ se `dist/` não existir, se `index.html` ou `playgama-bridge-config.json`
 estiverem fora da raiz, se houver path absoluto, URL externa não permitida,
 mais de 1.000 arquivos, mais de 250 MB ou caminho acima de 240 caracteres.
 
-## Conteúdo esperado do ZIP (0.5.0)
+## Conteúdo esperado do ZIP (0.5.1)
 
 ```text
 index.html
@@ -44,10 +44,10 @@ Regras verificadas por `scripts/package.mjs`:
 - `index.html` e o config do Bridge na raiz;
 - assets com caminhos relativos (`./assets/...`, `./favicon.svg`);
 - nenhum `src="/..."`, `href="/..."`, `url(/...)` ou import absoluto;
-- nenhuma URL externa no conteúdo do jogo. O build 0.5.0 usa o Bridge **local**
-  (`./playgama-bridge.js`) e não faz request ao CDN `bridge.playgama.com` no
-  boot. O validador ainda permite a URL do CDN como exceção, mas ela não é usada
-  pelo build atual; o runtime vendorizado `playgama-bridge.js` não é escaneado;
+- nenhuma URL externa no conteúdo do jogo, exceto o SDK nativo do CrazyGames
+  (`https://sdk.crazygames.com`). Fora do CrazyGames o Bridge é local
+  (`./playgama-bridge.js`), carregado dinamicamente, sem request ao CDN da
+  Playgama. O runtime vendorizado `playgama-bridge.js` não é escaneado;
 - `https://phaser.io` e namespaces `www.w3.org` são strings não-request e estão
   na allowlist do validador.
 
@@ -147,20 +147,20 @@ unzip -t release/blockbreaker-web.zip
 - [ ] Rotação preserva progresso (pausa + overlay).
 - [ ] ZIP ≤ 250 MB, ≤ 1.500 arquivos, paths ≤ 240 caracteres.
 - [ ] Sem logo do Bridge no mock; modo mock sem analytics.
-- [ ] Screenshots/capas/vídeos regerados a partir da 0.5.0; os assets atuais
+- [ ] Screenshots/capas/vídeos regerados a partir da 0.5.1; os assets atuais
       ainda são os da 0.4.0.
 
 ## Pacote atual
 
-Referência de 2026-11-11, versão **0.5.0**, build em **main** (sem upload, tag ou
+Referência de 2026-11-11, versão **0.5.1**, build em **main** (sem upload, tag ou
 GitHub Release):
 
 | Item | Valor |
 |---|---|
 | ZIP | `release/blockbreaker-web.zip` |
-| Tamanho | 1.517.039 bytes (~1.481 KiB) |
+| Tamanho | 1.508.491 bytes (~1.481 KiB) |
 | Arquivos | 20 |
-| SHA-256 | `010bcfc3f9b09cbef5ff20c8d8e4c1fb8a56b0ad8c4ce460530819d7f879c32b` |
+| SHA-256 | `f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce` |
 | Raiz | `index.html` + `playgama-bridge-config.json` |
 | Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge local |
 
@@ -169,13 +169,13 @@ antes de qualquer upload.
 
 ## Release por tag — somente após aprovação humana
 
-**Não crie tag ou release sem decisão explícita.** A `0.5.0` está em main e ainda
+**Não crie tag ou release sem decisão explícita.** A `0.5.1` está em main e ainda
 não foi tagueada nem publicada. A submissão em itch.io, GameFlare, Playgama e
 CrazyGames é manual e feita pelo responsável.
 
 Pré-requisitos:
 
-1. Teste humano da 0.5.0 concluído e CI verde no commit que receberá a tag; o
+1. Teste humano da 0.5.1 concluído e CI verde no commit que receberá a tag; o
    `release.yml` não roda E2E.
 2. `npm run package` local limpo, com `unzip -t` OK.
 3. `package.json` e `release/manifest.json` na mesma versão da tag.
@@ -187,15 +187,15 @@ git switch main
 git pull --ff-only
 git status                      # deve estar limpo
 
-git tag -a v0.5.0 -m "Bricklike v0.5.0"
-git push origin v0.5.0
+git tag -a v0.5.1 -m "Bricklike v0.5.1"
+git push origin v0.5.1
 ```
 
 Conferência:
 
 ```bash
 gh run list --workflow Release --limit 1
-gh release view v0.5.0 --json name,assets,url
+gh release view v0.5.1 --json name,assets,url
 ```
 
 Fallback manual **somente** se o workflow falhar e o build local estiver
@@ -203,9 +203,9 @@ validado:
 
 ```bash
 npm run build && npm run package
-gh release create v0.5.0 \
+gh release create v0.5.1 \
   release/blockbreaker-web.zip release/manifest.json \
-  --title "Bricklike v0.5.0" \
+  --title "Bricklike v0.5.1" \
   --generate-notes
 ```
 

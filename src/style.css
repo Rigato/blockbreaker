@@ -166,13 +166,48 @@ button {
   touch-action: none;
 }
 
+#desktop-side-art {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  background:
+    linear-gradient(180deg, rgba(4, 7, 15, 0.28), rgba(4, 7, 15, 0.52)),
+    #05070f url("./assets/desktop-side-art.svg") center / cover no-repeat;
+  pointer-events: none;
+}
+
+#desktop-side-art::after {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 0 30%, rgba(4, 7, 15, 0.48) 74%, rgba(4, 7, 15, 0.78));
+  content: "";
+}
+
 #stage-area {
   position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
+}
+
+/* Desktop/landscape gets intentional side art around the portrait field. */
+@media (min-aspect-ratio: 1 / 1) {
+  #desktop-side-art {
+    display: block;
+  }
+
+  #game-shell {
+    z-index: 2;
+    box-shadow:
+      0 0 0 1px rgba(126, 231, 255, 0.16),
+      0 0 60px rgba(42, 180, 220, 0.12),
+      0 30px 90px rgba(0, 0, 0, 0.6);
+  }
 }
 
 #game-shell {
@@ -2212,32 +2247,67 @@ button {
   color: rgba(255, 182, 232, 0.85);
 }
 
-/* Tutorial coach card: readable, out of the paddle line, and never blocks input. */
+/* Tutorial coach card: a paused modal that points to the relevant HUD area. */
 .hud__tutorial {
   position: absolute;
-  right: 8px;
-  bottom: clamp(94px, 15cqw, 126px);
-  left: 8px;
-  z-index: 4;
+  right: 10px;
+  left: 10px;
+  z-index: 5;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 2px 10px;
+  gap: 3px 10px;
   align-items: center;
   max-width: 390px;
   margin: 0 auto;
-  padding: clamp(8px, 2.4cqw, 12px) clamp(10px, 3cqw, 14px);
-  border: 1px solid rgba(100, 231, 255, 0.38);
-  border-radius: 8px;
+  padding: clamp(10px, 2.8cqw, 14px) clamp(12px, 3.2cqw, 16px);
+  border: 1px solid rgba(100, 231, 255, 0.55);
+  border-radius: 10px;
   background:
-    linear-gradient(180deg, rgba(10, 28, 52, 0.94), rgba(4, 10, 22, 0.92));
+    linear-gradient(180deg, rgba(10, 28, 52, 0.98), rgba(4, 10, 22, 0.97));
   box-shadow:
-    0 0 20px rgba(100, 231, 255, 0.14),
-    0 12px 26px rgba(0, 0, 0, 0.45);
+    0 0 0 100vmax rgba(2, 6, 14, 0.34),
+    0 0 26px rgba(100, 231, 255, 0.2),
+    0 18px 38px rgba(0, 0, 0, 0.62);
   pointer-events: none;
 }
 
 .hud__tutorial[hidden] {
   display: none;
+}
+
+.hud__tutorial.is-bottom {
+  bottom: clamp(132px, 24cqw, 190px);
+}
+
+.hud__tutorial.is-top {
+  top: clamp(86px, 18cqw, 116px);
+}
+
+.hud__tutorial.is-center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hud__tutorial::after {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-right: 8px solid transparent;
+  border-left: 8px solid transparent;
+  content: "";
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.hud__tutorial.is-bottom::after {
+  top: 100%;
+  border-top: 9px solid rgba(100, 231, 255, 0.55);
+}
+
+.hud__tutorial.is-top::after {
+  bottom: 100%;
+  border-bottom: 9px solid rgba(100, 231, 255, 0.55);
 }
 
 .hud__tutorial-step {
@@ -2250,9 +2320,10 @@ button {
 }
 
 .hud__tutorial-title {
+  grid-column: 1 / -1;
   color: var(--cyan-bright);
   font-family: var(--font-display);
-  font-size: clamp(12px, 3.2cqw, 17px);
+  font-size: clamp(14px, 3.6cqw, 19px);
   line-height: 1.2;
 }
 
@@ -2260,43 +2331,72 @@ button {
   grid-column: 1 / -1;
   margin: 0;
   color: var(--muted);
-  font-size: clamp(9px, 2.25cqw, 12px);
-  line-height: 1.35;
+  font-size: clamp(10px, 2.45cqw, 13px);
+  line-height: 1.4;
 }
 
+.hud__tutorial-ack,
 .hud__tutorial-skip {
-  grid-column: 2;
-  grid-row: 2;
-  padding: 4px 8px;
-  border: 1px solid rgba(126, 231, 255, 0.3);
-  border-radius: 4px;
-  background: rgba(8, 24, 42, 0.8);
-  color: var(--muted);
+  padding: 7px 12px;
+  border-radius: 6px;
   font: inherit;
-  font-size: clamp(8px, 2.1cqw, 10px);
+  font-size: clamp(9px, 2.2cqw, 11px);
   letter-spacing: 0.04em;
   pointer-events: auto;
   touch-action: manipulation;
 }
 
-.hud__tutorial-skip:hover,
-.hud__tutorial-skip:focus-visible {
-  border-color: var(--cyan);
+.hud__tutorial-ack {
+  grid-column: 1;
+  justify-self: start;
+  border: 1px solid var(--cyan);
+  background: rgba(100, 231, 255, 0.18);
   color: var(--cyan-bright);
+  font-weight: 700;
 }
 
-.hud__tutorial.is-new {
+.hud__tutorial-skip {
+  grid-column: 2;
+  justify-self: end;
+  border: 1px solid rgba(126, 231, 255, 0.25);
+  background: transparent;
+  color: var(--dim);
+}
+
+.hud__tutorial-ack:hover,
+.hud__tutorial-ack:focus-visible,
+.hud__tutorial-skip:hover,
+.hud__tutorial-skip:focus-visible {
+  border-color: var(--cyan-bright);
+  color: #ffffff;
+}
+
+.hud__tutorial.is-bottom.is-new,
+.hud__tutorial.is-top.is-new {
   animation: hud-tutorial-in 220ms ease-out both;
+}
+
+.hud__tutorial.is-center.is-new {
+  animation: hud-tutorial-center-in 220ms ease-out both;
 }
 
 @keyframes hud-tutorial-in {
   0% {
     opacity: 0;
-    transform: translateY(6px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+  }
+}
+
+@keyframes hud-tutorial-center-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-46%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%);
   }
 }
 

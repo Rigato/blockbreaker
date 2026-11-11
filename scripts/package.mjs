@@ -38,7 +38,10 @@ const LIMITS = {
 // Non-request URLs emitted by the engine/vendor code or used as XML
 // namespaces. The Bridge CDN is the only network host the game itself loads.
 const ALLOWED_URL_HOSTS = new Set([
+  // Playgama may still appear in the vendored bridge/config.
   'bridge.playgama.com',
+  // CrazyGames' own SDK is loaded only on its host (portal requirement).
+  'sdk.crazygames.com',
   'www.w3.org',
   'phaser.io',
 ]);

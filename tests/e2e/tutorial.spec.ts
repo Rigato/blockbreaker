@@ -20,9 +20,7 @@ test.describe('first-run tutorial', () => {
     const coach = page.locator('.hud__tutorial');
     await expect(coach).toBeVisible();
     await expect(coach).toContainText('Move & launch');
-
-    await page.keyboard.press('v');
-    await expect(coach).toContainText('Break & level up');
+    await expect(page.locator('#tutorial-ack')).toBeVisible();
 
     await page.locator('#tutorial-skip').click();
     await expect(page.locator('.overlay--results')).toBeVisible();
@@ -44,6 +42,20 @@ test.describe('first-run tutorial', () => {
     await page.locator(HUD).waitFor({ state: 'visible' });
     await expect(page.locator('.hud__tutorial')).toBeHidden();
     await expect(page.locator('.hud__wave-text')).toContainText('Wave 1/2');
+  });
+
+  test('acknowledging the first coach mark resumes the run', async ({ page }) => {
+    await page.goto('/?resetSave=1');
+    await waitForMenu(page);
+    await startTutorial(page);
+
+    await expect(page.locator('.hud__tutorial')).toContainText('Move & launch');
+    await page.locator('#tutorial-ack').click();
+    await expect(page.locator('.hud__tutorial')).toBeHidden();
+    await expect(page.locator('.hud__hint')).toHaveText('Tap / click / V to launch');
+
+    await page.keyboard.press('v');
+    await expect(page.locator('.hud__hint')).not.toHaveText('Tap / click / V to launch');
   });
 
   test('tutorial has two waves and shows the special-block coach mark', async ({ page }) => {

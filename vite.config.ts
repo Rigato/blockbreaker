@@ -1,11 +1,9 @@
 import { defineConfig } from 'vitest/config';
-import { playgamaBridge } from '@playgama/bridge/vite';
 
 export default defineConfig({
   base: './',
-  // Local-only Bridge: no external script on the boot path. The official
-  // 2.4.1 runtime still detects Playgama/CrazyGames at runtime.
-  plugins: [playgamaBridge({ mode: 'local' })],
+  // The Playgama runtime is vendored in public/playgama-bridge.js and loaded
+  // at runtime only outside CrazyGames; CrazyGames uses its native SDK.
   build: {
     target: 'es2020',
     sourcemap: false,
