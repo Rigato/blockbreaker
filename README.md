@@ -2,20 +2,20 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.3.0 — Endless mode**: an infinite run with procedural waves on top
-of the **v0.2.0 campaign** — **6 phases, 21 waves**, **9 block types**, **7 phase
-elements**, **3 bosses**, **19 perks**, dynamic layout zoom and per-phase
-endings. The M0–M7 history below remains valid and the `0.1.0-mvp` build is still
-the frozen package published on itch.io.
+line is **v0.4.0 — presentation, UX and ads**: the **v0.2.0 campaign** (6 phases,
+21 waves, 9 block types, 7 phase elements, 3 bosses, 19 perks), the **v0.3.0
+Endless mode**, and the v0.4.0 visual/menu/HUD/How-to-Play/ads pass. Version
+0.4.0 is published manually on itch.io and in the Playgama sandbox; the
+historical `0.1.0-mvp` build is no longer the live itch.io build.
 
-The v0.3.0 work is implemented on `main`; there is no public v0.3.0 release or
-portal upload yet. The v0.1.0-mvp ZIP on itch.io is **frozen** and is not
-replaced by this branch. The GitHub Pages review build tracks the branch.
+The v0.4.0 work is implemented and published manually on itch.io/Playgama.
+CrazyGames still needs a new submission for 0.4.0; GameFlare remains blocked by
+account access. The GitHub Pages review build tracks the branch.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
 
-## v0.4.0-dev — first impression pass
+## v0.4.0 — presentation, UX and ads
 
 - **New block art:** polished arcade tiles with saturated materials, deeper
   bevels, softer shadows and clearer HP/crack feedback, designed to match the
@@ -81,8 +81,8 @@ npm run preview   # serves dist/ locally
 
 ## v0.3.0 — Endless mode
 
-Development line: `main`. Not published to any portal yet; the `0.1.0-mvp` ZIP
-on itch.io stays frozen.
+Development line: `main`. This work is now part of v0.4.0, published on itch.io
+and in the Playgama sandbox.
 
 - **Endless button** in the main menu, separate from Play and Levels.
 - **Infinite run:** no victory condition; the run ends when every ball is lost.
@@ -109,8 +109,8 @@ on itch.io stays frozen.
 
 ## v0.2.0 — campaign expansion
 
-Development branch: `feat/v0.2.0`. Not published to any portal yet; the
-`0.1.0-mvp` ZIP on itch.io stays frozen.
+Development branch: `feat/v0.2.0` (historical). This work is now part of
+v0.4.0, published on itch.io and in the Playgama sandbox.
 
 - **Campaign:** 6 phases with waves per phase **3 / 3 / 3 / 3 / 4 / 5 = 21**.
   Phases 4–6 are **Frostbound Spire** (3), **Emberforge** (4) and
@@ -147,21 +147,20 @@ Development branch: `feat/v0.2.0`. Not published to any portal yet; the
 - `store/covers/` has the required cover sizes (1920×1080, 800×1200, 800×800)
   plus the Playgama portrait **1080×1920**, a contact sheet and editable SVG
   sources. Visual language is consistent; the only text is **BRICKLIKE**.
-- `store/screenshots/` has five real production-build captures at 390×844:
-  menu, opening gameplay, laser + multiball, level-up and victory. Debug chrome
-  is hidden in every shot.
-- `store/video/bricklike-preview.mp4` is a 30,6 s, 1280×720 gameplay preview with
-  the portrait run composed over the game's cover art. It is silent; the capture
-  script and limitations are documented in `store/video/README.md`.
+- `store/screenshots/` has eight real production-build captures at 390×844:
+  menu, opening gameplay, laser + multiball, level-up, victory, special blocks,
+  boss and Endless. Debug chrome is hidden in every shot.
+- `store/video/bricklike-preview.mp4` is an 18,1 s preview with the portrait run
+  composed over the game's cover art. It is silent; the capture script and
+  limitations are documented in `store/video/README.md`.
 - `docs/release/portal-metadata.md` contains English title, short and long
   descriptions (≥ 100 words), controls, tags and portal-specific drafts for
   itch.io, GameFlare, Playgama and CrazyGames Basic.
 - `docs/release/submission-checklist.md` lists every manual field, asset and
   step per portal, all marked **pending human review**.
-- `docs/release/g7-review.md` inventories the package and defines the review
-  checklist. The package is versioned `0.1.0-mvp`; **G7 has not been approved**,
-  no tag, GitHub Release or portal upload was created by this milestone, and the
-  user performs all submissions.
+- `docs/old/release/g7-review.md` inventories the historical MVP package and
+  defines the G7 review checklist. The current line is `0.4.0`; no tag or GitHub
+  Release was created, and the user performs all submissions.
 
 ## M6 — QA, performance and balance
 
@@ -172,8 +171,9 @@ Development branch: `feat/v0.2.0`. Not published to any portal yet; the
 - `npm run qa:runs -- --runs=10` produces `docs/qa/run-log.csv`: an automated
   debug-projectile baseline for duration/levels/perks regression, explicitly
   **not** a human playtest.
-- `docs/qa/` contains the device matrix, 10-run log, playtest kit, performance
-  and size report, and the M6 report.
+- `docs/old/qa/` contains the historical device matrix, 10-run log, performance
+  and size report, and the M6 report. `docs/qa/playtest-kit.md` is the current
+  protocol.
 - No P0/P1 was found by the automated suite. G6 was approved on 2026-11-08 after
   the owner completed the human playtest, real-device matrix and 10-minute
   hardware session. No M6 tuning was applied without human data; the detailed
@@ -186,9 +186,10 @@ Development branch: `feat/v0.2.0`. Not published to any portal yet; the
 - `game_ready` once after the menu is interactive; `level_started`,
   `level_paused`, `level_resumed`, `level_completed` and `level_failed` sent to
   the platform at the correct moments.
-- **Interstitial only on Results exit** (Next/Retry): the game pauses and hard
-  mutes audio, shows a blocking loading overlay, and continues on
-  `closed`/`failed`/15 s timeout. No rewarded UI, banners or own frequency logic.
+- **At M5, interstitial only on Results exit** (Next/Retry): the game pauses and
+  hard mutes audio, shows a blocking loading overlay, and continues on
+  `closed`/`failed`/15 s timeout. v0.4.0 adds wave interstitials and rewarded
+  revive; no banners or own frequency logic.
 - Validated Bridge 2.4.1 config: no Bridge loading logo, no analytics,
   safe-area adaptation and interstitial placement.
 - `npm run package` builds `release/blockbreaker-web.zip` with `index.html` at
@@ -378,17 +379,19 @@ release/                   Generated ZIP + manifest (not committed)
 
 ## Docs
 
+- [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
+- [GDD × current state gap](docs/gdd-gap-analysis.md)
+- [Current handoff — v0.4.0](docs/handoff-v0.4.0.md)
 - [Technical publishing spec](docs/spec-tecnica-publicacao.md)
 - [Low-friction publishing plan](docs/plano-baixa-fricao.md)
-- [MVP implementation plan](docs/plano-implementacao-mvp.md)
-- [v0.2.0 campaign expansion plan](docs/plano-v0.2.0.md)
-- [Endless mode plan](docs/plano-endless.md)
-- [v0.4.0 visual/menu plan](docs/plano-v0.4.0-menu-visual.md)
-- [GDD × current state gap analysis](docs/gdd-gap-analysis.md)
+- [Build and release runbook](docs/build-release.md)
+- [Portal metadata](docs/release/portal-metadata.md)
+- [Submission checklist](docs/release/submission-checklist.md)
+- [Publication status](docs/release/status.md)
 - [CrazyGames rejection review](docs/release/crazygames-review.md)
-- [Current handoff — v0.3.0](docs/handoff-v0.3.0.md)
-- [Post-MVP handoff — historical](docs/handoff-proxima-fase.md)
+- [Playtest kit](docs/qa/playtest-kit.md)
+- [Historical docs archive](docs/old/README.md)
 
 ## Deployment
 
@@ -396,4 +399,5 @@ Every push to `main` runs typecheck, tests, content validation, Bridge config
 validation, build and package in CI; the ZIP is uploaded as an artifact. The
 `deploy` workflow publishes `dist/` to GitHub Pages for review. A `v*` tag runs
 `.github/workflows/release.yml` and creates a GitHub Release with the web ZIP
-and manifest. The tag/Release wait for G7, and portal submission is manual.
+and manifest. The tag/Release wait for human approval, and portal submission is
+manual.

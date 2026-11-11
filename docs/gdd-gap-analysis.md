@@ -1,6 +1,6 @@
 # Bricklike — GDD × estado atual (2026-11-10)
 
-Comparação entre o GDD v1.2/v1.3 e o build de desenvolvimento na `main`.
+Comparação entre o GDD v1.4 e o build de desenvolvimento `0.4.0` na `main`.
 Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
@@ -26,6 +26,7 @@ implementados, não bugs.
 | About Us | logomarca e texto do estúdio | implementado neste ciclo |
 | HUD legível | compacto em iframes estreitos | implementado neste ciclo |
 | Ads | interstitials 3/4 ondas + results e rewarded revive | implementado neste ciclo |
+| Ads reais | Bridge interstitial/rewarded + fallback/mock + testes | implementado neste ciclo |
 | Direção visual dos blocos | revisão de materiais e legibilidade | implementado neste ciclo |
 | Inglês | UI e metadata | implementado |
 | Reduced motion / budgets | partículas e trails limitados | implementado |
@@ -36,17 +37,16 @@ implementados, não bugs.
 | Item | GDD | Observação |
 |---|---|---|
 | Metaprogressão permanente | backlog | desbloqueios de conteúdo, sem bônus permanentes de atributos iniciais |
-| Rewarded ads | fora da v0.3.0 | decidir recompensa, frequência e caminho sem ad |
 | Leaderboard do Endless | backlog | ranking global continua fora |
 | Rankings globais / conquistas | backlog | dependem dos recursos dos portais |
 | Mundos sci-fi/industrial | backlog | novos temas e conteúdo |
 | Localização | backlog | catálogo de strings por locale antes |
 | Landscape jogável | backlog | hoje só portrait + guarda de rotação |
+| Moldura/letterbox desktop | pendência | HUD compacto resolveu leitura; shell 9:16 ainda centralizado |
 | Editor de fases / pipeline procedural | backlog | fora do Endless |
 | Backend, contas e cloud save | backlog | sem servidor próprio |
 | Full Launch CrazyGames | backlog | Data/User modules, entrada direta no gameplay, progresso na conta |
 | Poki, GameDistribution, Famobi | backlog | avaliar depois de retenção provada |
-| Rewarded ads opcionais | backlog | integrar somente após definir limites de balance |
 | Novas combinações de desafio | pendência | além de `timeLimit` e `noLaser` |
 | Conteúdo além das 6 fases | não planejado no GDD | campanha fechada; Endless cobre o longo prazo |
 
@@ -61,7 +61,8 @@ implementados, não bugs.
 | Performance em hardware real / 4 GB RAM | pendente |
 | Teste de save antigo no navegador | pendente (parse coberto por testes) |
 | Mixagem final de áudio | pendente |
-| Screenshots/capas atualizados para o build atual | pendente |
+| Screenshots/capas/vídeos atualizados para o build atual | concluído em 2026-11-10 |
+| Fill/limites reais de ads na Playgama/CrazyGames | pendente |
 | Tag e GitHub Release | pendente de decisão |
 | Submissão manual nos portais | usuário |
 
@@ -72,5 +73,6 @@ elementos, 3 chefes, 19 perks e o Endless estão implementados. O que falta é
 majoritariamente **meta-sistemas de retenção** (metaprogressão, conquistas,
 leaderboards, desafios), **distribuição** (Full Launch, novos portais,
 localização, landscape) e **validação humana** de balance/performance. O ciclo
-v0.4.0 atacou a lacuna mais visível para os portais: primeira impressão,
-consistência visual, legibilidade desktop e onboarding indireto pelo menu.
+v0.4.0 fechou a lacuna de primeira impressão, consistência visual, HUD,
+How to Play/About e ads. O próximo ciclo pode atacar retenção ou a moldura
+desktop.

@@ -1,6 +1,6 @@
 # Store assets — Bricklike
 
-Assets de loja da versão `0.1.0-mvp`. Todos são drafts para revisão humana; a
+Assets de loja da versão `0.4.0`. Todos são drafts para revisão humana; a
 submissão nos portais é manual.
 
 ## Capas — `store/covers/`

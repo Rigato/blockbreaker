@@ -2,6 +2,13 @@
 
 **Resumo executivo do relatório completo** (`final_turn_001.md`, 115 fontes) — focado no que importa para *começar*, não em maximizar receita.
 
+> **Atualização 2026-11-10:** o plano original foi executado. itch.io está com a
+> `0.4.0`; a Playgama está em sandbox com a `0.4.0`; a CrazyGames reprovou o
+> Basic Launch com a `0.3.0` e a `0.4.0` precisa ser reenviada como nova
+> submissão; a GameFlare segue bloqueada por acesso à conta, sem resposta do
+> suporte. A build atual tem interstitials em pausas naturais e rewarded revive
+> opcional. Ver `docs/handoff-v0.4.0.md`.
+
 ---
 
 ## A resposta em uma linha

@@ -1,18 +1,21 @@
-# Playtest kit — M6
+# Playtest kit — Bricklike v0.4.0
 
-Protocolo para validar as metas de diversão e ritmo do §1.2 do plano. O baseline
-automatizado (`npm run qa:runs`) **não substitui** este playtest: ele só mede
-duração/nível/perks com um bot que dispara projéteis de debug.
+Protocolo para validar diversão, ritmo e balance da campanha (fases 1–6) e do
+Endless. O baseline automatizado (`npm run qa:runs`) **não substitui** este
+playtest: ele só mede duração/nível/perks com um bot que dispara projéteis de
+debug.
 
 ## Objetivo
 
 Responder com evidência:
 
+- Novos jogadores entendem o loop e os controles com o **How to Play** + hints?
 - 4 de 5 pessoas completam a fase 1 em até 3 tentativas e aceitam jogar de novo?
-- Run de 2–5 min, com 3–5 level ups por run?
+- Run de 2–5 min, com 3–5 level ups por run nas fases iniciais?
 - Pelo menos 3 arquétipos de perk escolhidos entre os participantes?
 - Nenhum perk domina mais de 70% das ofertas em que apareceu?
-- Controle, mira, clareza e sensação de poder são compreensíveis sem explicação?
+- Fases 4–6 e Endless têm timers, densidade, chefes e velocidade justos?
+- Ads (interstitial/timed) e o revive rewarded parecem naturais, não abusivos?
 
 ## Amostra e logística
 
@@ -21,20 +24,21 @@ Responder com evidência:
 - Device real: pelo menos 2 Android/Chrome, 1 iPhone/Safari, 1 desktop e
   1 aparelho de baixa memória, se possível.
 - Gravar tela + áudio da sessão ou anotar em tempo real. Pedir consentimento.
-- Não explicar controles. O único hint permitido é o texto da tela
-  (“Tap / click / V to launch”, “Drag / mouse / arrows…”). Se a pessoa travar,
-  registrar o tempo e só então responder “o que você tentou?”.
+- Não explicar controles. O único hint permitido é o texto da tela e o
+  **How to Play**. Se a pessoa travar, registrar o tempo e só então responder
+  “o que você tentou?”.
 
 ## Roteiro do facilitador
 
 1. Abrir a build em portrait, com som ligado e save recém-resetado.
 2. Ler: “Jogue como quiser; não tem resposta certa. Vou observar e cronometrar.”
 3. Não demonstrar movimento, lançamento, laser ou pause.
-4. Cronometrar do clique em **Play** até o primeiro lançamento.
+4. Cronometrar do clique em **Campaign → Play** até o primeiro lançamento.
 5. Deixar até 3 tentativas na fase 1 por run; registrar cada morte/retry.
 6. Ao fim de cada run, perguntar: “Jogaria de novo agora? De 1 a 5, por quê?”
 7. Ao fim das 3 runs, fazer as perguntas de percepção.
-8. Não corrigir a build no meio da sessão; anotar bugs com passos.
+8. Registrar reação a interstitials/revive rewarded e se parecem naturais.
+9. Não corrigir a build no meio da sessão; anotar bugs com passos.
 
 ## Métricas por run (planilha)
 
@@ -45,7 +49,9 @@ Preencher uma linha por run. Template: `docs/qa/run-log-template.csv`.
 | `first_launch_s` | Play → primeiro lançamento (V/toque/clique) |
 | `duration_s` | Play → Victory/Defeat |
 | `result` | Victory / Defeat |
-| `waves_cleared` | 0–3 |
+| `waves_cleared` | 0–21 (campanha) ou onda alcançada (Endless) |
+| `phase` | fase inicial ou Endless |
+| `ads_seen` | interstitials e revive offer vistos |
 | `level_ups` | popups de Level Up resolvidos |
 | `perks_offered` | nomes dos 3 cards de cada oferta, separados por `;` |
 | `perks_chosen` | nome escolhido em cada oferta |
@@ -73,12 +79,15 @@ Preencher uma linha por run. Template: `docs/qa/run-log-template.csv`.
 - **Variedade:** arquétipos distintos escolhidos entre todos os participantes.
   Meta: ≥3. Para dominância, por perk: `escolhas / ofertas em que apareceu`;
   sinalizar >70%.
-- **Técnico:** bugs por severidade (P0/P1/P2), device e passos. Cruzar com
-  `docs/qa/device-matrix.md` e `docs/qa/performance.md`.
-- **Escopo:** qualquer feature nova observada vira backlog, não correção no M6.
+- **Técnico:** bugs por severidade (P0/P1/P2), device e passos. Cruzar com o
+  device matrix/performance arquivados em `docs/old/qa/` quando aplicável.
+- **Ads:** registrar se interstitial/revive interrompeu o fluxo, se o mute
+  funcionou e se a recompensa foi entregue.
+- **Escopo:** qualquer feature nova observada vira backlog, não correção no
+  playtest.
 
-Se “diversão” ou “ritmo” falharem, reabrir M1/M2 (core/XP e perks), não M4
-(apresentação), conforme §8.5.
+Se “diversão” ou “ritmo” falharem, reabrir balance de XP/perks ou densidade das
+ondas, não a apresentação.
 
 ## Baseline automatizado (não é playtest)
 

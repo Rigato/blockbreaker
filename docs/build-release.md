@@ -1,4 +1,4 @@
-# Build e release
+# Build e release — Bricklike
 
 ## Comandos
 
@@ -10,6 +10,7 @@ npm run validate:content
 node scripts/validate-bridge-config.mjs
 npm run build
 npm run package
+npm run test:e2e
 ```
 
 `npm run build` gera `dist/` com `index.html`, `playgama-bridge-config.json` e o
@@ -25,14 +26,16 @@ se `dist/` não existir, se `index.html` ou `playgama-bridge-config.json`
 estiverem fora da raiz, se houver path absoluto, URL externa não permitida,
 mais de 1.000 arquivos, mais de 250 MB ou caminho acima de 240 caracteres.
 
-## Conteúdo esperado do ZIP
+## Conteúdo esperado do ZIP (0.4.0)
 
 ```text
 index.html
 playgama-bridge-config.json
 playgama-bridge.js
 favicon.svg
-assets/...
+assets/...                 # JS/CSS/fontes
+bad-decision-games/...     # logo WebP/PNG
+how-to-play/...            # 5 screenshots 780x468
 licenses/...
 ```
 
@@ -43,40 +46,41 @@ Regras verificadas por `scripts/package.mjs`:
 - nenhum `src="/..."`, `href="/..."`, `url(/...)` ou import absoluto;
 - nenhuma URL externa no conteúdo do jogo. A exceção é o CDN do Bridge
   (`https://bridge.playgama.com`). O fallback local (`./playgama-bridge.js`) é
-  permitido. O runtime vendorizado `playgama-bridge.js` não é escaneado: ele
-  contém endpoints internos de todos os portais suportados pelo SDK;
-- `https://phaser.io` (banner de versão do engine) e namespaces `www.w3.org`
-  são strings não-request e estão na allowlist do validador.
+  permitido. O runtime vendorizado `playgama-bridge.js` não é escaneado;
+- `https://phaser.io` e namespaces `www.w3.org` são strings não-request e estão
+  na allowlist do validador.
 
 ## Configuração do Bridge
 
 `public/playgama-bridge-config.json` é copiado para `dist/` e para a raiz do
-ZIP. `node scripts/validate-bridge-config.mjs` confere o schema lido pelo
-Bridge 2.4.1 instalado:
+ZIP. `node scripts/validate-bridge-config.mjs` confere o schema do Bridge 2.4.1:
 
-- sem loading screen do Bridge (`loadingScreenType: "none"`), sem logo
-  (`showFullLoadingLogo: false`) e sem analytics (`sendAnalyticsEvents: false`);
+- sem loading screen/logo do Bridge e sem analytics;
 - `game.adaptToSafeArea: true`;
-- interstitial com `minimumDelayBetweenInterstitial` e
-  `initialInterstitialDelay` numéricos e `placementFallback`;
-- `interstitial.autoShow`/`rewarded.autoShow` vazios (ads só na saída dos
-  results);
+- interstitial com `minimumDelayBetweenInterstitial: 60` e
+  `initialInterstitialDelay: 0`;
+- `placementFallback` definido; sem banners;
 - `platforms.mock` sem logo/analytics;
-- nenhum banner, rewarded UI ou URL externa no config.
+- nenhuma URL externa no config.
 
-O jogo não implementa frequência própria de ads; o Bridge controla o intervalo
-mínimo. Em Basic Launch do CrazyGames os ads ficam desligados e o fluxo de
-`showInterstitial` retorna `skipped`/`failed` sem bloquear a navegação.
+O jogo pede interstitials em pausas naturais e não implementa frequência própria
+além da cadência de ondas; o Bridge aplica o mínimo de 60 s. Em Basic Launch do
+CrazyGames os ads ficam desligados e o fluxo retorna `skipped`/`failed` sem
+bloquear a navegação.
 
 ## Ads sem portal (QA)
 
-Para validar a UI e o fluxo do interstitial sem subir para a Playgama:
+O build web normal roda em modo mock (itch.io, GameFlare, GitHub Pages), então
+**não há ads reais**. Use os flags debug-only:
 
-- `?debug=1&adMock=show` — simula um anúncio de 1,4 s e retorna `shown`;
-- `?debug=1&adMock=fail` — simula falha após 0,7 s e retorna `failed`.
+- `?debug=1&adMock=show` — interstitial de 1,4 s retorna `shown`;
+- `?debug=1&adMock=fail` — interstitial retorna `failed`;
+- `?debug=1&adMock=rewarded` — rewarded revive retorna `rewarded`;
+- `?debug=1&adMock=rewarded-fail` — rewarded revive retorna `failed`.
 
 O proxy é debug-only: storage, lifecycle, mensagens e config continuam reais. O
-anúncio real e o Bridge DevTools exigem um ambiente/portal da Playgama.
+painel de debug mostra suporte a `interstitial / rewarded`. Ads reais exigem
+Playgama ou CrazyGames.
 
 ## Teste em subpasta
 
@@ -103,164 +107,94 @@ unzip -t release/blockbreaker-web.zip
 ## CI e release
 
 - `.github/workflows/ci.yml`: em push/PR roda typecheck, tests, conteúdo,
-  config do Bridge, build e package; sobe `dist/` (`blockbreaker-dist`) e o ZIP
-  (`blockbreaker-web`).
-- `.github/workflows/release.yml`: em tag `v*` roda a mesma bateria, empacota e
-  cria um GitHub Release com `blockbreaker-web.zip` e `manifest.json`.
-- `.github/workflows/deploy.yml`: continua publicando `dist/` no GitHub Pages
-  para review; não é um canal de submissão.
+  config do Bridge, build, package e E2E; sobe `dist/` e o ZIP.
+- `.github/workflows/deploy.yml`: publica `dist/` no GitHub Pages para review;
+  não é canal de submissão.
+- `.github/workflows/release.yml`: em tag `v*` roda a bateria, empacota e cria
+  um GitHub Release com `blockbreaker-web.zip` e `manifest.json`.
 
-## Checklist de build e portal (§5.5)
+## Checklist de build e portal
 
 - [ ] `unzip -l` mostra `index.html` e `playgama-bridge-config.json` na raiz.
-- [ ] Abrir o build em subpasta (teste acima) sem 404 e com paths relativos.
+- [ ] Abrir o build em subpasta sem 404 e com paths relativos.
 - [ ] Network sem requests externas além do CDN do Bridge/fallback local.
 - [ ] Mock/adblock: com SDK bloqueado, o jogo cai no `FallbackAdapter` e abre.
-- [ ] Rede lenta: boot não passa de 10 s; storage tem timeout de 3 s e cai em
-      memória.
+- [ ] Rede lenta: boot não passa de 10 s; storage tem timeout e cai em memória.
 - [ ] `game_ready` enviado uma vez só depois do menu interativo.
 - [ ] `level_started`, `level_paused`, `level_resumed`, `level_completed` e
       `level_failed` chegam ao Bridge nos momentos certos.
 - [ ] Storage via Bridge (`bb.save`/`bb.settings`), sem `localStorage` direto;
       reload preserva progresso e `?resetSave=1` limpa.
-- [ ] Ads: interstitial só na saída dos results; `closed`/`failed`/timeout de
-      15 s retomam o jogo; unsupported retorna `skipped`.
+- [ ] Ads: interstitials a cada 3/4 ondas e na saída dos results; `failed`/
+      `skipped`/timeout de 15 s retomam o jogo; rewarded revive só em `rewarded`.
 - [ ] Áudio mutado em ads/background; `AUDIO_STATE_CHANGED` aplicado no boot.
+- [ ] Relógio da run não conta pause, level-up, ads ou revive offer.
 - [ ] Responsivo de 320 px ao desktop, sem scrollbar; toque, mouse e teclado.
 - [ ] Rotação preserva progresso (pausa + overlay).
-- [ ] ZIP ≤ 250 MB, ≤ 1.000 arquivos, paths ≤ 240 caracteres.
+- [ ] ZIP ≤ 250 MB, ≤ 1.500 arquivos, paths ≤ 240 caracteres.
 - [ ] Sem logo do Bridge no mock; modo mock sem analytics.
+- [ ] Screenshots/capas/vídeos conferidos contra o build atual.
 
-## Validação do pacote de release (M7)
+## Pacote atual
 
-Executado no worktree `m7-s6` a partir de `c0d8928`, com build limpo:
-
-```bash
-rm -rf dist release
-npm run build
-npm run package
-unzip -t release/blockbreaker-web.zip
-```
-
-Resultado em 2026-11-08:
+Referência de 2026-11-10, versão **0.4.0**:
 
 | Item | Valor |
 |---|---|
 | ZIP | `release/blockbreaker-web.zip` |
-| Tamanho | 502.321 bytes (490,5 KiB / 0,48 MiB) |
-| Conteúdo descompactado | 1.859.569 bytes (1,77 MiB) |
-| Arquivos | 13 |
-| Maior path | 38 caracteres (`assets/Silkscreen-Regular-W9-u5Upq.ttf`) |
-| SHA-256 | `e35893177fb7df1a34397a65e913927017816f4265043419551b19d6ff5dbd23` |
-| `unzip -t` | “No errors detected in compressed data” |
-| Raiz do ZIP | `index.html` + `playgama-bridge-config.json` presentes |
+| Tamanho | 1.514.701 bytes (~1.479 KiB) |
+| Arquivos | 20 |
+| SHA-256 | `af3e55e847cacf7e8828ad7b0de8eb65e87b0c1a07613ebf93dc50bdb299f793` |
+| Raiz | `index.html` + `playgama-bridge-config.json` |
+| Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge |
 
-Todos os limites ficam muito abaixo do teto: 13/1.000 arquivos, 0,48/250 MiB,
-38/240 caracteres. O `scripts/package.mjs` também confirmou ausência de paths
-absolutos e de URLs externas fora da allowlist (`bridge.playgama.com`,
-`www.w3.org`, `phaser.io`).
+O hash muda a cada build; confirme o valor em `release/manifest.json` antes de
+qualquer upload.
 
-### Teste em subpasta do ZIP (M7)
+## Release por tag — somente após aprovação humana
 
-O ZIP foi extraído em `.qa/sub/` (somente os bytes do pacote, sem `dist/`) e
-servido em `http://127.0.0.1:4181/sub/`:
-
-```bash
-rm -rf .qa && mkdir -p .qa/sub
-unzip -q release/blockbreaker-web.zip -d .qa/sub
-cd .qa && python3 -m http.server 4181 --bind 127.0.0.1
-```
-
-- Menu carrega com título **Bricklike**; `Play` inicia o HUD e o canvas.
-- Todas as respostas foram 2xx; nenhum 404 e nenhum request com falha.
-- Hosts observados: `127.0.0.1` e `bridge.playgama.com` (CDN do Bridge). Nenhum
-  outro host externo, nenhum request para `api.playgama.com`.
-- Console e `pageerror` limpos no cenário com CDN disponível.
-- Com `bridge.playgama.com` bloqueado, o fallback local `./playgama-bridge.js`
-  é servido, o jogo entra em modo `mock`, abre o menu e inicia a partida.
-- Com o CDN bloqueado, o save (`bb.save`) foi gravado e, após reload, a fase 2
-  permaneceu desbloqueada. Os únicos erros de console são os dois
-  `Failed to load resource: net::ERR_FAILED` esperados do CDN bloqueado; não há
-  `pageerror`.
-
-O relatório completo, com comandos e evidências, está em
-[`docs/release/technical-validation.md`](release/technical-validation.md).
-
-## Release por tag — somente após o G7
-
-**Não execute estes comandos antes da aprovação explícita do G7.** A submissão
-em itch.io, GameFlare, Playgama e CrazyGames é **manual** e continua sendo feita
-pelo responsável do projeto; o workflow apenas publica o ZIP e o manifesto como
-artefatos de release.
+**Não crie tag ou release sem decisão explícita.** A submissão em itch.io,
+GameFlare, Playgama e CrazyGames é manual e feita pelo responsável.
 
 Pré-requisitos:
 
-1. CI verde no commit que receberá a tag (`ci.yml`); o `release.yml` não roda
-   E2E, então o smoke E2E deve ter passado no mesmo commit.
+1. CI verde no commit que receberá a tag; o `release.yml` não roda E2E.
 2. `npm run package` local limpo, com `unzip -t` OK.
-3. `package.json` e `release/manifest.json` com a mesma versão da tag. O pacote
-   desta rodada está em `0.1.0-mvp`, alinhado à tag planejada `v0.1.0-mvp`.
+3. `package.json` e `release/manifest.json` na mesma versão da tag.
 
-Comandos exatos:
+Comandos exatos, quando aprovado:
 
 ```bash
-# 1. A partir de main já aprovada e sincronizada
 git switch main
 git pull --ff-only
 git status                      # deve estar limpo
 
-# 2. Tag anotada (dispara .github/workflows/release.yml no push)
-git tag -a v0.1.0-mvp -m "Bricklike v0.1.0-mvp"
-git push origin v0.1.0-mvp
+git tag -a v0.4.0 -m "Bricklike v0.4.0"
+git push origin v0.4.0
 ```
-
-O workflow `Release` roda typecheck, testes, validação de conteúdo, validação do
-config do Bridge, build e package; depois cria automaticamente o GitHub Release
-`Bricklike v0.1.0-mvp` com `blockbreaker-web.zip` e `manifest.json`.
 
 Conferência:
 
 ```bash
 gh run list --workflow Release --limit 1
-gh release view v0.1.0-mvp --json name,assets,url
+gh release view v0.4.0 --json name,assets,url
 ```
 
-Fallback manual **somente** se o workflow falhar depois de o build ter passado
-localmente (não rode junto com o passo automático, para não duplicar a release):
+Fallback manual **somente** se o workflow falhar e o build local estiver
+validado:
 
 ```bash
 npm run build && npm run package
-gh release create v0.1.0-mvp \
+gh release create v0.4.0 \
   release/blockbreaker-web.zip release/manifest.json \
-  --title "Bricklike v0.1.0-mvp" \
+  --title "Bricklike v0.4.0" \
   --generate-notes
 ```
 
-O `release.yml` usa `permissions: contents: write`, `concurrency` sem cancelar
-release em andamento e `softprops/action-gh-release@v2` com
-`fail_on_unmatched_files: true`. Para o escopo do MVP não é necessária
-alteração no workflow.
+Não rode o fallback junto com o workflow para não duplicar a release.
 
-## Checklist final de release (M7)
+## Fora do escopo
 
-- [x] `npm run build` e `npm run package` limpos no worktree.
-- [x] `index.html` e `playgama-bridge-config.json` na raiz do ZIP.
-- [x] `unzip -t` sem erros.
-- [x] 13 arquivos, 0,48 MiB, maior path com 38 caracteres.
-- [x] Sem paths absolutos e sem URLs externas fora da allowlist.
-- [x] ZIP extraído em subpasta abre, inicia e carrega assets sem 404.
-- [x] Somente `bridge.playgama.com` como host externo no boot.
-- [x] CDN do Bridge bloqueado: fallback local, modo mock e save/reload OK.
-- [x] `npm run test:e2e` — 16 testes passando.
-- [x] `release.yml` revisado: tag `v*`, nome Bricklike, dois anexos,
-      `contents: write`.
-- [x] Bump de versão alinhado à tag (`0.1.0-mvp`).
-- [ ] Tag, push e GitHub Release executados **somente após o G7**.
-- [ ] Upload/submissão nos portais feito manualmente pelo responsável.
-
-## Fora do escopo deste milestone
-
-A submissão a portais, capas, vídeo, descrição e criação da release pública de
-loja continuam **manuais** e dependem do G7. Este trabalho entrega build, ZIP,
-config, CI e release técnica por tag; não publica em nenhum portal e não cria
-tag, push nem GitHub Release.
+Submissão a portais, capas, vídeo, descrição e release pública de loja continuam
+manuais. O build técnico e o ZIP são gerados por este runbook; nenhum portal é
+publicado automaticamente.

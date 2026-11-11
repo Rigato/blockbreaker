@@ -1,7 +1,7 @@
 # Submission checklist — Bricklike
 
-**Versão de desenvolvimento:** `0.3.x` + revisão visual/menu (v0.4.0-dev).  
-**Build publicado:** `0.1.0-mvp` no itch.io (congelado).  
+**Versão de desenvolvimento:** `0.4.0`.  
+**Build publicado:** `0.4.0` no itch.io e no sandbox da Playgama.  
 **Status global:** pendente de revisão humana.  
 **Quem submete:** o usuário, manualmente, em cada portal. Nenhum upload, tag ou
 release pública foi feito por este trabalho.
@@ -32,8 +32,9 @@ GameFlare bloqueado por acesso).
 - [x] Testar leitura em **907×510**, **1216×684**, **1280×720**, **800×450**
       e **1920×1080** além de 320×568 e 390×844 (HUD compacto ≤440 px).
 - [x] Onboarding via **How to Play** no menu (5 páginas com screenshots).
-- [ ] Menu leva ao gameplay em 1 clique (Campaign → seleção → Play). **Pendente
-      de revisão humana.**
+- [ ] Menu leva ao gameplay em Campaign → seleção → Play (2 cliques). Para o
+      Full Launch da CrazyGames seria necessário 1 clique/entrada direta.
+      **Pendente de revisão humana.**
 
 
 ## Assets compartilhados
@@ -63,6 +64,7 @@ GameFlare bloqueado por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto HTML5 criado pelo usuário | pendente de revisão humana |
+| Versão publicada | `0.4.0` atualizada manualmente | concluído |
 | Upload | ZIP HTML5 final | pendente de revisão humana |
 | Embed | Mobile Friendly ligado; fullscreen; click-to-play | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
@@ -71,7 +73,7 @@ GameFlare bloqueado por acesso).
 | Tags | arcade, brick-breaker, roguelite, pixel-art, html5, mobile | pendente de revisão humana |
 | Preço | Free + doação opcional; sem venda no embed HTML5 | pendente de revisão humana |
 | Capa | 16:9 ou 2:3 aprovada | pendente de revisão humana |
-| Screenshots | 5 imagens aprovadas | pendente de revisão humana |
+| Screenshots | 8 imagens atualizadas | concluído |
 | Ads | Nenhum ad interno; não prometer ads no itch.io | pendente de revisão humana |
 | Publicação | Usuário clica em publicar | pendente de revisão humana |
 
@@ -96,6 +98,7 @@ GameFlare bloqueado por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário no Playgama | pendente de revisão humana |
+| Versão no sandbox | `0.4.0` enviada manualmente | concluído |
 | Upload | ZIP com `index.html` e `playgama-bridge-config.json` na raiz | pendente de revisão humana |
 | Bridge | Config validado; sem logo/analytics; safe area ligada | pendente de revisão humana |
 | Eventos | `game_ready`, `level_started/paused/resumed/completed/failed` | pendente de revisão humana |
@@ -116,6 +119,7 @@ GameFlare bloqueado por acesso).
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário | pendente de revisão humana |
 | Tipo de submissão | **Basic Launch**, não Full Launch | pendente de revisão humana |
+| Fluxo de reenvio | Como a 0.3.0 foi rejeitada, enviar a 0.4.0 como **nova submissão** (não update) | pendente de revisão humana |
 | Upload | ZIP HTML5 final | pendente de revisão humana |
 | Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | pendente de revisão humana |
 | Capa 2:3 | 800×1200, mesma linguagem visual | pendente de revisão humana |
@@ -132,8 +136,8 @@ GameFlare bloqueado por acesso).
 | Consistência | Capa, screenshots e blocos usam a mesma linguagem visual | pendente de revisão humana |
 | Qualidade | Sem artefatos, texto cortado, controles ambíguos ou áudio estourado | pendente de revisão humana |
 | Revalidação | Conferir regras atuais do Basic Launch | pendente de revisão humana |
-| Full Launch | Fora do escopo deste MVP | pendente de revisão humana |
-| Publicação | Usuário submete e acompanha 7 dias/500 plays | pendente de revisão humana |
+| Full Launch | Fora do escopo deste ciclo | pendente de revisão humana |
+| Publicação | Usuário submete e acompanha 7 dias/500 plays se aprovado | pendente de revisão humana |
 
 ## Reenvio ao CrazyGames
 

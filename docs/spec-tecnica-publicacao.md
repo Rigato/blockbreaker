@@ -2,6 +2,14 @@
 
 Escopo: **itch.io, GameFlare, Playgama e CrazyGames**. Um único build HTML5, um único ZIP, quatro portais. As regras abaixo são as que afetam a implementação; regras de negócio (payout, revenue share, review comercial) não são objeto deste documento.
 
+> **Estado do build em 2026-11-10:** versão `0.4.0`, publicada manualmente no
+> itch.io e no sandbox da Playgama. O jogo implementa interstitial após cada 3ª
+> onda da campanha, após cada 4ª onda do Endless e ao sair dos results por
+> Next/Retry/Menu; o rewarded revive é oferecido uma vez por run. CrazyGames
+> Basic foi reprovado com a 0.3.0 e aguarda reenvio como nova submissão;
+> GameFlare está bloqueado por acesso à conta. Ver `docs/handoff-v0.4.0.md` e
+> `docs/release/status.md`.
+
 ---
 
 ## 0. Ordem de execução

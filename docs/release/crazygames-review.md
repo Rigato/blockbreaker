@@ -2,6 +2,7 @@
 
 **Data:** 2026-11-10  
 **Build avaliado:** v0.3.0 (Endless), submetido como CrazyGames Basic Launch  
+**Build atual para reenvio:** v0.4.0 (revisão visual/menu, HUD, How to Play/About e ads)  
 **Resultado:** reprovado por “abaixo dos padrões de qualidade do portal”, sem
 detalhamento.
 
@@ -215,4 +216,23 @@ Problema atual é acesso à conta, não build. Enquanto o suporte responde:
 - Metadata atualizada; 280 testes unitários e 24 E2E verdes.
 - Restante para o próximo ciclo: moldura/letterbox desktop dedicada,
   metaprogressão, conquistas/desafios e localização.
+
+## 8. Como reenviar a 0.4.0
+
+Fonte: FAQ oficial da CrazyGames (2026-11-10).
+
+- A `0.3.0` foi rejeitada antes de ser publicada, então **não existe um jogo
+  publicado para “atualizar”**. O reenvio deve ser feito como **nova submissão**
+  (“submit as a new submission”), com melhorias claras.
+- O fluxo de **update** do Developer Portal vale para jogo já publicado; não é o
+  caso.
+- No Developer Portal, usar **Submit a game** com a build `0.4.0`, metadata,
+  3 capas e vídeo atuais.
+- Se o portal impedir por já existir um registro da `0.3.0`, abrir
+  <https://developer.crazygames.com/support> e pedir orientação. Não criar conta
+  duplicada sem resposta.
+- A mensagem de reenvio deve listar: novo visual de blocos/menu, HUD legível,
+  How to Play/About, seleção de fases, ads/rewarded revive e screenshots/assets
+  atualizados.
+
 

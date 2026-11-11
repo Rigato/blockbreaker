@@ -1,31 +1,41 @@
-# M7 — pacote de publicação
+# Pacote de publicação
 
-Versão do pacote: **`0.1.0-mvp`**  
-Tag planejada: **`v0.1.0-mvp`** (não criada até o G7)
+Versão do pacote: **`0.4.0`**  
+Tag planejada: **`v0.4.0`** (não criada; depende de aprovação humana)
 
 Este diretório reúne o material para revisão humana e submissão **manual** nos
-portais. Nenhum upload, tag ou GitHub Release foi feito pelo trabalho de M7.
+portais. Nenhum upload, tag ou GitHub Release é feito automaticamente.
 
 ## Comece por aqui
 
-1. `docs/release/g7-review.md` — inventário e checklist do review G7.
-2. `store/README.md` — índice dos assets de loja.
-3. `docs/release/portal-metadata.md` — textos em inglês por portal.
-4. `docs/release/submission-checklist.md` — campos e passos de cada portal.
-5. `docs/release/technical-validation.md` — evidências do ZIP/build.
-6. `docs/release/status.md` — onde registrar URLs e status depois do upload.
-7. `docs/release/crazygames-review.md` — diagnóstico da reprovação e backlog de
-   qualidade para o reenvio.
+1. `docs/handoff-v0.4.0.md` — onboarding da sessão atual.
+2. `docs/release/portal-metadata.md` — textos em inglês por portal.
+3. `docs/release/submission-checklist.md` — campos e passos de cada portal.
+4. `docs/release/status.md` — status/URLs de publicação.
+5. `docs/release/crazygames-review.md` — diagnóstico da reprovação e backlog.
+6. `docs/build-release.md` — build, ZIP, CI, ads QA e runbook de tag.
+7. `store/README.md` — índice dos assets de loja.
 
 ## Assets
 
 - `store/covers/` — capas 1920×1080, 800×1200, 1080×1920 e 800×800.
-- `store/screenshots/` — cinco capturas reais em 390×844.
+- `store/screenshots/` — 8 capturas reais em 390×844 (menu, gameplay, laser,
+  level-up, results, especiais, chefe e Endless).
 - `store/video/` — previews MP4 1920×1080 e 1080×1620, 18,1 s, silenciosos.
+- `public/how-to-play/` — 5 screenshots 780×468 usados no jogo.
+- `public/bad-decision-games/` — logo do estúdio (WebP + PNG).
 
-## Limites deste milestone
+## Limites
 
-- A arte de capa é um **draft de alta qualidade**; o refino final é humano.
+- A arte de capa é um draft de alta qualidade; o refino final é humano.
 - A submissão em itch.io, GameFlare, Playgama e CrazyGames Basic é manual.
-- A tag e o GitHub Release só devem ser criados depois do G7.
+- A tag e o GitHub Release só devem ser criados depois de aprovação humana.
 - Revalidar as regras de cada portal na data do upload.
+- A `0.4.0` está publicada no itch.io e no sandbox da Playgama; CrazyGames
+  aguarda nova submissão e GameFlare está bloqueada por login.
+- A `0.1.0-mvp` é apenas histórica.
+
+## Histórico
+
+Revisão G7 e validação técnica do MVP foram arquivadas em
+`docs/old/release/`.

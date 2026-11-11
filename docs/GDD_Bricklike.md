@@ -3,22 +3,23 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.3  
+**Versão:** 1.4  
 **Data:** 2026-11-10  
-**Status:** v0.3.0 em desenvolvimento; v0.1.0-mvp no itch.io  
+**Status:** v0.4.0 publicada no itch.io e no sandbox da Playgama; CrazyGames/GameFlare pendentes  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha v0.2.0 tem **6 fases e 21 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. A v0.3.0 adiciona o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. O build `0.1.0-mvp` continua congelado no itch.io.
+A campanha v0.2.0 tem **6 fases e 21 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. A v0.3.0 adiciona o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adiciona a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A `0.4.0` está publicada no itch.io e no sandbox da Playgama; `0.1.0-mvp` é histórica.
 
 ### Como ler os status
 
 - **Confirmado:** escolha expressa pelo jogador ou consolidada no design.
-- **v0.3.0:** implementado e validado na expansão atual (modo Endless).
-- **v0.2.0:** implementado e validado na expansão anterior (campanha).
+- **v0.4.0:** implementado e validado na expansão atual (apresentação, ads e UX).
+- **v0.3.0:** implementado e validado na expansão anterior (modo Endless).
+- **v0.2.0:** implementado e validado na expansão da campanha.
 - **MVP:** recorte original de `0.1.0-mvp`.
 - **Futuro:** ideia aceita como possibilidade, sem compromisso de implementação.
 - **Em aberto:** parâmetro ou regra que ainda precisa de decisão ou teste.
@@ -247,7 +248,7 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Modo Endless | Run infinita separada da campanha. O save v1 guarda `endless` com `bestWave`, `bestScore` e `runs`; não altera `unlockedPhase`. |
 | Salvamento | Save schema v1 (`bb.save`), com `unlockedPhase` de 1 a 6 e estatísticas por fase. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
 | Compatibilidade | Saves antigos continuam válidos; `unlockedPhase` é limitado a 1..6 e campos malformados caem em defaults. |
-| Metaprogressão | Fora do escopo da v0.3.0. Desbloqueios permanentes de conteúdo e melhorias de atributos ficam para uma fase futura. |
+| Metaprogressão | Fora do escopo da v0.4.0. Desbloqueios permanentes de conteúdo e melhorias de atributos ficam para uma fase futura. |
 | Competição | Estatísticas pessoais e recordes por fase; rankings globais e conquistas continuam fora do escopo. |
 
 - Save v1 mantém `phases` por `phaseId` com `bestTimeMs`, `bestScore`, `attempts`, `clears` e `bestLevel`.
@@ -294,6 +295,22 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | UI | Botão Endless no menu, HUD sem denominador e results sem Next |
 | Escopo | Campanha intacta; Endless não desbloqueia fases |
 
+### O que entrou na v0.4.0
+
+| Item | Entrega |
+|---|---|
+| Blocos | Redesign “arcade tile” com variação determinística, materiais, HP pips e cracks |
+| Menu | Campaign/Endless, fundo animado de bolinhas, progresso e rodapé com How to Play/Settings/About |
+| Seleção de fases | Tela cheia com ícones, accents, taglines, features, chefes e estatísticas |
+| HUD | Modo compacto ≤440 px com ícones e valores de 11–13 px |
+| Settings | Sound, Music e Screen shake no menu e pause; save compatível |
+| Endless | Desbloqueio ao concluir a campanha, com diálogo explicativo |
+| How to Play | 5 páginas com screenshots localizados 5:3 |
+| About Us | Logomarca Bad Decision Games + texto do estúdio |
+| Ads | Interstitial a cada 3 ondas (campanha), a cada 4 (Endless) e na saída dos results; rewarded revive 1x por run |
+| Save | `campaignComplete` e migração de saves antigos |
+| Assets | 8 screenshots de loja, capas e vídeos de 18,1 s atualizados |
+
 ### O que continua fora
 
 - Metaprogressão permanente, leaderboards e conquistas.
@@ -308,10 +325,13 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 
 - Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
 - **Um build, 6 fases:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração.
-- O **itch.io recebeu o build `0.1.0-mvp`**; esse ZIP permanece congelado.
-- A v0.3.0 (modo Endless) é desenvolvimento e ainda não substitui o build publicado.
-- Os portais restantes (GameFlare, Playgama e CrazyGames Basic) continuam com submissão **manual**.
-- Revalidar os requisitos dos portais na data de submissão.
+- O **itch.io recebeu a `0.4.0`** manualmente; `0.1.0-mvp` é histórica.
+- A v0.4.0 é a linha atual de desenvolvimento/publicação; está no itch.io e no
+  sandbox da Playgama.
+- **Playgama:** build em sandbox, com milestones pendentes.
+- **CrazyGames:** Basic Launch reprovado por qualidade; P0 de apresentação executado, reenvio pendente.
+- **GameFlare:** conta criada, acesso bloqueado; suporte acionado.
+- Os portais restantes continuam com submissão **manual**; revalidar requisitos na data.
 
 ### Stack de desenvolvimento
 
@@ -334,7 +354,7 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 
 ## 9. Backlog futuro
 
-Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog. O **modo Endless** entrou no escopo da **v0.3.0** com fase infinita, progressão, chefes recorrentes e recordes no save.
+Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog. O **modo Endless** entrou no escopo da **v0.3.0** com fase infinita, progressão, chefes recorrentes e recordes no save. A **v0.4.0** fechou a lacuna de apresentação/UX e implementou interstitials e rewarded revive.
 
 - Leaderboard específico do modo Endless (o ranking global continua fora).
 - Metaprogressão permanente com desbloqueios de conteúdo, sem bônus permanentes de atributos iniciais.
@@ -363,7 +383,9 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | Metaprogressão | Fora do escopo; decidir se a próxima fase é conteúdo, meta ou plataforma. |
 | Localização | Fora do escopo; o catálogo de strings precisa ser separado por locale antes. |
 | Performance real | Números de hardware real ainda não estão versionados; criar baseline por device. |
-| Distribuição | itch.io com `0.1.0-mvp` congelado; portais restantes aguardam submissão manual. A v0.3.0 (Endless) é desenvolvimento e não substitui o build publicado. |
+| Distribuição | itch.io e Playgama sandbox com `0.4.0`; CrazyGames reprovado e GameFlare com acesso bloqueado. |
+| Apresentação desktop | HUD compacto implementado; falta moldura/letterbox dedicada para 1366×768+ |
+| Ads | Interstitials e rewarded revive implementados; acompanhar fill/limites reais na Playgama e CrazyGames |
 | Áudio | Novos elementos e chefes usam SFX existentes; mixagem final ainda pode ser refinada. |
 
 ### Checklist de coerência
@@ -376,7 +398,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 - Metaprogressão desbloqueia conteúdo, não bônus permanentes de atributos. A run ativa não é salva.
 - O Endless é uma run separada: não desbloqueia fases, não substitui a campanha e mantém seus próprios recordes no save.
 - A monetização é somente publicidade; o rewarded revive é opcional e tem caminho sem ad.
-- O build `0.1.0-mvp` do itch.io permanece congelado; a v0.3.0 é desenvolvimento.
+- O build `0.1.0-mvp` é histórico; a `0.4.0` está publicada no itch.io e no sandbox da Playgama.
 
 ---
 
@@ -388,8 +410,10 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.1` | 2026-11-08 | v0.2.0-dev: campanha de 6 fases / 21 ondas, 9 blocos, 7 elementos, 3 chefes, 19 perks, desafios, zoom de layout, encerramentos e save 1..6. |
 | `1.2` | 2026-11-09 | v0.3.0-dev: modo Endless com fase infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas, save `endless` e results próprios. |
 | `1.3` | 2026-11-10 | v0.4.0-dev: revisão visual dos blocos, menu Campaign/Endless, fundo animado, seleção de fases temática, settings de som/música/shake, Endless desbloqueado ao concluir a campanha, HUD compacto, How to Play, About Us, interstitials a cada 3/4 ondas, rewarded revive 1x por run e save `campaignComplete`. |
+| `1.4` | 2026-11-10 | Fechamento da v0.4.0: status, escopo, distribuição, ads e pendências atualizados para a nova sessão; GDD consolidado como fonte de design. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |
+| `0.4.0-dev` | 2026-11-10 | Revisão visual/menu, HUD compacto, How to Play/About, ads com rewarded revive, docs reorganizados. |
 
 Este GDD separa as decisões confirmadas do recorte da versão atual, do backlog futuro e das pendências de design. Use a seção de pendências para fechar parâmetros e critérios de aceite antes de transformar o escopo em tarefas de implementação.
