@@ -467,10 +467,10 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
 
 - [`docs/GDD_Bricklike.md`](GDD_Bricklike.md) — fonte de design v1.6.
 - [`docs/gdd-gap-analysis.md`](gdd-gap-analysis.md) — implementado × pendente.
-- [`docs/spec-tecnica-publicacao.md`](spec-tecnica-publicacao.md) — requisitos
-  dos portais.
-- [`docs/plano-baixa-fricao.md`](plano-baixa-fricao.md) — estratégia de
-  distribuição.
+- [`docs/spec-tecnica-publicacao.md`](spec-tecnica-publicacao.md) — guia único
+  de publicação: estratégia, portais, arquitetura, ads, save, QA e release. O
+  antigo plano de baixa fricção está arquivado em
+  [`old/plans/plano-baixa-fricao.md`](old/plans/plano-baixa-fricao.md).
 - [`docs/build-release.md`](build-release.md) — build, ZIP, CI e runbook.
 - [`docs/release/portal-metadata.md`](release/portal-metadata.md) — textos em
   inglês.

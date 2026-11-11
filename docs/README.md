@@ -9,10 +9,9 @@ o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
    arquitetura, invariantes, gates, portais, riscos e próximos passos.
 2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.6).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente.
-4. **[Spec técnica de publicação](spec-tecnica-publicacao.md)** — requisitos de
-   itch.io, GameFlare, Playgama e CrazyGames.
-5. **[Plano de baixa fricção](plano-baixa-fricao.md)** — estratégia de
-   distribuição e expectativa de receita.
+4. **[Guia de publicação web](spec-tecnica-publicacao.md)** — estratégia,
+   arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
+   CrazyGames, ads, save, metadata, QA e release.
 
 ## Operação e release
 

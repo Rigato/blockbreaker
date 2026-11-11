@@ -306,8 +306,8 @@ confirme o hash antes de cada upload.
 
 - `docs/GDD_Bricklike.md` — fonte de design v1.4.
 - `docs/gdd-gap-analysis.md` — implementado × pendente.
-- `docs/spec-tecnica-publicacao.md` — requisitos dos portais.
-- `docs/plano-baixa-fricao.md` — estratégia de distribuição.
+- `docs/spec-tecnica-publicacao.md` — guia único de publicação.
+- `docs/old/plans/plano-baixa-fricao.md` — plano histórico arquivado.
 - `docs/build-release.md` — build, ZIP, CI e runbook de release.
 - `docs/release/portal-metadata.md` — textos em inglês.
 - `docs/release/submission-checklist.md` — checklist manual.
