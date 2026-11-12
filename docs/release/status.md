@@ -1,7 +1,7 @@
 # Status de publicação — Bricklike
 
 Versão publicada: **`0.5.1`** no **itch.io** e no **sandbox da Playgama**  
-Versão em desenvolvimento: **`0.6.0`**, local e **não publicada**  
+Versão em desenvolvimento: **`0.6.1`**, local e **não publicada**  
 CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**  
 Atualizado em: 2026-11-12  
 Responsável pela submissão: **usuário (manual)**
@@ -9,15 +9,15 @@ Responsável pela submissão: **usuário (manual)**
 Este arquivo é o registro de publicação. O `0.1.0-mvp` foi a primeira versão
 publicada no itch.io; ele foi substituído manualmente pela `0.5.1`. A `0.5.1`
 também está no sandbox da Playgama e foi submetida ao CrazyGames em 2026-11-11.
-A `0.6.0` está em `main`, é **local e não foi enviada a nenhum portal**.
-Nenhuma tag ou GitHub Release foi criada.
+A `0.6.1` está na linha atual de desenvolvimento, é **local e não foi enviada a
+nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
 
 ## Estado em 2026-11-12
 
-- **itch.io:** `0.5.1` publicada manualmente. A `0.6.0` é local; a
+- **itch.io:** `0.5.1` publicada manualmente. A `0.6.1` é local; a
   `0.1.0-mvp` fica apenas como histórico.
 - **Playgama:** `0.5.1` no **sandbox**; precisa cumprir milestones de
-  retenção/qualidade antes da publicação no catálogo. A `0.6.0` não foi enviada.
+  retenção/qualidade antes da publicação no catálogo. A `0.6.1` não foi enviada.
 - **CrazyGames:** a `0.3.0` foi **reprovada** por “abaixo dos padrões de
   qualidade”. A `0.4.0` foi reenviada como nova submissão e **reprovada de novo
   com a mesma mensagem genérica**, sem detalhamento. A `0.5.1` foi submetida em
@@ -28,14 +28,41 @@ Nenhuma tag ou GitHub Release foi criada.
   orientation**; o Bricklike está como **PORTRAIT**. O desktop é assumido
   landscape pelo portal. Não existe campo para declarar portrait no PC.
 - **GameFlare:** conta criada, mas acesso bloqueado; suporte acionado e **sem
-  resposta**. A `0.5.1` não foi publicada lá e a `0.6.0` não foi enviada.
-- **GitHub Pages:** acompanha a `main`; a `0.6.0` já aparece no build de review
-  após o push de 2026-11-12.
-- **ZIP 0.6.0:** local, 20 arquivos, 1.513.834 bytes (~1.478 KiB), SHA-256
-  `1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd`
+  resposta**. A `0.5.1` não foi publicada lá e a `0.6.1` não foi enviada.
+- **GitHub Pages:** acompanha a `main`; a `0.6.1` aparece no build de review
+  após o push desta fase.
+- **ZIP 0.6.1:** local, 20 arquivos, 1.517.384 bytes (~1.482 KiB), SHA-256
+  `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a`
   (pode mudar no build final; confirme em `release/manifest.json`).
 
-## O que a 0.6.0 entrega
+## O que a 0.6.1 entrega
+
+- **Tier 4:** Overkill (100 Sparks), Shield Bash (110) e Conductor (120,
+  requer Prism Laser) levam o catálogo a **22 perks**: 10 starters e 12
+  unlocks em quatro tiers.
+- **Overkill:** o dano excedente de um hit direto vira splash de até 2 nos
+  quatro vizinhos ortogonais; não encadeia e não nasce de explosão/link.
+- **Shield Bash:** a cada 8 acertos no paddle, 1 de dano nas duas linhas mais
+  baixas; a onda não dispara Overkill.
+- **Conductor:** cada alvo do laser encadeia uma vez para um vizinho ainda não
+  atingido, com 50% do dano (mínimo 1).
+- **Economia de Sparks:** onda `1 + floor(blocos/12)`, combo +1 em 5/10/15
+  (máx. +3 por onda), chefe +3, clear +6 e first clear +6 extra; teto de
+  **250 por run**.
+- **Anti-farm:** onda/combo/chefe pagam no máximo uma vez por onda por run;
+  reiniciar uma onda já premiada suprime essas recompensas na tentativa nova.
+- **HUD:** chip de Sparks da run com pulso e toast `+N Sparks · motivo`.
+- **Results:** `+X Sparks · total Y` com breakdown por waves, bosses, clear,
+  first clear e combo.
+- **Workshop:** card de progressão com ícone, saldo, badge **Ready**,
+  `X / 22 unlocked`, `N left` e barra; diálogo com quatro tiers e 12 cards.
+- **Save v2 inalterado:** nenhum campo novo; ofertas continuam filtrando perks
+  bloqueadas; sem bônus permanentes, ads por Sparks, loot box ou compra de
+  vantagem.
+- **Gates:** 396 testes em 32 arquivos; 37 E2E em 10 spec files; ZIP 0.6.1 com
+  20 arquivos e 1.517.384 bytes.
+
+### O que a 0.6.0 entregou (build anterior)
 
 - **Perks reworkadas:** Momentum, Bombardier, Boss Slayer e Hot Streak
   substituem Combo Master, Bomb Ball, Boss Bane e Swift Ball.
@@ -66,21 +93,24 @@ Nenhuma tag ou GitHub Release foi criada.
   e 22 ondas**. Totais: **743 blocos / 1.809 XP**; campanha pura: **727 / 1.777**.
 - **Controles touch** com drag relativo 1:1 e ganho até 2,2×; **laser** com
   lançamento explícito; **ads** com a política de 60 s; **side art** desktop.
-- A `0.5.1` continua sendo a build publicada; a `0.6.0` não a substituiu.
+- A `0.5.1` continua sendo a build publicada; a `0.6.0` e a `0.6.1` ainda não a
+  substituíram.
 
-## Gates da 0.6.0
+## Gates da 0.6.1
 
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | ✅ sem erros |
-| `npm test` | ✅ 375 testes em 31 arquivos |
+| `npm test` | ✅ 396 testes em 32 arquivos |
 | `npm run validate:content` | ✅ 7 níveis, 22 ondas, 743 blocos, 1.809 XP |
 | Bridge config | ✅ schema 2.4.1, sem logo/analytics, sem URLs externas |
-| `npm run test:e2e` | ✅ 36 testes em 10 spec files |
+| `npm run test:e2e` | ✅ 37 testes em 10 spec files |
 | `npm run build` | ✅ |
-| `npm run package` | ✅ 20 arquivos, 1.513.834 bytes, SHA acima |
-| CI + Deploy | ✅ verdes no commit `59103a4` (CI 43291233343; Deploy 43291233520) |
+| `npm run package` | ✅ 20 arquivos, 1.517.384 bytes, SHA acima |
 
+Gates históricos da 0.6.0: 375 testes em 31 arquivos, 36 E2E em 10 spec files e
+ZIP de 20 arquivos/1.513.834 bytes
+(`1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd`).
 Gates históricos da 0.5.1: 329 testes em 29 arquivos, 31 E2E em 9 spec files e
 ZIP de 20 arquivos/1.508.491 bytes
 (`f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce`).
@@ -95,7 +125,7 @@ Números do sandbox da 0.4.0, registrados sem conclusão de qualidade/retenção
 - **116 launches**, **31 plays**, **5m45s**, **3/2 likes**.
 
 A amostra é pequena demais para concluir qualidade ou retenção. A política de
-ads da 0.5.1 deve ser medida novamente depois da publicação; a 0.6.0 ainda não
+ads da 0.5.1 deve ser medida novamente depois da publicação; a 0.6.1 ainda não
 foi publicada.
 
 ## Modo Endless
@@ -110,10 +140,10 @@ foi publicada.
 
 | Portal | Versão | Status | URL pública | Data | Observação |
 |---|---|---|---|---|---|
-| itch.io | **0.5.1** | **publicado** | — | 2026-11-11 | atualização manual; `0.1.0-mvp` histórica; 0.6.0 local |
-| Playgama | **0.5.1** | **sandbox** | — | 2026-11-11 | milestones pendentes; amostra pequena; 0.6.0 não enviada |
+| itch.io | **0.5.1** | **publicado** | — | 2026-11-11 | atualização manual; `0.1.0-mvp` histórica; 0.6.1 local |
+| Playgama | **0.5.1** | **sandbox** | — | 2026-11-11 | milestones pendentes; amostra pequena; 0.6.1 não enviada |
 | CrazyGames Basic | 0.5.1 | **pausado** | — | 2026-11-11 | submissão pausada/bloqueada até 2026-11-26 |
-| GameFlare | 0.5.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login; 0.6.0 não enviada |
+| GameFlare | 0.5.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login; 0.6.1 não enviada |
 
 ### CrazyGames — como pedir detalhes e reenviar
 
@@ -130,16 +160,16 @@ Fonte: <https://docs.crazygames.com/faq/> e
   deve usar teste humano e assets atualizados.
 - Não criar conta duplicada nem abrir tickets repetidos.
 
-## Checklist rápido pós-0.6.0
+## Checklist rápido pós-0.6.1
 
-- [ ] Teste humano da 0.6.0 concluído (Workshop, Sparks, save v1→v2, perks
-      reworkadas, ads mock, layout de portal).
-- [ ] ZIP 0.6.0 conferido contra `release/manifest.json` e hash registrado.
-- [ ] Assets de loja revisados/regenerados para a 0.6.0, se houver publicação.
+- [ ] Teste humano da 0.6.1 concluído (Tier 4, economia, anti-farm, card do
+      Workshop, HUD/results, save v1→v2, ads mock, layout de portal).
+- [ ] ZIP 0.6.1 conferido contra `release/manifest.json` e hash registrado.
+- [ ] Assets de loja revisados/regenerados para a 0.6.1, se houver publicação.
 - [ ] Título **Bricklike** consistente.
-- [ ] Descrição, controles e tags revisados para perks + metaprogression +
+- [ ] Descrição, controles e tags revisados para Tier 4 + economia de Sparks +
       Workshop.
-- [ ] Publicar 0.6.0 manualmente no itch.io e no sandbox da Playgama, após
+- [ ] Publicar 0.6.1 manualmente no itch.io e no sandbox da Playgama, após
       aprovação.
 - [ ] CrazyGames: aguardar 2026-11-26 e decidir o reenvio.
 - [ ] Resolver GameFlare com o suporte.

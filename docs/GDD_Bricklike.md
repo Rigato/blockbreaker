@@ -3,21 +3,22 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.7  
+**Versão:** 1.8  
 **Data:** 2026-11-12  
-**Status:** v0.6.0 local e não publicada; v0.5.1 publicada no itch.io e no sandbox da Playgama; CrazyGames pausado até 2026-11-26; GameFlare pendente  
+**Status:** v0.6.1 local e não publicada; v0.5.1 publicada no itch.io e no sandbox da Playgama; CrazyGames pausado até 2026-11-26; GameFlare bloqueado  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha atual tem **6 fases e 20 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **19 perks**. Com o **tutorial** da v0.5.1, o seletor mostra **7 cards e 22 ondas** no total. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adiciona a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A `0.6.0` está em `main` para teste e **não foi publicada**; itch.io e o sandbox da Playgama seguem com a `0.5.1`; `0.1.0-mvp` é histórica.
+A campanha atual tem **6 fases e 20 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **22 perks**. Com o **tutorial** da v0.5.1, o seletor mostra **7 cards e 22 ondas** no total. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` está na linha atual de desenvolvimento, é **local e não foi publicada**; itch.io e o sandbox da Playgama seguem com a `0.5.1`; `0.1.0-mvp` é histórica.
 
 ### Como ler os status
 
 - **Confirmado:** escolha expressa pelo jogador ou consolidada no design.
-- **v0.6.0:** implementado e validado no ciclo atual (perks reworkadas, Sparks, Workshop e save v2).
+- **v0.6.1:** implementado e validado no ciclo atual (Tier 4, economia de Sparks, feedback de HUD e card do Workshop).
+- **v0.6.0:** implementado e validado no ciclo anterior (perks reworkadas, primeira economia de Sparks, Workshop e save v2).
 - **v0.5.1:** implementado e validado no ciclo anterior (tutorial, controles touch e política de ads).
 - **v0.4.0:** implementado e validado no ciclo anterior (apresentação, ads e UX).
 - **v0.3.0:** implementado e validado na expansão anterior (modo Endless).
@@ -76,14 +77,16 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
   inteira (fase 6) for concluída. O botão fica visivelmente bloqueado e, ao ser
   tocado, abre um diálogo explicando o requisito.
 
-### Menu, seleção de fases e configurações (v0.5.1; Workshop na v0.6.0)
+### Menu, seleção de fases e configurações (v0.5.1; Workshop na v0.6.1)
 
 - **Menu:** dois caminhos principais — **Campaign** e **Endless** — sem o texto
   de MVP `XP · Perks · Levels` e sem o rodapé de controles. O rodapé mostra
   **How to Play**, **Settings**, **About Us** e a versão.
-- **Workshop (v0.6.0):** strip no menu com o saldo de **Sparks** e badge quando
-  há uma perk comprável; abre um diálogo com cards por tier, custo, descrição e
-  estado (`owned`/`affordable`/`locked`).
+- **Workshop (v0.6.1):** card de progressão no menu com ícone, saldo de
+  **Sparks**, badge **Ready** quando há uma perk comprável, contagem
+  `X / 22 unlocked`, `N left` e barra de progresso; abre um diálogo com **12
+  cards em quatro tiers**, custo, descrição e estado
+  (`owned`/`affordable`/`locked`).
 - **Campaign:** card principal com progresso, fase atual, nós de progresso e CTA
   `Continue`/`Start campaign`. Abre a seleção de fases.
 - **Tutorial:** card próprio antes das seis fases, com badge “Start here”. Em
@@ -140,7 +143,7 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - Cada bloco destruído concede XP. A curva atual é `8 / 20 / 26 / 33 / 39 / 46…` (base `20 + 10 × (level − 1)`, multiplicador global de 0,65 e desconto de primeiro nível).
 - Ao preencher a barra de XP, a partida pausa automaticamente; três opções aleatórias de perk aparecem e o jogador escolhe uma.
 - O catálogo usa um modelo híbrido: alguns perks podem ser escolhidos repetidamente e evoluem por níveis; outros são únicos. Limites variam por perk.
-- **Pool da run (v0.6.0):** as ofertas consideram apenas as **10 perks iniciais** e as perks já compradas no Workshop; perks bloqueadas nunca aparecem.
+- **Pool da run (v0.6.1):** as ofertas consideram apenas as **10 perks iniciais** e as perks já compradas no Workshop; perks bloqueadas nunca aparecem. Conductor exige Prism Laser.
 - **Regras de onda:**
   - `timeLimit`: a onda tem contagem regressiva; se o tempo zerar antes da limpeza, a run termina em derrota. O HUD mostra o tempo restante.
   - `noLaser`: o Prism Laser fica desabilitado apenas naquela onda; o perk continua adquirido para as ondas seguintes.
@@ -270,7 +273,7 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Modo Endless | Run infinita separada da campanha. O save v2 guarda `endless` com `bestWave`, `bestScore` e `runs`; não altera `unlockedPhase`. |
 | Salvamento | Save schema v2 (`bb.save`), com `unlockedPhase` de 0 a 6 (0 = tutorial), estatísticas por fase e `meta: { sparks, unlocks }`. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
 | Compatibilidade | Saves v1 continuam válidos e migram para v2 com `sparks = 0` e `unlocks = []`; `unlockedPhase` é limitado a 0..6 e campos malformados caem em defaults. |
-| Metaprogressão | **Horizontal (v0.6.0):** Sparks desbloqueiam perks no Workshop; não há bônus permanentes de atributos nem poder pago. |
+| Metaprogressão | **Horizontal (v0.6.1):** Sparks desbloqueiam perks no Workshop; não há bônus permanentes de atributos nem poder pago. |
 | Competição | Estatísticas pessoais e recordes por fase; rankings globais e conquistas continuam fora do escopo. |
 
 - Save v2 mantém `phases` por `phaseId` com `bestTimeMs`, `bestScore`, `attempts`, `clears` e `bestLevel`; o tutorial usa `phaseId = 'tutorial'`.
@@ -290,16 +293,28 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | `boss_slayer` | Boss Slayer | único | A cada 10 blocos destruídos, o próximo acerto no chefe causa +3 de dano; o contador zera depois do acerto. |
 | `hot_streak` | Hot Streak | repetível, máx. 2 | Após 5 hits consecutivos, +1/+2 de dano por 3 s; cada novo hit renova o timer; não altera a velocidade. |
 
-As quatro substituem Combo Master, Bomb Ball, Boss Bane e Swift Ball. O
-catálogo continua com **19 perks**; Explosive Core (8 blocos) e Bombardier (12
-blocos) usam contadores separados.
+Na 0.6.0, as quatro substituíram Combo Master, Bomb Ball, Boss Bane e Swift
+Ball, e o catálogo ficou em 19 perks. A 0.6.1 mantém as quatro e adiciona as
+três perks Tier 4, levando o catálogo a **22 perks**. Explosive Core (8 blocos)
+e Bombardier (12 blocos) continuam com contadores separados.
 
-### 5.2 Metaprogressão e Workshop (v0.6.0)
+### 5.2 Tier 4 (v0.6.1)
+
+| ID | Nome | Tipo | Custo | Efeito |
+|---|---|---|---:|---|
+| `overkill` | Overkill | único | 100 | Dano excedente de um hit direto que destrói um bloco vira splash de até **2** nos quatro blocos ortogonalmente adjacentes. O splash não dispara Overkill de novo; explosões, dano de link e Shield Bash não propagam Overkill. |
+| `shield_bash` | Shield Bash | único | 110 | A cada **8 acertos no paddle**, uma onda de choque causa **1** de dano nas **duas linhas mais baixas** do campo; o contador zera no disparo e ao resetar a run/perk. A onda não dispara Overkill. |
+| `conductor` | Conductor | único, requer `prism_laser` | 120 | Cada alvo do Prism Laser tenta encadear **uma vez** para um bloco ortogonalmente adjacente que o feixe ainda não atingiu, causando `max(1, round(level × 0.5))` de dano (1/1/2 nos níveis 1/2/3). Sem o perk, o laser não encadeia. |
+
+Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
+(9 da 0.6.0 + 3 Tier 4). O Workshop passa a mostrar **quatro tiers**.
+
+### 5.3 Metaprogressão e Workshop (v0.6.1)
 
 - **Pool inicial:** 10 perks — Multiball, Wide Paddle, Power Ball, Quick Study,
   Arcane Turret, Giant Ball, Safety Net, Prism Laser, Foresight e Critical
   Strike. Os níveis máximos somam 24.
-- **Unlocks atuais:** 9 perks bloqueadas, em três tiers:
+- **Unlocks atuais:** 12 perks bloqueadas, em quatro tiers:
 
 | Tier | Perk | Custo em Sparks |
 |---:|---|---:|
@@ -312,16 +327,37 @@ blocos) usam contadores separados.
 | 3 | Laser Focus | 65 |
 | 3 | Overcharge | 65 |
 | 3 | Hot Streak | 75 |
+| 4 | Overkill | 100 |
+| 4 | Shield Bash | 110 |
+| 4 | Conductor | 120 |
 
-- **Sparks:** +1 por onda concluída, +3 por chefe derrotado e +5 na primeira
-  conclusão de uma fase; teto de **30 por run**. No Endless, +1 por onda
-  alcançada e +3 a cada 5 ondas, também com teto 30.
-- **Workshop:** strip no menu com saldo e badge; diálogo por tier com nome,
+#### Economia de Sparks
+
+| Evento | Recompensa |
+|---|---:|
+| Onda concluída | `1 + floor(blocos destruídos na onda / 12)` |
+| Combo de 5, 10 e 15 acertos na onda | +1 cada; máximo +3 por onda, uma vez por marco |
+| Chefe derrotado | +3 |
+| Conclusão de fase | +6 (sempre) |
+| Primeira conclusão da fase | +6 extra (12 no total) |
+| Teto por run | **250** (proteção de segurança) |
+
+- Campanha e Endless usam as mesmas recompensas por evento; o Endless não tem
+  fórmula plana própria.
+- **Anti-farm:** onda, combo e chefe são reivindicados por tentativa de onda.
+  Reiniciar uma onda já premiada na mesma run suprime essas recompensas na nova
+  tentativa; a conclusão de fase continua pagando +6.
+- O teto de 250 é proteção, não o valor normal: uma campanha completa rende
+  ~169 Sparks antes dos bônus de bloco e combo.
+- **Workshop:** card no menu com ícone, saldo, badge **Ready**, contagem
+  `X / 22 unlocked`, `N left` e barra de progresso; diálogo por tier com nome,
   descrição, custo e estado; compra determinística que debita Sparks, persiste
   o unlock, emite `meta:changed` e atualiza menu/diálogo.
 - **Ofertas:** filtram perks bloqueadas; a perk comprada entra na pool das
   próximas runs. O fallback `Arcane Insight` continua como válvula.
-- **Results:** mostram `+X Sparks · total Y`.
+- **HUD:** chip de Sparks da run, com pulso e toast `+N Sparks · <motivo>`.
+- **Results:** mostram `+X Sparks · total Y` e a quebra por fonte
+  (`Waves`, `Bosses`, `Clear`, `First clear`, `Combo`).
 - **Sem poder permanente:** o meta desbloqueia conteúdo, não atributos; não há
   ads, loot box, compra de vantagem ou refund nesta versão.
 
@@ -403,7 +439,7 @@ blocos) usam contadores separados.
 | Item | Entrega |
 |---|---|
 | Perks reworkadas | Momentum, Bombardier, Boss Slayer e Hot Streak substituem Combo Master, Bomb Ball, Boss Bane e Swift Ball |
-| Pool inicial | 10 perks iniciais; 9 perks atuais bloqueadas |
+| Pool inicial | 10 perks iniciais; 9 perks bloqueadas naquela versão |
 | Metaprogressão | Sparks persistidos e 9 unlocks em três tiers (12–75 Sparks) |
 | Workshop | Strip no menu, cards por tier, compra, estados e feedback de erro |
 | Ofertas | Filtram perks bloqueadas; compradas entram na pool das próximas runs |
@@ -413,10 +449,23 @@ blocos) usam contadores separados.
 | Gates | 375 testes em 31 arquivos; 36 E2E em 10 spec files; ZIP 0.6.0 local, 20 arquivos |
 | Publicação | 0.6.0 local e não publicada; 0.5.1 continua no itch.io/Playgama; sem tag/release |
 
+### O que entrou na v0.6.1
+
+| Item | Entrega |
+|---|---|
+| Tier 4 | Overkill (100), Shield Bash (110) e Conductor (120); catálogo com 22 perks e 12 unlocks em quatro tiers |
+| Economia | Onda `1 + floor(blocos/12)`, combo +1 em 5/10/15 (máx. +3), chefe +3, clear +6 e first clear +6 extra; teto de 250 |
+| Anti-farm | Onda/combo/chefe pagam no máximo uma vez por onda por run; retry é suprimido |
+| Feedback | Chip e toast de Sparks no HUD; results com total e breakdown por fonte |
+| Workshop | Card de progressão com ícone, saldo, badge, `X / 22 unlocked`, `N left` e barra |
+| Save | Schema v2 inalterado; nenhuma migração nova |
+| Gates | 396 testes em 32 arquivos; 37 E2E em 10 spec files; ZIP 0.6.1 local, 20 arquivos |
+| Publicação | 0.6.1 local e não publicada; 0.5.1 continua no itch.io/Playgama; sem tag/release |
+
 ### O que continua fora
 
 - Bônus permanentes de atributos, leaderboards e conquistas.
-- Cosméticos, desafios com recompensa, reroll de oferta e perks Tier 4 (Overkill, Shield Bash, Conductor).
+- Cosméticos, desafios com recompensa e reroll de oferta.
 - Mundos sci-fi/industrial, localização e landscape jogável.
 - **Moldura/letterbox desktop:** decisão do dono é não fazer nesta linha; o shell portrait centralizado é intencional.
 - Editor de fases e pipeline procedural.
@@ -430,12 +479,12 @@ blocos) usam contadores separados.
 - Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
 - **Um build, 6 fases:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração. O Bridge é **local** no boot (`./playgama-bridge.js`), sem request ao CDN da Playgama.
 - O **itch.io recebeu a `0.5.1`** manualmente; `0.1.0-mvp` é histórica.
-- A **0.6.0 é a linha atual de desenvolvimento**, mas está **local e não publicada**. itch.io e o sandbox da Playgama continuam com a **0.5.1**.
+- A **0.6.1 é a linha atual de desenvolvimento**, mas está **local e não publicada**. itch.io e o sandbox da Playgama continuam com a **0.5.1**.
 - **Playgama:** build 0.5.1 em sandbox, com milestones pendentes; amostra pequena de stats, sem conclusão de qualidade/retenção.
 - **CrazyGames:** a 0.3.0 e a 0.4.0 foram reprovadas com a mesma mensagem genérica; a 0.5.1 foi submetida em 2026-11-11. A submissão está **pausada até 2026-11-26**. Decisão: **não fazer moldura/letterbox desktop**.
 - **GameFlare:** conta criada, acesso bloqueado; suporte acionado e sem resposta.
 - Os portais restantes continuam com submissão **manual**; revalidar requisitos na data.
-- **Assets de loja:** capas, screenshots, vídeos e imagens do How to Play continuam os da 0.5.1; revisão humana e eventual regeneração para a 0.6.0 pendentes antes da submissão.
+- **Assets de loja:** capas, screenshots, vídeos e imagens do How to Play continuam os da 0.5.1; revisão humana e eventual regeneração para a 0.6.1 pendentes antes da submissão.
 
 ### Stack de desenvolvimento
 
@@ -448,7 +497,7 @@ blocos) usam contadores separados.
 
 - Jogo totalmente gratuito; receita somente de publicidade.
 - Modelo escolhido: anúncios convencionais conforme cada portal e anúncios recompensados opcionais que concedem uma vantagem ao jogador.
-- **Interstitials em pausas naturais (política 0.5.1, mantida na 0.6.0):**
+- **Interstitials em pausas naturais (política 0.5.1, mantida na 0.6.1):**
   - campanha: somente quando há próxima onda e a onda limpa é múltipla de 3 — na prática, fase 5 após a onda 3 e fase 6 após a onda 3; nunca no fim da fase;
   - Endless: a cada 4 ondas;
   - tutorial: nenhum ad;
@@ -464,10 +513,10 @@ blocos) usam contadores separados.
 
 ## 9. Backlog futuro
 
-Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog. O **modo Endless** entrou no escopo da **v0.3.0** com fase infinita, progressão, chefes recorrentes e recordes no save. A **v0.4.0** fechou a lacuna de apresentação/UX e implementou interstitials e rewarded revive. A **v0.5.1** adicionou tutorial in-game, controles touch com edge assist, gate do laser, política de ads mais conservadora e aviso de storage. A **v0.6.0** entregou as perks reworkadas, a primeira camada de metaprogressão horizontal (Sparks + Workshop) e o save v2; a build está local, aguardando teste humano.
+Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais perks, estruturas de fase, encerramentos e zoom) saíram deste backlog. O **modo Endless** entrou no escopo da **v0.3.0** com fase infinita, progressão, chefes recorrentes e recordes no save. A **v0.4.0** fechou a lacuna de apresentação/UX e implementou interstitials e rewarded revive. A **v0.5.1** adicionou tutorial in-game, controles touch com edge assist, gate do laser, política de ads mais conservadora e aviso de storage. A **v0.6.0** entregou as perks reworkadas, a primeira camada de metaprogressão horizontal (Sparks + Workshop) e o save v2. A **v0.6.1** completou o Tier 4, reequilibrou a economia de Sparks, adicionou feedback de HUD/results e promoveu o Workshop a card; a build está local, aguardando teste humano.
 
 - Leaderboard específico do modo Endless (o ranking global continua fora).
-- Expansão da metaprogressão: cosméticos, desafios com recompensa, reroll de oferta e perks Tier 4.
+- Expansão da metaprogressão: cosméticos, desafios com recompensa e reroll de oferta.
 - Outros usos de rewarded ads (bônus, rerolls) após definir benefícios e limites para preservar o equilíbrio.
 - Rankings globais e conquistas, condicionados aos recursos dos portais.
 - Mundos temáticos sci-fi/futurista e industrial/pós-apocalíptico.
@@ -485,22 +534,22 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | Tutorial | Implementado com 2 ondas, 16 blocos, 32 XP e 2 level ups; skip e coach marks cobertos por testes. Falta validar compreensão em teste humano. |
 | Endless | Uma fase infinita implementada; balanceamento das ondas altas e dos chefes ainda depende de playtest humano. |
 | Ondas | Distribuição decidida: tutorial 2; campanha 2/3/3/3/4/5. A fase 1 encurtada e as ondas 4–6 estão implementadas e validadas. |
-| Perks | Catálogo fechado em 19 perks, com níveis, pré-requisitos e fallback interno; Momentum, Bombardier, Boss Slayer e Hot Streak foram reworkadas na 0.6.0. Balanceamento fino ainda depende de playtest humano. |
-| Metaprogressão | Implementada na 0.6.0: 10 starters, 9 unlocks, Sparks e Workshop. Falta calibrar economia e tempo até o primeiro unlock em playtest. |
-| Save v2 | Implementado com `meta: { sparks, unlocks }`; migração v1→v2 coberta por testes. Falta validar save antigo real no navegador. |
-| Workshop | Implementado com tiers, custos, compra, persistência e badge no menu; E2E e layout 320/390 cobertos. Falta teste em iframe de portal. |
+| Perks | Catálogo fechado em 22 perks, com níveis, pré-requisitos e fallback interno; Momentum, Bombardier, Boss Slayer e Hot Streak foram reworkadas na 0.6.0, e Overkill, Shield Bash e Conductor entraram na 0.6.1. Balanceamento fino ainda depende de playtest humano. |
+| Metaprogressão | Implementada na 0.6.1: 10 starters, 12 unlocks em quatro tiers, Sparks e Workshop. Falta calibrar economia e tempo até o primeiro unlock em playtest. |
+| Save v2 | Implementado com `meta: { sparks, unlocks }` e inalterado na 0.6.1; migração v1→v2 coberta por testes. Falta validar save antigo real no navegador. |
+| Workshop | Implementado com card de progressão, quatro tiers, 12 cards, custos, compra, persistência, contagem e barra; E2E e layout 320/390 cobertos. Falta teste em iframe de portal. |
 | Chefes | Três chefes definidos (Frost Sentinel, Ember Warden, Void Herald) com HP, padrão, shards e corrosão. Ajuste de dificuldade segue aberto para playtest. |
 | Regras de onda | `timeLimit` e `noLaser` implementados nas ondas definidas. Novas combinações de desafio ficam para o futuro. |
 | Zoom | Escala 0,68–1,0 implementada e validada no conteúdo. Testar legibilidade em telas pequenas reais. |
 | Balanceamento | Ainda depende de playtest humano; o bot de QA não substitui jogador. |
 | Rewarded ads | Revive uma vez por run implementado; outros usos ficam para o futuro. |
-| Próximo ciclo | Decidir entre conteúdo (novo mundo/Tier 4), retenção (cosméticos/desafios/reroll) ou plataforma (localização/landscape). |
+| Próximo ciclo | Decidir entre conteúdo (novo mundo), retenção (cosméticos/desafios/reroll) ou plataforma (localização/landscape). |
 | Localização | Fora do escopo; o catálogo de strings precisa ser separado por locale antes. |
-| Performance real | Protocolo e script prontos (`docs/qa/performance-testing.md`, `scripts/perf-smoke.mjs`); resultados da 0.6.0 pendentes. |
-| Distribuição | itch.io e Playgama sandbox com `0.5.1`; 0.6.0 local; CrazyGames pausado até 2026-11-26; GameFlare bloqueado. |
+| Performance real | Protocolo e script prontos (`docs/qa/performance-testing.md`, `scripts/perf-smoke.mjs`); resultados da 0.6.1 pendentes. |
+| Distribuição | itch.io e Playgama sandbox com `0.5.1`; 0.6.1 local; CrazyGames pausado até 2026-11-26; GameFlare bloqueado. |
 | Apresentação desktop | Side art adicionada em landscape; o campo continua portrait e sem moldura. Risco residual de legibilidade em iframe desktop. |
-| Ads | Política 0.5.1 mantida na 0.6.0 e testada com mock; acompanhar fill/limites reais na Playgama e CrazyGames. |
-| Store assets | Capas, screenshots, vídeos e How to Play continuam os da 0.5.1; revisão humana e eventual regeneração para a 0.6.0 pendentes. |
+| Ads | Política 0.5.1 mantida na 0.6.1 e testada com mock; acompanhar fill/limites reais na Playgama e CrazyGames. |
+| Store assets | Capas, screenshots, vídeos e How to Play continuam os da 0.5.1; revisão humana e eventual regeneração para a 0.6.1 pendentes. |
 | Áudio | Novos elementos e chefes usam SFX existentes; mixagem final ainda pode ser refinada. |
 
 ### Checklist de coerência
@@ -512,10 +561,10 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 - O laser exige lançamento explícito na onda e pelo menos uma bola solta; reset, Sticky e a bola inicial presa bloqueiam o disparo.
 - O toque é relativo 1:1 no centro, com ganho até 2,2× na zona externa de 22%; mouse é absoluto e a velocidade do paddle não mudou.
 - O zoom é escala de layout, não de câmera; o input não muda.
-- Metaprogressão desbloqueia perks, não bônus permanentes de atributos; as 10 starters são implícitas e as compradas ficam no save v2. A run ativa não é salva.
+- Metaprogressão desbloqueia perks, não bônus permanentes de atributos; são 10 starters + 12 unlocks = 22 perks, as starters são implícitas e as compradas ficam no save v2. A run ativa não é salva.
 - O Endless é uma run separada: não desbloqueia fases, não substitui a campanha e mantém seus próprios recordes no save.
 - A monetização é somente publicidade; o rewarded revive é opcional e tem caminho sem ad; tutorial não tem ads.
-- O build `0.1.0-mvp` é histórico; a `0.5.1` está publicada no itch.io e no sandbox da Playgama; a `0.6.0` está local e ainda não publicada.
+- O build `0.1.0-mvp` é histórico; a `0.5.1` está publicada no itch.io e no sandbox da Playgama; a `0.6.1` está local e ainda não publicada.
 
 ---
 
@@ -530,11 +579,13 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.4` | 2026-11-10 | Fechamento da v0.4.0: status, escopo, distribuição, ads e pendências atualizados para a nova sessão; GDD consolidado como fonte de design. |
 | `1.6` | 2026-11-11 | v0.5.1: tutorial jogável/pulável com 2 ondas e gate do level 1; campanha em 20 ondas (2/3/3/3/4/5); 743/1.809 com tutorial; edge assist do toque; gate explícito do laser; nova política de ads; aviso de storage; segunda reprovação da CrazyGames e decisão de não fazer moldura desktop. |
 | `1.7` | 2026-11-12 | v0.6.0 local: perks Momentum, Bombardier, Boss Slayer e Hot Streak; 10 starters e 9 unlocks; Sparks e Workshop; save v2 com migração; ofertas filtradas; gates com 375 testes e 36 E2E. Build não publicada; 0.5.1 segue no itch.io/Playgama; CrazyGames pausado até 2026-11-26. |
+| `1.8` | 2026-11-12 | v0.6.1 local: Tier 4 com Overkill, Shield Bash e Conductor; catálogo em 22 perks e 12 unlocks em quatro tiers; economia por onda, combo, clear/first clear, teto 250 e anti-farm; chip/toast no HUD; results com breakdown; Workshop como card com contagem e progresso; gates com 396 testes e 37 E2E. Build não publicada; 0.5.1 segue no itch.io/Playgama. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |
 | `0.4.0-dev` | 2026-11-10 | Revisão visual/menu, HUD compacto, How to Play/About, ads com rewarded revive, docs reorganizados. |
 | `0.5.1-dev` | 2026-11-11 | Tutorial, campanha de 20 ondas, edge assist, gate do laser, política de ads e aviso de storage; build publicada no itch.io/Playgama. |
 | `0.6.0-dev` | 2026-11-12 | Perks reworkadas, 10 starters/9 unlocks, Sparks, Workshop, save v2 e ofertas filtradas; build local, sem tag/release. |
+| `0.6.1-dev` | 2026-11-12 | Tier 4 (Overkill, Shield Bash, Conductor), economia de Sparks reformulada, chip/toast no HUD, results com breakdown e Workshop como card; build local, sem tag/release. |
 
 Este GDD separa as decisões confirmadas do recorte da versão atual, do backlog futuro e das pendências de design. Use a seção de pendências para fechar parâmetros e critérios de aceite antes de transformar o escopo em tarefas de implementação.

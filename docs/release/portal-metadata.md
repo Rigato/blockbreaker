@@ -3,7 +3,7 @@
 Draft de metadata em inglês para revisão humana antes de qualquer submissão.
 A submissão é **manual**, feita pelo usuário. A `0.5.1` já está publicada no
 itch.io/Playgama; este draft descreve a próxima submissão e ainda não foi
-enviado para a `0.6.0`.
+enviado para a `0.6.1`.
 
 ## Identidade
 
@@ -46,11 +46,16 @@ _(≈190 characters.)_
 > Warden and Void Herald. Clear the campaign to unlock Endless mode, an infinite
 > run with escalating speed, procedural waves and a boss every five waves.
 >
+> Sparks earned from waves, combos and bosses unlock extra perks in the
+> Workshop, including the Tier 4 Overkill, Shield Bash and Conductor. The
+> catalog has 22 perks across 10 starters and 12 unlocks, with no permanent
+> stat bonuses.
+>
 > Runs last a few minutes and progress is saved between sessions on the device.
 > Play with touch, mouse or keyboard. No account, download or install is
 > required — the game runs directly in the browser.
 
-_(≈220 words.)_
+_(≈260 words.)_
 
 ## Controls
 
@@ -76,6 +81,8 @@ _(≈220 words.)_
 - `Space` / `E`: fire the Prism Laser when the perk is active.
 - `P`: pause or resume.
 - `1` / `2` / `3`: choose a perk card.
+
+**Workshop:** open the Workshop card in the menu to spend Sparks on new perks.
 
 ## Tags
 
@@ -204,10 +211,10 @@ _(≈220 words.)_
   letterbox shell.
 - The 0.4.0 submission was rejected again with the same generic message. The
   0.5.1 was submitted on 2026-11-11; the submission is paused until
-  2026-11-26. The 0.6.0 is local and has not been submitted.
+  2026-11-26. The 0.6.1 is local and has not been submitted.
 - **Screenshots, covers and the preview video were regenerated from the 0.5.1
   build** (tutorial, level 1 with two waves, touch controls). They still need
-  human review and regeneration for the 0.6.0 before submitting; do not claim
+  human review and regeneration for the 0.6.1 before submitting; do not claim
   they are published.
 - Full Launch requirements (Data/User modules, direct-to-gameplay landing,
   account-linked progress) are **out of scope** for this milestone.
@@ -222,10 +229,10 @@ _(≈220 words.)_
 - Do not use the technical name `blockbreaker` as player-facing marketing copy.
 - Keep the description, screenshots and covers in sync with the current build.
 - The store covers, screenshots and videos are from the **0.5.1** build and are
-  pending human review. Review and regenerate them against the 0.6.0 before
+  pending human review. Review and regenerate them against the 0.6.1 before
   submitting.
 - Do not promise ads on itch.io or GameFlare: those portals do not serve the
   in-game interstitials used on Playgama/CrazyGames.
 - Do not claim CrazyGames approved the 0.5.1; the submission is paused until
   2026-11-26. The 0.5.1 is live on itch.io and in the Playgama sandbox; the
-  0.6.0 is local and unpublished.
+  0.6.1 is local and unpublished.

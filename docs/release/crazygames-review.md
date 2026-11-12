@@ -9,7 +9,7 @@ adapter nativo), submetida em 2026-11-11; submissão pausada até 2026-11-26
 qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
 
 > **Atualização 2026-11-12:** a submissão da 0.5.1 está **pausada até
-> 2026-11-26**. A `0.6.0` é local e não foi submetida. Este documento permanece
+> 2026-11-26**. A `0.6.1` é local e não foi submetida. Este documento permanece
 > como diagnóstico histórico da 0.5.1.
 
 ## 0. Atualização 2026-11-11 — segunda reprovação da 0.4.0

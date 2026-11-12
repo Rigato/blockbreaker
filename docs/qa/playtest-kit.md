@@ -1,10 +1,10 @@
-# Playtest kit — Bricklike v0.6.0
+# Playtest kit — Bricklike v0.6.1
 
 Protocolo para validar diversão, ritmo e balance do tutorial, da campanha
 (fases 1–6) e do Endless. O baseline automatizado (`npm run qa:runs`) **não
 substitui** este playtest: ele só mede duração/nível/perks com um bot que
 dispara projéteis de debug. **Ainda não há resultado de playtest humano da
-0.6.0**; este documento é o protocolo, não um relatório.
+0.6.1**; este documento é o protocolo, não um relatório.
 
 ## Objetivo
 
@@ -25,10 +25,17 @@ Responder com evidência:
 - A política de ads (tutorial sem ads; campanha só em onda múltipla de 3;
   Endless a cada 4; exits com 60 s) parece natural, não abusiva?
 - O aviso “Progress may not be saved” é notado e entendido em fallback?
-- O **Workshop** é descoberto no menu, os custos em Sparks fazem sentido e a
-  primeira compra acontece em 1–2 runs?
+- O card do **Workshop** é descoberto no menu, a contagem `X / 22` e a barra
+  fazem sentido, os custos em Sparks parecem justos e a primeira compra
+  acontece em 1–2 runs?
 - As perks reworkadas (**Momentum**, **Bombardier**, **Boss Slayer** e **Hot
   Streak**) são compreendidas e parecem úteis?
+- As três perks **Tier 4** (**Overkill**, **Shield Bash** e **Conductor**) são
+  compreendidas e parecem úteis? Conductor + Prism Laser é percebido?
+- O **chip/toast de Sparks** no HUD e o **breakdown nos results** são notados
+  sem poluir a tela?
+- A economia (fórmula por onda, combo, chefe, clear e teto de 250) recompensa
+  sem parecer grind ou farm? O retry de uma onda premiada é entendido?
 
 ## Amostra e logística
 
@@ -104,6 +111,12 @@ Preencher uma linha por run. Template: `docs/qa/run-log-template.csv`.
 - **Variedade:** arquétipos distintos escolhidos entre todos os participantes.
   Meta: ≥3. Para dominância, por perk: `escolhas / ofertas em que apareceu`;
   sinalizar >70%.
+- **Sparks e Workshop:** registrar no comments o saldo ao fim de cada run, a
+  compra feita e o tempo até o primeiro unlock; nas sessões seguintes, medir a
+  descoberta do card e da contagem `X / 22`. Meta inicial: primeiro unlock em
+  1–2 runs, sem bater no teto de 250.
+- **Tier 4:** registrar se Overkill, Shield Bash e Conductor foram comprados,
+  entendidos e percebidos em jogo; sinalizar texto confuso ou custo alto demais.
 - **Técnico:** bugs por severidade (P0/P1/P2), device e passos. Cruzar com o
   device matrix/performance arquivados em `docs/old/qa/` quando aplicável.
 - **Controles:** registrar se o edge assist causou overshoot, se o centro ficou
@@ -120,13 +133,13 @@ ondas, não a apresentação.
 
 ## Status dos dados
 
-- **Nenhum playtest humano da 0.6.0 foi registrado ainda.** As metas acima são
+- **Nenhum playtest humano da 0.6.1 foi registrado ainda.** As metas acima são
   critérios de aceite, não resultados.
 - A amostra do sandbox da Playgama (0.4.0) é pequena: 17/100 qualifying plays,
   avg play time 5:42, ad shows/play 1,70, 116 launches, 31 plays, 5m45s, 3/2
   likes. Não use essa amostra como playtest nem como conclusão de retenção.
 - Performance tem protocolo separado em `docs/qa/performance-testing.md` e
-  script `scripts/perf-smoke.mjs`; resultados da 0.6.0 pendentes.
+  script `scripts/perf-smoke.mjs`; resultados da 0.6.1 pendentes.
 
 ## Baseline automatizado (não é playtest)
 

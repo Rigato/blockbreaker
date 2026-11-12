@@ -5,18 +5,18 @@ o histórico fica em `docs/old/` e nos handoffs arquivados.
 
 ## Comece por aqui
 
-1. **[Handoff v0.6.0](handoff-v0.6.0.md)** — estado do jogo, perks, meta,
-   Workshop, save v2, arquitetura, invariantes, gates, portais, riscos e
-   próximos passos.
-2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.7).
+1. **[Handoff v0.6.1](handoff-v0.6.1.md)** — estado do jogo, Tier 4, economia
+   de Sparks, Workshop, save v2, arquitetura, invariantes, gates, portais,
+   riscos e próximos passos.
+2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.8).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente.
 4. **[Guia de publicação web](spec-tecnica-publicacao.md)** — estratégia,
    arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
    CrazyGames, ads, save, metadata, QA e release.
-5. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — desenho da revisão
-   do catálogo e da primeira camada de meta horizontal.
-6. **[Plano v0.6.0](plano-v0.6.0-metaprogressao.md)** — implementação por fases,
-   gates e critérios de aceite.
+5. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo, Tier 4,
+   economia de Sparks e meta horizontal.
+6. **[Plano v0.6.0](plano-v0.6.0-metaprogressao.md)** — plano histórico da
+   implementação da metaprogressão.
 
 ## Operação e release
 
@@ -51,10 +51,12 @@ o histórico fica em `docs/old/` e nos handoffs arquivados.
 - Assets usados pelo jogo: `../public/bad-decision-games/` e
   `../public/how-to-play/`.
 - Assets de loja: `../store/` — da 0.5.1; revisão humana pendente antes de
-  qualquer upload da 0.6.0.
+  qualquer upload da 0.6.1.
 
 ## Histórico
 
+- [Handoff v0.6.0](handoff-v0.6.0.md) — onboarding da build anterior, mantido
+  como referência histórica.
 - [Handoff v0.5.1](handoff-v0.5.1.md) — onboarding da build publicada,
   mantido como referência histórica.
 - [Handoff v0.4.0](handoff-v0.4.0.md) — onboarding anterior, mantido como

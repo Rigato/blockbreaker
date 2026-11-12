@@ -2,23 +2,56 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.6.0 — perk reworks, metaprogression and Workshop**: the **v0.2.0
-campaign** (6 phases, 20 waves, 9 block types, 7 phase elements, 3 bosses, 19
-perks), the **v0.3.0 Endless mode**, the **v0.4.0 presentation/menu/HUD/ads**
-pass, the **v0.5.1 tutorial, touch edge assist, laser gate and revised ad
-cadence**, and the **v0.6.0 Sparks economy, perk unlocks and save v2**.
+line is **v0.6.1 — Tier 4 perks, Sparks economy and Workshop card**: the
+**v0.2.0 campaign base** (6 phases, 20 waves, 9 block types, 7 phase elements,
+3 bosses, now 22 perks), the **v0.3.0 Endless mode**, the **v0.4.0
+presentation/menu/HUD/ads** pass, the **v0.5.1 tutorial, touch edge assist,
+laser gate and revised ad cadence**, the **v0.6.0 perk reworks, first Sparks
+economy, perk unlocks and save v2**, and the **v0.6.1 Tier 4 perks, reworked
+Sparks economy and Workshop progression card**.
 
-The **v0.6.0 build is local and unpublished**. The **v0.5.1 build remains live**
+The **v0.6.1 build is local and unpublished**. The **v0.5.1 build remains live**
 on itch.io and in the Playgama sandbox. CrazyGames is paused until
 2026-11-26 after the 0.5.1 submission; GameFlare remains blocked by account
 access.
 No tag or GitHub Release has been created. The GitHub Pages review build tracks
-`main`.
+`main`; this phase did not commit or push, so it still shows v0.6.0.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
 
-## v0.6.0 — perk reworks, metaprogression and Workshop
+## v0.6.1 — Tier 4 perks, Sparks economy and Workshop card
+
+- **Tier 4 perks:** three new unlocks bring the catalog to **22 perks** (10
+  starters + 12 unlocks). **Overkill** (100 Sparks) splashes up to 2 excess
+  direct-hit damage to the four orthogonal neighbours; **Shield Bash** (110)
+  fires a 1-damage shockwave across the bottom two rows every 8 paddle hits;
+  **Conductor** (120, requires Prism Laser) chains each laser target once to an
+  adjacent block for 50% damage, minimum 1.
+- **Sparks economy:** each cleared wave pays `1 + floor(destroyed blocks / 12)`;
+  combos of 5/10/15 add +1 each once per wave; bosses add +3; a phase clear adds
+  +6, plus +6 extra on the first clear. The run cap is **250**. Retrying an
+  already-paid wave in the same run suppresses that attempt's wave, combo and
+  boss Sparks.
+- **HUD and results:** a run Sparks chip pulses and shows a `+N Sparks · reason`
+  toast; results show `+X Sparks · total Y` plus a breakdown by waves, bosses,
+  clear, first clear and combo.
+- **Workshop card:** the menu strip is now a progression card with its own icon,
+  Sparks balance, **Ready** badge, `X / 22 unlocked`, `N left` and a progress
+  bar. The dialog lists 12 cards across four tiers.
+- **Unchanged invariants:** save v2 still has only `meta: { sparks, unlocks }`;
+  offers never include locked perks; there are no permanent stat bonuses, ads
+  for Sparks, loot boxes or paid advantages.
+- **Tests and package:** 396 unit tests in 32 files, 37 E2E tests in 10 spec
+  files, content validation with 7 levels / 22 waves / 743 blocks / 1,809 XP,
+  and a local 0.6.1 ZIP with 20 files, 1,517,384 bytes (~1,482 KiB), SHA-256
+  `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a`
+  (the hash may change on the final build).
+- **Publication status:** 0.6.1 is local/unpublished. itch.io and the Playgama
+  sandbox still serve 0.5.1; CrazyGames is paused until 2026-11-26; GameFlare
+  remains blocked. No tag or GitHub Release was created.
+
+## v0.6.0 — perk reworks, metaprogression and Workshop (historical)
 
 - **Perk reworks:** Combo Master became **Momentum** (consecutive block hits add
   damage/XP, reset on paddle contact), Bomb Ball became **Bombardier** (every 12
@@ -44,7 +77,7 @@ No tag or GitHub Release has been created. The GitHub Pages review build tracks
 - **Results:** show `+X Sparks · total Y` after a phase or Endless run.
 - **Tests and package:** 375 unit tests in 31 files, 36 E2E tests in 10 spec
   files, content validation with 7 levels / 22 waves / 743 blocks / 1,809 XP,
-  and a local 0.6.0 ZIP with 20 files, 1,513,819 bytes (~1,478 KiB), SHA-256
+  and a local 0.6.0 ZIP with 20 files, 1,513,834 bytes (~1,478 KiB), SHA-256
   `1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd`
   (the hash may change on the final build).
 - **Publication status:** 0.6.0 is local/unpublished. itch.io and the Playgama
@@ -157,7 +190,7 @@ npm run preview   # serves dist/ locally
 ## v0.3.0 — Endless mode
 
 Development line: `main`. This work is part of v0.4.0 (published on itch.io and
-in the Playgama sandbox) and remains in the v0.5.1 and v0.6.0 builds.
+in the Playgama sandbox) and remains in the v0.5.1, v0.6.0 and v0.6.1 builds.
 
 - **Endless button** in the main menu, separate from Campaign and the level select.
 - **Infinite run:** no victory condition; the run ends when every ball is lost.
@@ -236,7 +269,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 - `docs/release/submission-checklist.md` lists every manual field, asset and
   step per portal, all marked **pending human review**.
 - `docs/old/release/g7-review.md` inventories the historical MVP package and
-  defines the G7 review checklist. The current line is `0.6.0` (local); no tag
+  defines the G7 review checklist. The current line is `0.6.1` (local); no tag
   or GitHub Release was created, and the user performs all submissions.
 
 ## M6 — QA, performance and balance
@@ -277,7 +310,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   with the ZIP and manifest. GitHub Pages remains the review build.
 - Tested in a subfolder, with the Bridge blocked/fallback, mock/no-ads,
   failed/timed-out interstitial and no external requests to `api.playgama.com`.
-  The current v0.6.0 build loads the Bridge **locally** and makes no request to
+  The current v0.6.1 build loads the Bridge **locally** and makes no request to
   the Playgama CDN at boot.
 - See [docs/build-release.md](docs/build-release.md) for the build, ZIP and
   portal checklist.
@@ -395,12 +428,12 @@ automatically after 2.5 s.
 
 ## Platform boot
 
-- The v0.6.0 build loads `./playgama-bridge.js` dynamically only outside CrazyGames; the CrazyGames host uses the direct native SDK adapter. There is no request to `bridge.playgama.com` at boot. Both paths keep a timeout and an in-memory fallback.
+- The v0.6.1 build loads `./playgama-bridge.js` dynamically only outside CrazyGames; the CrazyGames host uses the direct native SDK adapter. There is no request to `bridge.playgama.com` at boot. Both paths keep a timeout and an in-memory fallback.
 - The Bridge loading screen is disabled in `playgama-bridge-config.json`
   (`loadingScreenType: "none"`) so no Bridge branding is shown; the game uses
   its own boot screen and progress bar.
 - `game_ready` is sent only after the menu is rendered and interactive.
-- Ads keep the v0.5.1 policy in v0.6.0: no tutorial ads; campaign wave ads only
+- Ads keep the v0.5.1 policy in v0.6.1: no tutorial ads; campaign wave ads only
   with a following wave and a multiple of 3; Endless every 4 waves; Results and
   pause exits use a 60 s cooldown. Unsupported platforms skip without UI
   breakage. The player setting and platform audio state both mute the audio
@@ -470,12 +503,13 @@ release/                   Generated ZIP + manifest (not committed)
 - [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
-- [Current handoff — v0.6.0](docs/handoff-v0.6.0.md)
+- [Current handoff — v0.6.1](docs/handoff-v0.6.1.md)
+- [Archived handoff — v0.6.0](docs/handoff-v0.6.0.md)
 - [Archived handoff — v0.5.1](docs/handoff-v0.5.1.md)
 - [Archived handoff — v0.4.0](docs/handoff-v0.4.0.md)
 - [Web publishing guide](docs/spec-tecnica-publicacao.md) — strategy, portals, architecture, ads, save and QA
-- [Perk and metaprogression design](docs/perks-e-metaprogressao.md) — v0.6.0 catalog review and horizontal meta
-- [v0.6.0 implementation plan](docs/plano-v0.6.0-metaprogressao.md) — phases, gates and acceptance criteria
+- [Perk and metaprogression design](docs/perks-e-metaprogressao.md) — v0.6.1 catalog, Tier 4 and Sparks economy
+- [v0.6.0 implementation plan](docs/plano-v0.6.0-metaprogressao.md) — historical phases, gates and acceptance criteria
 - [Build and release runbook](docs/build-release.md)
 - [Portal metadata](docs/release/portal-metadata.md)
 - [Submission checklist](docs/release/submission-checklist.md)

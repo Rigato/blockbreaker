@@ -26,7 +26,7 @@ se `dist/` não existir, se `index.html` ou `playgama-bridge-config.json`
 estiverem fora da raiz, se houver path absoluto, URL externa não permitida,
 mais de 1.000 arquivos, mais de 250 MB ou caminho acima de 240 caracteres.
 
-## Conteúdo esperado do ZIP (0.6.0)
+## Conteúdo esperado do ZIP (0.6.1)
 
 ```text
 index.html
@@ -140,9 +140,16 @@ unzip -t release/blockbreaker-web.zip
       começa em 0 e o skip libera o level 1.
 - [ ] Save v1 migra para v2 com `sparks = 0` e `unlocks = []`, preservando
       campanha e Endless; a run ativa não é salva.
-- [ ] Workshop abre pelo menu, compra com saldo, persiste após reload e mostra
-      a perk comprada como owned; results mostram `+X Sparks · total Y`.
-- [ ] Ofertas nunca incluem perk bloqueada; a comprada entra na pool.
+- [ ] Workshop abre pelo menu, mostra card com `X / 22`, `N left` e barra,
+      lista quatro tiers/12 cards, compra com saldo, persiste após reload e
+      mostra a perk comprada como owned; results mostram `+X Sparks · total Y`
+      com breakdown por fonte.
+- [ ] Tier 4 comprável e funcional: Overkill espalha o excedente, Shield Bash
+      dispara a cada 8 acertos e Conductor encadeia o laser uma vez.
+- [ ] Economia: onda `1 + floor(blocos/12)`, combo 5/10/15, chefe +3, clear +6,
+      first clear +12 e teto 250; retry de onda premiada não paga de novo.
+- [ ] Ofertas nunca incluem perk bloqueada; a comprada entra na pool; Conductor
+      exige Prism Laser.
 - [ ] Laser bloqueado até o lançamento explícito da bola; HUD mostra
       “Launch the ball first”.
 - [ ] Edge assist do toque ativo no celular; mouse continua absoluto.
@@ -152,21 +159,21 @@ unzip -t release/blockbreaker-web.zip
 - [ ] Rotação preserva progresso (pausa + overlay).
 - [ ] ZIP ≤ 250 MB, ≤ 1.500 arquivos, paths ≤ 240 caracteres.
 - [ ] Sem logo do Bridge no mock; modo mock sem analytics.
-- [ ] Screenshots/capas/vídeos da 0.6.0 revisados/regenerados; os assets atuais
+- [ ] Screenshots/capas/vídeos da 0.6.1 revisados/regenerados; os assets atuais
       ainda são os da 0.5.1.
 
 ## Pacote atual
 
-Referência de 2026-11-12, versão **0.6.0**, build em **main** (sem upload, tag ou
-GitHub Release):
+Referência de 2026-11-12, versão **0.6.1**, build local na linha atual (sem
+upload, tag ou GitHub Release):
 
 | Item | Valor |
 |---|---|
 | ZIP | `release/blockbreaker-web.zip` |
-| Tamanho | 1.513.834 bytes (~1.478 KiB) |
-| Descomprimido | 3.055.341 bytes |
+| Tamanho | 1.517.384 bytes (~1.482 KiB) |
+| Descomprimido | 3.071.124 bytes |
 | Arquivos | 20 |
-| SHA-256 | `1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd` |
+| SHA-256 | `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a` |
 | Raiz | `index.html` + `playgama-bridge-config.json` |
 | Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge local |
 
@@ -176,14 +183,15 @@ antes de qualquer upload. O manifesto também registra `fileCount: 20`,
 
 ## Release por tag — somente após aprovação humana
 
-**Não crie tag ou release sem decisão explícita.** A `0.6.0` está em main e
-ainda não foi tagueada nem publicada. A `0.5.1` é a build publicada no itch.io
-e no sandbox da Playgama. A submissão em itch.io, GameFlare, Playgama e
+**Não crie tag ou release sem decisão explícita.** A `0.6.1` está na linha
+atual de desenvolvimento e ainda não foi tagueada nem publicada. A `0.5.1` é a
+build publicada no itch.io e no sandbox da Playgama. A submissão em itch.io,
+GameFlare, Playgama e
 CrazyGames é manual e feita pelo responsável.
 
 Pré-requisitos:
 
-1. Teste humano da 0.6.0 concluído e CI verde no commit que receberá a tag; o
+1. Teste humano da 0.6.1 concluído e CI verde no commit que receberá a tag; o
    `release.yml` não roda E2E.
 2. `npm run package` local limpo, com `unzip -t` OK.
 3. `package.json` e `release/manifest.json` na mesma versão da tag.
@@ -195,15 +203,15 @@ git switch main
 git pull --ff-only
 git status                      # deve estar limpo
 
-git tag -a v0.6.0 -m "Bricklike v0.6.0"
-git push origin v0.6.0
+git tag -a v0.6.1 -m "Bricklike v0.6.1"
+git push origin v0.6.1
 ```
 
 Conferência:
 
 ```bash
 gh run list --workflow Release --limit 1
-gh release view v0.6.0 --json name,assets,url
+gh release view v0.6.1 --json name,assets,url
 ```
 
 Fallback manual **somente** se o workflow falhar e o build local estiver
@@ -211,9 +219,9 @@ validado:
 
 ```bash
 npm run build && npm run package
-gh release create v0.6.0 \
+gh release create v0.6.1 \
   release/blockbreaker-web.zip release/manifest.json \
-  --title "Bricklike v0.6.0" \
+  --title "Bricklike v0.6.1" \
   --generate-notes
 ```
 

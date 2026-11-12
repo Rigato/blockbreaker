@@ -53,7 +53,9 @@ metaprogressão horizontal (Sparks + Workshop) e Tier 4. Não inclui novo mundo.
 | Boss Bane | Tech de chefe | Estreita demais | Rework → Boss Slayer |
 | Swift Ball | Risco/recompensa | Armadilha: velocidade é ruim | Rework → Hot Streak |
 
-**Resumo:** 10 mantidas, 4 reworks, 9 bloqueadas. Nenhuma remoção nesta versão.
+**Resumo:** 10 mantidas, 4 reworks e 9 bloqueadas na revisão original. Com as
+três Tier 4 da v0.6.1, o catálogo fica em 22 perks e 12 bloqueadas. Nenhuma
+remoção nesta versão.
 
 ## 4. Pool inicial e pool bloqueado
 
@@ -79,7 +81,7 @@ fallback só aparece no fim de uma run excepcionalmente longa.
 (Multiball/Prism Laser) sem exigir que o jogador entenda sinergias complexas.
 Foresight ajuda o onboarding; Safety Net dá margem para erro.
 
-### 4.2 Bloqueadas — 9 perks atuais
+### 4.2 Bloqueadas na revisão original — 9 perks
 
 | Perk | Tier | Custo | Motivo |
 |---|---|---:|---|
