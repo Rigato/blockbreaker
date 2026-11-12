@@ -2,6 +2,7 @@ import type {
   AdState,
   HudSnapshot,
   InterstitialResult,
+  MetaState,
   PerkOffer,
   PlatformSource,
   SimTuning,
@@ -34,6 +35,7 @@ export interface GameEventMap {
   'tuning:changed': SimTuning;
   'levelup:offered': { offers: readonly PerkOffer[]; level: number };
   'levelup:closed': { level: number };
+  'meta:changed': MetaState;
 }
 
 export class TypedEventBus<T extends object> {

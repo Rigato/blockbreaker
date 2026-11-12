@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RunState } from '../src/progression/RunState';
+import { META_UNLOCKS, STARTER_PERK_IDS } from '../src/content/meta';
 import { PERK_CATALOG } from '../src/content/perks';
 
 function withLevelUp(seed = 11): RunState {
@@ -14,6 +15,16 @@ function maxOut(run: RunState, skip: readonly string[] = []): void {
     if (skip.includes(perk.id)) continue;
     for (let level = 0; level < perk.maxLevel; level += 1) {
       run.grantPerk(perk.id);
+    }
+  }
+}
+
+function maxOutIds(run: RunState, ids: readonly string[]): void {
+  for (const id of ids) {
+    const perk = PERK_CATALOG.find((candidate) => candidate.id === id);
+    if (!perk) continue;
+    for (let level = 0; level < perk.maxLevel; level += 1) {
+      run.grantPerk(id);
     }
   }
 }
@@ -153,5 +164,62 @@ describe('M2 perk choice', () => {
     const choice = run.grantPerk('sticky_paddle');
     expect(choice.perk.level).toBe(1);
     expect(choice.spawnedBalls).toBe(0);
+  });
+});
+
+describe('meta perk unlock gating', () => {
+  it('offers only starter perks when no unlocks are owned', () => {
+    const run = new RunState();
+    run.startRun(11, STARTER_PERK_IDS);
+    run.addXp(20);
+
+    const starter = new Set<string>(STARTER_PERK_IDS);
+    const offers = run.takeOffers();
+    expect(offers).toHaveLength(3);
+    for (const offer of offers) {
+      expect(starter.has(offer.id)).toBe(true);
+    }
+  });
+
+  it('never offers a locked perk, even when starters are maxed', () => {
+    const run = new RunState();
+    run.startRun(11, STARTER_PERK_IDS);
+    maxOutIds(run, STARTER_PERK_IDS);
+    run.addXp(8);
+
+    const locked = new Set(META_UNLOCKS.map((unlock) => unlock.id));
+    const offers = run.takeOffers();
+    expect(offers.map((offer) => offer.id)).toEqual(['xp_fallback']);
+    expect(offers.some((offer) => locked.has(offer.id))).toBe(false);
+  });
+
+  it('adds a bought unlock to the offer pool', () => {
+    const run = new RunState();
+    run.startRun(11, [...STARTER_PERK_IDS, 'second_chance']);
+    maxOutIds(run, STARTER_PERK_IDS);
+    run.addXp(8);
+
+    const offers = run.takeOffers();
+    expect(offers.map((offer) => offer.id)).toContain('second_chance');
+  });
+
+  it('respects an explicitly restricted unlock set', () => {
+    const run = new RunState();
+    run.startRun(11, ['power_ball']);
+    run.addXp(20);
+
+    const offers = run.takeOffers();
+    expect(offers.map((offer) => offer.id).sort()).toEqual(
+      ['power_ball', 'xp_fallback'].sort(),
+    );
+  });
+
+  it('still lets debug grants bypass unlock gating', () => {
+    const run = new RunState();
+    run.startRun(1, STARTER_PERK_IDS);
+
+    const choice = run.grantPerk('second_chance');
+    expect(choice.perk.level).toBe(1);
+    expect(choice.modifiers.reviveCharges).toBe(1);
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { RunState, xpToNextForLevel } from '../src/progression/RunState';
 import { BASE_RUN_MODIFIERS, GAME_CONFIG } from '../src/game/config';
+import { STARTER_PERK_IDS } from '../src/content/meta';
 import { PERK_CATALOG } from '../src/content/perks';
 
 function progressed(seed = 7): RunState {
@@ -438,5 +439,59 @@ describe('M2 run lifecycle', () => {
       'boss_slayer',
       'hot_streak',
     ]);
+  });
+});
+
+describe('meta gating in a run', () => {
+  it('keeps every offer inside the starter set across many level ups', () => {
+    const run = new RunState();
+    run.startRun(7, STARTER_PERK_IDS);
+    run.addXp(1000);
+
+    const starter = new Set<string>(STARTER_PERK_IDS);
+    let offersSeen = 0;
+    while (run.pendingLevelUps > 0) {
+      const offers = run.takeOffers();
+      expect(offers.length).toBeGreaterThan(0);
+      for (const offer of offers) {
+        expect(
+          starter.has(offer.id) || offer.id === 'xp_fallback',
+        ).toBe(true);
+      }
+      offersSeen += 1;
+      run.choosePerk(offers[0]!.id);
+    }
+
+    expect(offersSeen).toBeGreaterThan(3);
+  });
+
+  it('adds an explicitly unlocked perk to the offer pool', () => {
+    const run = new RunState();
+    run.startRun(7, [...STARTER_PERK_IDS, 'second_chance']);
+    const starter = new Set<string>(STARTER_PERK_IDS);
+    for (const perk of PERK_CATALOG) {
+      if (!starter.has(perk.id)) continue;
+      for (let level = 0; level < perk.maxLevel; level += 1) {
+        run.grantPerk(perk.id);
+      }
+    }
+    run.addXp(8);
+
+    expect(run.takeOffers().map((offer) => offer.id)).toContain('second_chance');
+  });
+
+  it('defaults to the full catalog when no unlock set is passed', () => {
+    const starter = new Set<string>(STARTER_PERK_IDS);
+    const offered = new Set<string>();
+
+    for (let seed = 1; seed <= 10; seed += 1) {
+      const run = new RunState();
+      run.startRun(seed);
+      run.addXp(8);
+      for (const offer of run.takeOffers()) offered.add(offer.id);
+    }
+
+    expect(offered.size).toBeGreaterThan(3);
+    expect([...offered].some((id) => !starter.has(id))).toBe(true);
   });
 });

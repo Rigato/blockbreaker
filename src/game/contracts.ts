@@ -84,7 +84,13 @@ export interface EndlessStats {
   runs: number;
 }
 
-/** Persisted save. Active runs are intentionally not saved. */
+/** Persisted meta progression. Unlocks are perk ids bought in the Workshop. */
+export interface MetaProgress {
+  sparks: number;
+  unlocks: string[];
+}
+
+/** Legacy v1 save, kept so `parseSave` can migrate existing players. */
 export interface SaveV1 {
   version: 1;
   /** 0 = tutorial only; 1..6 = campaign phases unlocked. */
@@ -94,6 +100,45 @@ export interface SaveV1 {
   /** True once phase 6 has been cleared; unlocks Endless mode. */
   campaignComplete: boolean;
   updatedAt: number;
+}
+
+/** Persisted save. Active runs are intentionally not saved. */
+export interface SaveV2 {
+  version: 2;
+  /** 0 = tutorial only; 1..6 = campaign phases unlocked. */
+  unlockedPhase: number;
+  phases: Record<string, PhaseStats>;
+  endless: EndlessStats;
+  /** True once phase 6 has been cleared; unlocks Endless mode. */
+  campaignComplete: boolean;
+  meta: MetaProgress;
+  updatedAt: number;
+}
+
+/** One Workshop card: a locked perk with its cost and current state. */
+export interface MetaUnlockView {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  tier: number;
+  unlocked: boolean;
+  affordable: boolean;
+  available: boolean;
+}
+
+/** Read-only meta progression state consumed by the Workshop UI. */
+export interface MetaState {
+  sparks: number;
+  unlocks: readonly MetaUnlockView[];
+}
+
+export type MetaPurchaseError = 'unknown' | 'owned' | 'insufficient';
+
+export interface MetaPurchaseResult {
+  ok: boolean;
+  error?: MetaPurchaseError;
+  meta: MetaState;
 }
 
 export interface SettingsV1 {
@@ -107,14 +152,14 @@ export interface SettingsV1 {
 }
 
 export interface SaveSnapshot {
-  save: SaveV1;
+  save: SaveV2;
   settings: SettingsV1;
 }
 
 /** Persistence boundary used by the M3 game; backed by PlatformService storage. */
 export interface SaveRepository {
   load(): Promise<SaveSnapshot>;
-  save(save: SaveV1): Promise<void>;
+  save(save: SaveV2): Promise<void>;
   saveSettings(settings: SettingsV1): Promise<void>;
   reset(): Promise<void>;
 }
@@ -286,6 +331,10 @@ export interface PhaseResult {
   waveReached?: number;
   /** Best wave after recording the result. */
   bestWave?: number;
+  /** Sparks awarded by this finished run. */
+  sparksEarned?: number;
+  /** Persisted Sparks after applying this result. */
+  sparksTotal?: number;
 }
 
 /** Contextual tutorial coach marks shown only during the tutorial phase. */
@@ -344,6 +393,10 @@ export interface HudSnapshot {
   campaignComplete: boolean;
   /** Endless unlocks only after the campaign is complete. */
   endlessUnlocked: boolean;
+  /** Persisted Sparks available in the Workshop. */
+  sparks?: number;
+  /** True when at least one locked perk can be bought with the current Sparks. */
+  workshopReady?: boolean;
   /** Non-null only while the results screen is open. */
   result: PhaseResult | null;
   /** True while the active phase is the tutorial. */
@@ -404,7 +457,7 @@ export interface ProgressionService {
   readonly modifiers: RunModifiers;
   readonly perks: readonly PerkState[];
 
-  startRun(seed: number): void;
+  startRun(seed: number, unlockedPerkIds?: Iterable<string>): void;
   reset(): void;
   /** Applies the Quick Study multiplier and queues level ups. */
   addXp(baseAmount: number): XpGain;
@@ -443,6 +496,10 @@ export interface GameCommands {
   startEndless(): void;
   /** Returns the persisted Endless statistics. */
   getEndlessStats(): EndlessStats;
+  /** Returns the persisted Sparks and perk unlock state for the Workshop. */
+  getMetaState(): MetaState;
+  /** Buys one perk unlock with Sparks and persists it on success. */
+  purchasePerkUnlock(id: string): MetaPurchaseResult;
   pause(): void;
   resume(): void;
   togglePause(): void;

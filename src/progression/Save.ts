@@ -4,16 +4,18 @@ import type {
   PhaseStats,
   SaveRepository,
   SaveSnapshot,
-  SaveV1,
+  SaveV2,
   SettingsV1,
   StorageService,
 } from '../game/contracts';
 import { GAME_CONFIG } from '../game/config';
+import { sanitizeMeta } from './meta';
 
 /** Highest campaign phase; `unlockedPhase` is clamped to 0..MAX_PHASE (0 = tutorial). */
 export const MAX_PHASE = 6;
 
-const SAVE_VERSION = 1 as const;
+const SAVE_VERSION = 2 as const;
+const SETTINGS_VERSION = 1 as const;
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -95,20 +97,21 @@ function sanitizePhases(value: unknown): Record<string, PhaseStats> {
   return phases;
 }
 
-export function createDefaultSave(now: number = Date.now()): SaveV1 {
+export function createDefaultSave(now: number = Date.now()): SaveV2 {
   return {
     version: SAVE_VERSION,
     unlockedPhase: 0,
     phases: {},
     endless: defaultEndlessStats(),
     campaignComplete: false,
+    meta: { sparks: 0, unlocks: [] },
     updatedAt: now,
   };
 }
 
 export function createDefaultSettings(): SettingsV1 {
   return {
-    version: SAVE_VERSION,
+    version: SETTINGS_VERSION,
     sound: true,
     music: true,
     screenShake: true,
@@ -124,17 +127,22 @@ export function createDefaultSnapshot(now: number = Date.now()): SaveSnapshot {
 
 /**
  * Safe parse of `bb.save`. Never throws: invalid JSON, unknown/future versions
- * or malformed roots yield defaults; individual fields are merged safely.
+ * or malformed roots yield defaults; v1 saves migrate to v2 without losing
+ * campaign or Endless progress.
  */
 export function parseSave(
   raw: string | null | undefined,
   now: number = Date.now(),
-): SaveV1 {
+): SaveV2 {
   const parsed = parseJson(raw);
-  if (!isRecord(parsed) || parsed.version !== SAVE_VERSION) {
+  if (
+    !isRecord(parsed) ||
+    (parsed.version !== 1 && parsed.version !== SAVE_VERSION)
+  ) {
     return createDefaultSave(now);
   }
 
+  const sourceVersion = parsed.version;
   let unlockedPhase = isFiniteNumber(parsed.unlockedPhase)
     ? Math.min(MAX_PHASE, Math.max(0, Math.floor(parsed.unlockedPhase)))
     : 0;
@@ -169,6 +177,10 @@ export function parseSave(
     phases,
     endless: sanitizeEndlessStats(parsed.endless),
     campaignComplete,
+    // v1 has no meta block: starters stay implicit and nothing is bought yet.
+    meta: sourceVersion === SAVE_VERSION
+      ? sanitizeMeta(parsed.meta)
+      : { sparks: 0, unlocks: [] },
     updatedAt: isFiniteNumber(parsed.updatedAt) && parsed.updatedAt >= 0
       ? parsed.updatedAt
       : now,
@@ -178,11 +190,11 @@ export function parseSave(
 /** Safe parse of `bb.settings`; anything invalid falls back to sound on. */
 export function parseSettings(raw: string | null | undefined): SettingsV1 {
   const parsed = parseJson(raw);
-  if (!isRecord(parsed) || parsed.version !== SAVE_VERSION) {
+  if (!isRecord(parsed) || parsed.version !== SETTINGS_VERSION) {
     return createDefaultSettings();
   }
   return {
-    version: SAVE_VERSION,
+    version: SETTINGS_VERSION,
     sound: typeof parsed.sound === 'boolean' ? parsed.sound : true,
     music: typeof parsed.music === 'boolean' ? parsed.music : true,
     screenShake:
@@ -222,7 +234,7 @@ export class StorageSaveRepository implements SaveRepository {
     };
   }
 
-  async save(save: SaveV1): Promise<void> {
+  async save(save: SaveV2): Promise<void> {
     await this.storage.set([this.saveKey], [JSON.stringify(save)]);
   }
 
@@ -236,7 +248,7 @@ export class StorageSaveRepository implements SaveRepository {
 }
 
 /** Phase stats for `phaseId`, with zeroed defaults and no shared references. */
-export function getPhaseStats(save: SaveV1, phaseId: string): PhaseStats {
+export function getPhaseStats(save: SaveV2, phaseId: string): PhaseStats {
   const stats = save.phases[phaseId];
   if (stats === undefined) return defaultPhaseStats();
   return {
@@ -253,10 +265,10 @@ export function getPhaseStats(save: SaveV1, phaseId: string): PhaseStats {
  * never persisted; only stats and the sequential unlock are recorded.
  */
 export function applyPhaseResult(
-  save: SaveV1,
+  save: SaveV2,
   result: PhaseResult,
   now: number = Date.now(),
-): SaveV1 {
+): SaveV2 {
   const previous = getPhaseStats(save, result.phaseId);
   const score = isFiniteNumber(result.score) && result.score >= 0 ? result.score : 0;
   const timeMs =
@@ -297,12 +309,13 @@ export function applyPhaseResult(
     campaignComplete:
       save.campaignComplete === true ||
       (result.victory && result.phaseIndex >= MAX_PHASE),
+    meta: sanitizeMeta(save.meta),
     updatedAt: now,
   };
 }
 
 /** Endless stats for `save`, with zeroed defaults and no shared references. */
-export function getEndlessStats(save: SaveV1): EndlessStats {
+export function getEndlessStats(save: SaveV2): EndlessStats {
   const stats = save.endless;
   if (!isRecord(stats)) return defaultEndlessStats();
   return {
@@ -317,17 +330,18 @@ export function getEndlessStats(save: SaveV1): EndlessStats {
  * Endless bests/runs and `updatedAt` change; campaign progress is untouched.
  */
 export function applyEndlessResult(
-  save: SaveV1,
+  save: SaveV2,
   wave: number,
   score: number,
   now: number = Date.now(),
-): SaveV1 {
+): SaveV2 {
   const previous = getEndlessStats(save);
   const waveReached = nonNegativeInteger(wave, 0);
   const runScore = nonNegativeInteger(score, 0);
 
   return {
     ...save,
+    meta: sanitizeMeta(save.meta),
     endless: {
       bestWave: Math.max(previous.bestWave, waveReached),
       bestScore: Math.max(previous.bestScore, runScore),

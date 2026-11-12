@@ -6,6 +6,8 @@ import type {
   HudPhase,
   HudSnapshot,
   InterstitialResult,
+  MetaPurchaseResult,
+  MetaState,
   PerkSummary,
   PhaseResult,
   PhaseSelectInfo,
@@ -15,7 +17,7 @@ import type {
   RewardedResult,
   SaveRepository,
   SaveSnapshot,
-  SaveV1,
+  SaveV2,
   SettingsV1,
   SimTuning,
   TestWaveInfo,
@@ -28,6 +30,7 @@ import { gameEvents } from './events';
 import { AudioService } from '../audio';
 import { ENDLESS_PHASE, endlessEnding, endlessWave } from '../content/endless';
 import { endingForResult } from '../content/endings';
+import { getUnlockedPerkIds } from '../content/meta';
 import { CAMPAIGN_PHASE_COUNT, PHASES } from '../content/phases';
 import { summarizePhase } from '../content/phasePresentation';
 import type { PhaseDef, WaveDef } from '../content/types';
@@ -42,6 +45,12 @@ import {
   getEndlessStats,
   getPhaseStats,
 } from '../progression/Save';
+import {
+  getMetaState as buildMetaState,
+  purchaseUnlock,
+  sparksForCampaign,
+  sparksForEndless,
+} from '../progression/meta';
 import { RunState } from '../progression/RunState';
 import { GameScene } from '../render/GameScene';
 import { hexToCss, themeForPhase } from '../render/themes';
@@ -129,7 +138,7 @@ export class BlockBreakerGame implements GameCommands {
   private levelUpRevealAt = 0;
   private ballRespawnLeftMs = 0;
   private adBusy = false;
-  private save: SaveV1 = createDefaultSave();
+  private save: SaveV2 = createDefaultSave();
   private settings: SettingsV1 = createDefaultSettings();
   private readonly clock = new FixedStepClock();
   private pendingLaunch = false;
@@ -231,7 +240,7 @@ export class BlockBreakerGame implements GameCommands {
     });
     document.addEventListener('visibilitychange', this.handleVisibility);
 
-    this.runState.startRun(1);
+    this.runState.startRun(1, getUnlockedPerkIds(this.save.meta));
     this.world.applyRunModifiers(this.runState.modifiers);
     this.syncHud(true);
 
@@ -308,7 +317,7 @@ export class BlockBreakerGame implements GameCommands {
     this.tutorialStep = null;
     this.tutorialCompleted.clear();
     this.waveIntroUntil = 0;
-    this.runState.startRun(this.runSeed);
+    this.runState.startRun(this.runSeed, getUnlockedPerkIds(this.save.meta));
     this.loadEndlessWave(1);
     this.scene.setPhase('phase-6', 5);
     this.scene.setMenuMode(false);
@@ -324,6 +333,31 @@ export class BlockBreakerGame implements GameCommands {
 
   getEndlessStats(): EndlessStats {
     return getEndlessStats(this.save);
+  }
+
+  getMetaState(): MetaState {
+    return buildMetaState(this.save.meta);
+  }
+
+  purchasePerkUnlock(id: string): MetaPurchaseResult {
+    const result = purchaseUnlock(this.save.meta, id);
+    if (!result.ok) {
+      return { ok: false, error: result.error, meta: this.getMetaState() };
+    }
+
+    this.save = {
+      ...this.save,
+      meta: result.meta,
+      updatedAt: Date.now(),
+    };
+    void this.saveRepository.save(this.save).catch((error: unknown) => {
+      console.warn('[save] could not persist perk unlock', error);
+    });
+
+    const meta = this.getMetaState();
+    gameEvents.emit('meta:changed', meta);
+    this.syncHud(true);
+    return { ok: true, meta };
   }
 
   startPhase(phaseId: string): void {
@@ -348,7 +382,7 @@ export class BlockBreakerGame implements GameCommands {
     this.tutorialStep = null;
     this.tutorialCompleted.clear();
     this.waveIntroUntil = 0;
-    this.runState.startRun(this.runSeed);
+    this.runState.startRun(this.runSeed, getUnlockedPerkIds(this.save.meta));
     this.loadPhaseWave(0);
     this.scene.setPhase(phase.id, phase.index);
     this.scene.setMenuMode(false);
@@ -598,6 +632,7 @@ export class BlockBreakerGame implements GameCommands {
     this.scene.setScreenShakeEnabled(true);
     this.audio.setSuspended(false);
     this.syncHud(true);
+    gameEvents.emit('meta:changed', this.getMetaState());
     gameEvents.emit('save:reset', {
       keys: [GAME_CONFIG.storage.saveKey, GAME_CONFIG.storage.settingsKey],
     });
@@ -1279,6 +1314,20 @@ export class BlockBreakerGame implements GameCommands {
     })();
   }
 
+  /** Adds Sparks to the persisted meta and returns the new total. */
+  private addSparks(amount: number): number {
+    const earned = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+    const sparksTotal = this.save.meta.sparks + earned;
+    this.save = {
+      ...this.save,
+      meta: {
+        sparks: sparksTotal,
+        unlocks: [...this.save.meta.unlocks],
+      },
+    };
+    return sparksTotal;
+  }
+
   private finishPhase(victory: boolean): void {
     if (this.mode === 'endless') {
       this.finishEndless();
@@ -1305,6 +1354,21 @@ export class BlockBreakerGame implements GameCommands {
       timeMs,
     });
 
+    // Waves/bosses only count once completed; the phase clear adds +5 once.
+    const previousStats = getPhaseStats(this.save, phase.id);
+    const completedWaves = victory
+      ? phase.waves.length
+      : Math.max(0, this.currentWaveIndex);
+    const defeatedBosses = phase.waves
+      .slice(0, completedWaves)
+      .filter((wave) => wave.boss !== undefined).length;
+    const sparksEarned = sparksForCampaign({
+      waves: completedWaves,
+      bosses: defeatedBosses,
+      firstClear: victory && previousStats.clears === 0,
+    });
+    const sparksTotal = this.addSparks(sparksEarned);
+
     const provisional: PhaseResult = {
       phaseId: phase.id,
       phaseName: phase.name,
@@ -1320,6 +1384,8 @@ export class BlockBreakerGame implements GameCommands {
       bestTimeMs: null,
       nextPhaseId: nextPhase?.id ?? null,
       ending,
+      sparksEarned,
+      sparksTotal,
     };
 
     const updated = applyPhaseResult(this.save, provisional);
@@ -1358,6 +1424,8 @@ export class BlockBreakerGame implements GameCommands {
     const wave = Math.max(1, this.currentWaveIndex + 1);
     const score = this.runScore;
     const timeMs = Math.max(0, Math.round(this.phaseElapsedMs));
+    const sparksEarned = sparksForEndless({ wave });
+    const sparksTotal = this.addSparks(sparksEarned);
     const updated = applyEndlessResult(this.save, wave, score);
     this.save = updated;
     const stats = getEndlessStats(updated);
@@ -1379,6 +1447,8 @@ export class BlockBreakerGame implements GameCommands {
       endless: true,
       waveReached: wave,
       bestWave: stats.bestWave,
+      sparksEarned,
+      sparksTotal,
     };
     this.phase = 'defeat';
     this.nextWaveAt = 0;
@@ -1748,6 +1818,10 @@ export class BlockBreakerGame implements GameCommands {
     const wave = this.currentWaveDef ?? phase?.waves[this.currentWaveIndex] ?? null;
     const stats = !endless && phase ? getPhaseStats(this.save, phase.id) : null;
     const endlessStats = endless ? getEndlessStats(this.save) : null;
+    const meta = buildMetaState(this.save.meta);
+    const workshopReady = meta.unlocks.some(
+      (unlock) => !unlock.unlocked && unlock.affordable,
+    );
     const laser =
       modifiers.laserCooldown !== null
         ? {
@@ -1845,6 +1919,8 @@ export class BlockBreakerGame implements GameCommands {
       screenShakeEnabled: this.settings.screenShake,
       campaignComplete: this.save.campaignComplete,
       endlessUnlocked: this.save.campaignComplete,
+      sparks: meta.sparks,
+      workshopReady,
       boss:
         boss && boss.hp > 0
           ? { name: boss.name, hp: boss.hp, maxHp: boss.maxHp, phase: boss.phase }

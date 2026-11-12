@@ -39,6 +39,9 @@ export class RunState implements ProgressionService {
   private readonly levels = new Map<string, number>();
   private currentOffers: PerkOffer[] = [];
   private rng = createRng(0);
+  private unlockedPerkIds: ReadonlySet<string> = new Set(
+    PERK_CATALOG.map((definition) => definition.id),
+  );
 
   get seed(): number {
     return this.currentSeed;
@@ -75,8 +78,11 @@ export class RunState implements ProgressionService {
     return acquired;
   }
 
-  startRun(seed: number): void {
+  startRun(seed: number, unlockedPerkIds?: Iterable<string>): void {
     this.currentSeed = seed;
+    this.unlockedPerkIds = unlockedPerkIds === undefined
+      ? new Set(PERK_CATALOG.map((definition) => definition.id))
+      : new Set(unlockedPerkIds);
     this.reset();
   }
 
@@ -119,6 +125,7 @@ export class RunState implements ProgressionService {
 
     const eligible = PERK_CATALOG.filter(
       (definition) =>
+        this.unlockedPerkIds.has(definition.id) &&
         this.levelOf(definition.id) < definition.maxLevel &&
         (definition.requires === undefined || this.levelOf(definition.requires) > 0),
     );
