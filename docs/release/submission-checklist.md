@@ -20,8 +20,8 @@ GameFlare bloqueado por acesso).
 - [ ] ZIP final 0.6.1 gerado pelo pipeline de release, com `index.html` e
       `playgama-bridge-config.json` na raiz e Bridge local
       (`./playgama-bridge.js`, sem request ao CDN da Playgama). **Gerado:
-      20 arquivos, 1.517.384 bytes, SHA-256
-      `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a`;
+      20 arquivos, 1.517.380 bytes, SHA-256
+      `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`;
       falta teste final.**
 - [ ] ZIP aberto em aba anônima, servido em subpasta, sem 404 e sem requests
       externas no boot. **Pendente de revisão humana.**

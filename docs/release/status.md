@@ -31,8 +31,8 @@ nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
   resposta**. A `0.5.1` não foi publicada lá e a `0.6.1` não foi enviada.
 - **GitHub Pages:** acompanha a `main`; a `0.6.1` aparece no build de review
   após o push desta fase.
-- **ZIP 0.6.1:** local, 20 arquivos, 1.517.384 bytes (~1.482 KiB), SHA-256
-  `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a`
+- **ZIP 0.6.1:** local, 20 arquivos, 1.517.380 bytes (~1.482 KiB), SHA-256
+  `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`
   (pode mudar no build final; confirme em `release/manifest.json`).
 
 ## O que a 0.6.1 entrega
@@ -60,7 +60,7 @@ nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
   bloqueadas; sem bônus permanentes, ads por Sparks, loot box ou compra de
   vantagem.
 - **Gates:** 396 testes em 32 arquivos; 37 E2E em 10 spec files; ZIP 0.6.1 com
-  20 arquivos e 1.517.384 bytes.
+  20 arquivos e 1.517.380 bytes.
 
 ### O que a 0.6.0 entregou (build anterior)
 
@@ -106,7 +106,7 @@ nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
 | Bridge config | ✅ schema 2.4.1, sem logo/analytics, sem URLs externas |
 | `npm run test:e2e` | ✅ 37 testes em 10 spec files |
 | `npm run build` | ✅ |
-| `npm run package` | ✅ 20 arquivos, 1.517.384 bytes, SHA acima |
+| `npm run package` | ✅ 20 arquivos, 1.517.380 bytes, SHA acima |
 
 Gates históricos da 0.6.0: 375 testes em 31 arquivos, 36 E2E em 10 spec files e
 ZIP de 20 arquivos/1.513.834 bytes

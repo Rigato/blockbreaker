@@ -24,9 +24,9 @@ enviada a nenhum portal.
 
 ## Pacote atual (0.6.1)
 
-- `release/blockbreaker-web.zip` — 20 arquivos, 1.517.384 bytes
-  (~1.482 KiB), 3.071.124 bytes descomprimidos, maior path com 38 caracteres.
-- SHA-256: `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a`.
+- `release/blockbreaker-web.zip` — 20 arquivos, 1.517.380 bytes
+  (~1.482 KiB), 3.071.123 bytes descomprimidos, maior path com 38 caracteres.
+- SHA-256: `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`.
 - Gates: 396 testes em 32 arquivos; 37 E2E em 10 spec files; conteúdo com
   7 níveis / 22 ondas / 743 blocos / 1.809 XP.
 - O hash pode mudar em um rebuild; confirme em `release/manifest.json` antes de

@@ -32,8 +32,8 @@ a `0.6.1` aparece após o push desta fase)
 | Portais | itch.io 0.5.1; Playgama 0.5.1 sandbox; CrazyGames pausado até 2026-11-26; GameFlare bloqueado |
 | Node | 22.12+ (CI usa Node 24) |
 | Stack | Phaser 3.90, TypeScript estrito, Vite 8, Vitest, Playwright, Playgama Bridge 2.4.1 + adapter nativo do CrazyGames |
-| ZIP local | `release/blockbreaker-web.zip` — 0.6.1, 20 arquivos, 1.517.384 bytes |
-| SHA-256 do ZIP | `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a` |
+| ZIP local | `release/blockbreaker-web.zip` — 0.6.1, 20 arquivos, 1.517.380 bytes |
+| SHA-256 do ZIP | `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd` |
 
 O hash pode mudar em um rebuild; confirme em `release/manifest.json` antes de
 qualquer upload. A `0.6.1` não foi publicada em nenhum portal.
@@ -216,15 +216,15 @@ Resultados de referência da 0.6.1 (2026-11-12):
 | Bridge config | ✅ schema 2.4.1, sem logo/analytics, sem URLs externas |
 | `npm run build` | ✅ bundle Phaser/Vite (83 módulos) |
 | `npm run test:e2e` | ✅ **37 testes** em **10 spec files** |
-| `npm run package` | ✅ ZIP 0.6.1, **20 arquivos**, **1.517.384 bytes**, SHA-256 `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a` |
+| `npm run package` | ✅ ZIP 0.6.1, **20 arquivos**, **1.517.380 bytes**, SHA-256 `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd` |
 
 ### 5.1 Manifesto do ZIP
 
-- 20 arquivos; 1.517.384 bytes comprimidos; 3.071.124 bytes descomprimidos;
+- 20 arquivos; 1.517.380 bytes comprimidos; 3.071.123 bytes descomprimidos;
   maior caminho com 38 caracteres.
 - Raiz: `index.html`, `playgama-bridge-config.json`, `playgama-bridge.js`,
   `favicon.svg`.
-- `assets/`: `Game-BnazynF2.js`, `index-BrKmAQhZ.js`, `index-BVe7B3B7.css`,
+- `assets/`: `Game-N3olQShx.js`, `index-CfeGvdml.js`, `index-BVe7B3B7.css`,
   `Silkscreen-Bold-BHMh3gvp.ttf`, `Silkscreen-Regular-W9-u5Upq.ttf`,
   `.gitkeep`.
 - `bad-decision-games/`: `logo.png`, `logo.webp`.

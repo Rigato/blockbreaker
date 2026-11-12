@@ -170,10 +170,10 @@ upload, tag ou GitHub Release):
 | Item | Valor |
 |---|---|
 | ZIP | `release/blockbreaker-web.zip` |
-| Tamanho | 1.517.384 bytes (~1.482 KiB) |
-| Descomprimido | 3.071.124 bytes |
+| Tamanho | 1.517.380 bytes (~1.482 KiB) |
+| Descomprimido | 3.071.123 bytes |
 | Arquivos | 20 |
-| SHA-256 | `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a` |
+| SHA-256 | `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd` |
 | Raiz | `index.html` + `playgama-bridge-config.json` |
 | Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge local |
 

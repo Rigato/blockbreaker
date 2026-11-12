@@ -45,7 +45,7 @@ No tag or GitHub Release has been created. The GitHub Pages review build tracks
 - **Tests and package:** 396 unit tests in 32 files, 37 E2E tests in 10 spec
   files, content validation with 7 levels / 22 waves / 743 blocks / 1,809 XP,
   and a local 0.6.1 ZIP with 20 files, 1,517,384 bytes (~1,482 KiB), SHA-256
-  `e9aaa4ad57032279377f7f78f0f1f6c458de760a5e49aaa7ea7d6ff486bb170a`
+  `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`
   (the hash may change on the final build).
 - **Publication status:** 0.6.1 is local/unpublished. itch.io and the Playgama
   sandbox still serve 0.5.1; CrazyGames is paused until 2026-11-26; GameFlare
