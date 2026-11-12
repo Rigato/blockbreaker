@@ -86,6 +86,7 @@ export class HudOverlay {
   private readonly resultsKicker: HTMLElement;
   private readonly resultsTitle: HTMLElement;
   private readonly resultsPhase: HTMLElement;
+  private readonly resultsSparks: HTMLElement;
   private readonly resultsEndless: HTMLElement;
   private readonly resultsScore: HTMLElement;
   private readonly resultsTime: HTMLElement;
@@ -178,6 +179,11 @@ export class HudOverlay {
     this.resultsPhase = document.createElement('p');
     this.resultsPhase.className = 'overlay__phase';
 
+    this.resultsSparks = document.createElement('p');
+    this.resultsSparks.className = 'overlay__sparks';
+    this.resultsSparks.id = 'results-sparks';
+    this.resultsSparks.hidden = true;
+
     this.resultsEndless = document.createElement('p');
     this.resultsEndless.className = 'overlay__endless';
     this.resultsEndless.hidden = true;
@@ -242,6 +248,7 @@ export class HudOverlay {
       this.resultsTitle,
       this.resultsPhase,
       summary,
+      this.resultsSparks,
       this.resultsEndless,
       this.resultsEnding,
       perksTitle,
@@ -361,6 +368,8 @@ export class HudOverlay {
     this.resultsBestTime.textContent = formatTime(result.bestTimeMs);
     this.resultsLevel.textContent = String(result.level);
 
+    this.renderSparks(result);
+
     this.renderEnding(result.ending ?? null);
 
     const showNext = !endless && result.victory && result.nextPhaseId !== null;
@@ -370,6 +379,23 @@ export class HudOverlay {
 
     const kicker = this.resultsKicker.textContent ?? '';
     this.resultsPanel.setAttribute('aria-label', `${kicker} · ${result.phaseName}`);
+  }
+
+  private renderSparks(result: PhaseResult): void {
+    const earned = result.sparksEarned;
+    if (earned === undefined) {
+      this.resultsSparks.hidden = true;
+      this.resultsSparks.textContent = '';
+      return;
+    }
+
+    this.resultsSparks.hidden = false;
+    this.resultsSparks.textContent =
+      result.sparksTotal === undefined
+        ? en.resultsSparksNoTotal.replace('{{earned}}', String(earned))
+        : en.resultsSparks
+            .replace('{{earned}}', String(earned))
+            .replace('{{total}}', String(result.sparksTotal));
   }
 
   private renderEnding(ending: PhaseResult['ending']): void {

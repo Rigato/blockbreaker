@@ -881,6 +881,27 @@ export class BlockBreakerGame implements GameCommands {
     }
   }
 
+  /** Debug-only: adds Sparks, persists the save and refreshes the menu. */
+  debugAddSparks(amount: number): void {
+    const earned = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+    if (earned === 0) return;
+
+    this.save = {
+      ...this.save,
+      meta: {
+        sparks: this.save.meta.sparks + earned,
+        unlocks: [...this.save.meta.unlocks],
+      },
+      updatedAt: Date.now(),
+    };
+    void this.saveRepository.save(this.save).catch((error: unknown) => {
+      console.warn('[save] could not persist debug sparks', error);
+    });
+
+    gameEvents.emit('meta:changed', this.getMetaState());
+    this.syncHud(true);
+  }
+
   /** Debug-only deterministic defeat for E2E/layout QA. */
   debugDefeat(): void {
     if (this.phase === 'menu' || this.phase === 'run-complete' || this.phase === 'defeat') {

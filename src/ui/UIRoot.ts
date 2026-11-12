@@ -21,6 +21,7 @@ import { Orientation } from './Orientation';
 import { PhaseSelect } from './PhaseSelect';
 import { ReviveDialog } from './ReviveDialog';
 import { SettingsDialog } from './SettingsDialog';
+import { WorkshopDialog } from './WorkshopDialog';
 
 export interface UIRootOptions {
   root: HTMLElement;
@@ -72,6 +73,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     onSettings: handleSettings,
     onHowToPlay: handleHowToPlay,
     onAbout: handleAbout,
+    onWorkshop: handleWorkshop,
     storageWarning: storageUnavailable,
     onStorageInfo: handleStorageInfo,
   });
@@ -108,6 +110,12 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   const about = new AboutDialog({
     root: options.root,
     onClose: () => menu.focusPlay(),
+  });
+
+  const workshop = new WorkshopDialog({
+    root: options.root,
+    controller,
+    onClose: () => menu.focusWorkshop(),
   });
 
   const hud = new Hud({ root: options.root, controller });
@@ -156,6 +164,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     infoDialog.close();
     howToPlay.close();
     about.close();
+    workshop.close();
     phaseInfo = readPhaseInfo();
     phaseSelect.open(phaseInfo, selectedPhaseId);
   }
@@ -169,6 +178,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     infoDialog.close();
     howToPlay.close();
     about.close();
+    workshop.close();
     phaseSelect.close();
     controller.startEndless();
   }
@@ -177,6 +187,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     settings.close();
     howToPlay.close();
     about.close();
+    workshop.close();
     infoDialog.open({
       title: en.endlessLockedTitle,
       body: en.endlessLockedBody,
@@ -189,6 +200,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     settings.close();
     howToPlay.close();
     about.close();
+    workshop.close();
     infoDialog.open({
       title: en.storageWarningTitle,
       body: en.storageWarningBody,
@@ -201,6 +213,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     infoDialog.close();
     howToPlay.close();
     about.close();
+    workshop.close();
     settings.open(lastSnapshot);
   }
 
@@ -209,6 +222,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     settings.close();
     infoDialog.close();
     about.close();
+    workshop.close();
     howToPlay.open();
   }
 
@@ -217,7 +231,17 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     settings.close();
     infoDialog.close();
     howToPlay.close();
+    workshop.close();
     about.open();
+  }
+
+  function handleWorkshop(): void {
+    phaseSelect.close();
+    settings.close();
+    infoDialog.close();
+    howToPlay.close();
+    about.close();
+    workshop.open();
   }
 
   const applySnapshot = (snapshot: HudSnapshot): void => {
@@ -237,6 +261,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       infoDialog.close();
       howToPlay.close();
       about.close();
+      workshop.close();
     }
 
     if (snapshot.phase === 'menu') {
@@ -288,6 +313,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       infoDialog.dispose();
       howToPlay.dispose();
       about.dispose();
+      workshop.dispose();
       hud.dispose();
       overlay.dispose();
       levelUp.dispose();

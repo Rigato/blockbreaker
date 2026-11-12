@@ -377,6 +377,15 @@ export class DebugPanel {
     xpActions.append(addXp20, addXp100);
     section.append(xpActions);
 
+    const sparkActions = document.createElement('div');
+    sparkActions.className = 'debug__button-row';
+
+    const addSparks20 = makeButton(`${en.debugAddSparks} +20`, 'debug__button');
+    addSparks20.addEventListener('click', () => this.controller.debugAddSparks(20));
+
+    sparkActions.append(addSparks20);
+    section.append(sparkActions);
+
     const perkLabel = document.createElement('span');
     perkLabel.className = 'debug__label';
     perkLabel.textContent = en.debugForcePerk;

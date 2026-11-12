@@ -534,6 +534,8 @@ export interface GameCommands {
   debugGrantPerk(perkId: string): void;
   /** Debug-only: grants XP, triggering queued level ups. */
   debugAddXp(amount: number): void;
+  /** Debug-only: adds Sparks to the persisted meta progression. */
+  debugAddSparks(amount: number): void;
   /** Debug-only: ends the current run in defeat immediately. */
   debugDefeat(): void;
   /** Debug-only: ends the current phase in victory immediately. */

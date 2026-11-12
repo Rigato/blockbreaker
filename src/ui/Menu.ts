@@ -13,6 +13,7 @@ export interface MenuOptions {
   onSettings: () => void;
   onHowToPlay: () => void;
   onAbout: () => void;
+  onWorkshop: () => void;
   storageWarning: boolean;
   onStorageInfo: () => void;
 }
@@ -59,6 +60,7 @@ export class Menu {
   private readonly onSettings: () => void;
   private readonly onHowToPlay: () => void;
   private readonly onAbout: () => void;
+  private readonly onWorkshop: () => void;
   private readonly onStorageInfo: () => void;
 
   private readonly section: HTMLElement;
@@ -73,6 +75,9 @@ export class Menu {
   private readonly howToPlayButton: HTMLButtonElement;
   private readonly settingsButton: HTMLButtonElement;
   private readonly aboutButton: HTMLButtonElement;
+  private readonly workshopButton: HTMLButtonElement;
+  private readonly workshopSparks: HTMLElement;
+  private readonly workshopReady: HTMLElement;
   private readonly storageButton: HTMLButtonElement;
 
   private nodes: HTMLElement[] = [];
@@ -88,6 +93,7 @@ export class Menu {
     this.onSettings = options.onSettings;
     this.onHowToPlay = options.onHowToPlay;
     this.onAbout = options.onAbout;
+    this.onWorkshop = options.onWorkshop;
     this.onStorageInfo = options.onStorageInfo;
 
     const section = document.createElement('section');
@@ -235,6 +241,44 @@ export class Menu {
 
     modes.append(campaign, endless);
 
+    // --- Workshop strip ----------------------------------------------------
+    const workshopButton = document.createElement('button');
+    this.workshopButton = workshopButton;
+    workshopButton.type = 'button';
+    workshopButton.id = 'workshop-button';
+    workshopButton.className = 'menu__workshop';
+    workshopButton.addEventListener('click', this.handleWorkshop);
+
+    const workshopMain = document.createElement('span');
+    workshopMain.className = 'menu__workshop-main';
+
+    const workshopMark = document.createElement('span');
+    workshopMark.className = 'menu__workshop-mark';
+    workshopMark.setAttribute('aria-hidden', 'true');
+
+    const workshopTitle = document.createElement('span');
+    workshopTitle.className = 'menu__workshop-title';
+    workshopTitle.textContent = en.menuWorkshop;
+
+    workshopMain.append(workshopMark, workshopTitle);
+
+    const workshopMeta = document.createElement('span');
+    workshopMeta.className = 'menu__workshop-meta';
+
+    const workshopSparks = document.createElement('span');
+    this.workshopSparks = workshopSparks;
+    workshopSparks.className = 'menu__workshop-sparks';
+    workshopSparks.textContent = en.menuWorkshopSparks.replace('{{sparks}}', '0');
+
+    const workshopReady = document.createElement('span');
+    this.workshopReady = workshopReady;
+    workshopReady.className = 'menu__workshop-ready';
+    workshopReady.textContent = en.menuWorkshopReady;
+    workshopReady.hidden = true;
+
+    workshopMeta.append(workshopSparks, workshopReady);
+    workshopButton.append(workshopMain, workshopMeta);
+
     // Discreet storage notice. Only mounted when the platform reports memory
     // storage, so normal players never see it.
     const storageButton = document.createElement('button');
@@ -331,7 +375,7 @@ export class Menu {
 
     footer.append(footerNav, version);
 
-    section.append(brand, modes, storageButton, footer);
+    section.append(brand, modes, workshopButton, storageButton, footer);
     options.root.append(section);
   }
 
@@ -340,6 +384,7 @@ export class Menu {
     this.updateNodes(phases);
     this.updateCampaign(snapshot, phases);
     this.updateEndless(snapshot);
+    this.updateWorkshop(snapshot);
   }
 
   setHidden(hidden: boolean): void {
@@ -350,12 +395,17 @@ export class Menu {
     this.campaignButton.focus({ preventScroll: true });
   }
 
+  focusWorkshop(): void {
+    this.workshopButton.focus({ preventScroll: true });
+  }
+
   dispose(): void {
     this.campaignButton.removeEventListener('click', this.handleCampaign);
     this.endlessButton.removeEventListener('click', this.handleEndless);
     this.howToPlayButton.removeEventListener('click', this.handleHowToPlay);
     this.settingsButton.removeEventListener('click', this.handleSettings);
     this.aboutButton.removeEventListener('click', this.handleAbout);
+    this.workshopButton.removeEventListener('click', this.handleWorkshop);
     this.storageButton.removeEventListener('click', this.handleStorageInfo);
     this.section.remove();
   }
@@ -440,6 +490,17 @@ export class Menu {
     this.campaignButton.dataset.progress = complete ? 'complete' : cleared > 0 ? 'started' : 'fresh';
   }
 
+  private updateWorkshop(snapshot: HudSnapshot): void {
+    const sparks = snapshot.sparks ?? 0;
+    this.workshopSparks.textContent = en.menuWorkshopSparks.replace(
+      '{{sparks}}',
+      String(sparks),
+    );
+    const ready = snapshot.workshopReady === true;
+    this.workshopReady.hidden = !ready;
+    this.workshopButton.classList.toggle('is-ready', ready);
+  }
+
   private updateEndless(snapshot: HudSnapshot): void {
     this.endlessUnlocked = snapshot.endlessUnlocked;
     const locked = !snapshot.endlessUnlocked;
@@ -493,6 +554,11 @@ export class Menu {
   private readonly handleAbout = (): void => {
     this.aboutButton.blur();
     this.onAbout();
+  };
+
+  private readonly handleWorkshop = (): void => {
+    this.workshopButton.blur();
+    this.onWorkshop();
   };
 
   private readonly handleStorageInfo = (): void => {
