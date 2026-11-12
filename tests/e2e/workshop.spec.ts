@@ -58,8 +58,19 @@ test.describe('workshop', () => {
     const strip = page.locator('#workshop-button');
     await expect(strip).toBeVisible();
     await expect(strip).toContainText('Workshop');
+    await expect(strip).toContainText('Unlock perks');
     await expect(strip).toContainText('0 Sparks');
     await expect(strip.locator('.menu__workshop-ready')).toBeHidden();
+    await expect(strip.locator('.menu__workshop-count')).toContainText('10 / 22');
+    await expect(strip.locator('.menu__workshop-left')).toHaveText('12 left');
+    await expect(strip).toHaveAttribute(
+      'aria-label',
+      'Workshop, 10 of 22 perks unlocked, 0 Sparks',
+    );
+    const initialProgress = await strip
+      .locator('.menu__workshop-progress-fill')
+      .evaluate((element) => element.getBoundingClientRect().width);
+    expect(initialProgress).toBeGreaterThan(0);
 
     await openWorkshop(page);
     const workshop = page.locator('.workshop:not([hidden])');
@@ -104,6 +115,10 @@ test.describe('workshop', () => {
     await addSparks(page, 20);
     await expect(strip).toContainText('20 Sparks');
     await expect(strip.locator('.menu__workshop-ready')).toBeVisible();
+    await expect(strip.locator('.menu__workshop-count')).toContainText('10 / 22');
+    const progressBefore = await strip
+      .locator('.menu__workshop-progress-fill')
+      .evaluate((element) => element.getBoundingClientRect().width);
 
     await openWorkshop(page);
     const card = page.locator(SECOND_CHANCE);
@@ -121,6 +136,12 @@ test.describe('workshop', () => {
     await expect(page.locator('.workshop')).toBeHidden();
     await expect(strip).toContainText('8 Sparks');
     await expect(strip.locator('.menu__workshop-ready')).toBeHidden();
+    await expect(strip.locator('.menu__workshop-count')).toContainText('11 / 22');
+    await expect(strip.locator('.menu__workshop-left')).toHaveText('11 left');
+    const progressAfter = await strip
+      .locator('.menu__workshop-progress-fill')
+      .evaluate((element) => element.getBoundingClientRect().width);
+    expect(progressAfter).toBeGreaterThan(progressBefore);
 
     // Sparks and the unlock are already on disk before the reload.
     await expect
@@ -130,6 +151,8 @@ test.describe('workshop', () => {
     await page.goto('/?debug=1');
     await waitForMenu(page);
     await expect(strip).toContainText('8 Sparks');
+    await expect(strip.locator('.menu__workshop-count')).toContainText('11 / 22');
+    await expect(strip.locator('.menu__workshop-left')).toHaveText('11 left');
 
     await openWorkshop(page);
     await expect(page.locator('#workshop-sparks')).toHaveText('8 Sparks');
@@ -253,7 +276,33 @@ test.describe('workshop layout', () => {
       await expectInsideViewport(page, '#campaign-button');
       await expectInsideViewport(page, '#endless-button');
       await expectInsideViewport(page, '#workshop-button');
+      await expectInsideViewport(page, '.menu__modes');
       await expectInsideViewport(page, '.menu__footer');
+
+      const structure = await page.evaluate(() => {
+        const modes = document.querySelector('.menu__modes');
+        const footer = document.querySelector('.menu__footer');
+        return {
+          modeIds: [...(modes?.children ?? [])].map((child) => child.id),
+          workshopInFooter: Boolean(footer?.querySelector('#workshop-button')),
+        };
+      });
+      expect(structure.modeIds).toEqual([
+        'campaign-button',
+        'endless-button',
+        'workshop-button',
+      ]);
+      expect(structure.workshopInFooter).toBe(false);
+
+      const card = await page.locator('#workshop-button').boundingBox();
+      const footer = await page.locator('.menu__footer').boundingBox();
+      expect(card).not.toBeNull();
+      expect(footer).not.toBeNull();
+      if (card && footer) {
+        expect(card.width).toBeLessThanOrEqual(330);
+        expect(card.height).toBeGreaterThanOrEqual(58);
+        expect(card.y + card.height).toBeLessThanOrEqual(footer.y);
+      }
 
       await page.locator('#workshop-button').click();
       await expect(page.locator('.workshop:not([hidden])')).toBeVisible();

@@ -61,6 +61,9 @@ test.describe('layout matrix', () => {
       await expectNoScroll(page);
       await expectInsideViewport(page, '.menu');
       await expectInsideViewport(page, '#game-shell');
+      await expect(page.locator('#workshop-button')).toBeVisible();
+      await expectInsideViewport(page, '.menu__modes');
+      await expectInsideViewport(page, '#workshop-button');
 
       await collapseDebugPanel(page);
       await page.locator('#campaign-button').click();

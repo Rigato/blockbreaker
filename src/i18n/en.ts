@@ -56,8 +56,13 @@ export const en = {
   storageWarningConfirm: 'Got it',
 
   menuWorkshop: 'Workshop',
+  menuWorkshopSub: 'Unlock perks',
   menuWorkshopSparks: '{{sparks}} Sparks',
   menuWorkshopReady: 'Ready',
+  menuWorkshopUnlocked: 'unlocked',
+  menuWorkshopLeft: '{{left}} left',
+  menuWorkshopAria:
+    'Workshop, {{unlocked}} of {{total}} perks unlocked, {{sparks}} Sparks',
   workshopTitle: 'Workshop',
   workshopSubtitle: 'Spend Sparks to unlock perks',
   workshopSparks: '{{sparks}} Sparks',

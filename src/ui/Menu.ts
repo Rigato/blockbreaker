@@ -47,10 +47,22 @@ const ABOUT_SVG =
   '<path d="M12 7.6h.01"/>' +
   '</svg>';
 
+/** Workshop / lab flask with a small spark, drawn inline (no image assets). */
+const WORKSHOP_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+  '<path d="M9.4 3.4h5.2"/>' +
+  '<path d="M10.4 3.4v4.8l-4 6.8a2.4 2.4 0 0 0 2.1 3.6h7a2.4 2.4 0 0 0 2.1-3.6l-4-6.8V3.4"/>' +
+  '<path d="M7.1 14.2h9.8"/>' +
+  '<path d="M18.1 3.1l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6Z" ' +
+  'fill="currentColor" stroke="none"/>' +
+  '</svg>';
+
 /**
- * Title screen: brand, two mode cards (Campaign primary, Endless secondary)
- * and a footer with How to play / Settings / About us entry points. The menu
- * only renders state; UIRoot decides what each card starts.
+ * Title screen: brand, three cards (Campaign primary, Endless secondary,
+ * Workshop progression) and a footer with How to play / Settings / About us
+ * entry points. The menu only renders state; UIRoot decides what each card
+ * starts.
  */
 export class Menu {
   private readonly controller: GameCommands;
@@ -78,6 +90,9 @@ export class Menu {
   private readonly workshopButton: HTMLButtonElement;
   private readonly workshopSparks: HTMLElement;
   private readonly workshopReady: HTMLElement;
+  private readonly workshopCountValue: HTMLElement;
+  private readonly workshopLeft: HTMLElement;
+  private readonly workshopProgressFill: HTMLElement;
   private readonly storageButton: HTMLButtonElement;
 
   private nodes: HTMLElement[] = [];
@@ -239,31 +254,38 @@ export class Menu {
     endless.append(endlessBody, endlessStat, endlessLockNote);
     endless.addEventListener('click', this.handleEndless);
 
-    modes.append(campaign, endless);
-
-    // --- Workshop strip ----------------------------------------------------
+    // Workshop card (progression surface, after Endless).
     const workshopButton = document.createElement('button');
     this.workshopButton = workshopButton;
     workshopButton.type = 'button';
     workshopButton.id = 'workshop-button';
     workshopButton.className = 'menu__workshop';
+    workshopButton.setAttribute('aria-label', en.menuWorkshop);
     workshopButton.addEventListener('click', this.handleWorkshop);
 
-    const workshopMain = document.createElement('span');
-    workshopMain.className = 'menu__workshop-main';
+    const workshopIcon = document.createElement('span');
+    workshopIcon.className = 'menu__workshop-icon';
+    workshopIcon.setAttribute('aria-hidden', 'true');
+    workshopIcon.innerHTML = WORKSHOP_SVG;
 
-    const workshopMark = document.createElement('span');
-    workshopMark.className = 'menu__workshop-mark';
-    workshopMark.setAttribute('aria-hidden', 'true');
+    const workshopText = document.createElement('span');
+    workshopText.className = 'menu__workshop-text';
 
     const workshopTitle = document.createElement('span');
     workshopTitle.className = 'menu__workshop-title';
     workshopTitle.textContent = en.menuWorkshop;
 
-    workshopMain.append(workshopMark, workshopTitle);
+    const workshopSub = document.createElement('span');
+    workshopSub.className = 'menu__workshop-sub';
+    workshopSub.textContent = en.menuWorkshopSub;
 
-    const workshopMeta = document.createElement('span');
-    workshopMeta.className = 'menu__workshop-meta';
+    workshopText.append(workshopTitle, workshopSub);
+
+    const workshopSide = document.createElement('span');
+    workshopSide.className = 'menu__workshop-side';
+
+    const workshopTop = document.createElement('span');
+    workshopTop.className = 'menu__workshop-top';
 
     const workshopSparks = document.createElement('span');
     this.workshopSparks = workshopSparks;
@@ -276,8 +298,45 @@ export class Menu {
     workshopReady.textContent = en.menuWorkshopReady;
     workshopReady.hidden = true;
 
-    workshopMeta.append(workshopSparks, workshopReady);
-    workshopButton.append(workshopMain, workshopMeta);
+    workshopTop.append(workshopSparks, workshopReady);
+
+    const workshopCount = document.createElement('span');
+    workshopCount.className = 'menu__workshop-count';
+
+    const workshopCountValue = document.createElement('span');
+    this.workshopCountValue = workshopCountValue;
+    workshopCountValue.className = 'menu__workshop-count-value';
+    workshopCountValue.textContent = '0 / 0';
+
+    const workshopCountLabel = document.createElement('span');
+    workshopCountLabel.className = 'menu__workshop-count-label';
+    workshopCountLabel.textContent = en.menuWorkshopUnlocked;
+
+    workshopCount.append(workshopCountValue, workshopCountLabel);
+
+    const workshopLeft = document.createElement('span');
+    this.workshopLeft = workshopLeft;
+    workshopLeft.className = 'menu__workshop-left';
+
+    workshopSide.append(workshopTop, workshopCount, workshopLeft);
+
+    const workshopProgress = document.createElement('span');
+    workshopProgress.className = 'menu__workshop-progress';
+    workshopProgress.setAttribute('aria-hidden', 'true');
+
+    const workshopProgressFill = document.createElement('span');
+    this.workshopProgressFill = workshopProgressFill;
+    workshopProgressFill.className = 'menu__workshop-progress-fill';
+    workshopProgress.append(workshopProgressFill);
+
+    workshopButton.append(
+      workshopIcon,
+      workshopText,
+      workshopSide,
+      workshopProgress,
+    );
+
+    modes.append(campaign, endless, workshopButton);
 
     // Discreet storage notice. Only mounted when the platform reports memory
     // storage, so normal players never see it.
@@ -375,7 +434,7 @@ export class Menu {
 
     footer.append(footerNav, version);
 
-    section.append(brand, modes, workshopButton, storageButton, footer);
+    section.append(brand, modes, storageButton, footer);
     options.root.append(section);
   }
 
@@ -492,10 +551,29 @@ export class Menu {
 
   private updateWorkshop(snapshot: HudSnapshot): void {
     const sparks = snapshot.sparks ?? 0;
+    const unlocked = Math.max(0, snapshot.perksUnlocked ?? 0);
+    const total = Math.max(0, snapshot.perksTotal ?? 0);
+    const left = Math.max(0, total - unlocked);
+    const progress = total > 0 ? Math.min(1, unlocked / total) : 0;
+
     this.workshopSparks.textContent = en.menuWorkshopSparks.replace(
       '{{sparks}}',
       String(sparks),
     );
+    this.workshopCountValue.textContent = `${unlocked} / ${total}`;
+    this.workshopLeft.textContent = en.menuWorkshopLeft.replace(
+      '{{left}}',
+      String(left),
+    );
+    this.workshopProgressFill.style.width = `${(progress * 100).toFixed(2)}%`;
+    this.workshopButton.setAttribute(
+      'aria-label',
+      en.menuWorkshopAria
+        .replace('{{unlocked}}', String(unlocked))
+        .replace('{{total}}', String(total))
+        .replace('{{sparks}}', String(sparks)),
+    );
+
     const ready = snapshot.workshopReady === true;
     this.workshopReady.hidden = !ready;
     this.workshopButton.classList.toggle('is-ready', ready);
