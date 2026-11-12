@@ -438,6 +438,8 @@ release/                   Generated ZIP + manifest (not committed)
 - [Current handoff — v0.5.1](docs/handoff-v0.5.1.md)
 - [Archived handoff — v0.4.0](docs/handoff-v0.4.0.md)
 - [Web publishing guide](docs/spec-tecnica-publicacao.md) — strategy, portals, architecture, ads, save and QA
+- [Perk and metaprogression design](docs/perks-e-metaprogressao.md) — v0.6.0 catalog review and horizontal meta
+- [v0.6.0 implementation plan](docs/plano-v0.6.0-metaprogressao.md) — phases, gates and acceptance criteria
 - [Build and release runbook](docs/build-release.md)
 - [Portal metadata](docs/release/portal-metadata.md)
 - [Submission checklist](docs/release/submission-checklist.md)
