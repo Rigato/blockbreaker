@@ -171,7 +171,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   `p5w2` and `p6w4`. A failed time limit ends the run; `noLaser` disables only
   that wave.
 - **19 perks:** the original 11 plus Critical Strike, Laser Focus, Overcharge,
-  Combo Master, Second Chance, Bomb Ball, Boss Bane and Swift Ball. Builds have
+  Momentum, Second Chance, Bombardier, Boss Slayer and Hot Streak. Builds have
   intended synergies (laser, damage, XP/score, defence, explosions).
 - **Second Chance:** one revive per run with a fresh ball. It consumes a single
   charge and does not create per-ball lives.

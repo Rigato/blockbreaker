@@ -229,12 +229,16 @@ export class RunState implements ProgressionService {
       critMultiplier,
       laserWidthStep,
       laserCooldownStep,
-      comboStep,
+      momentumDamageStep,
+      momentumDamageCapPerLevel,
+      momentumXpStep,
+      momentumXpCapPerLevel,
       reviveCharges,
-      bombEvery,
-      bossDamageStep,
-      swiftBallStep,
-      swiftScoreStep,
+      bombardierEvery,
+      bossSlayerEvery,
+      hotStreakHits,
+      hotStreakDamageStep,
+      hotStreakDurationMs,
     } = GAME_CONFIG.perks;
 
     const widePaddle = this.levelOf('wide_paddle');
@@ -248,8 +252,8 @@ export class RunState implements ProgressionService {
     const critLevel = this.levelOf('critical_strike');
     const laserFocusLevel = this.levelOf('laser_focus');
     const overchargeLevel = this.levelOf('overcharge');
-    const comboLevel = this.levelOf('combo_master');
-    const swiftLevel = this.levelOf('swift_ball');
+    const momentumLevel = this.levelOf('momentum');
+    const hotStreakLevel = this.levelOf('hot_streak');
     const laserCooldownMultiplier = Math.max(
       0.6,
       1 - laserCooldownStep * overchargeLevel,
@@ -280,13 +284,20 @@ export class RunState implements ProgressionService {
     modifiers.laserTargetBonus = laserFocusLevel;
     modifiers.laserWidthMultiplier = 1 + laserWidthStep * laserFocusLevel;
     modifiers.laserCooldownMultiplier = laserCooldownMultiplier;
-    modifiers.comboStep = comboLevel > 0 ? comboStep : 0;
-    modifiers.comboMax = comboStep * comboLevel;
+    modifiers.momentumDamageStep = momentumLevel > 0 ? momentumDamageStep : 0;
+    modifiers.momentumDamageCap = momentumDamageCapPerLevel * momentumLevel;
+    modifiers.momentumXpStep = momentumLevel > 0 ? momentumXpStep : 0;
+    modifiers.momentumXpCap = momentumXpCapPerLevel * momentumLevel;
     modifiers.reviveCharges = this.levelOf('second_chance') > 0 ? reviveCharges : 0;
-    modifiers.bombEvery = this.levelOf('bomb_ball') > 0 ? bombEvery : null;
-    modifiers.bossDamageBonus = bossDamageStep * this.levelOf('boss_bane');
-    modifiers.ballSpeedMultiplier = 1 + swiftBallStep * swiftLevel;
-    modifiers.scoreMultiplier = 1 + swiftScoreStep * swiftLevel;
+    modifiers.bombardierEvery =
+      this.levelOf('bombardier') > 0 ? bombardierEvery : null;
+    modifiers.bossSlayerEvery =
+      this.levelOf('boss_slayer') > 0 ? bossSlayerEvery : null;
+    modifiers.hotStreakHits = hotStreakLevel > 0 ? hotStreakHits : 0;
+    modifiers.hotStreakDamage = hotStreakDamageStep * hotStreakLevel;
+    modifiers.hotStreakDurationMs = hotStreakLevel > 0 ? hotStreakDurationMs : 0;
+    modifiers.ballSpeedMultiplier = 1;
+    modifiers.scoreMultiplier = 1;
 
     return modifiers;
   }

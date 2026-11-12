@@ -188,10 +188,16 @@ describe('M2 derived modifiers', () => {
     expect(modifiers.laserTargetBonus).toBe(0);
     expect(modifiers.laserWidthMultiplier).toBe(1);
     expect(modifiers.laserCooldownMultiplier).toBe(1);
-    expect(modifiers.comboStep).toBe(0);
-    expect(modifiers.comboMax).toBe(0);
+    expect(modifiers.momentumDamageStep).toBe(0);
+    expect(modifiers.momentumDamageCap).toBe(0);
+    expect(modifiers.momentumXpStep).toBe(0);
+    expect(modifiers.momentumXpCap).toBe(0);
     expect(modifiers.reviveCharges).toBe(0);
-    expect(modifiers.bombEvery).toBeNull();
+    expect(modifiers.bombardierEvery).toBeNull();
+    expect(modifiers.bossSlayerEvery).toBeNull();
+    expect(modifiers.hotStreakHits).toBe(0);
+    expect(modifiers.hotStreakDamage).toBe(0);
+    expect(modifiers.hotStreakDurationMs).toBe(0);
     expect(modifiers.bossDamageBonus).toBe(0);
     expect(modifiers.ballSpeedMultiplier).toBe(1);
     expect(modifiers.scoreMultiplier).toBe(1);
@@ -215,10 +221,16 @@ describe('M2 derived modifiers', () => {
       laserTargetBonus: 0,
       laserWidthMultiplier: 1,
       laserCooldownMultiplier: 1,
-      comboStep: 0,
-      comboMax: 0,
+      momentumDamageStep: 0,
+      momentumDamageCap: 0,
+      momentumXpStep: 0,
+      momentumXpCap: 0,
       reviveCharges: 0,
-      bombEvery: null,
+      bombardierEvery: null,
+      bossSlayerEvery: null,
+      hotStreakHits: 0,
+      hotStreakDamage: 0,
+      hotStreakDurationMs: 0,
       bossDamageBonus: 0,
       ballSpeedMultiplier: 1,
       scoreMultiplier: 1,
@@ -286,13 +298,31 @@ describe('v0.2.0 derived modifiers', () => {
     expect(run.modifiers.laserCooldown).toBeNull();
   });
 
-  it('derives the Combo Master step and cap', () => {
+  it('derives Momentum damage and XP steps and caps by level', () => {
     const run = progressed();
-    run.grantPerk('combo_master');
-    run.grantPerk('combo_master');
-    run.grantPerk('combo_master');
-    expect(run.modifiers.comboStep).toBeCloseTo(0.05);
-    expect(run.modifiers.comboMax).toBeCloseTo(0.15);
+    expect(run.modifiers.momentumDamageStep).toBe(0);
+    expect(run.modifiers.momentumDamageCap).toBe(0);
+    expect(run.modifiers.momentumXpStep).toBe(0);
+    expect(run.modifiers.momentumXpCap).toBe(0);
+
+    run.grantPerk('momentum');
+    expect(run.modifiers.momentumDamageStep).toBeCloseTo(0.01);
+    expect(run.modifiers.momentumDamageCap).toBeCloseTo(0.05);
+    expect(run.modifiers.momentumXpStep).toBeCloseTo(0.02);
+    expect(run.modifiers.momentumXpCap).toBeCloseTo(0.1);
+
+    run.grantPerk('momentum');
+    expect(run.modifiers.momentumDamageCap).toBeCloseTo(0.1);
+    expect(run.modifiers.momentumXpCap).toBeCloseTo(0.2);
+
+    run.grantPerk('momentum');
+    expect(run.modifiers.momentumDamageCap).toBeCloseTo(0.15);
+    expect(run.modifiers.momentumXpCap).toBeCloseTo(0.3);
+
+    const maxed = run.grantPerk('momentum');
+    expect(maxed.perk.level).toBe(3);
+    expect(run.modifiers.momentumDamageCap).toBeCloseTo(0.15);
+    expect(run.modifiers.momentumXpCap).toBeCloseTo(0.3);
   });
 
   it('grants a revive charge and no ball from Second Chance', () => {
@@ -302,24 +332,37 @@ describe('v0.2.0 derived modifiers', () => {
     expect(run.modifiers.reviveCharges).toBe(1);
   });
 
-  it('enables Bomb Ball drops and scales Boss Bane damage', () => {
+  it('arms Bombardier and Boss Slayer at their unique levels', () => {
     const run = progressed();
-    expect(run.modifiers.bombEvery).toBeNull();
-    run.grantPerk('bomb_ball');
-    expect(run.modifiers.bombEvery).toBe(12);
+    expect(run.modifiers.bombardierEvery).toBeNull();
+    expect(run.modifiers.bossSlayerEvery).toBeNull();
 
-    run.grantPerk('boss_bane');
-    expect(run.modifiers.bossDamageBonus).toBe(1);
-    run.grantPerk('boss_bane');
-    expect(run.modifiers.bossDamageBonus).toBe(2);
+    run.grantPerk('bombardier');
+    expect(run.modifiers.bombardierEvery).toBe(12);
+    expect(run.grantPerk('bombardier').perk.level).toBe(1);
+
+    run.grantPerk('boss_slayer');
+    expect(run.modifiers.bossSlayerEvery).toBe(10);
+    expect(run.grantPerk('boss_slayer').perk.level).toBe(1);
   });
 
-  it('scales ball speed and score with Swift Ball', () => {
+  it('scales Hot Streak damage without changing ball speed or score', () => {
     const run = progressed();
-    run.grantPerk('swift_ball');
-    run.grantPerk('swift_ball');
-    expect(run.modifiers.ballSpeedMultiplier).toBeCloseTo(1.12);
-    expect(run.modifiers.scoreMultiplier).toBeCloseTo(1.2);
+    expect(run.modifiers.hotStreakHits).toBe(0);
+    expect(run.modifiers.hotStreakDamage).toBe(0);
+    expect(run.modifiers.hotStreakDurationMs).toBe(0);
+
+    run.grantPerk('hot_streak');
+    expect(run.modifiers.hotStreakHits).toBe(5);
+    expect(run.modifiers.hotStreakDamage).toBe(1);
+    expect(run.modifiers.hotStreakDurationMs).toBe(3000);
+
+    run.grantPerk('hot_streak');
+    expect(run.modifiers.hotStreakDamage).toBe(2);
+    expect(run.modifiers.hotStreakDurationMs).toBe(3000);
+    expect(run.modifiers.ballSpeedMultiplier).toBe(1);
+    expect(run.modifiers.scoreMultiplier).toBe(1);
+    expect(run.grantPerk('hot_streak').perk.level).toBe(2);
   });
 
   it('hides Prism Laser dependants until Prism Laser is acquired', () => {
@@ -389,11 +432,11 @@ describe('M2 run lifecycle', () => {
       'critical_strike',
       'laser_focus',
       'overcharge',
-      'combo_master',
+      'momentum',
       'second_chance',
-      'bomb_ball',
-      'boss_bane',
-      'swift_ball',
+      'bombardier',
+      'boss_slayer',
+      'hot_streak',
     ]);
   });
 });

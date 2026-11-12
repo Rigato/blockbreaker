@@ -136,9 +136,9 @@ describe('special blocks', () => {
     expect(world.events.some((event) => event.type === 'explosion')).toBe(true);
   });
 
-  it('starts the Bomb Ball count when the perk is acquired', () => {
+  it('starts the Bombardier count when the perk is acquired', () => {
     const world = makeWorld({
-      id: 'bomb-counter',
+      id: 'bombardier-counter',
       name: 'Counter',
       rows: ['11111', '11111', '11111', '11111', '11111'],
       legend: { '1': 'crystal' },
@@ -149,15 +149,16 @@ describe('special blocks', () => {
       world.damageBlock(world.blocks[0]!, 1);
     }
     world.drainEvents();
-    world.applyRunModifiers({ ...BASE_RUN_MODIFIERS, bombEvery: 12 });
+    world.applyRunModifiers({ ...BASE_RUN_MODIFIERS, bombardierEvery: 12 });
 
     world.damageBlock(world.blocks[0]!, 1);
-    expect(world.events.some((event) => event.type === 'explosion')).toBe(false);
+    expect(world.bombardierArmed).toBe(false);
 
     for (let index = 0; index < 11; index += 1) {
       world.damageBlock(world.blocks[0]!, 1);
     }
-    expect(world.events.some((event) => event.type === 'explosion')).toBe(true);
+    expect(world.bombardierArmed).toBe(true);
+    expect(world.events.some((event) => event.type === 'explosion')).toBe(false);
   });
 
   it('linked blocks share damage with every member of their group', () => {

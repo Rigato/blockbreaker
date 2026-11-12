@@ -149,14 +149,26 @@ export interface RunModifiers {
   laserWidthMultiplier: number;
   /** Multiplier applied to the laser cooldown (lower is faster). */
   laserCooldownMultiplier: number;
-  /** Score/XP bonus added per combo step (fraction). */
-  comboStep: number;
-  /** Maximum combo bonus (fraction). */
-  comboMax: number;
+  /** Momentum: damage bonus fraction added per consecutive block hit. */
+  momentumDamageStep: number;
+  /** Momentum: maximum damage bonus fraction. */
+  momentumDamageCap: number;
+  /** Momentum: XP bonus fraction added per consecutive block hit. */
+  momentumXpStep: number;
+  /** Momentum: maximum XP bonus fraction. */
+  momentumXpCap: number;
   /** Remaining Second Chance revives for the run. */
   reviveCharges: number;
-  /** Blocks destroyed between Bomb Ball drops; null when not acquired. */
-  bombEvery: number | null;
+  /** Blocks destroyed between Bombardier charges; null when not acquired. */
+  bombardierEvery: number | null;
+  /** Blocks destroyed between Boss Slayer charges; null when not acquired. */
+  bossSlayerEvery: number | null;
+  /** Hot Streak: consecutive block hits required to trigger; 0 when not acquired. */
+  hotStreakHits: number;
+  /** Hot Streak: bonus ball damage while the buff is active. */
+  hotStreakDamage: number;
+  /** Hot Streak: buff duration in milliseconds. */
+  hotStreakDurationMs: number;
   /** Extra damage against bosses. */
   bossDamageBonus: number;
   /** Multiplier applied to the base ball speed. */

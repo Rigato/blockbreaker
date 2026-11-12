@@ -317,7 +317,11 @@ export class World {
   private linkDepth = 0;
   /** Perk-local kill counters, reset when the perk is acquired. */
   private explosiveCoreProgress = 0;
-  private bombBallProgress = 0;
+  private bombardierKillProgress = 0;
+  private bombardierChargeArmed = false;
+  private bossSlayerKillProgress = 0;
+  private bossSlayerChargeArmed = false;
+  private hotStreakRemainingMsValue = 0;
   private rng: () => number;
   private readonly eventLog: SimEvent[] = [];
   private readonly eventHistory: SimEvent[] = [];
@@ -447,6 +451,35 @@ export class World {
     return this.destroyedBlocks;
   }
 
+  /** True when Bombardier's next direct block hit will detonate. */
+  get bombardierArmed(): boolean {
+    return this.bombardierChargeArmed;
+  }
+
+  /** Destroyed blocks counted towards the next Bombardier charge. */
+  get bombardierProgress(): number {
+    return this.bombardierKillProgress;
+  }
+
+  /** True when Boss Slayer's next direct boss hit deals bonus damage. */
+  get bossSlayerArmed(): boolean {
+    return this.bossSlayerChargeArmed;
+  }
+
+  /** Destroyed blocks counted towards the next Boss Slayer charge. */
+  get bossSlayerProgress(): number {
+    return this.bossSlayerKillProgress;
+  }
+
+  /** Remaining Hot Streak duration in milliseconds; 0 when inactive. */
+  get hotStreakRemainingMs(): number {
+    return this.hotStreakRemainingMsValue;
+  }
+
+  get hotStreakActive(): boolean {
+    return this.hotStreakRemainingMsValue > 0;
+  }
+
   get isRunning(): boolean {
     return this.running;
   }
@@ -524,7 +557,11 @@ export class World {
     this.explosionDepth = 0;
     this.linkDepth = 0;
     this.explosiveCoreProgress = 0;
-    this.bombBallProgress = 0;
+    this.bombardierKillProgress = 0;
+    this.bombardierChargeArmed = false;
+    this.bossSlayerKillProgress = 0;
+    this.bossSlayerChargeArmed = false;
+    this.hotStreakRemainingMsValue = 0;
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
     this.multiplierState = null;
     this.corrosionStacks = 0;
@@ -575,7 +612,10 @@ export class World {
    */
   applyRunModifiers(modifiers: RunModifiers): void {
     const previousExplosiveEvery = this.modifiersValue.explosiveEvery;
-    const previousBombEvery = this.modifiersValue.bombEvery;
+    const previousBombardierEvery = this.modifiersValue.bombardierEvery;
+    const previousBossSlayerEvery = this.modifiersValue.bossSlayerEvery;
+    const previousHotStreakDamage = this.modifiersValue.hotStreakDamage;
+    const previousHotStreakHits = this.modifiersValue.hotStreakHits;
     this.modifiersValue = {
       ...modifiers,
       paddleWidthMultiplier: Math.max(0.1, modifiers.paddleWidthMultiplier),
@@ -602,13 +642,22 @@ export class World {
       laserTargetBonus: Math.max(0, Math.floor(modifiers.laserTargetBonus)),
       laserWidthMultiplier: Math.max(0.1, modifiers.laserWidthMultiplier),
       laserCooldownMultiplier: Math.max(0.1, modifiers.laserCooldownMultiplier),
-      comboStep: Math.max(0, modifiers.comboStep),
-      comboMax: Math.max(0, modifiers.comboMax),
+      momentumDamageStep: Math.max(0, modifiers.momentumDamageStep),
+      momentumDamageCap: Math.max(0, modifiers.momentumDamageCap),
+      momentumXpStep: Math.max(0, modifiers.momentumXpStep),
+      momentumXpCap: Math.max(0, modifiers.momentumXpCap),
       reviveCharges: Math.max(0, Math.floor(modifiers.reviveCharges)),
-      bombEvery:
-        modifiers.bombEvery !== null && modifiers.bombEvery > 0
-          ? Math.floor(modifiers.bombEvery)
+      bombardierEvery:
+        modifiers.bombardierEvery !== null && modifiers.bombardierEvery > 0
+          ? Math.floor(modifiers.bombardierEvery)
           : null,
+      bossSlayerEvery:
+        modifiers.bossSlayerEvery !== null && modifiers.bossSlayerEvery > 0
+          ? Math.floor(modifiers.bossSlayerEvery)
+          : null,
+      hotStreakHits: Math.max(0, Math.floor(modifiers.hotStreakHits)),
+      hotStreakDamage: Math.max(0, Math.floor(modifiers.hotStreakDamage)),
+      hotStreakDurationMs: Math.max(0, modifiers.hotStreakDurationMs),
       bossDamageBonus: Math.max(0, modifiers.bossDamageBonus),
       ballSpeedMultiplier: Math.max(0.1, modifiers.ballSpeedMultiplier),
       scoreMultiplier: Math.max(0, modifiers.scoreMultiplier),
@@ -617,8 +666,19 @@ export class World {
     if (previousExplosiveEvery !== this.modifiersValue.explosiveEvery) {
       this.explosiveCoreProgress = 0;
     }
-    if (previousBombEvery !== this.modifiersValue.bombEvery) {
-      this.bombBallProgress = 0;
+    if (previousBombardierEvery !== this.modifiersValue.bombardierEvery) {
+      this.bombardierKillProgress = 0;
+      this.bombardierChargeArmed = false;
+    }
+    if (previousBossSlayerEvery !== this.modifiersValue.bossSlayerEvery) {
+      this.bossSlayerKillProgress = 0;
+      this.bossSlayerChargeArmed = false;
+    }
+    if (
+      previousHotStreakDamage !== this.modifiersValue.hotStreakDamage ||
+      previousHotStreakHits !== this.modifiersValue.hotStreakHits
+    ) {
+      this.hotStreakRemainingMsValue = 0;
     }
 
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
@@ -900,6 +960,13 @@ export class World {
         this.multiplierState = null;
         this.pushEvent({ type: 'multiplier:expired' });
       }
+    }
+
+    if (this.hotStreakRemainingMsValue > 0) {
+      this.hotStreakRemainingMsValue = Math.max(
+        0,
+        this.hotStreakRemainingMsValue - dtMs,
+      );
     }
 
     if (this.timeLimitRemainingMsValue !== null) {
@@ -1692,12 +1759,71 @@ export class World {
     ball.horizontalMs = 0;
     ball.aboveBlocksMs = 0;
 
-    let damage = this.modifiersValue.ballDamage;
+    // The hit itself advances the combo; damage and XP from this hit use the
+    // new streak count, matching the original combo timing.
+    this.comboCount += 1;
+    this.pushEvent({
+      type: 'combo:changed',
+      count: this.comboCount,
+      multiplier: this.momentumDamageMultiplier(this.comboCount),
+    });
+
+    let damage = this.ballHitDamage(this.comboCount);
     if (this.modifiersValue.critChance > 0 && this.rng() < this.modifiersValue.critChance) {
       damage = Math.max(1, Math.round(damage * this.modifiersValue.critMultiplier));
       this.pushEvent({ type: 'critical', blockId: block.id, ballId: ball.id, damage });
     }
+
+    // Bombardier consumes its charge on this direct hit, even if the blast is
+    // resolved after the ball damage.
+    const detonateBombardier = this.bombardierChargeArmed;
+    if (detonateBombardier) this.bombardierChargeArmed = false;
+
     this.applyDamage(block, damage, ball.id);
+
+    if (detonateBombardier) this.detonateBombardier(block, ball.id);
+    this.refreshHotStreak();
+  }
+
+  /** Ball damage including Momentum and an active Hot Streak buff. */
+  private ballHitDamage(comboCount: number): number {
+    const momentum = this.momentumDamageMultiplier(comboCount);
+    const hotStreak =
+      this.hotStreakRemainingMsValue > 0 ? this.modifiersValue.hotStreakDamage : 0;
+    return Math.max(1, this.modifiersValue.ballDamage * momentum + hotStreak);
+  }
+
+  private momentumDamageMultiplier(comboCount: number): number {
+    return (
+      1 +
+      Math.min(
+        this.modifiersValue.momentumDamageCap,
+        Math.max(0, comboCount) * this.modifiersValue.momentumDamageStep,
+      )
+    );
+  }
+
+  private momentumXpMultiplier(): number {
+    return (
+      1 +
+      Math.min(
+        this.modifiersValue.momentumXpCap,
+        this.comboCount * this.modifiersValue.momentumXpStep,
+      )
+    );
+  }
+
+  /** Activates or refreshes Hot Streak once the streak threshold is reached. */
+  private refreshHotStreak(): void {
+    if (
+      this.modifiersValue.hotStreakHits <= 0 ||
+      this.modifiersValue.hotStreakDamage <= 0 ||
+      this.modifiersValue.hotStreakDurationMs <= 0
+    ) {
+      return;
+    }
+    if (this.comboCount < this.modifiersValue.hotStreakHits) return;
+    this.hotStreakRemainingMsValue = this.modifiersValue.hotStreakDurationMs;
   }
 
   /**
@@ -1755,28 +1881,20 @@ export class World {
     }
   }
 
-  private comboMultiplier(): number {
-    return 1 + Math.min(this.modifiersValue.comboMax, this.comboCount * this.modifiersValue.comboStep);
-  }
-
   private resetCombo(): void {
     if (this.comboCount === 0) return;
     this.comboCount = 0;
-    this.pushEvent({ type: 'combo:changed', count: 0, multiplier: this.comboMultiplier() });
+    this.pushEvent({
+      type: 'combo:changed',
+      count: 0,
+      multiplier: this.momentumDamageMultiplier(0),
+    });
   }
 
   private destroyBlock(block: Block, sourceBallId: number): void {
     const index = this.blocks.indexOf(block);
     if (index < 0) return;
     this.blocks.splice(index, 1);
-
-    this.comboCount += 1;
-    const comboMult = this.comboMultiplier();
-    this.pushEvent({
-      type: 'combo:changed',
-      count: this.comboCount,
-      multiplier: comboMult,
-    });
 
     const type = BLOCK_TYPES[block.type];
     const multiplier = this.multiplierState;
@@ -1785,13 +1903,19 @@ export class World {
       Math.round(
         type.score *
           this.modifiersValue.scoreMultiplier *
-          comboMult *
           (multiplier?.scoreFactor ?? 1),
       ),
     );
+    // Keep two decimals so small percentage bonuses such as Momentum's +2%
+    // are not rounded away on 1 HP blocks.
     const xp = Math.max(
       0,
-      Math.round(block.maxHp * comboMult * (multiplier?.xpFactor ?? 1)),
+      Math.round(
+        block.maxHp *
+          this.momentumXpMultiplier() *
+          (multiplier?.xpFactor ?? 1) *
+          100,
+      ) / 100,
     );
 
     this.score += score;
@@ -1805,6 +1929,9 @@ export class World {
       xp,
     });
 
+    this.maybeArmBombardier();
+    this.maybeArmBossSlayer();
+
     const behavior = type.behavior;
     if (behavior === 'multiplier') {
       this.activateMultiplier();
@@ -1812,7 +1939,6 @@ export class World {
       this.explode(block, 2, 1, sourceBallId);
     }
 
-    this.maybeBomb(block, sourceBallId);
     this.maybeExplodePerk(block, sourceBallId);
   }
 
@@ -1831,8 +1957,14 @@ export class World {
     });
   }
 
-  /** Explosive blocks and Bomb Ball: 1-cell ring damage. */
-  private explode(block: Block, damage: number, radiusCells: number, sourceBallId: number): void {
+  /** Explosive blocks, Explosive Core and Bombardier: 1-cell blast. */
+  private explode(
+    block: Block,
+    damage: number,
+    radiusCells: number,
+    sourceBallId: number,
+    centerDamage = damage,
+  ): void {
     if (this.explosionDepth >= 3) return;
     const radius = this.cell * radiusCells;
     const centerX = block.left + block.width / 2;
@@ -1860,7 +1992,10 @@ export class World {
 
     this.explosionDepth += 1;
     try {
-      for (const target of targets) this.applyDamage(target, damage, sourceBallId);
+      for (const target of targets) {
+        const isCenter = target.row === block.row && target.col === block.col;
+        this.applyDamage(target, isCenter ? centerDamage : damage, sourceBallId);
+      }
     } finally {
       this.explosionDepth -= 1;
     }
@@ -1875,14 +2010,35 @@ export class World {
     }
   }
 
-  /** Bomb Ball: every `bombEvery` kills drops a 1-cell, 2-damage blast. */
-  private maybeBomb(block: Block, sourceBallId: number): void {
-    const every = this.modifiersValue.bombEvery;
-    if (every === null) return;
-    this.bombBallProgress += 1;
-    if (this.bombBallProgress < every) return;
-    this.bombBallProgress = 0;
-    this.explode(block, 2, 1, sourceBallId);
+  /** Bombardier: a charged 3x3 blast (2 center, 1 around). */
+  private detonateBombardier(block: Block, sourceBallId: number): void {
+    this.explode(
+      block,
+      GAME_CONFIG.perks.bombardierRingDamage,
+      1,
+      sourceBallId,
+      GAME_CONFIG.perks.bombardierCenterDamage,
+    );
+  }
+
+  /** Bombardier: every `bombardierEvery` kills arms the next block hit. */
+  private maybeArmBombardier(): void {
+    const every = this.modifiersValue.bombardierEvery;
+    if (every === null || this.bombardierChargeArmed) return;
+    this.bombardierKillProgress += 1;
+    if (this.bombardierKillProgress < every) return;
+    this.bombardierKillProgress = 0;
+    this.bombardierChargeArmed = true;
+  }
+
+  /** Boss Slayer: every `bossSlayerEvery` kills arms the next boss hit. */
+  private maybeArmBossSlayer(): void {
+    const every = this.modifiersValue.bossSlayerEvery;
+    if (every === null || this.bossSlayerChargeArmed) return;
+    this.bossSlayerKillProgress += 1;
+    if (this.bossSlayerKillProgress < every) return;
+    this.bossSlayerKillProgress = 0;
+    this.bossSlayerChargeArmed = true;
   }
 
   /** Explosive Core: every `explosiveEvery` kills, blast the 1-cell ring. */
@@ -2004,7 +2160,12 @@ export class World {
   }
 
   private handleBossBallHit(ball: Ball, boss: Boss): void {
-    let damage = this.modifiersValue.ballDamage + this.modifiersValue.bossDamageBonus;
+    let damage =
+      this.ballHitDamage(this.comboCount) + this.modifiersValue.bossDamageBonus;
+    if (this.bossSlayerChargeArmed) {
+      damage += GAME_CONFIG.perks.bossSlayerDamage;
+      this.bossSlayerChargeArmed = false;
+    }
     if (this.modifiersValue.critChance > 0 && this.rng() < this.modifiersValue.critChance) {
       damage = Math.max(1, Math.round(damage * this.modifiersValue.critMultiplier));
       this.pushEvent({ type: 'critical', blockId: boss.id, ballId: ball.id, damage });

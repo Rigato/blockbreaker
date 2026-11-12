@@ -1786,8 +1786,8 @@ export class BlockBreakerGame implements GameCommands {
             multiplier:
               1 +
               Math.min(
-                modifiers.comboMax,
-                this.world.comboCount * modifiers.comboStep,
+                modifiers.momentumDamageCap,
+                this.world.comboCount * modifiers.momentumDamageStep,
               ),
           }
         : null;
