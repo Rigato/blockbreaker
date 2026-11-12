@@ -3,9 +3,11 @@ import type {
   HudSnapshot,
   LaserHudState,
   PerkState,
+  SparksReason,
   TutorialState,
 } from '../game/contracts';
 import { GAME_CONFIG } from '../game/config';
+import { gameEvents } from '../game/events';
 import { en } from '../i18n/en';
 import { formatTime } from './format';
 import '../styles/hud-compact.css';
@@ -65,6 +67,8 @@ export class Hud {
   private readonly bossFill: HTMLElement;
   private readonly bossPips: HTMLElement;
   private readonly chips: HTMLElement;
+  private readonly sparksChip: HTMLElement;
+  private readonly sparksToast: HTMLElement;
   private readonly challengeChip: HTMLElement;
   private readonly multiplierChip: HTMLElement;
   private readonly comboChip: HTMLElement;
@@ -89,11 +93,14 @@ export class Hud {
   private ruleTimer: ReturnType<typeof setInterval> | null = null;
   private waveIntroText = '';
   private pulseTimer: ReturnType<typeof setTimeout> | null = null;
+  private sparksPulseTimer: ReturnType<typeof setTimeout> | null = null;
+  private sparksToastTimer: ReturnType<typeof setTimeout> | null = null;
   private levelUpTimer: ReturnType<typeof setTimeout> | null = null;
   private levelUpPhase = false;
   private respawnSeconds = -1;
   private lastWaveId: string | null = null;
   private visible = false;
+  private readonly unsubscribeSparks: () => void;
 
   constructor(options: HudOptions) {
     this.controller = options.controller;
@@ -257,6 +264,11 @@ export class Hud {
     chips.className = 'hud__chips';
     chips.hidden = true;
 
+    const sparksChip = document.createElement('span');
+    this.sparksChip = sparksChip;
+    sparksChip.className = 'hud__chip hud__chip--sparks';
+    sparksChip.hidden = true;
+
     const challengeChip = document.createElement('span');
     this.challengeChip = challengeChip;
     challengeChip.className = 'hud__chip hud__chip--rule';
@@ -273,7 +285,15 @@ export class Hud {
     comboChip.className = 'hud__chip hud__chip--combo';
     comboChip.hidden = true;
 
-    chips.append(challengeChip, multiplierChip, comboChip);
+    const sparksToast = document.createElement('span');
+    this.sparksToast = sparksToast;
+    sparksToast.className = 'hud__spark-toast';
+    sparksToast.hidden = true;
+    sparksToast.setAttribute('role', 'status');
+    sparksToast.setAttribute('aria-live', 'polite');
+    sparksToast.setAttribute('aria-atomic', 'true');
+
+    chips.append(sparksChip, challengeChip, multiplierChip, comboChip, sparksToast);
 
     const pauseButton = document.createElement('button');
     this.pauseButton = pauseButton;
@@ -441,6 +461,10 @@ export class Hud {
     section.append(top, tutorialPanel, footer, perksPopover, waveIntro);
     options.root.append(section);
 
+    this.unsubscribeSparks = gameEvents.on(
+      'sparks:earned',
+      this.handleSparksEarned,
+    );
     document.addEventListener('keydown', this.handleKeydown);
   }
 
@@ -526,6 +550,7 @@ export class Hud {
 
     this.updatePerks(snapshot.perks);
     this.updateBoss(snapshot.boss ?? null);
+    this.updateSparks(snapshot.runSparks ?? 0);
     this.updateRule(snapshot.rule ?? null);
     this.updateMultiplier(snapshot.multiplier ?? null);
     this.updateCombo(snapshot.combo ?? null);
@@ -541,6 +566,7 @@ export class Hud {
       this.closePerks();
       this.stopLaserTimer();
       this.stopRuleTimer();
+      this.clearSparksFeedback();
     } else {
       if (this.laser) this.syncLaserClock();
       if (this.ruleKind === 'timeLimit') {
@@ -553,6 +579,8 @@ export class Hud {
   dispose(): void {
     this.stopLaserTimer();
     this.stopRuleTimer();
+    this.clearSparksFeedback();
+    this.unsubscribeSparks();
     if (this.pulseTimer !== null) clearTimeout(this.pulseTimer);
     this.stopLevelUp();
     this.levelUpPhase = false;
@@ -685,6 +713,101 @@ export class Hud {
     );
   }
 
+  private updateSparks(runSparks: number): void {
+    const total = Math.max(0, Math.floor(runSparks));
+    this.sparksChip.hidden = total <= 0;
+    if (total > 0) {
+      const text = `${en.hudSparks} ${total}`;
+      this.sparksChip.textContent = text;
+      this.sparksChip.setAttribute('aria-label', text);
+      this.sparksChip.title = text;
+    } else {
+      this.sparksChip.textContent = '';
+      this.sparksChip.removeAttribute('aria-label');
+      this.sparksChip.removeAttribute('title');
+    }
+    this.syncChipsVisibility();
+  }
+
+  private readonly handleSparksEarned = ({
+    amount,
+    reason,
+    total,
+  }: {
+    amount: number;
+    reason: SparksReason;
+    total: number;
+  }): void => {
+    if (!this.visible || amount <= 0) return;
+    // The snapshot may not have arrived yet; unhide the chip/chips row first so
+    // the pulse and toast are visible in the same frame as the award.
+    this.updateSparks(total);
+    this.pulseSparks();
+    this.showSparksToast(amount, reason);
+  };
+
+  private pulseSparks(): void {
+    if (this.sparksPulseTimer !== null) clearTimeout(this.sparksPulseTimer);
+    this.sparksChip.classList.remove('is-pulsing');
+    void this.sparksChip.offsetWidth;
+    this.sparksChip.classList.add('is-pulsing');
+    this.sparksPulseTimer = setTimeout(() => {
+      this.sparksPulseTimer = null;
+      this.sparksChip.classList.remove('is-pulsing');
+    }, 520);
+  }
+
+  private showSparksToast(amount: number, reason: SparksReason): void {
+    if (this.sparksToastTimer !== null) clearTimeout(this.sparksToastTimer);
+    const reasonLabel = this.sparksReasonLabel(reason);
+    this.sparksToast.textContent =
+      amount === 1
+        ? en.hudSparkGainOne.replace('{{reason}}', reasonLabel)
+        : en.hudSparkGain
+            .replace('{{amount}}', String(amount))
+            .replace('{{reason}}', reasonLabel);
+    this.sparksToast.hidden = false;
+    this.sparksToast.classList.remove('is-visible');
+    void this.sparksToast.offsetWidth;
+    this.sparksToast.classList.add('is-visible');
+    this.sparksToastTimer = setTimeout(() => {
+      this.sparksToastTimer = null;
+      this.sparksToast.classList.remove('is-visible');
+      this.sparksToast.hidden = true;
+    }, 1200);
+  }
+
+  private clearSparksFeedback(): void {
+    if (this.sparksPulseTimer !== null) {
+      clearTimeout(this.sparksPulseTimer);
+      this.sparksPulseTimer = null;
+    }
+    if (this.sparksToastTimer !== null) {
+      clearTimeout(this.sparksToastTimer);
+      this.sparksToastTimer = null;
+    }
+    this.sparksChip.classList.remove('is-pulsing');
+    this.sparksToast.classList.remove('is-visible');
+    this.sparksToast.hidden = true;
+    this.sparksToast.textContent = '';
+  }
+
+  private sparksReasonLabel(reason: SparksReason): string {
+    switch (reason) {
+      case 'wave':
+        return en.hudSparkReasonWave;
+      case 'boss':
+        return en.hudSparkReasonBoss;
+      case 'clear':
+        return en.hudSparkReasonClear;
+      case 'firstClear':
+        return en.hudSparkReasonFirstClear;
+      case 'combo':
+      default:
+        return en.hudSparkReasonCombo;
+    }
+  }
+
   private updateRule(rule: HudSnapshot['rule'] | null): void {
     this.stopRuleTimer();
     this.ruleKind = rule?.kind ?? null;
@@ -786,7 +909,10 @@ export class Hud {
 
   private syncChipsVisibility(): void {
     this.chips.hidden =
-      this.challengeChip.hidden && this.multiplierChip.hidden && this.comboChip.hidden;
+      this.sparksChip.hidden &&
+      this.challengeChip.hidden &&
+      this.multiplierChip.hidden &&
+      this.comboChip.hidden;
   }
 
   private updateWaveIntro(intro: string | null): void {

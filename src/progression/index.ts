@@ -14,12 +14,18 @@ export {
   parseSettings,
 } from './Save';
 export {
+  COMBO_SPARK_MILESTONES,
   MAX_SPARKS_PER_RUN,
+  SPARKS_PER_BOSS,
+  SPARKS_PER_FIRST_CLEAR,
+  SPARKS_PER_PHASE_CLEAR,
+  RunSparkWaveClaims,
+  capRunSparks,
   getMetaState,
   purchaseUnlock,
   sanitizeMeta,
-  sparksForCampaign,
-  sparksForEndless,
+  sparksForPhaseClear,
+  sparksForWave,
 } from './meta';
 export type { PurchaseUnlockResult } from './meta';
 export {

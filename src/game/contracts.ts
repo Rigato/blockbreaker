@@ -90,6 +90,18 @@ export interface MetaProgress {
   unlocks: string[];
 }
 
+/** Per-source Sparks actually added to the run total, after the cap. */
+export interface SparksBreakdown {
+  waves: number;
+  bosses: number;
+  clear: number;
+  firstClear: number;
+  combo: number;
+}
+
+/** Source of a live Sparks award during a run. */
+export type SparksReason = 'wave' | 'boss' | 'clear' | 'firstClear' | 'combo';
+
 /** Legacy v1 save, kept so `parseSave` can migrate existing players. */
 export interface SaveV1 {
   version: 1;
@@ -343,6 +355,8 @@ export interface PhaseResult {
   bestWave?: number;
   /** Sparks awarded by this finished run. */
   sparksEarned?: number;
+  /** Per-source Sparks actually added by this run, after the cap. */
+  sparksBreakdown?: SparksBreakdown;
   /** Persisted Sparks after applying this result. */
   sparksTotal?: number;
 }
@@ -405,6 +419,8 @@ export interface HudSnapshot {
   endlessUnlocked: boolean;
   /** Persisted Sparks available in the Workshop. */
   sparks?: number;
+  /** Sparks earned so far in the active run, before persistence. */
+  runSparks?: number;
   /** Perks available to this save (starters plus bought unlocks). */
   perksUnlocked?: number;
   /** Total perks in the fixed catalog. */
@@ -550,6 +566,8 @@ export interface GameCommands {
   debugAddXp(amount: number): void;
   /** Debug-only: adds Sparks to the persisted meta progression. */
   debugAddSparks(amount: number): void;
+  /** Debug-only: awards Sparks to the active run and refreshes the HUD. */
+  debugAwardRunSparks(amount: number, reason: SparksReason): void;
   /** Debug-only: ends the current run in defeat immediately. */
   debugDefeat(): void;
   /** Debug-only: ends the current phase in victory immediately. */

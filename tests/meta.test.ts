@@ -10,12 +10,16 @@ import {
 } from '../src/content/meta';
 import { PERK_BY_ID, PERK_CATALOG } from '../src/content/perks';
 import {
+  COMBO_SPARK_MILESTONES,
   MAX_SPARKS_PER_RUN,
+  SPARKS_PER_BOSS,
+  RunSparkWaveClaims,
+  capRunSparks,
   getMetaState,
   purchaseUnlock,
   sanitizeMeta,
-  sparksForCampaign,
-  sparksForEndless,
+  sparksForPhaseClear,
+  sparksForWave,
 } from '../src/progression/meta';
 
 function emptyMeta(): MetaProgress {
@@ -224,48 +228,101 @@ describe('purchaseUnlock', () => {
 });
 
 describe('Sparks formulas', () => {
-  it('awards campaign waves, bosses and the first clear bonus', () => {
-    expect(
-      sparksForCampaign({ waves: 5, bosses: 1, firstClear: false }),
-    ).toBe(8);
-    expect(
-      sparksForCampaign({ waves: 5, bosses: 1, firstClear: true }),
-    ).toBe(13);
-    expect(
-      sparksForCampaign({ waves: 0, bosses: 0, firstClear: true }),
-    ).toBe(5);
+  it('exposes the new economy constants', () => {
+    expect(MAX_SPARKS_PER_RUN).toBe(250);
+    expect(SPARKS_PER_BOSS).toBe(3);
+    expect(COMBO_SPARK_MILESTONES).toEqual([5, 10, 15]);
   });
 
-  it('caps campaign Sparks at 30 per run', () => {
-    expect(
-      sparksForCampaign({ waves: 22, bosses: 3, firstClear: true }),
-    ).toBe(MAX_SPARKS_PER_RUN);
-    expect(MAX_SPARKS_PER_RUN).toBe(30);
+  it('awards a wave base of one plus one per twelve destroyed blocks', () => {
+    expect(sparksForWave({ blocks: 0, comboMilestones: 0 })).toBe(1);
+    expect(sparksForWave({ blocks: 11, comboMilestones: 0 })).toBe(1);
+    expect(sparksForWave({ blocks: 12, comboMilestones: 0 })).toBe(2);
+    expect(sparksForWave({ blocks: 23, comboMilestones: 0 })).toBe(2);
+    expect(sparksForWave({ blocks: 24, comboMilestones: 0 })).toBe(3);
+    expect(sparksForWave({ blocks: 100, comboMilestones: 0 })).toBe(9);
   });
 
-  it('ignores negative and fractional campaign inputs', () => {
-    expect(
-      sparksForCampaign({ waves: -4, bosses: -2, firstClear: false }),
-    ).toBe(0);
-    expect(
-      sparksForCampaign({ waves: 3.9, bosses: 1.8, firstClear: false }),
-    ).toBe(6);
+  it('adds one Spark per combo milestone, capped at three', () => {
+    expect(sparksForWave({ blocks: 0, comboMilestones: 1 })).toBe(2);
+    expect(sparksForWave({ blocks: 0, comboMilestones: 2 })).toBe(3);
+    expect(sparksForWave({ blocks: 0, comboMilestones: 3 })).toBe(4);
+    expect(sparksForWave({ blocks: 0, comboMilestones: 9 })).toBe(4);
+    expect(sparksForWave({ blocks: 24, comboMilestones: 3 })).toBe(6);
   });
 
-  it('awards Endless Sparks per wave plus three every five waves', () => {
-    expect(sparksForEndless({ wave: 0 })).toBe(0);
-    expect(sparksForEndless({ wave: 1 })).toBe(1);
-    expect(sparksForEndless({ wave: 5 })).toBe(8);
-    expect(sparksForEndless({ wave: 6 })).toBe(9);
-    expect(sparksForEndless({ wave: 10 })).toBe(16);
-    expect(sparksForEndless({ wave: 20 })).toBe(30);
+  it('ignores negative and fractional wave inputs', () => {
+    expect(sparksForWave({ blocks: -4, comboMilestones: 0 })).toBe(1);
+    expect(sparksForWave({ blocks: 3.9, comboMilestones: 2.8 })).toBe(3);
+    expect(sparksForWave({ blocks: Number.NaN, comboMilestones: 0 })).toBe(1);
   });
 
-  it('caps Endless Sparks at 30 and clamps invalid waves', () => {
-    expect(sparksForEndless({ wave: 99 })).toBe(MAX_SPARKS_PER_RUN);
-    expect(sparksForEndless({ wave: -7 })).toBe(0);
-    expect(sparksForEndless({ wave: Number.NaN })).toBe(0);
-    expect(sparksForEndless({ wave: 5.9 })).toBe(8);
+  it('pays six per phase clear and twelve on the first clear', () => {
+    expect(sparksForPhaseClear(false)).toBe(6);
+    expect(sparksForPhaseClear(true)).toBe(12);
+  });
+
+  it('caps an accumulated run at 250 Sparks', () => {
+    expect(capRunSparks(0)).toBe(0);
+    expect(capRunSparks(249)).toBe(249);
+    expect(capRunSparks(250)).toBe(250);
+    expect(capRunSparks(251)).toBe(MAX_SPARKS_PER_RUN);
+    expect(capRunSparks(999)).toBe(MAX_SPARKS_PER_RUN);
+    expect(capRunSparks(-3)).toBe(0);
+    expect(capRunSparks(Number.NaN)).toBe(0);
+    expect(capRunSparks(12.9)).toBe(12);
+  });
+});
+
+describe('RunSparkWaveClaims', () => {
+  it('claims on first award and keeps paying later awards in the same attempt', () => {
+    const claims = new RunSparkWaveClaims();
+
+    claims.beginWave('phase-1:p1w1');
+    expect(claims.isBlocked).toBe(false);
+    expect(claims.claim()).toBe(true);
+    expect(claims.claim()).toBe(true);
+    expect(claims.claim()).toBe(true);
+
+    claims.beginWave('phase-1:p1w2');
+    expect(claims.isBlocked).toBe(false);
+    expect(claims.claim()).toBe(true);
+  });
+
+  it('suppresses every award when the same wave is reloaded in the run', () => {
+    const claims = new RunSparkWaveClaims();
+
+    claims.beginWave('phase-1:p1w1');
+    expect(claims.claim()).toBe(true);
+
+    claims.beginWave('phase-2:p2w1');
+    expect(claims.claim()).toBe(true);
+
+    claims.beginWave('phase-1:p1w1');
+    expect(claims.isBlocked).toBe(true);
+    expect(claims.claim()).toBe(false);
+    expect(claims.claim()).toBe(false);
+
+    claims.beginWave('endless:1');
+    expect(claims.isBlocked).toBe(false);
+    expect(claims.claim()).toBe(true);
+    claims.beginWave('endless:1');
+    expect(claims.isBlocked).toBe(true);
+    expect(claims.claim()).toBe(false);
+  });
+
+  it('clears all claims only when a new run resets the tracker', () => {
+    const claims = new RunSparkWaveClaims();
+
+    claims.beginWave('phase-1:p1w1');
+    expect(claims.claim()).toBe(true);
+    claims.beginWave('phase-1:p1w1');
+    expect(claims.claim()).toBe(false);
+
+    claims.reset();
+    claims.beginWave('phase-1:p1w1');
+    expect(claims.isBlocked).toBe(false);
+    expect(claims.claim()).toBe(true);
   });
 });
 

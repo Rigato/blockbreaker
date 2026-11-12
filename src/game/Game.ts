@@ -20,6 +20,8 @@ import type {
   SaveV2,
   SettingsV1,
   SimTuning,
+  SparksBreakdown,
+  SparksReason,
   TestWaveInfo,
   TutorialPosition,
   TutorialStep,
@@ -47,10 +49,15 @@ import {
   getPhaseStats,
 } from '../progression/Save';
 import {
+  COMBO_SPARK_MILESTONES,
+  SPARKS_PER_BOSS,
+  SPARKS_PER_PHASE_CLEAR,
+  RunSparkWaveClaims,
+  capRunSparks,
   getMetaState as buildMetaState,
   purchaseUnlock,
-  sparksForCampaign,
-  sparksForEndless,
+  sparksForPhaseClear,
+  sparksForWave,
 } from '../progression/meta';
 import { RunState } from '../progression/RunState';
 import { GameScene } from '../render/GameScene';
@@ -90,6 +97,10 @@ const NO_ADS: AdsService = {
   },
 };
 
+function emptySparksBreakdown(): SparksBreakdown {
+  return { waves: 0, bosses: 0, clear: 0, firstClear: 0, combo: 0 };
+}
+
 function clampWorldHeight(cssWidth: number, cssHeight: number): number {
   if (cssWidth <= 0 || cssHeight <= 0) return GAME_CONFIG.worldHeight.min;
   const raw = Math.round((FIELD_WIDTH * cssHeight) / cssWidth);
@@ -128,6 +139,11 @@ export class BlockBreakerGame implements GameCommands {
   private phaseResult: PhaseResult | null = null;
   private runScore = 0;
   private waveScoreAtStart = 0;
+  private runSparks = 0;
+  private sparksBreakdown: SparksBreakdown = emptySparksBreakdown();
+  private readonly waveSparkClaims = new RunSparkWaveClaims();
+  private waveBlocksDestroyed = 0;
+  private readonly waveComboMilestones = new Set<number>();
   private pendingPerkBalls = 0;
   /** Extra Multiball slots waiting for the player's first launch this wave. */
   private pendingMultiballBalls = 0;
@@ -308,6 +324,7 @@ export class BlockBreakerGame implements GameCommands {
     this.phaseResult = null;
     this.runScore = 0;
     this.waveScoreAtStart = 0;
+    this.resetRunSparks();
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
     this.levelUpRevealAt = 0;
@@ -373,6 +390,7 @@ export class BlockBreakerGame implements GameCommands {
     this.phaseResult = null;
     this.runScore = 0;
     this.waveScoreAtStart = 0;
+    this.resetRunSparks();
     this.pendingPerkBalls = 0;
     this.nextWaveAt = 0;
     this.levelUpRevealAt = 0;
@@ -516,6 +534,7 @@ export class BlockBreakerGame implements GameCommands {
     this.phaseResult = null;
     this.runScore = 0;
     this.waveScoreAtStart = 0;
+    this.resetRunSparks();
     this.pendingPerkBalls = 0;
     this.pendingMultiballBalls = 0;
     this.multiballLaunchArmed = false;
@@ -610,6 +629,7 @@ export class BlockBreakerGame implements GameCommands {
     this.phaseElapsedMs = 0;
     this.phaseResult = null;
     this.runScore = 0;
+    this.resetRunSparks();
     this.phase = 'menu';
     this.pendingMultiballBalls = 0;
     this.multiballLaunchArmed = false;
@@ -903,6 +923,12 @@ export class BlockBreakerGame implements GameCommands {
     this.syncHud(true);
   }
 
+  /** Debug-only: awards Sparks to the active run and refreshes the HUD. */
+  debugAwardRunSparks(amount: number, reason: SparksReason): void {
+    this.awardSparks(amount, reason);
+    this.syncHud(true);
+  }
+
   /** Debug-only deterministic defeat for E2E/layout QA. */
   debugDefeat(): void {
     if (this.phase === 'menu' || this.phase === 'run-complete' || this.phase === 'defeat') {
@@ -1031,6 +1057,8 @@ export class BlockBreakerGame implements GameCommands {
     if (!phase) return;
     const wave = phase.waves[index];
     if (!wave) return;
+    this.resetWaveSparkTracking();
+    this.waveSparkClaims.beginWave(`${phase.id}:${wave.id}`);
     this.currentWaveDef = wave;
     this.world.setSeed(
       (this.runSeed ^ ((index + 1) * 0x9e3779b9)) >>> 0,
@@ -1070,6 +1098,8 @@ export class BlockBreakerGame implements GameCommands {
 
   private loadEndlessWave(waveNumber: number): void {
     const wave = endlessWave(waveNumber, this.runSeed);
+    this.resetWaveSparkTracking();
+    this.waveSparkClaims.beginWave(`endless:${waveNumber}`);
     this.currentWaveIndex = waveNumber - 1;
     this.currentWaveDef = wave;
     this.world.setSeed((this.runSeed ^ ((waveNumber + 1) * 0x9e3779b9)) >>> 0);
@@ -1236,6 +1266,13 @@ export class BlockBreakerGame implements GameCommands {
     const lastCampaignWave =
       this.mode === 'campaign' && waveNumber >= this.currentPhase.waves.length;
 
+    // Combo milestones are paid live from `combo:changed`, so the wave clear
+    // only adds its base amount: 1 + one per twelve destroyed blocks.
+    this.awardSparks(
+      sparksForWave({ blocks: this.waveBlocksDestroyed, comboMilestones: 0 }),
+      'wave',
+    );
+
     // The tutorial finishes with two short "what's next" coach marks before
     // the results screen. Everyone else goes straight to the phase results.
     if (lastCampaignWave && this.currentPhase.tutorial) {
@@ -1336,6 +1373,62 @@ export class BlockBreakerGame implements GameCommands {
     })();
   }
 
+  /** Clears per-run Sparks and the per-wave trackers. */
+  private resetRunSparks(): void {
+    this.runSparks = 0;
+    this.sparksBreakdown = emptySparksBreakdown();
+    this.waveSparkClaims.reset();
+    this.resetWaveSparkTracking();
+  }
+
+  /** Wave counters reset on every load, never on pause or level-up. */
+  private resetWaveSparkTracking(): void {
+    this.waveBlocksDestroyed = 0;
+    this.waveComboMilestones.clear();
+  }
+
+  /**
+   * Adds Sparks to the active run, capped at MAX_SPARKS_PER_RUN. The event
+   * carries the actual amount after the cap and the run total so far.
+   */
+  private awardSparks(amount: number, reason: SparksReason): void {
+    const requested = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+    if (requested === 0) return;
+
+    // Wave, combo and boss rewards belong to the wave attempt. A retried wave
+    // is blocked, while phase-clear rewards still pay on every victory.
+    if (reason === 'wave' || reason === 'boss' || reason === 'combo') {
+      if (!this.waveSparkClaims.claim()) return;
+    }
+
+    const total = capRunSparks(this.runSparks + requested);
+    const actual = total - this.runSparks;
+    if (actual <= 0) return;
+
+    this.runSparks = total;
+    switch (reason) {
+      case 'wave':
+        this.sparksBreakdown.waves += actual;
+        break;
+      case 'boss':
+        this.sparksBreakdown.bosses += actual;
+        break;
+      case 'clear':
+        this.sparksBreakdown.clear += actual;
+        break;
+      case 'firstClear':
+        this.sparksBreakdown.firstClear += actual;
+        break;
+      case 'combo':
+        this.sparksBreakdown.combo += actual;
+        break;
+      default:
+        break;
+    }
+
+    gameEvents.emit('sparks:earned', { amount: actual, reason, total });
+  }
+
   /** Adds Sparks to the persisted meta and returns the new total. */
   private addSparks(amount: number): number {
     const earned = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
@@ -1376,19 +1469,18 @@ export class BlockBreakerGame implements GameCommands {
       timeMs,
     });
 
-    // Waves/bosses only count once completed; the phase clear adds +5 once.
+    // Wave, boss and combo Sparks were awarded as they happened. A victory
+    // adds the phase-clear reward, plus the one-time first-clear bonus.
     const previousStats = getPhaseStats(this.save, phase.id);
-    const completedWaves = victory
-      ? phase.waves.length
-      : Math.max(0, this.currentWaveIndex);
-    const defeatedBosses = phase.waves
-      .slice(0, completedWaves)
-      .filter((wave) => wave.boss !== undefined).length;
-    const sparksEarned = sparksForCampaign({
-      waves: completedWaves,
-      bosses: defeatedBosses,
-      firstClear: victory && previousStats.clears === 0,
-    });
+    if (victory) {
+      const firstClear = previousStats.clears === 0;
+      const phaseClear = sparksForPhaseClear(firstClear);
+      this.awardSparks(SPARKS_PER_PHASE_CLEAR, 'clear');
+      if (phaseClear > SPARKS_PER_PHASE_CLEAR) {
+        this.awardSparks(phaseClear - SPARKS_PER_PHASE_CLEAR, 'firstClear');
+      }
+    }
+    const sparksEarned = this.runSparks;
     const sparksTotal = this.addSparks(sparksEarned);
 
     const provisional: PhaseResult = {
@@ -1407,6 +1499,7 @@ export class BlockBreakerGame implements GameCommands {
       nextPhaseId: nextPhase?.id ?? null,
       ending,
       sparksEarned,
+      sparksBreakdown: { ...this.sparksBreakdown },
       sparksTotal,
     };
 
@@ -1446,7 +1539,7 @@ export class BlockBreakerGame implements GameCommands {
     const wave = Math.max(1, this.currentWaveIndex + 1);
     const score = this.runScore;
     const timeMs = Math.max(0, Math.round(this.phaseElapsedMs));
-    const sparksEarned = sparksForEndless({ wave });
+    const sparksEarned = this.runSparks;
     const sparksTotal = this.addSparks(sparksEarned);
     const updated = applyEndlessResult(this.save, wave, score);
     this.save = updated;
@@ -1470,6 +1563,7 @@ export class BlockBreakerGame implements GameCommands {
       waveReached: wave,
       bestWave: stats.bestWave,
       sparksEarned,
+      sparksBreakdown: { ...this.sparksBreakdown },
       sparksTotal,
     };
     this.phase = 'defeat';
@@ -1702,6 +1796,7 @@ export class BlockBreakerGame implements GameCommands {
       switch (event.type) {
         case 'block:destroyed':
           this.runScore += event.score;
+          this.waveBlocksDestroyed += 1;
           this.runState.addXp(event.xp);
           this.audio.play('block-break');
           break;
@@ -1766,6 +1861,7 @@ export class BlockBreakerGame implements GameCommands {
           this.audio.play('block-damage', { rate: 0.7, volume: 0.8 });
           break;
         case 'boss:defeated':
+          this.awardSparks(SPARKS_PER_BOSS, 'boss');
           this.audio.play('explosion', { rate: 0.6 });
           break;
         case 'boss:attack':
@@ -1778,12 +1874,28 @@ export class BlockBreakerGame implements GameCommands {
           this.audio.play('safety');
           break;
         case 'rule:failed':
+          break;
         case 'combo:changed':
+          this.awardComboMilestones(event.count);
+          break;
         case 'multiplier:expired':
           break;
         default:
           break;
       }
+    }
+  }
+
+  /**
+   * Pays one Spark per combo milestone reached in this wave. The set keeps
+   * each milestone to a single award even after the combo streak resets.
+   */
+  private awardComboMilestones(count: number): void {
+    if (count <= 0) return;
+    for (const milestone of COMBO_SPARK_MILESTONES) {
+      if (count < milestone || this.waveComboMilestones.has(milestone)) continue;
+      this.waveComboMilestones.add(milestone);
+      this.awardSparks(1, 'combo');
     }
   }
 
@@ -1942,6 +2054,7 @@ export class BlockBreakerGame implements GameCommands {
       campaignComplete: this.save.campaignComplete,
       endlessUnlocked: this.save.campaignComplete,
       sparks: meta.sparks,
+      runSparks: this.runSparks,
       perksUnlocked: getUnlockedPerkIds(this.save.meta).length,
       perksTotal: PERK_CATALOG.length,
       workshopReady,

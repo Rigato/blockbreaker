@@ -3,6 +3,7 @@ import type {
   HudSnapshot,
   PerkState,
   PhaseResult,
+  SparksBreakdown,
 } from '../game/contracts';
 import { en } from '../i18n/en';
 import { formatScore, formatTime } from './format';
@@ -87,6 +88,7 @@ export class HudOverlay {
   private readonly resultsTitle: HTMLElement;
   private readonly resultsPhase: HTMLElement;
   private readonly resultsSparks: HTMLElement;
+  private readonly resultsSparksBreakdown: HTMLElement;
   private readonly resultsEndless: HTMLElement;
   private readonly resultsScore: HTMLElement;
   private readonly resultsTime: HTMLElement;
@@ -184,6 +186,11 @@ export class HudOverlay {
     this.resultsSparks.id = 'results-sparks';
     this.resultsSparks.hidden = true;
 
+    this.resultsSparksBreakdown = document.createElement('p');
+    this.resultsSparksBreakdown.className = 'overlay__sparks-breakdown';
+    this.resultsSparksBreakdown.id = 'results-sparks-breakdown';
+    this.resultsSparksBreakdown.hidden = true;
+
     this.resultsEndless = document.createElement('p');
     this.resultsEndless.className = 'overlay__endless';
     this.resultsEndless.hidden = true;
@@ -249,6 +256,7 @@ export class HudOverlay {
       this.resultsPhase,
       summary,
       this.resultsSparks,
+      this.resultsSparksBreakdown,
       this.resultsEndless,
       this.resultsEnding,
       perksTitle,
@@ -386,16 +394,50 @@ export class HudOverlay {
     if (earned === undefined) {
       this.resultsSparks.hidden = true;
       this.resultsSparks.textContent = '';
+      this.renderSparksBreakdown(undefined);
       return;
     }
 
+    const clearIncluded = (result.sparksBreakdown?.clear ?? 0) > 0;
+    const suffix = clearIncluded ? ` · ${en.resultsSparksClearIncluded}` : '';
     this.resultsSparks.hidden = false;
     this.resultsSparks.textContent =
-      result.sparksTotal === undefined
+      (result.sparksTotal === undefined
         ? en.resultsSparksNoTotal.replace('{{earned}}', String(earned))
         : en.resultsSparks
             .replace('{{earned}}', String(earned))
-            .replace('{{total}}', String(result.sparksTotal));
+            .replace('{{total}}', String(result.sparksTotal))) + suffix;
+    this.renderSparksBreakdown(result.sparksBreakdown);
+  }
+
+  private renderSparksBreakdown(breakdown: SparksBreakdown | undefined): void {
+    if (!breakdown) {
+      this.resultsSparksBreakdown.hidden = true;
+      this.resultsSparksBreakdown.textContent = '';
+      return;
+    }
+
+    const parts: string[] = [];
+    if (breakdown.waves > 0) {
+      parts.push(en.resultsSparksWaves.replace('{{amount}}', String(breakdown.waves)));
+    }
+    if (breakdown.bosses > 0) {
+      parts.push(en.resultsSparksBosses.replace('{{amount}}', String(breakdown.bosses)));
+    }
+    if (breakdown.clear > 0) {
+      parts.push(en.resultsSparksClear.replace('{{amount}}', String(breakdown.clear)));
+    }
+    if (breakdown.firstClear > 0) {
+      parts.push(
+        en.resultsSparksFirstClear.replace('{{amount}}', String(breakdown.firstClear)),
+      );
+    }
+    if (breakdown.combo > 0) {
+      parts.push(en.resultsSparksCombo.replace('{{amount}}', String(breakdown.combo)));
+    }
+
+    this.resultsSparksBreakdown.hidden = parts.length === 0;
+    this.resultsSparksBreakdown.textContent = parts.join(' · ');
   }
 
   private renderEnding(ending: PhaseResult['ending']): void {

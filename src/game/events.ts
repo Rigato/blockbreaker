@@ -6,6 +6,7 @@ import type {
   PerkOffer,
   PlatformSource,
   SimTuning,
+  SparksReason,
   Unsubscribe,
 } from './contracts';
 
@@ -35,6 +36,7 @@ export interface GameEventMap {
   'tuning:changed': SimTuning;
   'levelup:offered': { offers: readonly PerkOffer[]; level: number };
   'levelup:closed': { level: number };
+  'sparks:earned': { amount: number; reason: SparksReason; total: number };
   'meta:changed': MetaState;
 }
 

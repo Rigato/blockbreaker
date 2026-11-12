@@ -154,7 +154,84 @@ test.describe('workshop', () => {
 
     const sparks = page.locator('#results-sparks');
     await expect(sparks).toBeVisible();
-    await expect(sparks).toHaveText('+7 Sparks · total 7');
+    await expect(sparks).toHaveText('+12 Sparks · total 12 · phase clear included');
+    await expect(page.locator('#results-sparks-breakdown')).toHaveText(
+      'Clear 6 · First clear 6',
+    );
+  });
+
+  test('HUD shows the run Sparks chip and award toast at 320px', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto('/?debug=1&resetSave=1');
+    await waitForMenu(page);
+    await startPlay(page);
+    // `?debug=1` hides the HUD top bar; restore it for this visual check.
+    await page.evaluate(() => {
+      delete document.documentElement.dataset.debug;
+    });
+
+    const chip = page.locator('.hud__chip--sparks');
+    const toast = page.locator('.hud__spark-toast');
+    await expect(chip).toBeHidden();
+
+    // QA-only shortcut: award through the live run tracker instead of playing a
+    // whole wave, then refresh the snapshot the HUD normally receives.
+    await page.evaluate(() => {
+      const game = (
+        window as unknown as {
+          __bricklike?: {
+            debugAwardRunSparks(amount: number, reason: string): void;
+            getHudState(): { runSparks?: number };
+            restartWave(): void;
+          };
+        }
+      ).__bricklike;
+      if (!game) throw new Error('debug game handle is unavailable');
+      game.debugAwardRunSparks(3, 'combo');
+    });
+
+    await expect(chip).toBeVisible();
+    await expect(chip).toHaveText('Sparks 3');
+    await expectInsideViewport(page, '.hud__chip--sparks');
+    await expect(toast).toBeVisible();
+    await expect(toast).toHaveText('+3 Sparks · Combo');
+    await expect(toast).toBeHidden({ timeout: 3_000 });
+
+    // Retrying the same wave must not pay its Sparks again in this run.
+    const before = await page.evaluate(() => {
+      const game = (
+        window as unknown as {
+          __bricklike?: { getHudState(): { runSparks?: number } };
+        }
+      ).__bricklike;
+      return game?.getHudState().runSparks ?? 0;
+    });
+    expect(before).toBe(3);
+
+    await page.evaluate(() => {
+      const game = (
+        window as unknown as {
+          __bricklike?: {
+            debugAwardRunSparks(amount: number, reason: string): void;
+            getHudState(): { runSparks?: number };
+            restartWave(): void;
+          };
+        }
+      ).__bricklike;
+      if (!game) throw new Error('debug game handle is unavailable');
+      game.restartWave();
+      game.debugAwardRunSparks(3, 'boss');
+    });
+
+    const after = await page.evaluate(() => {
+      const game = (
+        window as unknown as {
+          __bricklike?: { getHudState(): { runSparks?: number } };
+        }
+      ).__bricklike;
+      return game?.getHudState().runSparks ?? 0;
+    });
+    expect(after).toBe(3);
   });
 });
 

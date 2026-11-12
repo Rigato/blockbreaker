@@ -182,14 +182,23 @@ ruim” por uma janela temporária de poder.
 
 | Evento | Sparks |
 |---|---:|
-| Onda concluída | +1 |
+| Onda concluída | `1 + floor(blocos destruídos na onda / 12)` |
+| Combo de 5, 10 e 15 acertos na onda | +1 cada, uma vez por marco por onda (máx. 3) |
 | Chefe derrotado | +3 |
-| Primeira conclusão de fase | +5 |
-| Desafio concluído | +2 (futuro) |
-| Teto por run | 30 |
+| Conclusão de fase | +6 (sempre) |
+| Primeira conclusão da fase | +6 extra (12 no total) |
+| Teto por run | 250 (segurança) |
 
-Uma campanha completa rende ~29 Sparks; uma run curta de 5 ondas rende ~5.
-Primeiro unlock desejado: 1–2 runs.
+Campanha e Endless usam as mesmas recompensas por evento; Endless não tem
+fórmula plana própria. Os valores são concedidos conforme acontecem e o teto de
+250 é aplicado ao total acumulado da run. O teto é uma proteção, não um limite
+normal: uma campanha completa rende ~169 Sparks antes dos bônus de combo, então
+as fases 5 e 6 continuam pagando normalmente.
+
+Exemplos: uma fase curta com 4 ondas e 1 chefe rende pelo menos 4 (ondas) +
+3 (chefe) + 12 (primeira conclusão) = 19 Sparks, antes dos bônus por blocos e
+combo. Uma run de Endless que limpa 5 ondas sem chefe rende pelo menos 5, mais
+os bônus de blocos e combo.
 
 ### 6.2 Custos
 
@@ -201,6 +210,8 @@ Primeiro unlock desejado: 1–2 runs.
 ### 6.3 Regras
 
 - Sparks são salvos no save, não na run.
+- Cada onda paga no máximo uma vez por run: reiniciar uma onda já premiada
+  suprime novas recompensas de onda, combo e chefe daquela tentativa.
 - Não há compra de vantagem permanente.
 - Não há Sparks por ad.
 - O jogador pode acumular e comprar na ordem que quiser dentro do tier.
@@ -239,7 +250,8 @@ Migração de v1:
 - Compra: debita Sparks, grava unlock, emite `meta:changed`, atualiza menu.
 - Perks bloqueadas aparecem no Codex/Workshop com “Como desbloquear”.
 - Sem preview jogável obrigatório nesta versão; descrição e ícone bastam.
-- No results: “Sparks +X” e total.
+- No results: “Sparks +X”, total persistido e quebra por fonte
+  (ondas/chefes/conclusão/primeira conclusão/combo).
 
 ## 9. Ofertas
 
@@ -275,7 +287,7 @@ Migração de v1:
 |---|---|
 | Primeira run pobre | 10 starters, 24 níveis, Foresight + Safety Net |
 | Unlock fraco decepciona | reworks antes de bloquear |
-| Economia lenta | primeiro unlock em 1–2 runs; teto 30 |
+| Economia lenta | primeiro unlock em 1–2 runs; teto 250 |
 | Economia rápida | custos T2/T3 altos; medir |
 | Perk bloqueada parece bug | Workshop visível e Codex com estado |
 | Save antigo quebra | migração v1→v2 + testes |

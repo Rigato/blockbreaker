@@ -2139,6 +2139,7 @@ button {
 }
 
 .hud__chips {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -2178,6 +2179,52 @@ button {
 .hud__chip--rule {
   border-color: rgba(255, 212, 121, 0.5);
   color: var(--gold);
+}
+
+.hud__chip--sparks {
+  border-color: rgba(255, 212, 121, 0.62);
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255, 212, 121, 0.35);
+}
+
+.hud__chip--sparks.is-pulsing {
+  animation: hud-sparks-pulse 520ms ease-out both;
+}
+
+.hud__spark-toast {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 3;
+  max-width: 220px;
+  padding: 2px 7px;
+  border: 1px solid rgba(255, 212, 121, 0.55);
+  border-radius: 4px;
+  background: rgba(20, 15, 4, 0.94);
+  box-shadow: 0 0 12px rgba(255, 212, 121, 0.28);
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: clamp(7px, 1.9cqw, 9px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.hud__spark-toast[hidden] {
+  display: none;
+}
+
+.hud__spark-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .hud__chip--rule.is-no-laser {
@@ -2463,6 +2510,21 @@ button {
   }
   100% {
     box-shadow: 0 0 10px rgba(255, 95, 210, 0.55);
+  }
+}
+
+@keyframes hud-sparks-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255, 212, 121, 0);
+  }
+  35% {
+    transform: scale(1.12);
+    box-shadow: 0 0 14px rgba(255, 212, 121, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255, 212, 121, 0);
   }
 }
 
@@ -4377,7 +4439,8 @@ html[data-debug='1'] .hud__top {
   }
 
   .hud__wave-intro,
-  .hud__chip {
+  .hud__chip,
+  .hud__spark-toast {
     animation: none !important;
     transition: none !important;
   }

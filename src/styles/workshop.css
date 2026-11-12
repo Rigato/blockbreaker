@@ -440,6 +440,24 @@
   display: none;
 }
 
+.overlay__sparks-breakdown {
+  margin: -2px 0 0;
+  padding: 0 4px;
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: clamp(7px, 1.9cqw, 9px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.overlay__sparks-breakdown[hidden] {
+  display: none;
+}
+
 /* --- Motion ---------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: no-preference) {

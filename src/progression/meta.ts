@@ -12,8 +12,20 @@ import {
   type MetaUnlock,
 } from '../content/meta';
 
-/** Maximum Sparks a single campaign or Endless run can award. */
-export const MAX_SPARKS_PER_RUN = 30;
+/** Safety cap for a single campaign or Endless run; normal runs stay below it. */
+export const MAX_SPARKS_PER_RUN = 250;
+
+/** Sparks awarded for defeating a boss. */
+export const SPARKS_PER_BOSS = 3;
+
+/** Sparks awarded by every phase clear, before the first-clear bonus. */
+export const SPARKS_PER_PHASE_CLEAR = 6;
+
+/** Extra Sparks awarded the first time a phase is cleared. */
+export const SPARKS_PER_FIRST_CLEAR = 6;
+
+/** Consecutive block hits that each grant one Spark, once per wave. */
+export const COMBO_SPARK_MILESTONES = [5, 10, 15] as const;
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -78,30 +90,71 @@ export function purchaseUnlock(
   };
 }
 
-/** Sparks for one finished campaign phase, capped per run. */
-export function sparksForCampaign({
-  waves,
-  bosses,
-  firstClear,
+/**
+ * Sparks for clearing one wave: plus one base Spark, one more per twelve
+ * destroyed blocks, and one per combo milestone reached during the wave.
+ */
+export function sparksForWave({
+  blocks,
+  comboMilestones,
 }: {
-  waves: number;
-  bosses: number;
-  firstClear: boolean;
+  blocks: number;
+  comboMilestones: number;
 }): number {
-  const earned =
-    nonNegativeInteger(waves) +
-    nonNegativeInteger(bosses) * 3 +
-    (firstClear ? 5 : 0);
-  return Math.min(MAX_SPARKS_PER_RUN, earned);
+  const destroyed = nonNegativeInteger(blocks);
+  const milestones = Math.min(
+    COMBO_SPARK_MILESTONES.length,
+    nonNegativeInteger(comboMilestones),
+  );
+  return 1 + Math.floor(destroyed / 12) + milestones;
 }
 
-/** Sparks for one finished Endless run: +3 per five waves, capped per run. */
-export function sparksForEndless({ wave }: { wave: number }): number {
-  const reached = nonNegativeInteger(wave);
-  return Math.min(
-    MAX_SPARKS_PER_RUN,
-    reached + Math.floor(reached / 5) * 3,
-  );
+/** Sparks for one phase clear: always six, twelve on the first clear. */
+export function sparksForPhaseClear(firstClear: boolean): number {
+  return SPARKS_PER_PHASE_CLEAR + (firstClear ? SPARKS_PER_FIRST_CLEAR : 0);
+}
+
+/** Clamps an accumulated run total to the per-run cap. */
+export function capRunSparks(amount: number): number {
+  return Math.min(MAX_SPARKS_PER_RUN, nonNegativeInteger(amount));
+}
+
+/**
+ * Tracks which waves have already paid Sparks in one run. A wave claims its
+ * key on the first award; reloading that key later in the same run suppresses
+ * all of its wave, combo and boss awards.
+ */
+export class RunSparkWaveClaims {
+  private readonly claimed = new Set<string>();
+  private currentKey: string | null = null;
+  private blocked = false;
+
+  /** Clears every claim; call only when a new run starts. */
+  reset(): void {
+    this.claimed.clear();
+    this.currentKey = null;
+    this.blocked = false;
+  }
+
+  /** Starts one wave attempt; a previously claimed key is suppressed. */
+  beginWave(key: string): void {
+    this.currentKey = key;
+    this.blocked = this.claimed.has(key);
+  }
+
+  /**
+   * True when the current attempt may award Sparks. The first successful call
+   * claims the current wave, while later calls in the same attempt still pay.
+   */
+  claim(): boolean {
+    if (this.blocked) return false;
+    if (this.currentKey !== null) this.claimed.add(this.currentKey);
+    return true;
+  }
+
+  get isBlocked(): boolean {
+    return this.blocked;
+  }
 }
 
 /** Workshop view built from the catalog, with all twelve current unlocks. */
