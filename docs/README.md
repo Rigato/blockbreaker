@@ -12,6 +12,10 @@ o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
 4. **[Guia de publicação web](spec-tecnica-publicacao.md)** — estratégia,
    arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
    CrazyGames, ads, save, metadata, QA e release.
+5. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — desenho da revisão
+   do catálogo e da primeira camada de meta horizontal.
+6. **[Plano v0.6.0](plano-v0.6.0-metaprogressao.md)** — implementação por fases,
+   gates e critérios de aceite.
 
 ## Operação e release
 
