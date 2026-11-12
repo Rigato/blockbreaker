@@ -8,7 +8,7 @@
 **Publicado em portal:** `0.5.1` no itch.io e no sandbox da Playgama  
 **Tag / GitHub Release:** nenhuma para `0.6.0`; nenhuma tag ou release foi criada  
 **Review build:** <https://rigato.github.io/blockbreaker/> (acompanha a `main`; a
-0.6.0 só aparece depois de um push)  
+0.6.0 já aparece após o push de 2026-11-12)  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>  
 **Repositório:** <https://github.com/Rigato/blockbreaker>  
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`
@@ -227,7 +227,7 @@ Resultados de referência da 0.6.0 (2026-11-12):
 - 20 arquivos; 1.513.834 bytes comprimidos; 3.055.341 bytes descomprimidos.
 - Raiz: `index.html`, `playgama-bridge-config.json`, `playgama-bridge.js`,
   `favicon.svg`.
-- `assets/`: `Game-DC3okkCe.js`, `index-znobdyD4.js`, `index-DGiZFFPW.css`,
+- `assets/`: `Game-TLcMbiI_.js`, `index-REZljkjI.js`, `index-C63t2-_X.css`,
   `Silkscreen-Bold-BHMh3gvp.ttf`, `Silkscreen-Regular-W9-u5Upq.ttf`,
   `.gitkeep`.
 - `bad-decision-games/`: `logo.png`, `logo.webp`.
@@ -264,8 +264,8 @@ playtest humano da 0.6.0.
   2026-11-11. A conta/portal está **pausado até 2026-11-26**; não reenviar antes
   dessa data.
 - **GameFlare:** conta criada, acesso bloqueado; não criar conta duplicada.
-- O GitHub Pages acompanha a `main`; a 0.6.0 só aparece depois de um push, que
-  não foi feito nesta fase.
+- O GitHub Pages acompanha a `main` e já serve a 0.6.0; CI e Deploy ficaram
+  verdes no commit `59103a4` (CI 43291233343; Deploy 43291233520).
 - **Assets de loja:** continuam os da 0.5.1. Revisão humana e eventual
   regeneração para a 0.6.0 seguem pendentes antes de qualquer upload.
 

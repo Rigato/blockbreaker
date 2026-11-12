@@ -29,8 +29,8 @@ Nenhuma tag ou GitHub Release foi criada.
   landscape pelo portal. Não existe campo para declarar portrait no PC.
 - **GameFlare:** conta criada, mas acesso bloqueado; suporte acionado e **sem
   resposta**. A `0.5.1` não foi publicada lá e a `0.6.0` não foi enviada.
-- **GitHub Pages:** acompanha a `main`; a `0.6.0` aparece no build de review
-  após o push desta fase.
+- **GitHub Pages:** acompanha a `main`; a `0.6.0` já aparece no build de review
+  após o push de 2026-11-12.
 - **ZIP 0.6.0:** local, 20 arquivos, 1.513.834 bytes (~1.478 KiB), SHA-256
   `1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd`
   (pode mudar no build final; confirme em `release/manifest.json`).
@@ -79,7 +79,7 @@ Nenhuma tag ou GitHub Release foi criada.
 | `npm run test:e2e` | ✅ 36 testes em 10 spec files |
 | `npm run build` | ✅ |
 | `npm run package` | ✅ 20 arquivos, 1.513.834 bytes, SHA acima |
-| CI + Deploy | não executados para a 0.6.0; sem push |
+| CI + Deploy | ✅ verdes no commit `59103a4` (CI 43291233343; Deploy 43291233520) |
 
 Gates históricos da 0.5.1: 329 testes em 29 arquivos, 31 E2E em 9 spec files e
 ZIP de 20 arquivos/1.508.491 bytes
