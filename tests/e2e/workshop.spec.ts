@@ -213,12 +213,13 @@ test.describe('workshop', () => {
       game.debugAwardRunSparks(3, 'combo');
     });
 
+    // Assert the transient toast first so a slow CI runner cannot miss it.
+    await expect(toast).toBeVisible();
+    await expect(toast).toHaveText('+3 Sparks · Combo');
     await expect(chip).toBeVisible();
     await expect(chip).toHaveText('Sparks 3');
     await expectInsideViewport(page, '.hud__chip--sparks');
-    await expect(toast).toBeVisible();
-    await expect(toast).toHaveText('+3 Sparks · Combo');
-    await expect(toast).toBeHidden({ timeout: 3_000 });
+    await expect(toast).toBeHidden({ timeout: 4_000 });
 
     // Retrying the same wave must not pay its Sparks again in this run.
     const before = await page.evaluate(() => {

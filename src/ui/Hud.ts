@@ -774,7 +774,7 @@ export class Hud {
       this.sparksToastTimer = null;
       this.sparksToast.classList.remove('is-visible');
       this.sparksToast.hidden = true;
-    }, 1200);
+    }, 2000);
   }
 
   private clearSparksFeedback(): void {
