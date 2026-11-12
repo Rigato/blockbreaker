@@ -1,9 +1,9 @@
-# Perks e metaprogressão — desenho v0.6.0
+# Perks e metaprogressão — desenho v0.6.1
 
-**Status:** proposta aprovada para implementação  
+**Status:** implementado na v0.6.1 (Tier 4 incluso)  
 **Data:** 2026-11-12  
 **Escopo:** revisão do catálogo de perks e primeira camada de
-metaprogressão horizontal (Sparks + Workshop). Não inclui novo mundo.
+metaprogressão horizontal (Sparks + Workshop) e Tier 4. Não inclui novo mundo.
 
 ## 1. Objetivos
 
@@ -93,16 +93,16 @@ Foresight ajuda o onboarding; Safety Net dá margem para erro.
 | Overcharge | 3 | 65 | Aprofunda a build de laser |
 | Hot Streak | 3 | 75 | Risco/recompensa; build de combo |
 
-### 4.3 Novas perks planejadas — Tier 4
+### 4.3 Novas perks — Tier 4 (implementadas na v0.6.1)
 
 | Perk | Efeito | Custo |
 |---|---|---:|
-| Overkill | Dano excedente ao destruir um bloco espalha para adjacentes | 100 |
-| Shield Bash | A cada 8 acertos no paddle, onda de choque danifica blocos próximos | 110 |
-| Conductor | Laser salta para um bloco adjacente com 50% do dano | 120 |
+| Overkill | Dano excedente ao destruir um bloco espalha até 2 de dano para blocos adjacentes | 100 |
+| Shield Bash | A cada 8 acertos no paddle, uma onda de choque causa 1 de dano nas duas linhas mais baixas | 110 |
+| Conductor | O laser salta para um bloco adjacente com 50% do dano | 120 |
 
-Essas três entram depois da primeira camada de meta; o Workshop pode mostrar
-“Coming soon” sem quebrar a economia.
+Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
+(9 atuais + 3 Tier 4). O Workshop passa a mostrar quatro tiers.
 
 ## 5. Reworks
 
@@ -160,6 +160,21 @@ Cada novo acerto renova o timer.
 
 **Por quê:** mantém o risco/recompensa de combo, mas troca “velocidade permanente
 ruim” por uma janela temporária de poder.
+
+### 5.5 Tier 4 — mecânicas
+
+- **Overkill:** quando um bloco é destruído por dano direto (bola, laser ou
+  projétil), o excedente `dano - HP restante` vira dano de splash, limitado a 2,
+  nos quatro blocos ortogonalmente adjacentes. O splash não dispara Overkill
+  novamente e explosões não propagam Overkill.
+- **Shield Bash:** cada acerto no paddle incrementa um contador; no 8º, o
+  contador zera e uma onda de choque causa 1 de dano em todos os blocos das
+  duas linhas mais baixas do campo. A onda não dispara Overkill.
+- **Conductor:** cada alvo atingido pelo Prism Laser tenta encadear uma vez para
+  um bloco ortogonalmente adjacente que ainda não foi atingido pelo feixe,
+  causando `max(1, round(level × 0.5))` de dano. Sem o perk, o laser não
+  encadeia.
+
 
 ## 6. Economia de Sparks
 

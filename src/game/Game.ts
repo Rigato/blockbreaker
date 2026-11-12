@@ -31,6 +31,7 @@ import { AudioService } from '../audio';
 import { ENDLESS_PHASE, endlessEnding, endlessWave } from '../content/endless';
 import { endingForResult } from '../content/endings';
 import { getUnlockedPerkIds } from '../content/meta';
+import { PERK_CATALOG } from '../content/perks';
 import { CAMPAIGN_PHASE_COUNT, PHASES } from '../content/phases';
 import { summarizePhase } from '../content/phasePresentation';
 import type { PhaseDef, WaveDef } from '../content/types';
@@ -1941,6 +1942,8 @@ export class BlockBreakerGame implements GameCommands {
       campaignComplete: this.save.campaignComplete,
       endlessUnlocked: this.save.campaignComplete,
       sparks: meta.sparks,
+      perksUnlocked: getUnlockedPerkIds(this.save.meta).length,
+      perksTotal: PERK_CATALOG.length,
       workshopReady,
       boss:
         boss && boss.hp > 0

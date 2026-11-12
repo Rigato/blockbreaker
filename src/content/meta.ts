@@ -36,6 +36,9 @@ export const META_UNLOCKS: readonly MetaUnlock[] = [
   { id: 'laser_focus', tier: 3, cost: 65 },
   { id: 'overcharge', tier: 3, cost: 65 },
   { id: 'hot_streak', tier: 3, cost: 75 },
+  { id: 'overkill', tier: 4, cost: 100 },
+  { id: 'shield_bash', tier: 4, cost: 110 },
+  { id: 'conductor', tier: 4, cost: 120 },
 ];
 
 const STARTER_SET: ReadonlySet<string> = new Set(STARTER_PERK_IDS);

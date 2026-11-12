@@ -9,8 +9,9 @@ export interface PerkDefinition extends PerkSummary {
 }
 
 /**
- * The nineteen perks (eleven M2 + eight v0.2.0), in a stable order. Values are
- * read from GAME_CONFIG so the progression service never hardcodes tuning.
+ * The twenty-two perks (eleven M2 + eight v0.2.0 + three Tier 4), in a stable
+ * order. Values are read from GAME_CONFIG so the progression service never
+ * hardcodes tuning.
  */
 export const PERK_CATALOG: readonly PerkDefinition[] = [
   {
@@ -148,6 +149,28 @@ export const PERK_CATALOG: readonly PerkDefinition[] = [
     description: `After ${GAME_CONFIG.perks.hotStreakHits} consecutive block hits, gain +1 damage per level for ${GAME_CONFIG.perks.hotStreakDurationMs / 1000} seconds; each new hit refreshes the timer.`,
     maxLevel: 2,
     kind: 'repeatable',
+  },
+  {
+    id: 'overkill',
+    name: 'Overkill',
+    description: `Excess damage from a direct hit splashes up to ${GAME_CONFIG.perks.overkillMaxSplash} damage to orthogonally adjacent blocks.`,
+    maxLevel: 1,
+    kind: 'unique',
+  },
+  {
+    id: 'shield_bash',
+    name: 'Shield Bash',
+    description: `Every ${GAME_CONFIG.perks.shieldBashEvery} paddle hits, a shockwave deals ${GAME_CONFIG.perks.shieldBashDamage} damage to the bottom ${GAME_CONFIG.perks.shieldBashRows} rows.`,
+    maxLevel: 1,
+    kind: 'unique',
+  },
+  {
+    id: 'conductor',
+    name: 'Conductor',
+    description: `Prism Laser targets chain once to an adjacent block for ${percent(GAME_CONFIG.perks.conductorChainFactor)} of the beam's damage (minimum 1).`,
+    maxLevel: 1,
+    kind: 'unique',
+    requires: 'prism_laser',
   },
 ];
 

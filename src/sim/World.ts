@@ -322,6 +322,8 @@ export class World {
   private bossSlayerKillProgress = 0;
   private bossSlayerChargeArmed = false;
   private hotStreakRemainingMsValue = 0;
+  /** Paddle hits counted towards the next Shield Bash shockwave. */
+  private shieldBashHits = 0;
   private rng: () => number;
   private readonly eventLog: SimEvent[] = [];
   private readonly eventHistory: SimEvent[] = [];
@@ -480,6 +482,11 @@ export class World {
     return this.hotStreakRemainingMsValue > 0;
   }
 
+  /** Paddle hits counted towards the next Shield Bash shockwave. */
+  get shieldBashProgress(): number {
+    return this.shieldBashHits;
+  }
+
   get isRunning(): boolean {
     return this.running;
   }
@@ -562,6 +569,7 @@ export class World {
     this.bossSlayerKillProgress = 0;
     this.bossSlayerChargeArmed = false;
     this.hotStreakRemainingMsValue = 0;
+    this.shieldBashHits = 0;
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
     this.multiplierState = null;
     this.corrosionStacks = 0;
@@ -616,6 +624,7 @@ export class World {
     const previousBossSlayerEvery = this.modifiersValue.bossSlayerEvery;
     const previousHotStreakDamage = this.modifiersValue.hotStreakDamage;
     const previousHotStreakHits = this.modifiersValue.hotStreakHits;
+    const previousShieldBashEvery = this.modifiersValue.shieldBashEvery;
     this.modifiersValue = {
       ...modifiers,
       paddleWidthMultiplier: Math.max(0.1, modifiers.paddleWidthMultiplier),
@@ -658,6 +667,14 @@ export class World {
       hotStreakHits: Math.max(0, Math.floor(modifiers.hotStreakHits)),
       hotStreakDamage: Math.max(0, Math.floor(modifiers.hotStreakDamage)),
       hotStreakDurationMs: Math.max(0, modifiers.hotStreakDurationMs),
+      overkillMaxSplash: Math.max(0, modifiers.overkillMaxSplash),
+      shieldBashEvery:
+        modifiers.shieldBashEvery !== null && modifiers.shieldBashEvery > 0
+          ? Math.floor(modifiers.shieldBashEvery)
+          : null,
+      shieldBashDamage: Math.max(0, modifiers.shieldBashDamage),
+      shieldBashRows: Math.max(0, Math.floor(modifiers.shieldBashRows)),
+      conductorChainFactor: Math.max(0, modifiers.conductorChainFactor),
       bossDamageBonus: Math.max(0, modifiers.bossDamageBonus),
       ballSpeedMultiplier: Math.max(0.1, modifiers.ballSpeedMultiplier),
       scoreMultiplier: Math.max(0, modifiers.scoreMultiplier),
@@ -679,6 +696,9 @@ export class World {
       previousHotStreakHits !== this.modifiersValue.hotStreakHits
     ) {
       this.hotStreakRemainingMsValue = 0;
+    }
+    if (previousShieldBashEvery !== this.modifiersValue.shieldBashEvery) {
+      this.shieldBashHits = 0;
     }
 
     this.safetyChargesValue = this.modifiersValue.safetyNetCharges;
@@ -861,7 +881,12 @@ export class World {
 
     // applyDamage validates membership, so blocks destroyed by a chained
     // explosion mid-loop are safely skipped.
-    for (const target of hitTargets) this.applyDamage(target, level, -1);
+    const beamHitIds = new Set(hitTargets.map((target) => target.id));
+    for (const target of hitTargets) {
+      const present = this.blocks.includes(target);
+      this.applyDamage(target, level, -1, true, true);
+      if (present) this.chainLaser(target, beamHitIds, level);
+    }
 
     if (this.boss && this.boss.hp > 0 && this.beamOverlapsBoss(x, half, this.boss)) {
       // A solid element below the boss (closer to the paddle) stops the beam.
@@ -871,6 +896,32 @@ export class World {
       }
     }
     return true;
+  }
+
+  /**
+   * Conductor: a laser target arcs once to one orthogonal neighbour that the
+   * beam has not already hit. `hitIds` grows with every chain so two targets
+   * can never chain to the same block.
+   */
+  private chainLaser(
+    source: Block,
+    hitIds: Set<string>,
+    level: number,
+  ): void {
+    const factor = this.modifiersValue.conductorChainFactor;
+    if (factor <= 0) return;
+    const target = this.blocks.find(
+      (candidate) =>
+        !hitIds.has(candidate.id) &&
+        Math.abs(candidate.row - source.row) +
+          Math.abs(candidate.col - source.col) ===
+          1,
+    );
+    if (!target) return;
+
+    hitIds.add(target.id);
+    const damage = Math.max(1, Math.round(level * factor));
+    this.applyDamage(target, damage, -1, false, false);
   }
 
   fireProjectile(): Projectile | null {
@@ -1710,6 +1761,7 @@ export class World {
     ball.aboveBlocksMs = 0;
     this.resetCombo();
     this.pushEvent({ type: 'paddle:hit', ballId: ball.id });
+    this.registerShieldBashHit();
 
     if (ny > 0) {
       // Hitting the underside: plain reflection, never an angular relaunch.
@@ -1747,6 +1799,50 @@ export class World {
     ball.y = this.paddle.y - this.paddle.height / 2 - ball.radius - 0.02;
   }
 
+  /** Shield Bash: counts every paddle contact and fires on the threshold. */
+  private registerShieldBashHit(): void {
+    this.shieldBashHits += 1;
+    const every = this.modifiersValue.shieldBashEvery;
+    if (every === null || every <= 0) return;
+    if (this.shieldBashHits < every) return;
+
+    this.shieldBashHits = 0;
+    this.triggerShieldBash();
+  }
+
+  /** Shield Bash: horizontal shockwave along the lowest occupied rows. */
+  private triggerShieldBash(): void {
+    const damage = this.modifiersValue.shieldBashDamage;
+    const rows = this.modifiersValue.shieldBashRows;
+    if (damage <= 0 || rows <= 0 || this.blocks.length === 0) return;
+
+    let maxRow = -Infinity;
+    for (const block of this.blocks) {
+      maxRow = Math.max(maxRow, block.row);
+    }
+    if (!Number.isFinite(maxRow)) return;
+
+    const firstRow = maxRow - rows + 1;
+    const targets = this.blocks.filter(
+      (block) => block.row >= firstRow && block.row <= maxRow,
+    );
+    if (targets.length === 0) return;
+
+    const bandCentreY = BLOCK_TOP + ((firstRow + maxRow + 1) / 2) * this.cell;
+    this.pushEvent({
+      type: 'explosion',
+      x: FIELD_WIDTH / 2,
+      y: bandCentreY,
+      radius: FIELD_WIDTH / 2,
+      blockIds: targets.map((block) => block.id),
+    });
+
+    // Shockwave damage is secondary: it never triggers Overkill or links.
+    for (const target of targets) {
+      this.applyDamage(target, damage, -1, false, false);
+    }
+  }
+
   private handleBlockHit(ball: Ball, block: Block): void {
     let cooldowns = this.blockCooldowns.get(ball.id);
     if (!cooldowns) {
@@ -1779,7 +1875,7 @@ export class World {
     const detonateBombardier = this.bombardierChargeArmed;
     if (detonateBombardier) this.bombardierChargeArmed = false;
 
-    this.applyDamage(block, damage, ball.id);
+    this.applyDamage(block, damage, ball.id, true, true);
 
     if (detonateBombardier) this.detonateBombardier(block, ball.id);
     this.refreshHotStreak();
@@ -1835,9 +1931,11 @@ export class World {
     damage: number,
     sourceBallId: number,
     allowLinks = true,
+    triggerOverkill = false,
   ): boolean {
     if (damage <= 0 || !this.blocks.includes(block)) return false;
     if (block.regen) block.regen.timerMs = block.regen.everyMs;
+    const hpBefore = block.hp;
     block.flashMs = 80;
     block.hp -= damage;
     this.pushEvent({
@@ -1850,8 +1948,37 @@ export class World {
 
     const destroyed = block.hp <= 0;
     if (destroyed) this.destroyBlock(block, sourceBallId);
+    if (triggerOverkill && destroyed) {
+      const splash = Math.min(
+        this.modifiersValue.overkillMaxSplash,
+        damage - hpBefore,
+      );
+      if (splash > 0) this.splashOverkill(block, splash, sourceBallId);
+    }
     if (allowLinks) this.propagateLinks(block, sourceBallId);
     return destroyed;
+  }
+
+  /**
+   * Overkill: splash excess direct-hit damage to the four orthogonal
+   * neighbours. The splash itself is secondary damage and cannot re-trigger
+   * Overkill, links or another Overkill splash chain.
+   */
+  private splashOverkill(
+    block: Block,
+    damage: number,
+    sourceBallId: number,
+  ): void {
+    if (damage <= 0) return;
+    const targets = this.blocks.filter(
+      (candidate) =>
+        Math.abs(candidate.row - block.row) +
+          Math.abs(candidate.col - block.col) ===
+        1,
+    );
+    for (const target of targets) {
+      this.applyDamage(target, damage, sourceBallId, false, false);
+    }
   }
 
   private propagateLinks(block: Block, sourceBallId: number): void {
@@ -2344,7 +2471,7 @@ export class World {
       projectileId: projectile.id,
       blockId: block.id,
     });
-    this.applyDamage(block, 1, -projectile.id);
+    this.applyDamage(block, 1, -projectile.id, true, true);
   }
 
   private spawnSafetyBall(): Ball {

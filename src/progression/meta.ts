@@ -104,7 +104,7 @@ export function sparksForEndless({ wave }: { wave: number }): number {
   );
 }
 
-/** Workshop view built from the catalog, with all nine current unlocks. */
+/** Workshop view built from the catalog, with all twelve current unlocks. */
 export function getMetaState(meta: MetaProgress): MetaState {
   const current = sanitizeMeta(meta);
   const unlocks: MetaUnlockView[] = META_UNLOCKS.map((unlock) => {

@@ -214,6 +214,16 @@ export interface RunModifiers {
   hotStreakDamage: number;
   /** Hot Streak: buff duration in milliseconds. */
   hotStreakDurationMs: number;
+  /** Overkill: maximum damage splashed to adjacent blocks; 0 when not acquired. */
+  overkillMaxSplash: number;
+  /** Shield Bash: paddle hits between shockwaves; null when not acquired. */
+  shieldBashEvery: number | null;
+  /** Shield Bash: shockwave damage. */
+  shieldBashDamage: number;
+  /** Shield Bash: number of bottom rows hit by the shockwave. */
+  shieldBashRows: number;
+  /** Conductor: fraction of laser level added as chain damage; 0 when not acquired. */
+  conductorChainFactor: number;
   /** Extra damage against bosses. */
   bossDamageBonus: number;
   /** Multiplier applied to the base ball speed. */
@@ -395,6 +405,10 @@ export interface HudSnapshot {
   endlessUnlocked: boolean;
   /** Persisted Sparks available in the Workshop. */
   sparks?: number;
+  /** Perks available to this save (starters plus bought unlocks). */
+  perksUnlocked?: number;
+  /** Total perks in the fixed catalog. */
+  perksTotal?: number;
   /** True when at least one locked perk can be bought with the current Sparks. */
   workshopReady?: boolean;
   /** Non-null only while the results screen is open. */

@@ -42,7 +42,7 @@ describe('meta content definitions', () => {
     }
   });
 
-  it('ships the nine current unlocks with the designed tiers and costs', () => {
+  it('ships the twelve current unlocks with the designed tiers and costs', () => {
     expect(
       META_UNLOCKS.map(({ id, tier, cost }) => ({ id, tier, cost })),
     ).toEqual([
@@ -55,19 +55,25 @@ describe('meta content definitions', () => {
       { id: 'laser_focus', tier: 3, cost: 65 },
       { id: 'overcharge', tier: 3, cost: 65 },
       { id: 'hot_streak', tier: 3, cost: 75 },
+      { id: 'overkill', tier: 4, cost: 100 },
+      { id: 'shield_bash', tier: 4, cost: 110 },
+      { id: 'conductor', tier: 4, cost: 120 },
     ]);
     for (const unlock of META_UNLOCKS) {
       expect(PERK_BY_ID.has(unlock.id)).toBe(true);
     }
   });
 
-  it('partitions the catalog into starters and unlocks', () => {
+  it('partitions the catalog into 10 starters and 12 unlocks', () => {
     const starter = new Set<string>(STARTER_PERK_IDS);
     for (const unlock of META_UNLOCKS) {
       expect(starter.has(unlock.id)).toBe(false);
     }
+    expect(STARTER_PERK_IDS).toHaveLength(10);
+    expect(META_UNLOCKS).toHaveLength(12);
+    expect(PERK_CATALOG).toHaveLength(22);
     const all = new Set([...STARTER_PERK_IDS, ...META_UNLOCKS.map((unlock) => unlock.id)]);
-    expect(all.size).toBe(PERK_CATALOG.length);
+    expect(all.size).toBe(22);
     expect([...all].sort()).toEqual(PERK_CATALOG.map((perk) => perk.id).sort());
   });
 
@@ -268,7 +274,7 @@ describe('getMetaState', () => {
     const state = getMetaState({ sparks: 12, unlocks: [] });
 
     expect(state.sparks).toBe(12);
-    expect(state.unlocks).toHaveLength(9);
+    expect(state.unlocks).toHaveLength(12);
     expect(state.unlocks.map((unlock) => unlock.id)).toEqual(
       META_UNLOCKS.map((unlock) => unlock.id),
     );

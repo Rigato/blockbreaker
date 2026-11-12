@@ -93,6 +93,11 @@ export const GAME_CONFIG = {
     hotStreakHits: 5,
     hotStreakDamageStep: 1,
     hotStreakDurationMs: 3000,
+    overkillMaxSplash: 2,
+    shieldBashEvery: 8,
+    shieldBashDamage: 1,
+    shieldBashRows: 2,
+    conductorChainFactor: 0.5,
   },
 
   elements: {
@@ -147,6 +152,11 @@ export const BASE_RUN_MODIFIERS: RunModifiers = {
   hotStreakHits: 0,
   hotStreakDamage: 0,
   hotStreakDurationMs: 0,
+  overkillMaxSplash: 0,
+  shieldBashEvery: null,
+  shieldBashDamage: 0,
+  shieldBashRows: 0,
+  conductorChainFactor: 0,
   bossDamageBonus: 0,
   ballSpeedMultiplier: 1,
   scoreMultiplier: 1,

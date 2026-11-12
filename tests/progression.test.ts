@@ -232,6 +232,11 @@ describe('M2 derived modifiers', () => {
       hotStreakHits: 0,
       hotStreakDamage: 0,
       hotStreakDurationMs: 0,
+      overkillMaxSplash: 0,
+      shieldBashEvery: null,
+      shieldBashDamage: 0,
+      shieldBashRows: 0,
+      conductorChainFactor: 0,
       bossDamageBonus: 0,
       ballSpeedMultiplier: 1,
       scoreMultiplier: 1,
@@ -366,6 +371,24 @@ describe('v0.2.0 derived modifiers', () => {
     expect(run.grantPerk('hot_streak').perk.level).toBe(2);
   });
 
+  it('derives the Tier 4 perk modifiers', () => {
+    const run = progressed();
+    expect(run.modifiers.overkillMaxSplash).toBe(0);
+    expect(run.modifiers.shieldBashEvery).toBeNull();
+    expect(run.modifiers.shieldBashDamage).toBe(0);
+    expect(run.modifiers.shieldBashRows).toBe(0);
+    expect(run.modifiers.conductorChainFactor).toBe(0);
+
+    run.grantPerk('overkill');
+    run.grantPerk('shield_bash');
+    run.grantPerk('conductor');
+    expect(run.modifiers.overkillMaxSplash).toBe(2);
+    expect(run.modifiers.shieldBashEvery).toBe(8);
+    expect(run.modifiers.shieldBashDamage).toBe(1);
+    expect(run.modifiers.shieldBashRows).toBe(2);
+    expect(run.modifiers.conductorChainFactor).toBeCloseTo(0.5);
+  });
+
   it('hides Prism Laser dependants until Prism Laser is acquired', () => {
     const run = progressed();
     maxOutCatalog(run, ['prism_laser', 'laser_focus', 'overcharge']);
@@ -413,10 +436,10 @@ describe('M2 run lifecycle', () => {
     expect(run.perks).toEqual([]);
   });
 
-  it('returns the nineteen catalog perks without the fallback', () => {
+  it('returns the twenty-two catalog perks without the fallback', () => {
     const run = progressed();
     const catalog = run.getCatalog();
-    expect(catalog).toHaveLength(19);
+    expect(catalog).toHaveLength(22);
     expect(catalog.map((perk) => perk.id)).not.toContain('xp_fallback');
     expect(catalog.map((perk) => perk.id)).toEqual([
       'multiball',
@@ -438,6 +461,9 @@ describe('M2 run lifecycle', () => {
       'bombardier',
       'boss_slayer',
       'hot_streak',
+      'overkill',
+      'shield_bash',
+      'conductor',
     ]);
   });
 });

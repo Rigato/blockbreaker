@@ -9,7 +9,7 @@ import {
 
 const SECOND_CHANCE = '.workshop__card[data-perk-id="second_chance"]';
 const EXPLOSIVE_CORE = '.workshop__card[data-perk-id="explosive_core"]';
-const HOT_STREAK = '.workshop__card[data-perk-id="hot_streak"]';
+const CONDUCTOR = '.workshop__card[data-perk-id="conductor"]';
 
 async function addSparks(page: Page, amount: number): Promise<void> {
   await page.evaluate((value) => {
@@ -68,8 +68,9 @@ test.describe('workshop', () => {
       'Tier 1',
       'Tier 2',
       'Tier 3',
+      'Tier 4',
     ]);
-    await expect(workshop.locator('.workshop__card')).toHaveCount(9);
+    await expect(workshop.locator('.workshop__card')).toHaveCount(12);
 
     const card = workshop.locator(SECOND_CHANCE);
     await expect(card).toHaveAttribute('data-state', 'locked');
@@ -187,7 +188,7 @@ test.describe('workshop layout', () => {
       const overflowY = await list.evaluate((element) => getComputedStyle(element).overflowY);
       expect(overflowY).toBe('auto');
 
-      const lastCard = page.locator(HOT_STREAK);
+      const lastCard = page.locator(CONDUCTOR);
       await lastCard.scrollIntoViewIfNeeded();
       await expect(lastCard).toBeVisible();
 

@@ -246,6 +246,11 @@ export class RunState implements ProgressionService {
       hotStreakHits,
       hotStreakDamageStep,
       hotStreakDurationMs,
+      overkillMaxSplash,
+      shieldBashEvery,
+      shieldBashDamage,
+      shieldBashRows,
+      conductorChainFactor,
     } = GAME_CONFIG.perks;
 
     const widePaddle = this.levelOf('wide_paddle');
@@ -261,6 +266,9 @@ export class RunState implements ProgressionService {
     const overchargeLevel = this.levelOf('overcharge');
     const momentumLevel = this.levelOf('momentum');
     const hotStreakLevel = this.levelOf('hot_streak');
+    const overkillLevel = this.levelOf('overkill');
+    const shieldBashLevel = this.levelOf('shield_bash');
+    const conductorLevel = this.levelOf('conductor');
     const laserCooldownMultiplier = Math.max(
       0.6,
       1 - laserCooldownStep * overchargeLevel,
@@ -303,6 +311,14 @@ export class RunState implements ProgressionService {
     modifiers.hotStreakHits = hotStreakLevel > 0 ? hotStreakHits : 0;
     modifiers.hotStreakDamage = hotStreakDamageStep * hotStreakLevel;
     modifiers.hotStreakDurationMs = hotStreakLevel > 0 ? hotStreakDurationMs : 0;
+    modifiers.overkillMaxSplash =
+      overkillLevel > 0 ? overkillMaxSplash : 0;
+    modifiers.shieldBashEvery =
+      shieldBashLevel > 0 ? shieldBashEvery : null;
+    modifiers.shieldBashDamage = shieldBashLevel > 0 ? shieldBashDamage : 0;
+    modifiers.shieldBashRows = shieldBashLevel > 0 ? shieldBashRows : 0;
+    modifiers.conductorChainFactor =
+      conductorLevel > 0 ? conductorChainFactor : 0;
     modifiers.ballSpeedMultiplier = 1;
     modifiers.scoreMultiplier = 1;
 
