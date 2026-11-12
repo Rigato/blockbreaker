@@ -1,13 +1,14 @@
 # docs — índice
 
 Ponto de entrada para a próxima sessão. Os documentos abaixo são a fonte atual;
-o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
+o histórico fica em `docs/old/` e nos handoffs arquivados.
 
 ## Comece por aqui
 
-1. **[Handoff v0.5.1](handoff-v0.5.1.md)** — estado do jogo, tutorial,
-   arquitetura, invariantes, gates, portais, riscos e próximos passos.
-2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.6).
+1. **[Handoff v0.6.0](handoff-v0.6.0.md)** — estado do jogo, perks, meta,
+   Workshop, save v2, arquitetura, invariantes, gates, portais, riscos e
+   próximos passos.
+2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.7).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente.
 4. **[Guia de publicação web](spec-tecnica-publicacao.md)** — estratégia,
    arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
@@ -23,8 +24,8 @@ o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
 - [Metadata de portal](release/portal-metadata.md) — textos em inglês.
 - [Checklist de submissão](release/submission-checklist.md) — passo a passo.
 - [Status de publicação](release/status.md) — versões, portais e pendências.
-- [Diagnóstico CrazyGames](release/crazygames-review.md) — duas reprovações da
-  0.4.0, decisão sobre desktop e plano da 0.5.1.
+- [Diagnóstico CrazyGames](release/crazygames-review.md) — reprovações, pausa
+  até 2026-11-26 e decisão sobre desktop.
 - [Índice do pacote de release](release/README.md).
 
 ## QA
@@ -49,11 +50,13 @@ o histórico fica em `docs/old/` e no handoff arquivado da v0.4.0.
 - `bad-decision-games-logo/` — fontes originais da logomarca do estúdio.
 - Assets usados pelo jogo: `../public/bad-decision-games/` e
   `../public/how-to-play/`.
-- Assets de loja: `../store/` — regenerados na sessão paralela; revisão humana
-  pendente antes da submissão da 0.5.1.
+- Assets de loja: `../store/` — da 0.5.1; revisão humana pendente antes de
+  qualquer upload da 0.6.0.
 
 ## Histórico
 
+- [Handoff v0.5.1](handoff-v0.5.1.md) — onboarding da build publicada,
+  mantido como referência histórica.
 - [Handoff v0.4.0](handoff-v0.4.0.md) — onboarding anterior, mantido como
   referência histórica.
 - [Arquivo `old/`](old/README.md) — handoffs, planos, QA e release do MVP.

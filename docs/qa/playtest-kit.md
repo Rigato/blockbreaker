@@ -1,10 +1,10 @@
-# Playtest kit — Bricklike v0.5.1
+# Playtest kit — Bricklike v0.6.0
 
 Protocolo para validar diversão, ritmo e balance do tutorial, da campanha
 (fases 1–6) e do Endless. O baseline automatizado (`npm run qa:runs`) **não
 substitui** este playtest: ele só mede duração/nível/perks com um bot que
 dispara projéteis de debug. **Ainda não há resultado de playtest humano da
-0.5.1**; este documento é o protocolo, não um relatório.
+0.6.0**; este documento é o protocolo, não um relatório.
 
 ## Objetivo
 
@@ -25,6 +25,10 @@ Responder com evidência:
 - A política de ads (tutorial sem ads; campanha só em onda múltipla de 3;
   Endless a cada 4; exits com 60 s) parece natural, não abusiva?
 - O aviso “Progress may not be saved” é notado e entendido em fallback?
+- O **Workshop** é descoberto no menu, os custos em Sparks fazem sentido e a
+  primeira compra acontece em 1–2 runs?
+- As perks reworkadas (**Momentum**, **Bombardier**, **Boss Slayer** e **Hot
+  Streak**) são compreendidas e parecem úteis?
 
 ## Amostra e logística
 
@@ -116,13 +120,13 @@ ondas, não a apresentação.
 
 ## Status dos dados
 
-- **Nenhum playtest humano da 0.5.1 foi registrado ainda.** As metas acima são
+- **Nenhum playtest humano da 0.6.0 foi registrado ainda.** As metas acima são
   critérios de aceite, não resultados.
 - A amostra do sandbox da Playgama (0.4.0) é pequena: 17/100 qualifying plays,
   avg play time 5:42, ad shows/play 1,70, 116 launches, 31 plays, 5m45s, 3/2
   likes. Não use essa amostra como playtest nem como conclusão de retenção.
 - Performance tem protocolo separado em `docs/qa/performance-testing.md` e
-  script `scripts/perf-smoke.mjs`; resultados da 0.5.1 pendentes.
+  script `scripts/perf-smoke.mjs`; resultados da 0.6.0 pendentes.
 
 ## Baseline automatizado (não é playtest)
 

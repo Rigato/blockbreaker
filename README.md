@@ -2,20 +2,54 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.5.1 — tutorial, touch controls and ads policy**: the **v0.2.0
+line is **v0.6.0 — perk reworks, metaprogression and Workshop**: the **v0.2.0
 campaign** (6 phases, 20 waves, 9 block types, 7 phase elements, 3 bosses, 19
 perks), the **v0.3.0 Endless mode**, the **v0.4.0 presentation/menu/HUD/ads**
-pass, and the **v0.5.1 tutorial, touch edge assist, laser gate and revised ad
-cadence**. The v0.5.1 build is **published on itch.io and in the Playgama sandbox**
-and was **submitted to CrazyGames** on 2026-11-11; the review is pending.
+pass, the **v0.5.1 tutorial, touch edge assist, laser gate and revised ad
+cadence**, and the **v0.6.0 Sparks economy, perk unlocks and save v2**.
 
-The historical `0.1.0-mvp` build is no longer the live itch.io build.
-CrazyGames rejected the 0.3.0 and rejected the resubmitted 0.4.0 again with the
-same generic quality message; the 0.5.1 is now under review. GameFlare remains
-blocked by account access. The GitHub Pages review build tracks `main`.
+The **v0.6.0 build is local and unpublished**. The **v0.5.1 build remains live**
+on itch.io and in the Playgama sandbox. CrazyGames is paused until
+2026-11-26 after the 0.5.1 submission; GameFlare remains blocked by account
+access.
+No tag or GitHub Release has been created. The GitHub Pages review build tracks
+`main`.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
+
+## v0.6.0 — perk reworks, metaprogression and Workshop
+
+- **Perk reworks:** Combo Master became **Momentum** (consecutive block hits add
+  damage/XP, reset on paddle contact), Bomb Ball became **Bombardier** (every 12
+  destroyed blocks arms a 3×3 detonation on the next block hit), Boss Bane
+  became **Boss Slayer** (every 10 blocks arms +3 damage on the next boss hit)
+  and Swift Ball became **Hot Streak** (+1/+2 damage for 3 s after 5 consecutive
+  hits).
+- **Starter pool:** 10 perks — Multiball, Wide Paddle, Power Ball, Quick Study,
+  Arcane Turret, Giant Ball, Safety Net, Prism Laser, Foresight and Critical
+  Strike.
+- **Workshop:** 9 perks unlock with Sparks in three tiers — Second Chance (12),
+  Explosive Core (15), Sticky Paddle (18), Momentum (35), Bombardier (40), Boss
+  Slayer (45), Laser Focus (65), Overcharge (65) and Hot Streak (75). The menu
+  strip shows the balance and a badge when something is affordable.
+- **Sparks:** +1 per cleared wave, +3 per defeated boss and +5 on a phase's
+  first clear, capped at **30 per run**. Endless awards +1 per wave plus +3 per
+  five waves, also capped at 30. Sparks are earned by playing, never by ads.
+- **Horizontal meta:** unlocks add perks to the offer pool; there are no
+  permanent stat bonuses, loot boxes or paid advantages.
+- **Save v2:** `version: 2` adds `meta: { sparks, unlocks }`; v1 saves migrate
+  with zero Sparks and no unlocks while preserving campaign and Endless
+  progress. The active run is still not saved.
+- **Results:** show `+X Sparks · total Y` after a phase or Endless run.
+- **Tests and package:** 375 unit tests in 31 files, 36 E2E tests in 10 spec
+  files, content validation with 7 levels / 22 waves / 743 blocks / 1,809 XP,
+  and a local 0.6.0 ZIP with 20 files, 1,513,819 bytes (~1,478 KiB), SHA-256
+  `1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd`
+  (the hash may change on the final build).
+- **Publication status:** 0.6.0 is local/unpublished. itch.io and the Playgama
+  sandbox still serve 0.5.1; CrazyGames is paused until 2026-11-26; GameFlare
+  remains blocked. No tag or GitHub Release was created.
 
 ## v0.5.1 — tutorial, touch controls and ads
 
@@ -123,7 +157,7 @@ npm run preview   # serves dist/ locally
 ## v0.3.0 — Endless mode
 
 Development line: `main`. This work is part of v0.4.0 (published on itch.io and
-in the Playgama sandbox) and remains in the v0.5.1 build on main.
+in the Playgama sandbox) and remains in the v0.5.1 and v0.6.0 builds.
 
 - **Endless button** in the main menu, separate from Campaign and the level select.
 - **Infinite run:** no victory condition; the run ends when every ball is lost.
@@ -202,7 +236,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 - `docs/release/submission-checklist.md` lists every manual field, asset and
   step per portal, all marked **pending human review**.
 - `docs/old/release/g7-review.md` inventories the historical MVP package and
-  defines the G7 review checklist. The current line is `0.5.1` (main); no tag
+  defines the G7 review checklist. The current line is `0.6.0` (local); no tag
   or GitHub Release was created, and the user performs all submissions.
 
 ## M6 — QA, performance and balance
@@ -243,7 +277,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   with the ZIP and manifest. GitHub Pages remains the review build.
 - Tested in a subfolder, with the Bridge blocked/fallback, mock/no-ads,
   failed/timed-out interstitial and no external requests to `api.playgama.com`.
-  The current v0.5.1 build loads the Bridge **locally** and makes no request to
+  The current v0.6.0 build loads the Bridge **locally** and makes no request to
   the Playgama CDN at boot.
 - See [docs/build-release.md](docs/build-release.md) for the build, ZIP and
   portal checklist.
@@ -361,15 +395,16 @@ automatically after 2.5 s.
 
 ## Platform boot
 
-- The v0.5.1 build loads `./playgama-bridge.js` dynamically only outside CrazyGames; the CrazyGames host uses the direct native SDK adapter. There is no request to `bridge.playgama.com` at boot. Both paths keep a timeout and an in-memory fallback.
+- The v0.6.0 build loads `./playgama-bridge.js` dynamically only outside CrazyGames; the CrazyGames host uses the direct native SDK adapter. There is no request to `bridge.playgama.com` at boot. Both paths keep a timeout and an in-memory fallback.
 - The Bridge loading screen is disabled in `playgama-bridge-config.json`
   (`loadingScreenType: "none"`) so no Bridge branding is shown; the game uses
   its own boot screen and progress bar.
 - `game_ready` is sent only after the menu is rendered and interactive.
-- Ads follow the v0.5.1 policy: no tutorial ads; campaign wave ads only with a
-  following wave and a multiple of 3; Endless every 4 waves; Results and pause
-  exits use a 60 s cooldown. Unsupported platforms skip without UI breakage. The
-  player setting and platform audio state both mute the audio service.
+- Ads keep the v0.5.1 policy in v0.6.0: no tutorial ads; campaign wave ads only
+  with a following wave and a multiple of 3; Endless every 4 waves; Results and
+  pause exits use a 60 s cooldown. Unsupported platforms skip without UI
+  breakage. The player setting and platform audio state both mute the audio
+  service.
 - No direct `localStorage` access in game code; storage always goes through
   `PlatformService`. If it falls back to memory, the menu shows “Progress may
   not be saved”.
@@ -435,7 +470,8 @@ release/                   Generated ZIP + manifest (not committed)
 - [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
-- [Current handoff — v0.5.1](docs/handoff-v0.5.1.md)
+- [Current handoff — v0.6.0](docs/handoff-v0.6.0.md)
+- [Archived handoff — v0.5.1](docs/handoff-v0.5.1.md)
 - [Archived handoff — v0.4.0](docs/handoff-v0.4.0.md)
 - [Web publishing guide](docs/spec-tecnica-publicacao.md) — strategy, portals, architecture, ads, save and QA
 - [Perk and metaprogression design](docs/perks-e-metaprogressao.md) — v0.6.0 catalog review and horizontal meta

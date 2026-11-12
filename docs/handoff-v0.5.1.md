@@ -1,6 +1,10 @@
 # Handoff — Bricklike v0.5.1
 
-**Fonte única de onboarding para a próxima sessão.**  
+> **Documento histórico.** A fonte atual de onboarding é
+> [`handoff-v0.6.0.md`](handoff-v0.6.0.md). A `0.5.1` continua sendo a build
+> publicada no itch.io e no sandbox da Playgama; a `0.6.0` é local.
+
+**Onboarding histórico da v0.5.1.**  
 **Data:** 2026-11-11  
 **Branch:** `main`  
 **Versão do package:** `0.5.1`  
@@ -12,10 +16,10 @@ a 0.5.1 só aparece depois do push)
 **Repositório:** <https://github.com/Rigato/blockbreaker>  
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`
 
-> Este documento substitui o handoff da v0.5.0 como fonte atual. O handoff
-> anterior fica como histórico em `docs/handoff-v0.5.0.md`. O GDD
-> (`docs/GDD_Bricklike.md`, v1.6) continua sendo a fonte de design; o gap
-> analysis (`docs/gdd-gap-analysis.md`) mostra o que falta.
+> Este documento foi substituído pelo handoff da v0.6.0 como fonte atual; o
+> handoff da v0.5.0 e este permanecem como histórico. O GDD
+> (`docs/GDD_Bricklike.md`, v1.7) é a fonte de design; o gap analysis
+> (`docs/gdd-gap-analysis.md`) mostra o que falta.
 
 ---
 

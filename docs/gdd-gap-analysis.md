@@ -1,9 +1,13 @@
-# Bricklike — GDD × estado atual (2026-11-11)
+# Bricklike — GDD × estado atual (2026-11-12)
 
-Comparação entre o GDD v1.6 e o build de desenvolvimento `0.5.1` na `main`.
+Comparação entre o GDD v1.7 e o build de desenvolvimento `0.6.0` na `main`.
 Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
+
+A `0.6.0` é **local e não publicada**. itch.io e o sandbox da Playgama seguem
+com a `0.5.1`; CrazyGames está pausado até 2026-11-26; GameFlare segue bloqueado.
+Nenhuma tag ou GitHub Release foi criada.
 
 ## Implementado
 
@@ -21,21 +25,29 @@ implementados, não bugs.
 | Desafios | `timeLimit` e `noLaser` | implementado |
 | Zoom de layout | escala 0,68–1,0 | implementado |
 | Perks | 19, com níveis e sinergias | implementado |
+| Perks reworkadas | Momentum, Bombardier, Boss Slayer e Hot Streak | implementado e testado |
+| Pool inicial | 10 starters: Multiball, Wide Paddle, Power Ball, Quick Study, Arcane Turret, Giant Ball, Safety Net, Prism Laser, Foresight e Critical Strike | implementado |
+| Unlocks | 9 perks bloqueadas em 3 tiers (12–75 Sparks) | implementado |
+| Sparks | +1/onda, +3/chefe, +5 na primeira fase; teto de 30 por run; Endless com +1/onda e +3 a cada 5 | implementado e testado |
+| Metaprogressão | horizontal, sem bônus permanentes de atributos | implementado |
+| Workshop | strip no menu, cards por tier, compra, saldo, badge, persistência e results | implementado e testado |
+| Ofertas filtradas | perks bloqueadas nunca aparecem; compradas entram na pool | implementado e testado |
+| Save v2 | `version: 2`, `meta: { sparks, unlocks }`, migração v1→v2 | implementado e testado |
 | Encerramentos | epílogos, rank S/A/B, final de campanha e epílogo do tutorial | implementado |
 | Endless | run infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas | implementado |
-| Save | schema v1, `unlockedPhase` 0..6, `campaignComplete`, `endless` | implementado |
+| Save de campanha | `unlockedPhase` 0..6, `campaignComplete`, `endless`, `phases` | implementado |
 | Settings | som, música e screen shake | implementado |
 | Aviso de storage | “Progress may not be saved” + popup em memória/fallback | implementado |
 | Desbloqueio do Endless | ao concluir a campanha; tutorial não conta | implementado |
-| Menu/seleção | Campaign/Endless, 7 cards com tutorial, fundo animado | implementado |
+| Menu/seleção | Campaign/Endless, 7 cards com tutorial, fundo animado, strip do Workshop | implementado |
 | How to Play | diálogo de 5 páginas com screenshots | implementado |
 | About Us | logomarca e texto do estúdio | implementado |
 | HUD legível | compacto em iframes estreitos | implementado |
 | Controles touch | drag relativo 1:1; edge assist e ganho de swipe longo até 2,2× | implementado e testado |
-| Side art desktop | arte lateral em viewport landscape; mobile portrait inalterado | implementado neste ciclo |
-| CrazyGames | adapter nativo sem Playgama no host do portal | implementado neste ciclo |
+| Side art desktop | arte lateral em viewport landscape; mobile portrait inalterado | implementado |
+| CrazyGames | adapter nativo sem Playgama no host do portal | implementado |
 | Laser | exige lançamento explícito na onda; reset bloqueia; HUD explica | implementado e testado |
-| Ads | política 0.5.1 (campanha só com próxima onda e múltiplo de 3; tutorial zero; exits com 60 s) | implementado e testado |
+| Ads | política 0.5.1 mantida (campanha só com próxima onda e múltiplo de 3; tutorial zero; exits com 60 s) | implementado e testado |
 | Ads reais | Bridge interstitial/rewarded + fallback/mock + testes | implementado |
 | Direção visual dos blocos | revisão de materiais e legibilidade | implementado |
 | Inglês | UI e metadata | implementado |
@@ -46,7 +58,10 @@ implementados, não bugs.
 
 | Item | GDD | Observação |
 |---|---|---|
-| Metaprogressão permanente | backlog | desbloqueios de conteúdo, sem bônus permanentes de atributos iniciais |
+| Bônus permanentes de atributos | fora do escopo | a meta da 0.6.0 é horizontal; poder permanente continua descartado |
+| Cosméticos e desafios com recompensa | backlog | planejados para depois da primeira camada de meta |
+| Reroll e ban de perk | backlog | não implementar sem antes medir a pool atual |
+| Perks Tier 4 | backlog | Overkill, Shield Bash e Conductor; o Workshop pode mostrar “Coming soon” no futuro |
 | Leaderboard do Endless | backlog | ranking global continua fora |
 | Rankings globais / conquistas | backlog | dependem dos recursos dos portais |
 | Mundos sci-fi/industrial | backlog | novos temas e conteúdo |
@@ -64,31 +79,37 @@ implementados, não bugs.
 
 | Item | Estado |
 |---|---|
-| Playtest humano da 0.5.1 | pendente |
+| Playtest humano da 0.6.0 | pendente |
 | Compreensão do tutorial/skip e dos coach marks | pendente |
 | Edge assist em celular real (borda, gesto do navegador) | pendente |
 | Playtest humano das fases 4–6 | pendente |
 | Balance dos chefes, timers e densidade | pendente |
 | Playtest do Endless (ondas 5, 10, 15, 20+) | pendente |
+| Economia de Sparks e tempo até o primeiro unlock | pendente |
+| Balance de Momentum, Bombardier, Boss Slayer e Hot Streak | pendente |
+| Migração de save v1→v2 em navegador real | pendente (parse coberto por testes) |
+| Workshop em iframe de portal | pendente (E2E cobre 320/390 e desktop) |
 | Legibilidade do zoom em telas pequenas reais | pendente |
 | Performance em hardware real / 4 GB RAM | pendente; protocolo em `docs/qa/performance-testing.md` e script `scripts/perf-smoke.mjs` |
-| Teste de save antigo no navegador | pendente (parse coberto por testes) |
 | Aviso de storage em fallback real | pendente |
 | Mixagem final de áudio | pendente |
-| Screenshots/capas/vídeos da 0.5.1 | gerados na sessão paralela; revisão humana pendente |
+| Screenshots/capas/vídeos da 0.6.0 | os atuais são da 0.5.1; revisão/regeneração pendente |
 | Fill/limites reais de ads na Playgama/CrazyGames | pendente |
 | Playgama sandbox stats | amostra pequena (17/100 qualifying plays; 5:42; 1,70 ad/play); não concluir qualidade/retenção |
-| CrazyGames | 0.3.0 e 0.4.0 reprovadas; 0.5.1 aguarda teste humano e assets novos |
-| Tag e GitHub Release | pendente de decisão |
-| Submissão manual nos portais | usuário |
+| CrazyGames | 0.3.0 e 0.4.0 reprovadas; 0.5.1 submetida em 2026-11-11; submissão pausada até 2026-11-26 |
+| Tag e GitHub Release | nenhuma criada; decisão humana pendente |
+| Submissão manual nos portais | 0.6.0 não submetida; usuário |
 
 ## Leitura rápida
 
-O GDD **não está atrasado em conteúdo de campanha**: as 6 fases, o tutorial, os
-9 blocos, 7 elementos, 3 chefes, 19 perks e o Endless estão implementados. O que
-falta é majoritariamente **validação humana** do novo tutorial/controles/ads,
-**meta-sistemas de retenção** (metaprogressão, conquistas, leaderboards),
-**distribuição** (Full Launch, novos portais, localização, landscape) e
-**assets de loja da 0.5.1**. A moldura desktop foi deliberadamente descartada;
-o risco de apresentação em iframe desktop continua registrado, mas não será
-resolvido por letterbox nesta linha.
+O GDD e o build **estão alinhados em conteúdo de campanha**: as 6 fases, o
+tutorial, os 9 blocos, 7 elementos, 3 chefes, 19 perks e o Endless estão
+implementados. A `0.6.0` fechou a lacuna de **metaprogressão horizontal** que o
+GDD v1.6 ainda listava como futura: 10 starters, 9 unlocks, Sparks, Workshop,
+save v2 e as quatro perks reworkadas estão no código e cobertos por testes.
+
+O que falta é majoritariamente **validação humana** do novo meta, da economia e
+das perks reworkadas, **distribuição** (publicar a 0.6.0, retomar CrazyGames
+após 2026-11-26, resolver GameFlare) e **assets de loja da 0.6.0**. A moldura
+desktop foi deliberadamente descartada; o risco de apresentação em iframe
+desktop continua registrado, mas não será resolvido por letterbox nesta linha.

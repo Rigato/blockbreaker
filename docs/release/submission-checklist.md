@@ -1,38 +1,39 @@
 # Submission checklist — Bricklike
 
-**Versão em desenvolvimento:** `0.5.1` (publicada no itch.io e no sandbox da Playgama).  
-**CrazyGames:** `0.5.1` submetida em 2026-11-11; aguardando review.  
-**Status global:** assets da 0.5.1 regerados; revisão humana e resultado do CrazyGames pendentes.  
-**Quem submete:** o usuário, manualmente, em cada portal. Nenhuma tag ou GitHub
-Release foi criada.
+**Versão em desenvolvimento:** `0.6.0` (**local; não publicada e não submetida**).  
+**Versão publicada:** `0.5.1` no itch.io e no sandbox da Playgama.  
+**CrazyGames:** `0.5.1` submetida em 2026-11-11; submissão pausada até 2026-11-26.  
+**Status global:** 0.6.0 local; assets de loja ainda os da 0.5.1; revisão humana
+pendente. Nenhuma tag ou GitHub Release foi criada.  
+**Quem submete:** o usuário, manualmente, em cada portal.
 
 Revalidar as regras de cada portal **na data da submissão**; elas mudam com
 frequência. O checklist registra o pacote atual e o aprendizado das submissões
-(Playgama sandbox, CrazyGames com 0.3.0 e 0.4.0 reprovadas e 0.5.1 em review, GameFlare bloqueado
-por acesso).
+(Playgama sandbox, CrazyGames com 0.3.0 e 0.4.0 reprovadas, 0.5.1 submetida e
+GameFlare bloqueado por acesso).
 
 ## Pré-requisitos comuns
 
-- [ ] Teste humano da 0.5.1 concluído: tutorial completo, skip, coach marks,
-      fase 1 com 2 ondas, edge assist no celular, laser bloqueado até o
-      lançamento, ads mock, save antigo e aviso de storage. **Pendente.**
-- [ ] ZIP final 0.5.1 gerado pelo pipeline de release, com `index.html` e
+- [ ] Teste humano da 0.6.0 concluído: Workshop, compra e persistência de
+      Sparks, migração de save v1→v2, perks reworkadas, tutorial, ads mock e
+      layout de portal. **Pendente.**
+- [ ] ZIP final 0.6.0 gerado pelo pipeline de release, com `index.html` e
       `playgama-bridge-config.json` na raiz e Bridge local
-      (`./playgama-bridge.js`, sem request ao CDN da Playgama). **Pendente de
-      teste final.**
+      (`./playgama-bridge.js`, sem request ao CDN da Playgama). **Gerado:
+      20 arquivos, 1.513.834 bytes; falta teste final.**
 - [ ] ZIP aberto em aba anônima, servido em subpasta, sem 404 e sem requests
       externas no boot. **Pendente de revisão humana.**
 - [ ] Título, descrição curta, descrição longa e controles revisados em
-      `docs/release/portal-metadata.md` para tutorial + 6 níveis/20 ondas
-      (22 com tutorial). **Pendente de revisão humana.**
-- [ ] Três capas revisadas e aprovadas em `store/covers/`. **Pendente de
-      revisão humana; capas da 0.5.1 já geradas.**
-- [x] Screenshots, capas e vídeos **regerados a partir da 0.5.1** (tutorial,
-      fase 1 com 2 ondas, controles touch, 7 cards, Frost Sentinel e Endless).
-      **Gerados; revisão humana pendente.**
-- [x] How to Play (5 páginas, 780×468) regenerado da 0.5.1; About Us
-      (logomarca Bad Decision Games) revisado na 0.4.0. **Revisão humana
-      pendente.**
+      `docs/release/portal-metadata.md` para perks reworkadas +
+      metaprogression + Workshop + 6 níveis/20 ondas (22 com tutorial).
+      **Pendente de revisão humana.**
+- [ ] Capas revisadas e aprovadas em `store/covers/`. **Pendente; capas atuais
+      são da 0.5.1.**
+- [x] Screenshots, capas e vídeos **da 0.5.1** (tutorial, fase 1 com 2 ondas,
+      controles touch, 7 cards, Frost Sentinel e Endless). **Revisão humana
+      pendente; regeneração para a 0.6.0 ainda não feita.**
+- [x] How to Play (5 páginas, 780×468) da 0.5.1; About Us (logomarca Bad
+      Decision Games) revisado na 0.4.0. **Revisão humana pendente.**
 - [ ] Nome **Bricklike** consistente em todos os portais. **Pendente de revisão
       humana.**
 - [x] Leitura em **907×510**, **1216×684**, **1280×720**, **800×450** e
@@ -41,8 +42,8 @@ por acesso).
 - [ ] Menu leva ao gameplay em Campaign → card → Play (2 cliques). Para o Full
       Launch da CrazyGames seria necessário 1 clique/entrada direta.
       **Pendente de decisão.**
-- [x] Gates: 329 testes unitários em 29 arquivos; 31 E2E em 9 spec files;
-      conteúdo com 7 níveis/22 ondas/743 blocos/1.809 XP.
+- [x] Gates da 0.6.0: 375 testes unitários em 31 arquivos; 36 E2E em 10 spec
+      files; conteúdo com 7 níveis/22 ondas/743 blocos/1.809 XP.
 
 ## Assets compartilhados
 
@@ -71,25 +72,25 @@ por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto HTML5 criado pelo usuário | pendente de revisão humana |
-| Versão publicada | `0.4.0` atualizada manualmente; 0.5.1 local | 0.4.0 publicado |
-| Upload 0.5.1 | ZIP HTML5 final + assets novos | pendente de teste humano |
+| Versão publicada | `0.5.1` atualizada manualmente; `0.6.0` local | 0.5.1 publicado |
+| Upload 0.6.0 | ZIP HTML5 final + assets revisados | pendente de teste humano |
 | Embed | Mobile Friendly ligado; fullscreen; click-to-play | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
-| Descrição | Curta + longa em inglês, tutorial + 20 ondas | pendente de revisão humana |
+| Descrição | Curta + longa em inglês, perks + meta + Workshop + 20 ondas | pendente de revisão humana |
 | Controles | Campo de controles preenchido, incluindo touch | pendente de revisão humana |
 | Tags | arcade, brick-breaker, roguelite, pixel-art, html5, mobile | pendente de revisão humana |
 | Preço | Free + doação opcional; sem venda no embed HTML5 | pendente de revisão humana |
-| Capa | 16:9 ou 2:3 aprovada | 0.5.1 gerado; revisão humana |
-| Screenshots | 8 imagens + tutorial | 0.5.1 gerado; revisão humana |
+| Capa | 16:9 ou 2:3 aprovada | 0.5.1; revisão humana |
+| Screenshots | 8 imagens + tutorial | 0.5.1; revisão humana |
 | Ads | Nenhum ad interno no itch.io; não prometer ads na página | pendente de revisão humana |
-| Publicação | Usuário clica em publicar após aprovação | pendente |
+| Publicação | Usuário clica em publicar após aprovação | 0.6.0 pendente |
 
 ## GameFlare
 
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário | bloqueado por acesso |
-| Upload | ZIP HTML5 ou link do build | pendente de desbloqueio |
+| Upload | ZIP HTML5 ou link do build | pendente de desbloqueio; 0.6.0 não enviada |
 | SDK | SDK opcional do GameFlare não é necessário | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
 | Descrição | Curta + longa em inglês | pendente de revisão humana |
@@ -97,7 +98,7 @@ por acesso).
 | Controles | Campo de controles preenchido | pendente de revisão humana |
 | Tags | arcade, block breaker, roguelite, pixel art, html5 | pendente de revisão humana |
 | Ads | Sem ads dentro do jogo; ads do portal ficam fora do jogo | pendente de revisão humana |
-| Assets | Capa e screenshots aprovadas | 0.5.1 gerado; revisão humana |
+| Assets | Capa e screenshots aprovadas | 0.5.1; revisão humana |
 | Publicação | Usuário envia para revisão após resolver o acesso | pendente |
 
 ## Playgama
@@ -105,21 +106,21 @@ por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário no Playgama | pendente de revisão humana |
-| Versão no sandbox | `0.4.0` enviada manualmente; 0.5.1 local | 0.4.0 sandbox |
+| Versão no sandbox | `0.5.1` enviada manualmente; `0.6.0` local | 0.5.1 sandbox |
 | Upload | ZIP com `index.html`, config e Bridge local na raiz | pendente de teste humano |
 | Bridge | Config validado; sem logo/analytics; safe area ligada | ok nos gates |
 | Eventos | `game_ready`, `level_started/paused/resumed/completed/failed` | pendente de revisão humana |
-| Storage | `bb.save` e `bb.settings` via Bridge; reload preserva | pendente de revisão humana |
+| Storage | `bb.save` v2 e `bb.settings` via Bridge; reload preserva | pendente de revisão humana |
 | Aviso de storage | “Progress may not be saved” em memória/fallback | pendente de teste manual |
 | Interstitial | Tutorial sem ads; campanha só com próxima onda e múltiplo de 3; Endless a cada 4; exits com cooldown de 60 s | implementado; validar no portal |
 | Rewarded | Revive opcional 1x por run; recompensa só no estado `rewarded`; Second Chance coexiste | implementado; validar no portal |
 | Áudio | Mudo durante ads/background; retoma após gesto | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
-| Descrição | Curta + longa em inglês, tutorial + 20 ondas | pendente de revisão humana |
+| Descrição | Curta + longa em inglês, perks + meta + Workshop + 20 ondas | pendente de revisão humana |
 | Orientação | Portrait | pendente de revisão humana |
-| Assets | Capa portrait **1080×1920** e screenshots aprovadas | 0.5.1 gerado; revisão humana |
+| Assets | Capa portrait **1080×1920** e screenshots aprovadas | 0.5.1; revisão humana |
 | Review | Acompanhar a review do portal (~24 h) | pendente de revisão humana |
-| Publicação | Usuário submete e acompanha o status | pendente |
+| Publicação | Usuário submete e acompanha o status | 0.6.0 pendente |
 
 **Amostra do sandbox (0.4.0, pequena):** 17/100 qualifying plays; avg play time
 5:42 vs meta 5:00; ad shows/play 1,70 vs meta 0,30; 116 launches, 31 plays,
@@ -132,14 +133,15 @@ por acesso).
 | Conta e projeto | Projeto criado pelo usuário | pendente de revisão humana |
 | Tipo de submissão | **Basic Launch**, não Full Launch | pendente de revisão humana |
 | Histórico | 0.3.0 e 0.4.0 reprovadas com a mesma mensagem genérica | registrado |
-| Fluxo de reenvio | **Nova submissão** (não update); 0.5.1 é a próxima tentativa | pendente |
-| Feedback | Pedir detalhes no Support/technical-support antes de reenviar | pendente |
-| Upload | ZIP HTML5 final da 0.5.1 | pendente de teste humano |
-| Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | 0.5.1 gerado; revisão humana |
-| Capa 2:3 | 800×1200, mesma linguagem visual | 0.5.1 gerado; revisão humana |
-| Capa 1:1 | 800×800, mesma linguagem visual | 0.5.1 gerado; revisão humana |
-| Preview video | MP4 15–20 s, gameplay real, 1920×1080 + 1080×1620 | 0.5.1 gerado; revisão humana |
-| Descrição | Inglês, ≥ 100 palavras, tutorial + 6 níveis/20 ondas | pendente de revisão humana |
+| 0.5.1 | Submetida em 2026-11-11 | submissão pausada até 2026-11-26 |
+| 0.6.0 | Ainda não submetida; local | pendente de teste humano |
+| Feedback | Pedir detalhes no Support/technical-support após 2026-11-26 | pendente |
+| Upload | ZIP HTML5 final da 0.6.0 | pendente de teste humano |
+| Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | 0.5.1; revisão humana |
+| Capa 2:3 | 800×1200, mesma linguagem visual | 0.5.1; revisão humana |
+| Capa 1:1 | 800×800, mesma linguagem visual | 0.5.1; revisão humana |
+| Preview video | MP4 15–20 s, gameplay real, 1920×1080 + 1080×1620 | 0.5.1; revisão humana |
+| Descrição | Inglês, ≥ 100 palavras, perks + meta + Workshop + 20 ondas | pendente de revisão humana |
 | Controles | Campo de controles preenchido | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
 | Ads | Desligados no Basic; jogo não trava esperando ad | implementado |
@@ -147,7 +149,7 @@ por acesso).
 | Mobile | Portrait mobile-friendly; testar em Chromebook/Android | pendente de teste humano |
 | Desktop | HUD legível em 907×510 e 1920×1080; shell portrait intencional, sem letterbox | pendente de revisão humana |
 | Onboarding | Tutorial in-game pulável + coach marks; caminho de skip | implementado; validar |
-| Consistência | Capa, screenshots e blocos usam a mesma linguagem visual | 0.5.1 gerado; revisão humana |
+| Consistência | Capa, screenshots e blocos usam a mesma linguagem visual | 0.5.1; revisão humana |
 | Qualidade | Sem artefatos, texto cortado, controles ambíguos ou áudio estourado | pendente de teste humano |
 | Revalidação | Conferir regras atuais do Basic Launch | pendente de revisão humana |
 | Full Launch | Fora do escopo deste ciclo | pendente de decisão |
@@ -157,29 +159,30 @@ por acesso).
 
 Antes de reenviar, ler `docs/release/crazygames-review.md` e
 `docs/research/crazygames-feedback.md`. A 0.4.0 foi recusada de novo com a mesma
-mensagem genérica; o FAQ só aceita reenvio se houver melhoria clara. A mensagem
-deve listar:
+mensagem genérica; o FAQ só aceita reenvio se houver melhoria clara. A
+submissão está pausada até **2026-11-26**. A mensagem deve listar:
 
+- perks reworkadas: Momentum, Bombardier, Boss Slayer e Hot Streak;
+- 10 starters, 9 unlocks, Sparks e Workshop;
+- save v2 com migração v1→v2 e ofertas filtradas;
 - tutorial in-game pulável com coach marks e gate do level 1;
 - controles touch com edge assist e gate explícito do laser;
-- nova política de ads (tutorial sem ads; campanha só em onda múltipla de 3 com
-  próxima onda; exits com cooldown de 60 s);
-- aviso de storage em fallback/memória;
+- política de ads mantida da 0.5.1;
 - campanha de 20 ondas (22 com tutorial) e 7 cards;
-- 329 testes unitários e 31 E2E verdes;
-- assets regenerados a partir da 0.5.1.
+- 375 testes unitários e 36 E2E verdes;
+- assets revisados/regenerados para a 0.6.0.
 
-**Ainda pendente:** pedir detalhes no Support, testar em humano e revisar
+**Ainda pendente:** aguardar 2026-11-26, testar em humano e revisar
 capas/screenshots/vídeo.
 
 ## Sequência manual acordada
 
-1. Testar a 0.5.1 manualmente e validar o ZIP final.
-2. Revisar screenshots, capas e vídeos gerados a partir da 0.5.1.
-3. Publicar no itch.io.
+1. Testar a 0.6.0 manualmente e validar o ZIP final.
+2. Revisar/regenerar screenshots, capas e vídeos para a 0.6.0.
+3. Publicar a 0.6.0 no itch.io, se aprovada.
 4. Publicar no GameFlare, se o acesso for desbloqueado.
 5. Submeter ao Playgama.
-6. Pedir feedback à CrazyGames e submeter a 0.5.1 como Basic Launch.
+6. Após 2026-11-26, pedir feedback à CrazyGames e decidir o reenvio da 0.6.0.
 7. Registrar URLs, datas e status de cada portal.
 8. Acompanhar o Basic Launch por 7 dias ou 500 plays antes de discutir Full
    Launch.

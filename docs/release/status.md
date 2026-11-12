@@ -1,73 +1,89 @@
 # Status de publicação — Bricklike
 
 Versão publicada: **`0.5.1`** no **itch.io** e no **sandbox da Playgama**  
-CrazyGames: **`0.5.1` submetida** em 2026-11-11; aguardando review  
-Atualizado em: 2026-11-11  
+Versão em desenvolvimento: **`0.6.0`**, local e **não publicada**  
+CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**  
+Atualizado em: 2026-11-12  
 Responsável pela submissão: **usuário (manual)**
 
 Este arquivo é o registro de publicação. O `0.1.0-mvp` foi a primeira versão
 publicada no itch.io; ele foi substituído manualmente pela `0.5.1`. A `0.5.1`
 também está no sandbox da Playgama e foi submetida ao CrazyGames em 2026-11-11.
+A `0.6.0` está em `main`, é **local e não foi enviada a nenhum portal**.
 Nenhuma tag ou GitHub Release foi criada.
 
-## Estado em 2026-11-11
+## Estado em 2026-11-12
 
-- **itch.io:** `0.5.1` publicada manualmente. A `0.1.0-mvp` fica apenas como
-  histórico.
+- **itch.io:** `0.5.1` publicada manualmente. A `0.6.0` é local; a
+  `0.1.0-mvp` fica apenas como histórico.
 - **Playgama:** `0.5.1` no **sandbox**; precisa cumprir milestones de
-  retenção/qualidade antes da publicação no catálogo.
+  retenção/qualidade antes da publicação no catálogo. A `0.6.0` não foi enviada.
 - **CrazyGames:** a `0.3.0` foi **reprovada** por “abaixo dos padrões de
   qualidade”. A `0.4.0` foi reenviada como nova submissão e **reprovada de novo
   com a mesma mensagem genérica**, sem detalhamento. A `0.5.1` foi submetida em
-  2026-11-11 e está **aguardando review**; diagnóstico e
-  canais de suporte em [`crazygames-review.md`](crazygames-review.md) e
+  2026-11-11; a submissão está **pausada/bloqueada até 2026-11-26**. Diagnóstico
+  e canais de suporte em [`crazygames-review.md`](crazygames-review.md) e
   [`../research/crazygames-feedback.md`](../research/crazygames-feedback.md).
 - **Orientação:** o formulário do CrazyGames só permite configurar **Mobile
   orientation**; o Bricklike está como **PORTRAIT**. O desktop é assumido
   landscape pelo portal. Não existe campo para declarar portrait no PC.
 - **GameFlare:** conta criada, mas acesso bloqueado; suporte acionado e **sem
-  resposta**. A `0.5.1` não foi publicada lá.
-- **GitHub Pages:** acompanha a `main`; a `0.5.1` já aparece no build de review.
-- **ZIP 0.5.1:** local, 20 arquivos, 1.508.491 bytes (~1.481 KiB), SHA-256
-  atual `f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce`
-  (pode mudar no build final).
+  resposta**. A `0.5.1` não foi publicada lá e a `0.6.0` não foi enviada.
+- **GitHub Pages:** acompanha a `main`; a `0.6.0` aparece no build de review
+  após o push desta fase.
+- **ZIP 0.6.0:** local, 20 arquivos, 1.513.834 bytes (~1.478 KiB), SHA-256
+  `1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd`
+  (pode mudar no build final; confirme em `release/manifest.json`).
 
-## O que a 0.5.1 entrega
+## O que a 0.6.0 entrega
+
+- **Perks reworkadas:** Momentum, Bombardier, Boss Slayer e Hot Streak
+  substituem Combo Master, Bomb Ball, Boss Bane e Swift Ball.
+- **Pool inicial de 10 perks:** Multiball, Wide Paddle, Power Ball, Quick Study,
+  Arcane Turret, Giant Ball, Safety Net, Prism Laser, Foresight e Critical
+  Strike.
+- **9 unlocks:** Second Chance (12), Explosive Core (15), Sticky Paddle (18),
+  Momentum (35), Bombardier (40), Boss Slayer (45), Laser Focus (65),
+  Overcharge (65) e Hot Streak (75).
+- **Sparks:** +1 por onda, +3 por chefe e +5 na primeira conclusão de fase,
+  com teto de 30 por run; Endless com +1 por onda e +3 a cada 5 ondas.
+- **Workshop:** strip no menu, cards por tier, compra, saldo, badge e feedback;
+  a compra persiste e atualiza o menu.
+- **Save v2:** `meta: { sparks, unlocks }`; saves v1 migram sem perder
+  progresso de campanha ou Endless.
+- **Ofertas:** perks bloqueadas nunca aparecem; as compradas entram na pool.
+- **Results:** `+X Sparks · total Y`.
+- **Sem poder permanente:** o meta desbloqueia perks, não atributos; sem ads,
+  loot box ou compra de vantagem.
+
+### O que a 0.5.1 entrega (build publicada)
 
 - **Tutorial** jogável e pulável: fase 0 `tutorial`, 2 ondas (`tutw1`,
   `tutw2`), 16 blocos, 32 XP e 2 level ups.
 - **Gate do level 1** em save novo (`unlockedPhase` 0..6; 0 = tutorial);
   saves antigos com `unlockedPhase >= 1` continuam válidos.
-- **Skip tutorial** conclui a fase e libera o level 1; coach marks de
-  mover/lançar, XP/perk, blocos especiais, chefes e Endless.
 - **Campanha** com 6 fases e **20 ondas** (2/3/3/3/4/5); com tutorial, **7 cards
   e 22 ondas**. Totais: **743 blocos / 1.809 XP**; campanha pura: **727 / 1.777**.
-- **Controles touch** com drag relativo 1:1 no centro e ganho progressivo até
-  2,2× na zona externa de 22%; mouse absoluto e teclado inalterados; limite de
-  velocidade do paddle igual.
-- **Laser** exige lançamento explícito na onda; reset bloqueia até o jogador
-  lançar; HUD mostra “Launch the ball first”.
-- **Ads** novas: tutorial sem ads; campanha só com próxima onda e múltiplo de 3
-  (fase 5 após onda 3, fase 6 após onda 3); Endless a cada 4; exits com cooldown
-  de 60 s; rewarded revive 1x/run; Second Chance + rewarded coexistem.
-- **Aviso de storage** “Progress may not be saved” quando o diagnóstico cai em
-  memória/fallback.
-- **Bridge local** no boot (`./playgama-bridge.js`), sem request ao CDN da
-  Playgama; o adapter nativo do CrazyGames ainda carrega o SDK do portal quando
-  detecta o host.
+- **Controles touch** com drag relativo 1:1 e ganho até 2,2×; **laser** com
+  lançamento explícito; **ads** com a política de 60 s; **side art** desktop.
+- A `0.5.1` continua sendo a build publicada; a `0.6.0` não a substituiu.
 
-## Gates da 0.5.1
+## Gates da 0.6.0
 
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | ✅ sem erros |
-| `npm test` | ✅ 329 testes em 29 arquivos |
+| `npm test` | ✅ 375 testes em 31 arquivos |
 | `npm run validate:content` | ✅ 7 níveis, 22 ondas, 743 blocos, 1.809 XP |
 | Bridge config | ✅ schema 2.4.1, sem logo/analytics, sem URLs externas |
-| `npm run test:e2e` | ✅ 31 testes em 9 spec files |
+| `npm run test:e2e` | ✅ 36 testes em 10 spec files |
 | `npm run build` | ✅ |
-| `npm run package` | ✅ 20 arquivos, 1.508.491 bytes, SHA acima |
-| CI + Deploy | pendente de push |
+| `npm run package` | ✅ 20 arquivos, 1.513.834 bytes, SHA acima |
+| CI + Deploy | não executados para a 0.6.0; sem push |
+
+Gates históricos da 0.5.1: 329 testes em 29 arquivos, 31 E2E em 9 spec files e
+ZIP de 20 arquivos/1.508.491 bytes
+(`f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce`).
 
 ## Playgama sandbox — amostra pequena
 
@@ -79,24 +95,25 @@ Números do sandbox da 0.4.0, registrados sem conclusão de qualidade/retenção
 - **116 launches**, **31 plays**, **5m45s**, **3/2 likes**.
 
 A amostra é pequena demais para concluir qualidade ou retenção. A política de
-ads da 0.5.1 deve ser medida novamente depois da publicação.
+ads da 0.5.1 deve ser medida novamente depois da publicação; a 0.6.0 ainda não
+foi publicada.
 
 ## Modo Endless
 
 - Run infinita separada da campanha, com velocidade 660→1100, linhas 4→12 e
   chefes a cada 5 ondas.
-- Save v1 guarda `endless: { bestWave, bestScore, runs }`.
+- Save v2 guarda `endless: { bestWave, bestScore, runs }`.
 - Desbloqueado ao concluir a campanha (fase 6); o tutorial não conta.
-- Publicado na `0.4.0` do itch.io e no sandbox da Playgama.
+- Publicado na `0.4.0` do itch.io e no sandbox da Playgama; permanece na `0.5.1`.
 
 ## Portais
 
 | Portal | Versão | Status | URL pública | Data | Observação |
 |---|---|---|---|---|---|
-| itch.io | **0.5.1** | **publicado** | — | 2026-11-11 | atualização manual; `0.1.0-mvp` histórica |
-| Playgama | **0.5.1** | **sandbox** | — | 2026-11-11 | milestones pendentes; amostra pequena |
-| CrazyGames Basic | 0.3.0 e 0.4.0 (reprovadas) / 0.5.1 | **submetida** | — | 2026-11-11 | aguardando review; reenvio como nova submissão |
-| GameFlare | 0.5.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login |
+| itch.io | **0.5.1** | **publicado** | — | 2026-11-11 | atualização manual; `0.1.0-mvp` histórica; 0.6.0 local |
+| Playgama | **0.5.1** | **sandbox** | — | 2026-11-11 | milestones pendentes; amostra pequena; 0.6.0 não enviada |
+| CrazyGames Basic | 0.5.1 | **pausado** | — | 2026-11-11 | submissão pausada/bloqueada até 2026-11-26 |
+| GameFlare | 0.5.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login; 0.6.0 não enviada |
 
 ### CrazyGames — como pedir detalhes e reenviar
 
@@ -107,26 +124,24 @@ Fonte: <https://docs.crazygames.com/faq/> e
   mesma mensagem genérica. Não há relatório público de QA; o caminho é o
   **Support do Developer Portal** (<https://developer.crazygames.com/support>)
   ou **technical-support@crazygames.com**.
-- Pedir confirmação se a reprovação foi da **QA inicial** ou de um **Basic
-  Launch**, e quais requisitos falharam; incluir game ID/submission ID, build e
-  data.
-- O dono decidiu **não fazer moldura/letterbox desktop**. A próxima tentativa é
-  a `0.5.1`, com tutorial in-game, controles mobile e política de ads.
-- Só reenviar depois de teste humano e de regerar capas, screenshots e vídeo a
-  partir da 0.5.1. Os assets foram gerados na sessão paralela; revisão humana pendente.
+- A `0.5.1` foi submetida em 2026-11-11. A submissão está pausada até
+  **2026-11-26**; não reenviar antes dessa data.
+- O dono decidiu **não fazer moldura/letterbox desktop**. A próxima tentativa
+  deve usar teste humano e assets atualizados.
 - Não criar conta duplicada nem abrir tickets repetidos.
 
-## Checklist rápido pós-upload
+## Checklist rápido pós-0.6.0
 
-- [ ] Teste humano da 0.5.1 concluído (tutorial/skip, edge assist, laser, ads
-      mock, save antigo, aviso de storage).
-- [ ] ZIP 0.5.1 conferido contra `release/manifest.json` e hash registrado.
-- [ ] Screenshots/capas/vídeos da 0.5.1 revisados e aprovados.
+- [ ] Teste humano da 0.6.0 concluído (Workshop, Sparks, save v1→v2, perks
+      reworkadas, ads mock, layout de portal).
+- [ ] ZIP 0.6.0 conferido contra `release/manifest.json` e hash registrado.
+- [ ] Assets de loja revisados/regenerados para a 0.6.0, se houver publicação.
 - [ ] Título **Bricklike** consistente.
-- [ ] Descrição, controles e tags revisados para tutorial + 20 ondas.
-- [x] Publicar 0.5.1 no itch.io e no sandbox da Playgama.
-- [x] Reenviar a 0.5.1 ao CrazyGames como nova submissão.
-- [ ] Acompanhar o review da 0.5.1 no CrazyGames.
+- [ ] Descrição, controles e tags revisados para perks + metaprogression +
+      Workshop.
+- [ ] Publicar 0.6.0 manualmente no itch.io e no sandbox da Playgama, após
+      aprovação.
+- [ ] CrazyGames: aguardar 2026-11-26 e decidir o reenvio.
 - [ ] Resolver GameFlare com o suporte.
 - [ ] Acompanhar milestones da Playgama com amostra maior.
 - [ ] Nenhum portal recebeu URL com `?debug=1` ou `?resetSave=1`.

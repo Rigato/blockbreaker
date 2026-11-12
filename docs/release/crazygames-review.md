@@ -4,9 +4,13 @@
 **Builds avaliados:** v0.3.0 (Endless) e v0.4.0 (revisão visual/menu, HUD,
 How to Play/About e ads), ambos submetidos como CrazyGames Basic Launch  
 **Build candidato:** v0.5.1 (tutorial in-game, controles mobile, side art e
-adapter nativo), submetida em 2026-11-11 e em review  
+adapter nativo), submetida em 2026-11-11; submissão pausada até 2026-11-26  
 **Resultado:** as duas builds foram reprovadas por “abaixo dos padrões de
 qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
+
+> **Atualização 2026-11-12:** a submissão da 0.5.1 está **pausada até
+> 2026-11-26**. A `0.6.0` é local e não foi submetida. Este documento permanece
+> como diagnóstico histórico da 0.5.1.
 
 ## 0. Atualização 2026-11-11 — segunda reprovação da 0.4.0
 
@@ -29,8 +33,9 @@ qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
   - **side art** em viewports desktop landscape, sem alterar o mobile portrait;
   - **adapter nativo do CrazyGames**, sem carregar a Playgama no host do portal;
   - campanha ajustada para 20 ondas e fase 1 com 2 ondas.
-- A 0.5.1 foi **submetida em 2026-11-11** e está em review. Capas,
-  screenshots e vídeos atuais são os da 0.4.0 e não devem ser reutilizados.
+- A 0.5.1 foi **submetida em 2026-11-11**; a submissão está pausada até
+  2026-11-26. Capas, screenshots e vídeos atuais são os da 0.4.0 e não devem ser
+  reutilizados.
 - Para pedir detalhes, use o Support do Developer Portal ou o e-mail técnico e o
   rascunho de mensagem de
   [`docs/research/crazygames-feedback.md`](../research/crazygames-feedback.md).

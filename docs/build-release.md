@@ -26,7 +26,7 @@ se `dist/` não existir, se `index.html` ou `playgama-bridge-config.json`
 estiverem fora da raiz, se houver path absoluto, URL externa não permitida,
 mais de 1.000 arquivos, mais de 250 MB ou caminho acima de 240 caracteres.
 
-## Conteúdo esperado do ZIP (0.5.1)
+## Conteúdo esperado do ZIP (0.6.0)
 
 ```text
 index.html
@@ -138,6 +138,11 @@ unzip -t release/blockbreaker-web.zip
       de 15 s retomam o jogo; rewarded revive só em `rewarded`.
 - [ ] Save antigo com `unlockedPhase >= 1` não repete o tutorial; save novo
       começa em 0 e o skip libera o level 1.
+- [ ] Save v1 migra para v2 com `sparks = 0` e `unlocks = []`, preservando
+      campanha e Endless; a run ativa não é salva.
+- [ ] Workshop abre pelo menu, compra com saldo, persiste após reload e mostra
+      a perk comprada como owned; results mostram `+X Sparks · total Y`.
+- [ ] Ofertas nunca incluem perk bloqueada; a comprada entra na pool.
 - [ ] Laser bloqueado até o lançamento explícito da bola; HUD mostra
       “Launch the ball first”.
 - [ ] Edge assist do toque ativo no celular; mouse continua absoluto.
@@ -147,35 +152,38 @@ unzip -t release/blockbreaker-web.zip
 - [ ] Rotação preserva progresso (pausa + overlay).
 - [ ] ZIP ≤ 250 MB, ≤ 1.500 arquivos, paths ≤ 240 caracteres.
 - [ ] Sem logo do Bridge no mock; modo mock sem analytics.
-- [ ] Screenshots/capas/vídeos regerados a partir da 0.5.1; os assets atuais
-      ainda são os da 0.4.0.
+- [ ] Screenshots/capas/vídeos da 0.6.0 revisados/regenerados; os assets atuais
+      ainda são os da 0.5.1.
 
 ## Pacote atual
 
-Referência de 2026-11-11, versão **0.5.1**, build em **main** (sem upload, tag ou
+Referência de 2026-11-12, versão **0.6.0**, build em **main** (sem upload, tag ou
 GitHub Release):
 
 | Item | Valor |
 |---|---|
 | ZIP | `release/blockbreaker-web.zip` |
-| Tamanho | 1.508.491 bytes (~1.481 KiB) |
+| Tamanho | 1.513.834 bytes (~1.478 KiB) |
+| Descomprimido | 3.055.341 bytes |
 | Arquivos | 20 |
-| SHA-256 | `f63d19341492aaa3b2378d262baac87f103e71daf00ec674972e531f832209ce` |
+| SHA-256 | `1fed8ff154821c209713b64635ab5660845994b6ec1146efdc1a71bab83bcedd` |
 | Raiz | `index.html` + `playgama-bridge-config.json` |
 | Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge local |
 
 O hash pode mudar no build final; confirme o valor em `release/manifest.json`
-antes de qualquer upload.
+antes de qualquer upload. O manifesto também registra `fileCount: 20`,
+`maxPathLength: 38` e a lista completa de paths.
 
 ## Release por tag — somente após aprovação humana
 
-**Não crie tag ou release sem decisão explícita.** A `0.5.1` está em main e ainda
-não foi tagueada nem publicada. A submissão em itch.io, GameFlare, Playgama e
+**Não crie tag ou release sem decisão explícita.** A `0.6.0` está em main e
+ainda não foi tagueada nem publicada. A `0.5.1` é a build publicada no itch.io
+e no sandbox da Playgama. A submissão em itch.io, GameFlare, Playgama e
 CrazyGames é manual e feita pelo responsável.
 
 Pré-requisitos:
 
-1. Teste humano da 0.5.1 concluído e CI verde no commit que receberá a tag; o
+1. Teste humano da 0.6.0 concluído e CI verde no commit que receberá a tag; o
    `release.yml` não roda E2E.
 2. `npm run package` local limpo, com `unzip -t` OK.
 3. `package.json` e `release/manifest.json` na mesma versão da tag.
@@ -187,15 +195,15 @@ git switch main
 git pull --ff-only
 git status                      # deve estar limpo
 
-git tag -a v0.5.1 -m "Bricklike v0.5.1"
-git push origin v0.5.1
+git tag -a v0.6.0 -m "Bricklike v0.6.0"
+git push origin v0.6.0
 ```
 
 Conferência:
 
 ```bash
 gh run list --workflow Release --limit 1
-gh release view v0.5.1 --json name,assets,url
+gh release view v0.6.0 --json name,assets,url
 ```
 
 Fallback manual **somente** se o workflow falhar e o build local estiver
@@ -203,9 +211,9 @@ validado:
 
 ```bash
 npm run build && npm run package
-gh release create v0.5.1 \
+gh release create v0.6.0 \
   release/blockbreaker-web.zip release/manifest.json \
-  --title "Bricklike v0.5.1" \
+  --title "Bricklike v0.6.0" \
   --generate-notes
 ```
 
