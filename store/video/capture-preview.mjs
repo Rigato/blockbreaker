@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * Records the Bricklike v0.5.0 preview from the production build.
+ * Records the Bricklike v0.6.1 preview from the production build.
  *
  * Two portal-ready outputs are composed from the same real gameplay clips:
  *   - bricklike-preview.mp4          1920x1080 (16:9)
  *   - bricklike-preview-portrait.mp4 1080x1620 (2:3)
  *
- * The video shows the title menu, the seven-card campaign selector, the
- * playable tutorial, laser + multiball gameplay, a level-up and the Frost
- * Sentinel boss. It ends on the matching store cover, which carries the
- * BRICKLIKE logo.
+ * The video shows the title menu with the Workshop progression card, the
+ * seven-card campaign selector, the playable tutorial, laser + multiball
+ * gameplay, a level-up and the Frost Sentinel boss. It ends on the matching
+ * store cover, which carries the BRICKLIKE logo.
  *
  * Usage:
  *   npm run build
@@ -40,15 +40,27 @@ if (!['both', 'landscape', 'portrait'].includes(format)) {
 }
 
 const viewport = { width: 390, height: 844 };
-const rawDir = join(repo, '.qa/video-raw-v050');
-const segmentRoot = join(repo, '.qa/video-segments-v050');
+const rawDir = join(repo, '.qa/video-raw-v061');
+const segmentRoot = join(repo, '.qa/video-segments-v061');
 const coverLandscape = join(repo, 'store/covers/cover-landscape-1920x1080.png');
 const coverPortrait = join(repo, 'store/covers/cover-portrait-800x1200.png');
 
+/**
+ * A v2 late-campaign save: tutorial and phase 1 cleared, so the menu shows
+ * the campaign in progress and the Workshop card has 42 Sparks, three
+ * unlocks, a useful count and a visible progress bar.
+ */
 const PROGRESS_SAVE = {
-  version: 1,
+  version: 2,
   unlockedPhase: 6,
   phases: {
+    tutorial: {
+      bestScore: 9800,
+      bestTimeMs: 45000,
+      attempts: 1,
+      clears: 1,
+      bestLevel: 4,
+    },
     'phase-1': {
       bestScore: 24800,
       bestTimeMs: 12000,
@@ -59,6 +71,10 @@ const PROGRESS_SAVE = {
   },
   endless: { bestWave: 12, bestScore: 34500, runs: 8 },
   campaignComplete: false,
+  meta: {
+    sparks: 42,
+    unlocks: ['second_chance', 'explosive_core', 'sticky_paddle'],
+  },
   updatedAt: Date.now(),
 };
 
@@ -150,11 +166,9 @@ async function recordClip(name, prepare, action) {
     isMobile: true,
     recordVideo: { dir: rawDir, size: viewport },
   });
-  if (name !== 'menu') {
-    await context.addInitScript((save) => {
-      localStorage.setItem('bb.save', JSON.stringify(save));
-    }, PROGRESS_SAVE);
-  }
+  await context.addInitScript((save) => {
+    localStorage.setItem('bb.save', JSON.stringify(save));
+  }, PROGRESS_SAVE);
   const page = await context.newPage();
   await prepare(page);
   const prepSeconds = (Date.now() - startedAt) / 1000;
@@ -166,11 +180,22 @@ async function recordClip(name, prepare, action) {
   return { name, path, prepSeconds };
 }
 
-// 1. Title menu. Fresh save shows the tutorial as the current campaign step.
+// 1. Title menu. The v2 progress save shows level 2 as the current campaign
+//    step and the Workshop progression card with Sparks, unlocks and progress.
 const menuClip = await recordClip(
   'menu',
   async (page) => {
-    await waitForMenu(page, `${baseUrl}/?resetSave=1`);
+    await waitForMenu(page, `${baseUrl}/`);
+    await page.locator('#workshop-button').waitFor({ state: 'visible' });
+    const workshop = {
+      sparks: (await page.locator('.menu__workshop-sparks').textContent())?.trim(),
+      count: (await page.locator('.menu__workshop-count-value').textContent())?.trim(),
+      left: (await page.locator('.menu__workshop-left').textContent())?.trim(),
+    };
+    console.log(`menu workshop: ${JSON.stringify(workshop)}`);
+    if (workshop.sparks !== '42 Sparks') {
+      throw new Error(`menu Workshop sparks are unexpected: ${workshop.sparks}`);
+    }
     await page.waitForTimeout(1000);
   },
   async (page) => {
@@ -400,10 +425,10 @@ function composeCoverSegment(variant, out) {
 
 function composeGameplaySegment(variant, clip, out) {
   const filter = [
-    `[0:v]scale=${variant.width}:${variant.height},boxblur=22:2,eq=brightness=0.01:saturation=1.2[bg]`,
+    `[0:v]scale=${variant.width}:${variant.height},boxblur=22:2,eq=brightness=0.01:saturation=1.2,setpts=PTS-STARTPTS[bg]`,
     // The browser recording includes the 32 px shell letterbox. Crop it so the
     // preview card is the game itself, not a black-banded screenshot.
-    `[1:v]crop=390:780:0:32,scale=-2:${variant.foregroundHeight},pad=iw+20:ih+20:10:10:color=0x7ef9ff@0.55[fg]`,
+    `[1:v]crop=390:780:0:32,scale=-2:${variant.foregroundHeight},pad=iw+20:ih+20:10:10:color=0x7ef9ff@0.55,setpts=PTS-STARTPTS[fg]`,
     '[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p[v]',
   ].join(';');
   runFfmpeg(

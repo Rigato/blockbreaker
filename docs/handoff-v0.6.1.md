@@ -4,8 +4,8 @@
 **Data:** 2026-11-12  
 **Branch:** `main`  
 **Versão do package:** `0.6.1`  
-**Build:** local, **não publicado e não submetido**  
-**Publicado em portal:** `0.5.1` no itch.io e no sandbox da Playgama  
+**Build:** publicada no itch.io e no sandbox da Playgama; testes básicos ok  
+**Publicado em portal:** `0.6.1` no itch.io e no sandbox da Playgama  
 **Tag / GitHub Release:** nenhuma para `0.6.1`; nenhuma tag ou release foi criada  
 **Review build:** <https://rigato.github.io/blockbreaker/> (acompanha a `main`;
 a `0.6.1` aparece após o push desta fase)  
@@ -26,17 +26,18 @@ a `0.6.1` aparece após o push desta fase)
 |---|---|
 | Branch de desenvolvimento | `main` |
 | Versão em desenvolvimento | `0.6.1` |
-| Versão publicada | `0.5.1` (itch.io + sandbox da Playgama) |
-| Build 0.6.1 | local, sem upload, sem tag e sem GitHub Release |
+| Versão publicada | `0.6.1` (itch.io + sandbox da Playgama) |
+| Build 0.6.1 | publicada em 2026-11-12; sem tag e sem GitHub Release |
 | Tag / GitHub Release | nenhuma para 0.2.x, 0.3.x, 0.4.0, 0.5.x, 0.6.0 ou 0.6.1 |
-| Portais | itch.io 0.5.1; Playgama 0.5.1 sandbox; CrazyGames pausado até 2026-11-26; GameFlare bloqueado |
+| Portais | itch.io 0.6.1; Playgama 0.6.1 sandbox; CrazyGames pausado até 2026-11-26; GameFlare bloqueado |
 | Node | 22.12+ (CI usa Node 24) |
 | Stack | Phaser 3.90, TypeScript estrito, Vite 8, Vitest, Playwright, Playgama Bridge 2.4.1 + adapter nativo do CrazyGames |
-| ZIP local | `release/blockbreaker-web.zip` — 0.6.1, 20 arquivos, 1.517.380 bytes |
-| SHA-256 do ZIP | `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd` |
+| ZIP local | `release/blockbreaker-web.zip` — 0.6.1, 20 arquivos, 1.514.492 bytes |
+| SHA-256 do ZIP | `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8` |
 
 O hash pode mudar em um rebuild; confirme em `release/manifest.json` antes de
-qualquer upload. A `0.6.1` não foi publicada em nenhum portal.
+qualquer upload. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama
+em 2026-11-12, após testes básicos do responsável.
 
 ---
 
@@ -216,11 +217,11 @@ Resultados de referência da 0.6.1 (2026-11-12):
 | Bridge config | ✅ schema 2.4.1, sem logo/analytics, sem URLs externas |
 | `npm run build` | ✅ bundle Phaser/Vite (83 módulos) |
 | `npm run test:e2e` | ✅ **37 testes** em **10 spec files** |
-| `npm run package` | ✅ ZIP 0.6.1, **20 arquivos**, **1.517.380 bytes**, SHA-256 `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd` |
+| `npm run package` | ✅ ZIP 0.6.1, **20 arquivos**, **1.514.492 bytes**, SHA-256 `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8` |
 
 ### 5.1 Manifesto do ZIP
 
-- 20 arquivos; 1.517.380 bytes comprimidos; 3.071.123 bytes descomprimidos;
+- 20 arquivos; 1.514.492 bytes comprimidos; 3.068.148 bytes descomprimidos;
   maior caminho com 38 caracteres.
 - Raiz: `index.html`, `playgama-bridge-config.json`, `playgama-bridge.js`,
   `favicon.svg`.
@@ -250,22 +251,22 @@ playtest humano da 0.6.1.
 
 | Portal | Versão | Status | Observação |
 |---|---|---|---|
-| itch.io | **0.5.1** | **publicado** | a 0.6.1 é local; atualização manual futura |
-| Playgama | **0.5.1** | **sandbox** | milestones pendentes; a 0.6.1 não foi enviada |
+| itch.io | **0.6.1** | **publicado** | atualização manual em 2026-11-12; testes básicos ok |
+| Playgama | **0.6.1** | **sandbox** | milestones pendentes; medir retenção/ads da nova build |
 | CrazyGames Basic | 0.5.1 | **pausado** | submissão pausada/bloqueada até **2026-11-26** |
-| GameFlare | 0.5.1 (não publicada) | **bloqueado** | conta sem acesso; suporte sem resposta |
+| GameFlare | 0.6.1 (não publicada) | **bloqueado** | conta sem acesso; suporte sem resposta |
 
-- **0.6.1 é local e não publicada.** Não há upload, tag ou GitHub Release.
-- **0.5.1 continua sendo a versão publicada** no itch.io e no sandbox da
-  Playgama.
+- **0.6.1 está publicada** no itch.io e no sandbox da Playgama desde
+  2026-11-12; o responsável fez testes básicos e considerou tudo ok.
+- **0.5.1 é a build anterior.** Não há tag ou GitHub Release.
 - **CrazyGames:** a 0.3.0 e a 0.4.0 foram reprovadas; a 0.5.1 foi submetida em
   2026-11-11. A conta/portal está **pausado até 2026-11-26**; não reenviar antes
   dessa data.
 - **GameFlare:** conta criada, acesso bloqueado; não criar conta duplicada.
 - **GitHub Pages:** acompanha a `main`; a 0.6.1 aparece no build de review
   após o push desta fase.
-- **Assets de loja:** continuam os da 0.5.1. Revisão humana e eventual
-  regeneração para a 0.6.1 seguem pendentes antes de qualquer upload.
+- **Assets de loja:** capas, 9 screenshots, 2 vídeos e 5 painéis How to Play
+  regenerados a partir da 0.6.1; revisão humana pendente antes de reutilizar.
 
 ---
 
@@ -303,7 +304,7 @@ playtest humano da 0.6.1.
 
 | Área | Estado | Risco / ação |
 |---|---|---|
-| Teste humano da 0.6.1 | pendente | validar Tier 4, economia, card do Workshop, HUD e results no navegador |
+| Teste humano da 0.6.1 | básico concluído | aprofundar Tier 4, economia e anti-farm em playtest |
 | Economia de Sparks | implementada e testada | calibrar tempo até o primeiro unlock e o teto de 250 com playtest |
 | Tier 4 | testes verdes | Overkill/Shield Bash/Conductor ainda precisam de sensação humana; Conductor depende de Prism Laser |
 | Anti-farm | coberto por teste | validar retry de onda em sessão real, incluindo pause/ads |
@@ -311,8 +312,8 @@ playtest humano da 0.6.1.
 | Workshop card | E2E e layout 320/390 verdes | validar em iframe de portal e em desktop |
 | CrazyGames | pausado até 2026-11-26 | não reenviar; retomar só depois da data e de teste humano |
 | GameFlare | bloqueado | follow-up único no suporte; não criar conta duplicada |
-| Assets de loja | da 0.5.1 | regenerar/revisar se a 0.6.1 for publicada |
-| Distribuição | 0.5.1 publicada; 0.6.1 local | nenhum portal recebeu a 0.6.1 |
+| Assets de loja | regenerados da 0.6.1 | revisar antes de reutilizar em portal |
+| Distribuição | 0.6.1 publicada no itch.io/Playgama | CrazyGames/GameFlare seguem pendentes |
 | Tag/Release | nenhuma | só criar depois de aprovação humana explícita |
 | P0/P1 | nenhum conhecido nos gates | reportar imediatamente se aparecer em teste manual |
 

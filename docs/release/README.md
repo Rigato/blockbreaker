@@ -1,14 +1,13 @@
 # Pacote de publicação
 
-Versão do pacote: **`0.6.1`** (local; **não publicada e não submetida**)  
-Versão publicada nos portais: **`0.5.1`** (itch.io e sandbox da Playgama)  
+Versão do pacote: **`0.6.1`** (publicada no itch.io e no sandbox da Playgama)  
+Build anterior: **`0.5.1`**  
 CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão pausada até 2026-11-26  
 Tag planejada: **`v0.6.1`** (não criada; depende de aprovação humana)
 
 Este diretório reúne o material para revisão humana e submissão **manual** nos
 portais. Os uploads de itch.io/Playgama e a submissão ao CrazyGames foram feitos
-pelo responsável; a tag e o GitHub Release continuam manuais. A `0.6.1` não foi
-enviada a nenhum portal.
+pelo responsável; a tag e o GitHub Release continuam manuais. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12.
 
 ## Comece por aqui
 
@@ -24,13 +23,13 @@ enviada a nenhum portal.
 
 ## Pacote atual (0.6.1)
 
-- `release/blockbreaker-web.zip` — 20 arquivos, 1.517.380 bytes
-  (~1.482 KiB), 3.071.123 bytes descomprimidos, maior path com 38 caracteres.
-- SHA-256: `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`.
+- `release/blockbreaker-web.zip` — 20 arquivos, 1.514.492 bytes
+  (~1.482 KiB), 3.068.148 bytes descomprimidos, maior path com 38 caracteres.
+- SHA-256: `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8`.
 - Gates: 396 testes em 32 arquivos; 37 E2E em 10 spec files; conteúdo com
   7 níveis / 22 ondas / 743 blocos / 1.809 XP.
 - O hash pode mudar em um rebuild; confirme em `release/manifest.json` antes de
-  qualquer upload. Nenhum portal recebeu a 0.6.1.
+  qualquer upload. A 0.6.1 foi publicada no itch.io e no sandbox da Playgama.
 
 ## Assets
 
@@ -41,9 +40,9 @@ enviada a nenhum portal.
 - `public/how-to-play/` — 5 screenshots 780×468 usados no jogo.
 - `public/bad-decision-games/` — logo do estúdio (WebP + PNG).
 
-**Todos os assets de loja acima são da 0.5.1** (tutorial, fase 1 com 2 ondas,
-controles touch). A revisão humana e uma eventual regeneração para a 0.6.1
-continuam pendentes antes de qualquer upload.
+**Todos os assets de loja acima foram regenerados a partir da 0.6.1** (capas,
+9 screenshots, 2 vídeos e 5 painéis How to Play). Revisão humana pendente antes
+de reutilizar em portal.
 
 ## Limites
 
@@ -52,8 +51,8 @@ continuam pendentes antes de qualquer upload.
 - A tag e o GitHub Release só devem ser criados depois de teste humano e
   aprovação explícita; nenhuma foi criada.
 - Revalidar as regras de cada portal na data do upload.
-- A `0.5.1` está publicada no itch.io e no sandbox da Playgama; a `0.6.1` é
-  local e não foi publicada.
+- A `0.6.1` está publicada no itch.io e no sandbox da Playgama; a `0.5.1` é a
+  build anterior.
 - CrazyGames reprovou a 0.3.0 e a 0.4.0; a 0.5.1 foi submetida em 2026-11-11 e
   a submissão está pausada até 2026-11-26. O dono decidiu não fazer
   moldura/letterbox desktop; a 0.5.1 usa side art.

@@ -1,7 +1,7 @@
 # Status de publicação — Bricklike
 
-Versão publicada: **`0.5.1`** no **itch.io** e no **sandbox da Playgama**  
-Versão em desenvolvimento: **`0.6.1`**, local e **não publicada**  
+Versão publicada: **`0.6.1`** no **itch.io** e no **sandbox da Playgama**  
+Build local: **`0.6.1`** (sem tag ou GitHub Release)  
 CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**  
 Atualizado em: 2026-11-12  
 Responsável pela submissão: **usuário (manual)**
@@ -9,15 +9,16 @@ Responsável pela submissão: **usuário (manual)**
 Este arquivo é o registro de publicação. O `0.1.0-mvp` foi a primeira versão
 publicada no itch.io; ele foi substituído manualmente pela `0.5.1`. A `0.5.1`
 também está no sandbox da Playgama e foi submetida ao CrazyGames em 2026-11-11.
-A `0.6.1` está na linha atual de desenvolvimento, é **local e não foi enviada a
-nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
+A `0.6.1` foi publicada manualmente no **itch.io** e no **sandbox da Playgama**
+em 2026-11-12; o responsável fez testes básicos e considerou tudo ok. Nenhuma
+tag ou GitHub Release foi criada.
 
 ## Estado em 2026-11-12
 
-- **itch.io:** `0.5.1` publicada manualmente. A `0.6.1` é local; a
-  `0.1.0-mvp` fica apenas como histórico.
-- **Playgama:** `0.5.1` no **sandbox**; precisa cumprir milestones de
-  retenção/qualidade antes da publicação no catálogo. A `0.6.1` não foi enviada.
+- **itch.io:** `0.6.1` publicada manualmente. A `0.5.1` fica como build
+  anterior; a `0.1.0-mvp` é histórica.
+- **Playgama:** `0.6.1` no **sandbox**; precisa cumprir milestones de
+  retenção/qualidade antes da publicação no catálogo.
 - **CrazyGames:** a `0.3.0` foi **reprovada** por “abaixo dos padrões de
   qualidade”. A `0.4.0` foi reenviada como nova submissão e **reprovada de novo
   com a mesma mensagem genérica**, sem detalhamento. A `0.5.1` foi submetida em
@@ -28,11 +29,11 @@ nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
   orientation**; o Bricklike está como **PORTRAIT**. O desktop é assumido
   landscape pelo portal. Não existe campo para declarar portrait no PC.
 - **GameFlare:** conta criada, mas acesso bloqueado; suporte acionado e **sem
-  resposta**. A `0.5.1` não foi publicada lá e a `0.6.1` não foi enviada.
+  resposta**. A `0.6.1` não foi publicada lá.
 - **GitHub Pages:** acompanha a `main`; a `0.6.1` aparece no build de review
   após o push desta fase.
-- **ZIP 0.6.1:** local, 20 arquivos, 1.517.380 bytes (~1.482 KiB), SHA-256
-  `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`
+- **ZIP 0.6.1:** local, 20 arquivos, 1.514.492 bytes (~1.482 KiB), SHA-256
+  `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8`
   (pode mudar no build final; confirme em `release/manifest.json`).
 
 ## O que a 0.6.1 entrega
@@ -60,7 +61,7 @@ nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
   bloqueadas; sem bônus permanentes, ads por Sparks, loot box ou compra de
   vantagem.
 - **Gates:** 396 testes em 32 arquivos; 37 E2E em 10 spec files; ZIP 0.6.1 com
-  20 arquivos e 1.517.380 bytes.
+  20 arquivos e 1.514.492 bytes.
 
 ### O que a 0.6.0 entregou (build anterior)
 
@@ -93,8 +94,8 @@ nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
   e 22 ondas**. Totais: **743 blocos / 1.809 XP**; campanha pura: **727 / 1.777**.
 - **Controles touch** com drag relativo 1:1 e ganho até 2,2×; **laser** com
   lançamento explícito; **ads** com a política de 60 s; **side art** desktop.
-- A `0.5.1` continua sendo a build publicada; a `0.6.0` e a `0.6.1` ainda não a
-  substituíram.
+- A `0.6.1` substituiu a `0.5.1` no itch.io e no sandbox da Playgama em
+  2026-11-12; a `0.5.1` fica como build anterior.
 
 ## Gates da 0.6.1
 
@@ -106,7 +107,7 @@ nenhum portal**. Nenhuma tag ou GitHub Release foi criada.
 | Bridge config | ✅ schema 2.4.1, sem logo/analytics, sem URLs externas |
 | `npm run test:e2e` | ✅ 37 testes em 10 spec files |
 | `npm run build` | ✅ |
-| `npm run package` | ✅ 20 arquivos, 1.517.380 bytes, SHA acima |
+| `npm run package` | ✅ 20 arquivos, 1.514.492 bytes, SHA acima |
 
 Gates históricos da 0.6.0: 375 testes em 31 arquivos, 36 E2E em 10 spec files e
 ZIP de 20 arquivos/1.513.834 bytes
@@ -124,9 +125,9 @@ Números do sandbox da 0.4.0, registrados sem conclusão de qualidade/retenção
 - Ad shows/play **1,70** contra meta **0,30**.
 - **116 launches**, **31 plays**, **5m45s**, **3/2 likes**.
 
-A amostra é pequena demais para concluir qualidade ou retenção. A política de
-ads da 0.5.1 deve ser medida novamente depois da publicação; a 0.6.1 ainda não
-foi publicada.
+A amostra é pequena demais para concluir qualidade ou retenção. A `0.6.1` já
+está no sandbox; medir novamente a política de ads e a retenção com a nova
+build.
 
 ## Modo Endless
 
@@ -134,16 +135,16 @@ foi publicada.
   chefes a cada 5 ondas.
 - Save v2 guarda `endless: { bestWave, bestScore, runs }`.
 - Desbloqueado ao concluir a campanha (fase 6); o tutorial não conta.
-- Publicado na `0.4.0` do itch.io e no sandbox da Playgama; permanece na `0.5.1`.
+- Publicado na `0.4.0` do itch.io e no sandbox da Playgama; permanece na `0.6.1`.
 
 ## Portais
 
 | Portal | Versão | Status | URL pública | Data | Observação |
 |---|---|---|---|---|---|
-| itch.io | **0.5.1** | **publicado** | — | 2026-11-11 | atualização manual; `0.1.0-mvp` histórica; 0.6.1 local |
-| Playgama | **0.5.1** | **sandbox** | — | 2026-11-11 | milestones pendentes; amostra pequena; 0.6.1 não enviada |
+| itch.io | **0.6.1** | **publicado** | — | 2026-11-12 | atualização manual; testes básicos ok; `0.5.1` anterior |
+| Playgama | **0.6.1** | **sandbox** | — | 2026-11-12 | milestones pendentes; medir retenção/ads da 0.6.1 |
 | CrazyGames Basic | 0.5.1 | **pausado** | — | 2026-11-11 | submissão pausada/bloqueada até 2026-11-26 |
-| GameFlare | 0.5.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login; 0.6.1 não enviada |
+| GameFlare | 0.6.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login |
 
 ### CrazyGames — como pedir detalhes e reenviar
 
@@ -162,15 +163,13 @@ Fonte: <https://docs.crazygames.com/faq/> e
 
 ## Checklist rápido pós-0.6.1
 
-- [ ] Teste humano da 0.6.1 concluído (Tier 4, economia, anti-farm, card do
-      Workshop, HUD/results, save v1→v2, ads mock, layout de portal).
+- [x] Teste básico humano da 0.6.1 concluído pelo responsável; tudo ok.
 - [ ] ZIP 0.6.1 conferido contra `release/manifest.json` e hash registrado.
-- [ ] Assets de loja revisados/regenerados para a 0.6.1, se houver publicação.
+- [x] Assets de loja regenerados para a 0.6.1; revisão humana antes de reutilizar em portal.
 - [ ] Título **Bricklike** consistente.
 - [ ] Descrição, controles e tags revisados para Tier 4 + economia de Sparks +
       Workshop.
-- [ ] Publicar 0.6.1 manualmente no itch.io e no sandbox da Playgama, após
-      aprovação.
+- [x] Publicar 0.6.1 manualmente no itch.io e no sandbox da Playgama.
 - [ ] CrazyGames: aguardar 2026-11-26 e decidir o reenvio.
 - [ ] Resolver GameFlare com o suporte.
 - [ ] Acompanhar milestones da Playgama com amostra maior.

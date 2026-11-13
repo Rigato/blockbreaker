@@ -1,10 +1,10 @@
 # Submission checklist — Bricklike
 
-**Versão em desenvolvimento:** `0.6.1` (**local; não publicada e não submetida**).  
-**Versão publicada:** `0.5.1` no itch.io e no sandbox da Playgama.  
+**Versão publicada:** `0.6.1` no itch.io e no sandbox da Playgama (2026-11-12).  
+**Build anterior:** `0.5.1`.  
 **CrazyGames:** `0.5.1` submetida em 2026-11-11; submissão pausada até 2026-11-26.  
-**Status global:** 0.6.1 local; assets de loja ainda os da 0.5.1; revisão humana
-pendente. Nenhuma tag ou GitHub Release foi criada.  
+**Status global:** testes básicos ok; assets de loja regenerados da 0.6.1;
+revisão humana pendente. Nenhuma tag ou GitHub Release foi criada.  
 **Quem submete:** o usuário, manualmente, em cada portal.
 
 Revalidar as regras de cada portal **na data da submissão**; elas mudam com
@@ -20,8 +20,8 @@ GameFlare bloqueado por acesso).
 - [ ] ZIP final 0.6.1 gerado pelo pipeline de release, com `index.html` e
       `playgama-bridge-config.json` na raiz e Bridge local
       (`./playgama-bridge.js`, sem request ao CDN da Playgama). **Gerado:
-      20 arquivos, 1.517.380 bytes, SHA-256
-      `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`;
+      20 arquivos, 1.514.492 bytes, SHA-256
+      `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8`;
       falta teste final.**
 - [ ] ZIP aberto em aba anônima, servido em subpasta, sem 404 e sem requests
       externas no boot. **Pendente de revisão humana.**
@@ -51,11 +51,11 @@ GameFlare bloqueado por acesso).
 
 | Asset | Caminho | Spec | Status |
 |---|---|---|---|
-| Capa 16:9 | `store/covers/cover-landscape-1920x1080.png` | 1920×1080 PNG | 0.5.1; revisão humana |
-| Capa 2:3 | `store/covers/cover-portrait-800x1200.png` | 800×1200 PNG | 0.5.1; revisão humana |
-| Capa portrait Playgama | `store/covers/cover-portrait-1080x1920.png` | 1080×1920 PNG | 0.5.1; revisão humana |
-| Capa 1:1 | `store/covers/cover-square-800x800.png` | 800×800 PNG | 0.5.1; revisão humana |
-| Contact sheet | `store/covers/cover-contact-sheet.png` | 1608×674, revisão interna | 0.5.1; revisão humana |
+| Capa 16:9 | `store/covers/cover-landscape-1920x1080.png` | 1920×1080 PNG | 0.6.1; revisão humana |
+| Capa 2:3 | `store/covers/cover-portrait-800x1200.png` | 800×1200 PNG | 0.6.1; revisão humana |
+| Capa portrait Playgama | `store/covers/cover-portrait-1080x1920.png` | 1080×1920 PNG | 0.6.1; revisão humana |
+| Capa 1:1 | `store/covers/cover-square-800x800.png` | 800×800 PNG | 0.6.1; revisão humana |
+| Contact sheet | `store/covers/cover-contact-sheet.png` | 1608×674, revisão interna | 0.6.1; revisão humana |
 | Menu | `store/screenshots/01-menu-390x844.png` | 390×844 PNG | 0.5.1; tutorial + 7 nós |
 | Tutorial / gameplay inicial | `store/screenshots/02-gameplay-early-390x844.png` | 390×844 PNG | 0.5.1; coach mark |
 | Laser + multiball | `store/screenshots/03-gameplay-laser-multiball-390x844.png` | 390×844 PNG | 0.5.1 |
@@ -64,28 +64,28 @@ GameFlare bloqueado por acesso).
 | Special blocks | `store/screenshots/06-special-blocks-390x844.png` | 390×844 PNG | 0.5.1 |
 | Boss | `store/screenshots/07-boss-frost-sentinel-390x844.png` | 390×844 PNG | 0.5.1 |
 | Endless | `store/screenshots/08-endless-wave-1-390x844.png` | 390×844 PNG | 0.5.1 |
-| How to Play | `public/how-to-play/*.png` | 780×468 PNG ×5 | 0.5.1; revisão humana |
+| How to Play | `public/how-to-play/*.png` | 780×468 PNG ×5 | 0.6.1; revisão humana |
 | Logo do estúdio | `public/bad-decision-games/logo.webp` + `.png` | 600×307 | ok |
-| Preview landscape | `store/video/bricklike-preview.mp4` | 1920×1080, 19,1 s, H.264 | 0.5.1; revisão humana |
-| Preview portrait | `store/video/bricklike-preview-portrait.mp4` | 1080×1620, 19,1 s, H.264 | 0.5.1; revisão humana |
+| Preview landscape | `store/video/bricklike-preview.mp4` | 1920×1080, 19,1 s, H.264 | 0.6.1; revisão humana |
+| Preview portrait | `store/video/bricklike-preview-portrait.mp4` | 1080×1620, 19,1 s, H.264 | 0.6.1; revisão humana |
 
 ## itch.io
 
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto HTML5 criado pelo usuário | pendente de revisão humana |
-| Versão publicada | `0.5.1` atualizada manualmente; `0.6.1` local | 0.5.1 publicado |
-| Upload 0.6.1 | ZIP HTML5 final + assets revisados | pendente de teste humano |
+| Versão publicada | `0.6.1` atualizada manualmente | 0.6.1 publicado |
+| Upload 0.6.1 | ZIP HTML5 final + assets revisados | publicado em 2026-11-12; teste básico ok |
 | Embed | Mobile Friendly ligado; fullscreen; click-to-play | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
 | Descrição | Curta + longa em inglês, Tier 4 + economia + Workshop + 20 ondas | pendente de revisão humana |
 | Controles | Campo de controles preenchido, incluindo touch | pendente de revisão humana |
 | Tags | arcade, brick-breaker, roguelite, pixel-art, html5, mobile | pendente de revisão humana |
 | Preço | Free + doação opcional; sem venda no embed HTML5 | pendente de revisão humana |
-| Capa | 16:9 ou 2:3 aprovada | 0.5.1; revisão humana |
-| Screenshots | 8 imagens + tutorial | 0.5.1; revisão humana |
+| Capa | 16:9 ou 2:3 aprovada | 0.6.1; revisão humana |
+| Screenshots | 9 imagens, incluindo Workshop/Tier 4 | 0.6.1; revisão humana |
 | Ads | Nenhum ad interno no itch.io; não prometer ads na página | pendente de revisão humana |
-| Publicação | Usuário clica em publicar após aprovação | 0.6.1 pendente |
+| Publicação | Usuário clica em publicar após aprovação | 0.6.1 publicado |
 
 ## GameFlare
 
@@ -100,7 +100,7 @@ GameFlare bloqueado por acesso).
 | Controles | Campo de controles preenchido | pendente de revisão humana |
 | Tags | arcade, block breaker, roguelite, pixel art, html5 | pendente de revisão humana |
 | Ads | Sem ads dentro do jogo; ads do portal ficam fora do jogo | pendente de revisão humana |
-| Assets | Capa e screenshots aprovadas | 0.5.1; revisão humana |
+| Assets | Capa e screenshots aprovadas | 0.6.1; revisão humana |
 | Publicação | Usuário envia para revisão após resolver o acesso | pendente |
 
 ## Playgama
@@ -108,8 +108,8 @@ GameFlare bloqueado por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário no Playgama | pendente de revisão humana |
-| Versão no sandbox | `0.5.1` enviada manualmente; `0.6.1` local | 0.5.1 sandbox |
-| Upload | ZIP com `index.html`, config e Bridge local na raiz | pendente de teste humano |
+| Versão no sandbox | `0.6.1` enviada manualmente | 0.6.1 sandbox |
+| Upload | ZIP com `index.html`, config e Bridge local na raiz | 0.6.1 no sandbox |
 | Bridge | Config validado; sem logo/analytics; safe area ligada | ok nos gates |
 | Eventos | `game_ready`, `level_started/paused/resumed/completed/failed` | pendente de revisão humana |
 | Storage | `bb.save` v2 e `bb.settings` via Bridge; reload preserva | pendente de revisão humana |
@@ -120,9 +120,9 @@ GameFlare bloqueado por acesso).
 | Título | Bricklike | pendente de revisão humana |
 | Descrição | Curta + longa em inglês, Tier 4 + economia + Workshop + 20 ondas | pendente de revisão humana |
 | Orientação | Portrait | pendente de revisão humana |
-| Assets | Capa portrait **1080×1920** e screenshots aprovadas | 0.5.1; revisão humana |
+| Assets | Capa portrait **1080×1920** e screenshots aprovadas | 0.6.1; revisão humana |
 | Review | Acompanhar a review do portal (~24 h) | pendente de revisão humana |
-| Publicação | Usuário submete e acompanha o status | 0.6.1 pendente |
+| Publicação | Usuário submete e acompanha o status | 0.6.1 no sandbox |
 
 **Amostra do sandbox (0.4.0, pequena):** 17/100 qualifying plays; avg play time
 5:42 vs meta 5:00; ad shows/play 1,70 vs meta 0,30; 116 launches, 31 plays,
@@ -139,10 +139,10 @@ GameFlare bloqueado por acesso).
 | 0.6.1 | Ainda não submetida; local | pendente de teste humano |
 | Feedback | Pedir detalhes no Support/technical-support após 2026-11-26 | pendente |
 | Upload | ZIP HTML5 final da 0.6.1 | pendente de teste humano |
-| Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | 0.5.1; revisão humana |
-| Capa 2:3 | 800×1200, mesma linguagem visual | 0.5.1; revisão humana |
-| Capa 1:1 | 800×800, mesma linguagem visual | 0.5.1; revisão humana |
-| Preview video | MP4 15–20 s, gameplay real, 1920×1080 + 1080×1620 | 0.5.1; revisão humana |
+| Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | 0.6.1; revisão humana |
+| Capa 2:3 | 800×1200, mesma linguagem visual | 0.6.1; revisão humana |
+| Capa 1:1 | 800×800, mesma linguagem visual | 0.6.1; revisão humana |
+| Preview video | MP4 15–20 s, gameplay real, 1920×1080 + 1080×1620 | 0.6.1; revisão humana |
 | Descrição | Inglês, ≥ 100 palavras, Tier 4 + economia + Workshop + 20 ondas | pendente de revisão humana |
 | Controles | Campo de controles preenchido | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
@@ -151,7 +151,7 @@ GameFlare bloqueado por acesso).
 | Mobile | Portrait mobile-friendly; testar em Chromebook/Android | pendente de teste humano |
 | Desktop | HUD legível em 907×510 e 1920×1080; shell portrait intencional, sem letterbox | pendente de revisão humana |
 | Onboarding | Tutorial in-game pulável + coach marks; caminho de skip | implementado; validar |
-| Consistência | Capa, screenshots e blocos usam a mesma linguagem visual | 0.5.1; revisão humana |
+| Consistência | Capa, screenshots e blocos usam a mesma linguagem visual | 0.6.1; revisão humana |
 | Qualidade | Sem artefatos, texto cortado, controles ambíguos ou áudio estourado | pendente de teste humano |
 | Revalidação | Conferir regras atuais do Basic Launch | pendente de revisão humana |
 | Full Launch | Fora do escopo deste ciclo | pendente de decisão |
@@ -181,7 +181,7 @@ capas/screenshots/vídeo.
 ## Sequência manual acordada
 
 1. Testar a 0.6.1 manualmente e validar o ZIP final.
-2. Revisar/regenerar screenshots, capas e vídeos para a 0.6.1.
+2. Revisar screenshots, capas e vídeos regenerados para a 0.6.1.
 3. Publicar a 0.6.1 no itch.io, se aprovada.
 4. Publicar no GameFlare, se o acesso for desbloqueado.
 5. Submeter ao Playgama.

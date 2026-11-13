@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Captures the five 5:3 How to Play panels (780x468) from the v0.5.0
+ * Captures the five 5:3 How to Play panels (780x468) from the v0.6.1
  * production build. Each panel is a real 390x234 crop of the 390x844 portrait
  * game, rendered at deviceScaleFactor 2 so the text stays sharp.
  *
@@ -23,11 +23,12 @@ const baseUrl = (urlArg ? urlArg.slice(6) : 'http://localhost:4180').replace(/\/
 
 const VIEWPORT = { width: 390, height: 844 };
 const PROGRESS_SAVE = {
-  version: 1,
+  version: 2,
   unlockedPhase: 6,
   phases: {},
   endless: { bestWave: 12, bestScore: 34500, runs: 8 },
   campaignComplete: false,
+  meta: { sparks: 0, unlocks: [] },
   updatedAt: Date.now(),
 };
 const COMPLETE_SAVE = { ...PROGRESS_SAVE, campaignComplete: true, updatedAt: Date.now() };

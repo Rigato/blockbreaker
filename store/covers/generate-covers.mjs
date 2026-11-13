@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generates the Bricklike v0.5.0 store covers as original SVG artwork, then
+ * Generates the Bricklike v0.6.1 store covers as original SVG artwork, then
  * rasterises them at the exact portal sizes with Playwright's Chromium.
  *
  *   node store/covers/generate-covers.mjs

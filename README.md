@@ -10,8 +10,8 @@ laser gate and revised ad cadence**, the **v0.6.0 perk reworks, first Sparks
 economy, perk unlocks and save v2**, and the **v0.6.1 Tier 4 perks, reworked
 Sparks economy and Workshop progression card**.
 
-The **v0.6.1 build is local and unpublished**. The **v0.5.1 build remains live**
-on itch.io and in the Playgama sandbox. CrazyGames is paused until
+The **v0.6.1 build is live** on itch.io and in the Playgama sandbox after basic
+testing. The **v0.5.1 build** is the previous release. CrazyGames is paused until
 2026-11-26 after the 0.5.1 submission; GameFlare remains blocked by account
 access.
 No tag or GitHub Release has been created. The GitHub Pages review build tracks
@@ -44,8 +44,8 @@ No tag or GitHub Release has been created. The GitHub Pages review build tracks
   for Sparks, loot boxes or paid advantages.
 - **Tests and package:** 396 unit tests in 32 files, 37 E2E tests in 10 spec
   files, content validation with 7 levels / 22 waves / 743 blocks / 1,809 XP,
-  and a local 0.6.1 ZIP with 20 files, 1,517,384 bytes (~1,482 KiB), SHA-256
-  `b8ded968506b34c221f0ebb5744ad0d301208838c44617689df3c1bf438bbdbd`
+  and a local 0.6.1 ZIP with 20 files, 1,514,492 bytes (~1,482 KiB), SHA-256
+  `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8`
   (the hash may change on the final build).
 - **Publication status:** 0.6.1 is local/unpublished. itch.io and the Playgama
   sandbox still serve 0.5.1; CrazyGames is paused until 2026-11-26; GameFlare

@@ -1,20 +1,22 @@
-# Preview videos — Bricklike v0.5.0
+# Preview videos — Bricklike v0.6.1
 
-Gerados a partir do build de produção `0.5.0`, com gameplay real e sem áudio.
+Gerados a partir do build de produção `0.6.1` e das capas atuais, com gameplay
+real e sem áudio.
 
 ## Arquivos
 
 | Arquivo | Especificação | Uso |
 |---|---|---|
-| `bricklike-preview.mp4` | 1920×1080 (16:9), 19,1 s, H.264, ~2,4 MB | CrazyGames landscape / portais |
-| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 19,1 s, H.264, ~4,3 MB | CrazyGames portrait / mobile |
+| `bricklike-preview.mp4` | 1920×1080 (16:9), 19,1 s, H.264, ~2,6 MB | CrazyGames landscape / portais |
+| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 19,1 s, H.264, ~4,5 MB | CrazyGames portrait / mobile |
 
 ## Conteúdo
 
-- Menu inicial com o tutorial como passo atual.
-- Seletor de campanha com o card do tutorial e os 7 cards (scroll real).
-- Tutorial com coach mark, lançamento e o passo “Break & level up”.
-- Gameplay com 4 bolas, Prism Laser e o HUD atual.
+- Menu atual com a campanha em progresso e o card de progressão do Workshop
+  (42 Sparks, 13/22 desbloqueados, 9 left e barra de progresso).
+- Seletor de campanha com os sete cards (tutorial + seis fases) e scroll real.
+- Tutorial com o coach mark “Move & Launch” e o lançamento da bola.
+- Gameplay com multiball, Prism Laser e o HUD atual.
 - Level-up com três cards.
 - Frost Sentinel com HP reduzido, fase 2 e shards.
 - Fecho na capa correspondente, com o logo **BRICKLIKE**.

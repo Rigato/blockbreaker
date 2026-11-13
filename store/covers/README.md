@@ -1,6 +1,6 @@
-# Store covers — Bricklike v0.5.0
+# Store covers — Bricklike v0.6.1
 
-Arte de capa original gerada para o build `0.5.0`, pendente de revisão humana.
+Arte de capa original gerada para o build `0.6.1`, pendente de revisão humana.
 
 ## Arquivos finais
 

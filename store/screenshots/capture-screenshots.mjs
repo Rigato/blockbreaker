@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Captures the eight Bricklike v0.5.0 store screenshots from the production
+ * Captures the nine Bricklike v0.6.1 store screenshots from the production
  * build (npm run build + vite preview).
  *
  * Usage:
@@ -9,9 +9,10 @@
  *   node store/screenshots/capture-screenshots.mjs --url=http://localhost:4180
  *
  * The debug query flag is used only to reach deterministic gameplay states
- * (tutorial step, level-up, special blocks, boss, Endless). The debug panel is
- * hidden with CSS and the `data-debug` attribute is removed before every shot,
- * so no debug control, FPS counter or tuning value appears in the images.
+ * (early phase-1, level-up, special blocks, boss, Endless, Workshop). The debug
+ * panel is hidden with CSS and the `data-debug` attribute is removed before
+ * every shot, so no debug control, FPS counter or tuning value appears in the
+ * images.
  */
 import { mkdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -25,13 +26,24 @@ const urlArg = args.find((arg) => arg.startsWith('--url='));
 const baseUrl = (urlArg ? urlArg.slice(6) : 'http://localhost:4180').replace(/\/$/, '');
 
 const VIEWPORT = { width: 390, height: 844 };
-const VERSION = '0.5.0';
+const VERSION = '0.6.1';
 
-/** A late-campaign save with a plausible phase-1 best for the results card. */
+/**
+ * A v2 late-campaign save: tutorial and phase 1 cleared, so the menu shows
+ * the campaign in progress, and 42 Sparks with three Workshop unlocks so the
+ * progression card has a useful count, balance and progress bar.
+ */
 const PROGRESS_SAVE = {
-  version: 1,
+  version: 2,
   unlockedPhase: 6,
   phases: {
+    tutorial: {
+      bestScore: 9800,
+      bestTimeMs: 45000,
+      attempts: 1,
+      clears: 1,
+      bestLevel: 4,
+    },
     'phase-1': {
       bestScore: 24800,
       bestTimeMs: 12000,
@@ -42,6 +54,10 @@ const PROGRESS_SAVE = {
   },
   endless: { bestWave: 12, bestScore: 34500, runs: 8 },
   campaignComplete: false,
+  meta: {
+    sparks: 42,
+    unlocks: ['second_chance', 'explosive_core', 'sticky_paddle'],
+  },
   updatedAt: Date.now(),
 };
 
@@ -149,37 +165,85 @@ async function resolveLevelUps(page, maximum = 8) {
 await mkdir(outDir, { recursive: true });
 const browser = await chromium.launch();
 
-// 1. Menu — fresh save, so the tutorial is the current campaign step and the
-//    seven progress nodes (tutorial + six levels) are all visible.
+// 1. Menu — v2 progress save, so level 2 is the current campaign step, the
+//    seven progress nodes (tutorial + six levels) are visible, and the
+//    Workshop card shows its Sparks balance, unlocked count and progress bar.
 {
-  const { context, page } = await newPage();
-  await waitForMenu(page, `${baseUrl}/?resetSave=1`);
+  const { context, page } = await newPage({ save: PROGRESS_SAVE });
+  await waitForMenu(page, baseUrl);
   await page.waitForTimeout(1400);
   const version = (await page.locator('.menu__version').textContent())?.trim();
   const status = (await page.locator('.menu__card-status').textContent())?.trim();
   const nodes = await page.locator('.menu__node').count();
   if (version !== `v${VERSION}`) throw new Error(`unexpected menu version ${version}`);
-  if (!/tutorial/i.test(status ?? '')) throw new Error(`menu does not show tutorial: ${status}`);
+  if (!/level 2/i.test(status ?? '')) throw new Error(`menu does not show level 2: ${status}`);
   if (nodes !== 7) throw new Error(`expected 7 campaign nodes, found ${nodes}`);
+  const workshop = {
+    visible: await page.locator('#workshop-button').isVisible(),
+    icon: await page.locator('.menu__workshop-icon svg').count(),
+    sparks: (await page.locator('.menu__workshop-sparks').textContent())?.trim(),
+    count: (await page.locator('.menu__workshop-count-value').textContent())?.trim(),
+    left: (await page.locator('.menu__workshop-left').textContent())?.trim(),
+    fill: await page.locator('.menu__workshop-progress-fill').evaluate(
+      (node) => node.style.width,
+    ),
+    ready: await page.locator('.menu__workshop-ready').isVisible(),
+  };
+  console.log(`menu workshop: ${JSON.stringify(workshop)}`);
+  if (!workshop.visible || workshop.icon === 0) {
+    throw new Error('menu Workshop card or icon is missing');
+  }
+  if (workshop.sparks !== '42 Sparks') {
+    throw new Error(`menu Workshop sparks are unexpected: ${workshop.sparks}`);
+  }
+  if (workshop.count !== '13 / 22' || workshop.left !== '9 left') {
+    throw new Error(
+      `menu Workshop count is unexpected: ${workshop.count} / ${workshop.left}`,
+    );
+  }
+  if (workshop.fill !== '59.09%') {
+    throw new Error(`menu Workshop progress is unexpected: ${workshop.fill}`);
+  }
+  if (!workshop.ready) throw new Error('menu Workshop Ready badge is missing');
   await shot(page, '01-menu-390x844.png');
   await context.close();
 }
 
-// 2. Tutorial / opening gameplay — coach mark step 2 with the ball in play.
+// 2. Phase 1 early gameplay — seeded v2 progress save, no tutorial coach mark.
+//    The opening brick field, HUD, ball and paddle are all visible.
 {
-  const { context, page } = await newPage();
-  await waitForMenu(page, `${baseUrl}/?debug=1&resetSave=1`);
+  const { context, page } = await newPage({ save: PROGRESS_SAVE });
+  await waitForMenu(page, `${baseUrl}/?debug=1`);
   await hideDebug(page);
-  await callGame(page, (game) => game.startPhase('tutorial'));
+  await callGame(page, (game) => {
+    game.startPhase('phase-1');
+    game.setTuning({ ballSpeedScale: 0.84 });
+  });
   await waitForHud(page);
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(500);
   await launch(page);
-  await page.waitForTimeout(950);
-  await movePaddle(page, 0.62);
+  await page.waitForTimeout(1400);
+  await movePaddle(page, 0.58);
   await page.waitForTimeout(250);
-  const coach = (await page.locator('.hud__tutorial-title').textContent())?.trim();
-  if (!/break & level up/i.test(coach ?? '')) {
-    throw new Error(`tutorial coach mark is not on step 2: ${coach}`);
+  const state = await page.evaluate(() => {
+    const game = window.__bricklike;
+    const balls = game?.world?.balls ?? [];
+    return {
+      phase: game?.phase,
+      balls: balls.length,
+      allStuck: balls.length === 0 || balls.every((ball) => ball.stuck),
+      blocks: game?.world?.blocks?.length ?? 0,
+      tutorialVisible: Boolean(document.querySelector('.hud__tutorial:not([hidden])')),
+      levelUpVisible: Boolean(document.querySelector('.levelup:not([hidden])')),
+      waveIntroVisible: Boolean(document.querySelector('.hud__wave-intro:not([hidden])')),
+    };
+  });
+  console.log(`phase-1 early shot: ${JSON.stringify(state)}`);
+  if (state.phase !== 'playing' || state.balls === 0 || state.allStuck || state.blocks === 0) {
+    throw new Error(`phase 1 is not in a playable early state: ${JSON.stringify(state)}`);
+  }
+  if (state.tutorialVisible || state.levelUpVisible || state.waveIntroVisible) {
+    throw new Error(`phase 1 early shot has an overlay: ${JSON.stringify(state)}`);
   }
   await shot(page, '02-gameplay-early-390x844.png');
   await context.close();
@@ -364,6 +428,89 @@ const browser = await chromium.launch();
   const endless = (await page.locator('.hud__wave-text').textContent().catch(() => ''))?.trim();
   console.log(`endless shot: ${endless}`);
   await shot(page, '08-endless-wave-1-390x844.png');
+  await context.close();
+}
+
+// 9. Workshop — opened from the v2 progress menu, scrolled to the bottom so
+//    every Tier 4 card (Overkill, Shield Bash, Conductor) is visible.
+{
+  const { context, page } = await newPage({ save: PROGRESS_SAVE });
+  await waitForMenu(page, `${baseUrl}/?debug=1`);
+  await hideDebug(page);
+  await page.locator('#workshop-button').click();
+  await page.locator('.workshop:not([hidden])').waitFor({ state: 'visible' });
+  await page.waitForTimeout(300);
+  const tiers = await page.locator('.workshop__tier').count();
+  if (tiers !== 4) throw new Error(`expected 4 Workshop tiers, found ${tiers}`);
+  // The four tiers are taller than the list viewport, but Tier 4 is the last
+  // content, so a normal max scroll leaves Tier 3 above it. A temporary bottom
+  // spacer gives the real list enough scroll range to put the Tier 4 heading
+  // at the top of the viewport; the cards themselves are untouched.
+  const scroll = await page.locator('.workshop__list').evaluate((list) => {
+    const tier = list.querySelector('.workshop__tier:last-child');
+    if (!tier) return null;
+    const listRect = list.getBoundingClientRect();
+    const tierRect = tier.getBoundingClientRect();
+    const headingOffset = tierRect.top - listRect.top + list.scrollTop;
+    const spacer = Math.max(0, Math.ceil(list.clientHeight - tierRect.height) + 2);
+    list.style.paddingBottom = `${spacer}px`;
+    list.scrollTop = Math.max(0, Math.round(headingOffset));
+    return { headingOffset, spacer, scrollTop: list.scrollTop };
+  });
+  console.log(`workshop tier 4 scroll: ${JSON.stringify(scroll)}`);
+  await page.waitForTimeout(350);
+  const tier4 = page.locator('.workshop__tier').last();
+  const tier4Names = (await tier4.locator('.workshop__card-name').allTextContents()).map(
+    (name) => name.trim(),
+  );
+  const bounds = await tier4.evaluate((tier) => {
+    const list = document.querySelector('.workshop__list');
+    if (!list) return null;
+    const tierRect = tier.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    const headingRect = tier
+      .querySelector('.workshop__tier-title')
+      ?.getBoundingClientRect();
+    const firstCardRect = tier
+      .querySelector('.workshop__card')
+      ?.getBoundingClientRect();
+    return {
+      top: Math.round(tierRect.top),
+      bottom: Math.round(tierRect.bottom),
+      listTop: Math.round(listRect.top),
+      listBottom: Math.round(listRect.bottom),
+      headingTop: headingRect ? Math.round(headingRect.top) : null,
+      firstCardTop: firstCardRect ? Math.round(firstCardRect.top) : null,
+    };
+  });
+  const pinned = {
+    head: await page.locator('.workshop__head').isVisible(),
+    sparks: (await page.locator('#workshop-sparks').textContent())?.trim(),
+  };
+  console.log(
+    `workshop tier 4: ${JSON.stringify(tier4Names)} ${JSON.stringify(bounds)} ${JSON.stringify(pinned)}`,
+  );
+  if (!['Overkill', 'Shield Bash', 'Conductor'].every((name) => tier4Names.includes(name))) {
+    throw new Error(`Tier 4 cards are incomplete: ${tier4Names.join(', ')}`);
+  }
+  if (!pinned.head || pinned.sparks !== '42 Sparks') {
+    throw new Error(`Workshop header/sparks are not pinned: ${JSON.stringify(pinned)}`);
+  }
+  if (!bounds || Math.abs(bounds.top - bounds.listTop) > 1) {
+    throw new Error(`Tier 4 heading is not at the list top: ${JSON.stringify(bounds)}`);
+  }
+  if (bounds.bottom > bounds.listBottom + 1) {
+    throw new Error(`Tier 4 is not fully visible in the Workshop list: ${JSON.stringify(bounds)}`);
+  }
+  if (
+    bounds.headingTop === null ||
+    bounds.firstCardTop === null ||
+    bounds.headingTop < bounds.listTop - 1 ||
+    bounds.firstCardTop < bounds.listTop - 1
+  ) {
+    throw new Error(`Tier 4 heading or Overkill is clipped: ${JSON.stringify(bounds)}`);
+  }
+  await shot(page, '09-workshop-tier4-390x844.png');
   await context.close();
 }
 
