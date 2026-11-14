@@ -15,6 +15,9 @@ usado como fonte de decisão.
    CrazyGames, ads, save, metadata, QA e release.
 5. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo de 22
    perks, Tier 4, economia de Sparks e meta horizontal.
+6. **[Spec — mapa de seleção de fases](phase-select-map-spec.md)** — rework do
+   mundo 1 (mapa + parallax); **implementado**, gates verdes.
+   Backup do estado anterior em [`design/phase-select-map-backup-v1.md`](design/phase-select-map-backup-v1.md).
 
 ## Operação e release
 
