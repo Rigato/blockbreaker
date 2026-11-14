@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   clickDebugAction,
+  closePhaseSelect,
   collapseDebugPanel,
   expandDebugPanel,
   forceDefeat,
@@ -70,7 +71,8 @@ test.describe('layout matrix', () => {
       await expect(page.locator('.phase-select:not([hidden])')).toBeVisible();
       await expectNoScroll(page);
       await expectInsideViewport(page, '.phase-select__panel');
-      await page.locator('.phase-select__back').click();
+      await closePhaseSelect(page);
+      await expect(page.locator('#campaign-button')).toBeVisible();
 
       await startPlay(page);
       await expectNoScroll(page);

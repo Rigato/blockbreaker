@@ -307,8 +307,10 @@ async function runScenario(browser, viewport) {
     // The debug panel can overlap the menu at small sizes. Use a DOM click so
     // the menu path is identical to a real click but is not blocked by it.
     await frame.evaluate(() => document.querySelector('#campaign-button')?.click());
-    await frame.waitForSelector('.phase-card', { state: 'visible', timeout: 15_000 });
-    await frame.evaluate(() => document.querySelector('.phase-card')?.click());
+    await frame.waitForSelector('.phase-node', { state: 'visible', timeout: 15_000 });
+    await frame.evaluate(() => document.querySelector('.phase-node:not([disabled])')?.click());
+    await frame.waitForSelector('.phase-sheet__play', { state: 'visible', timeout: 15_000 });
+    await frame.evaluate(() => document.querySelector('.phase-sheet__play')?.click());
     await frame.waitForSelector('.hud', { state: 'visible', timeout: 15_000 });
 
     // Let shaders compile and the first wave settle before sampling.

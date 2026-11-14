@@ -203,7 +203,7 @@ const menuClip = await recordClip(
   },
 );
 
-// 2. Campaign selector: the tutorial card plus the six level cards scroll past.
+// 2. Campaign selector: the map opens on the current node and scrolls up to phase 6.
 const selectClip = await recordClip(
   'select',
   async (page) => {
@@ -213,22 +213,22 @@ const selectClip = await recordClip(
     await page.waitForTimeout(600);
   },
   async (page) => {
-    // Hold the tutorial card, then scroll to level 6 at a readable pace.
+    // Hold the opening frame, then scroll the map at a readable pace.
     await page.waitForTimeout(800);
     await page.evaluate(
       () =>
         new Promise((resolve) => {
-          const list = document.querySelector('.phase-select__list');
-          if (!list) {
+          const scroller = document.querySelector('.phase-select__scroller');
+          if (!scroller) {
             resolve();
             return;
           }
-          list.scrollTop = 0;
+          scroller.scrollTop = 0;
           const start = performance.now();
           const duration = 1800;
           const step = (now) => {
             const t = Math.min(1, (now - start) / duration);
-            list.scrollTop = t * (list.scrollHeight - list.clientHeight);
+            scroller.scrollTop = t * (scroller.scrollHeight - scroller.clientHeight);
             if (t < 1) window.requestAnimationFrame(step);
             else resolve();
           };

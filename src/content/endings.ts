@@ -66,7 +66,8 @@ const TUTORIAL_EPILOGUE: Epilogue = {
     'waves of levels 4–6, and clearing all six levels unlocks Endless mode.',
 };
 
-function victoryRank(phaseIndex: number, score: number): 'S' | 'A' | 'B' {
+/** Score rank for a phase victory; also used by the campaign map badges. */
+export function victoryRank(phaseIndex: number, score: number): 'S' | 'A' | 'B' {
   const target = 1000 + phaseIndex * 400;
   if (score >= target * 1.5) return 'S';
   if (score >= target) return 'A';

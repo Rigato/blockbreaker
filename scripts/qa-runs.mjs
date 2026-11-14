@@ -132,7 +132,11 @@ async function runOnce(browser, index) {
   });
   await page.locator('#campaign-button').click();
   await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
-  await page.locator('.phase-card[data-phase-id="phase-1"]').click();
+  // Tap the phase node, then Play on the bottom sheet.
+  const phaseOneNode = page.locator('.phase-node[data-phase-id="phase-1"]');
+  await phaseOneNode.scrollIntoViewIfNeeded();
+  await phaseOneNode.click();
+  await page.locator('.phase-sheet__play').click();
   await page.locator('.hud').waitFor({ state: 'visible' });
 
   const compact = page.locator('#debug-compact');

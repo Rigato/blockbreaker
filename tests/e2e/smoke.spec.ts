@@ -183,11 +183,11 @@ test.describe('smoke', () => {
     await waitForMenu(page);
     await collapseDebugPanel(page);
     await page.locator('#campaign-button').click();
-    const phase2 = page.locator('.phase-card[data-phase-index="2"]');
+    const phase2 = page.locator('.phase-node[data-phase-index="2"]');
     await expect(phase2).toBeVisible();
     await expect(phase2).toBeEnabled();
     await expect(phase2).not.toHaveClass(/is-locked/);
-    await expect(page.locator('.phase-card[data-phase-index="3"]')).toBeDisabled();
+    await expect(page.locator('.phase-node[data-phase-index="3"]')).toBeDisabled();
   });
 
   for (const mode of ['show', 'fail'] as const) {

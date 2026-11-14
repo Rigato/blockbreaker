@@ -93,7 +93,11 @@ const browser = await chromium.launch();
   await page.locator('#campaign-button').click({ timeout: 5000 });
   await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible', timeout: 5000 });
   console.log('campaign click: OK (phase select opened)');
+  // The first back press may only dismiss the bottom sheet.
+  const select = page.locator('.phase-select:not([hidden])');
   await page.locator('.phase-select__back').click();
+  await select.waitFor({ state: 'hidden', timeout: 1200 }).catch(() => null);
+  if (await select.isVisible().catch(() => false)) await page.locator('.phase-select__back').click();
   await page.locator('#campaign-button').waitFor({ state: 'visible', timeout: 5000 });
   await page.close();
 }

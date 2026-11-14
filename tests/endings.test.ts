@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { endingForResult } from '../src/content/endings';
+import { endingForResult, victoryRank } from '../src/content/endings';
 
 function victory(overrides: Partial<Parameters<typeof endingForResult>[0]> = {}) {
   return endingForResult({
@@ -68,5 +68,28 @@ describe('endingForResult', () => {
     expect(victory({ phaseIndex: 5, phaseName: 'Emberforge', score: 3000 })?.rank).toBe('A');
     expect(victory({ phaseIndex: 5, phaseName: 'Emberforge', score: 4499 })?.rank).toBe('A');
     expect(victory({ phaseIndex: 5, phaseName: 'Emberforge', score: 4500 })?.rank).toBe('S');
+  });
+});
+
+describe('victoryRank', () => {
+  it('ranks each phase against its own target', () => {
+    // Phase 1 target 1400, S from 2100.
+    expect(victoryRank(1, 0)).toBe('B');
+    expect(victoryRank(1, 1399)).toBe('B');
+    expect(victoryRank(1, 1400)).toBe('A');
+    expect(victoryRank(1, 2099)).toBe('A');
+    expect(victoryRank(1, 2100)).toBe('S');
+
+    // Phase 3 target 2200, S from 3300.
+    expect(victoryRank(3, 2199)).toBe('B');
+    expect(victoryRank(3, 2200)).toBe('A');
+    expect(victoryRank(3, 3299)).toBe('A');
+    expect(victoryRank(3, 3300)).toBe('S');
+
+    // Phase 6 target 3400, S from 5100.
+    expect(victoryRank(6, 3399)).toBe('B');
+    expect(victoryRank(6, 3400)).toBe('A');
+    expect(victoryRank(6, 5099)).toBe('A');
+    expect(victoryRank(6, 5100)).toBe('S');
   });
 });

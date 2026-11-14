@@ -89,6 +89,8 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
       phaseSelect.close();
       menu.focusPlay();
     },
+    onEndless: handleEndless,
+    isEndlessUnlocked: () => lastSnapshot.endlessUnlocked,
   });
 
   const settings = new SettingsDialog({

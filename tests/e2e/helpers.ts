@@ -3,6 +3,8 @@ import type { ConsoleMessage, Page, Request } from '@playwright/test';
 export const MENU_READY = '#campaign-button';
 export const HUD = '.hud';
 export const LAUNCH_HINT = 'Tap / click / V to launch';
+export const PHASE_SELECT = '.phase-select:not([hidden])';
+export const PHASE_SHEET_PLAY = '.phase-sheet__play';
 
 export interface PageMonitor {
   readonly consoleErrors: string[];
@@ -69,23 +71,57 @@ async function ensureLevelOneUnlocked(page: Page): Promise<void> {
   await waitForMenu(page);
 }
 
+/**
+ * Taps a node on the phase map and waits for the bottom sheet. The node is
+ * centered first: the sheet can cover the lower edge of the scroller, and a
+ * node hidden behind it is not a real tap target.
+ */
+export async function selectPhase(page: Page, phaseId: string): Promise<void> {
+  const node = page.locator(`.phase-node[data-phase-id="${phaseId}"]`);
+  await node.waitFor({ state: 'visible' });
+  await node.evaluate((element) =>
+    element.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' }),
+  );
+  await node.click();
+  await page.locator(PHASE_SHEET_PLAY).waitFor({ state: 'visible' });
+}
+
+/** Presses Play on the bottom sheet and waits for the run to start. */
+export async function playSelectedPhase(page: Page): Promise<void> {
+  await page.locator(PHASE_SHEET_PLAY).click();
+  await page.locator(HUD).waitFor({ state: 'visible' });
+}
+
+/**
+ * Leaves the campaign screen through the back button. The first press may only
+ * dismiss the bottom sheet, so a second press runs when the screen stays open.
+ */
+export async function closePhaseSelect(page: Page): Promise<void> {
+  const overlay = page.locator(PHASE_SELECT);
+  const back = page.locator('.phase-select__back');
+  await back.click();
+  await overlay.waitFor({ state: 'hidden', timeout: 1_200 }).catch(() => null);
+  if (await overlay.isVisible().catch(() => false)) await back.click();
+  await overlay.waitFor({ state: 'hidden' });
+}
+
 /** Opens the campaign screen and starts level 1 (seeding the save if needed). */
 export async function startPlay(page: Page): Promise<void> {
   await ensureLevelOneUnlocked(page);
   await collapseDebugPanel(page);
   await page.locator(MENU_READY).click();
-  await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
-  await page.locator('.phase-card[data-phase-id="phase-1"]').click();
-  await page.locator(HUD).waitFor({ state: 'visible' });
+  await page.locator(PHASE_SELECT).waitFor({ state: 'visible' });
+  await selectPhase(page, 'phase-1');
+  await playSelectedPhase(page);
 }
 
 /** Opens the campaign screen and starts the tutorial from a fresh save. */
 export async function startTutorial(page: Page): Promise<void> {
   await collapseDebugPanel(page);
   await page.locator(MENU_READY).click();
-  await page.locator('.phase-select:not([hidden])').waitFor({ state: 'visible' });
-  await page.locator('.phase-card[data-phase-id="tutorial"]').click();
-  await page.locator(HUD).waitFor({ state: 'visible' });
+  await page.locator(PHASE_SELECT).waitFor({ state: 'visible' });
+  await selectPhase(page, 'tutorial');
+  await playSelectedPhase(page);
 }
 
 export async function expandDebugPanel(page: Page): Promise<void> {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { HUD, startTutorial, waitForMenu } from './helpers';
+import { HUD, playSelectedPhase, selectPhase, startTutorial, waitForMenu } from './helpers';
 
 test.describe('first-run tutorial', () => {
   test.use({ viewport: { width: 390, height: 844 } });
@@ -9,13 +9,14 @@ test.describe('first-run tutorial', () => {
     await waitForMenu(page);
 
     await page.locator('#campaign-button').click();
-    const tutorial = page.locator('.phase-card[data-phase-id="tutorial"]');
-    const levelOne = page.locator('.phase-card[data-phase-id="phase-1"]');
+    const tutorial = page.locator('.phase-node[data-phase-id="tutorial"]');
+    const levelOne = page.locator('.phase-node[data-phase-id="phase-1"]');
     await expect(tutorial).toBeVisible();
     await expect(tutorial).toBeEnabled();
     await expect(levelOne).toBeDisabled();
 
-    await tutorial.click();
+    await selectPhase(page, 'tutorial');
+    await playSelectedPhase(page);
     await page.locator(HUD).waitFor({ state: 'visible' });
     const coach = page.locator('.hud__tutorial');
     await expect(coach).toBeVisible();
