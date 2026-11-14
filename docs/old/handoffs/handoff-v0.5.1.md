@@ -1,7 +1,7 @@
 # Handoff — Bricklike v0.5.1
 
 > **Documento histórico.** A fonte atual de onboarding é
-> [`handoff-v0.6.1.md`](handoff-v0.6.1.md). A `0.5.1` continua sendo a build
+> [`handoff-v0.6.1.md`](../../handoff-v0.6.1.md). A `0.5.1` continua sendo a build
 > publicada no itch.io e no sandbox da Playgama; a `0.6.1` é local.
 
 **Onboarding histórico da v0.5.1.**  
@@ -385,8 +385,8 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
   portrait não cresceu; a legibilidade desktop segue como risco. O
   `BannerError` ainda aparece no console, agora comprovadamente do SDK do
   CrazyGames, não da Playgama. Ver
-  [`docs/release/crazygames-review.md`](release/crazygames-review.md) e
-  [`docs/research/crazygames-feedback.md`](research/crazygames-feedback.md).
+  [`docs/release/crazygames-review.md`](../../release/crazygames-review.md) e
+  [`docs/research/crazygames-feedback.md`](../../research/crazygames-feedback.md).
 - **Playgama sandbox (amostra pequena):** 17/100 qualifying plays; avg play time
   **5:42** contra meta **5:00**; ad shows/play **1,70** contra meta **0,30**;
   116 launches, 31 plays, 5m45s e 3/2 likes. A amostra é pequena demais para
@@ -444,8 +444,8 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
 2. **Validar o adapter CrazyGames** no Preview: Network sem
    `bridge.playgama.com`/`api.playgama.com`, SDK nativo carregado do
    `sdk.crazygames.com`, boot com SDK bloqueado caindo no fallback.
-3. **Medir performance** com [`docs/qa/performance-testing.md`](qa/performance-testing.md)
-   e [`scripts/perf-smoke.mjs`](../scripts/perf-smoke.mjs). Não há resultado de
+3. **Medir performance** com [`docs/qa/performance-testing.md`](../../qa/performance-testing.md)
+   e [`scripts/perf-smoke.mjs`](../../../scripts/perf-smoke.mjs). Não há resultado de
    performance da 0.5.1 ainda.
 4. **Revisar store assets** (screenshots do tutorial e da fase 1, capas/vídeos,
    How to Play) gerados na sessão paralela a partir da 0.5.1. Não reutilizar os assets da 0.4.0 na
@@ -455,7 +455,7 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
 6. **Publicar a 0.5.1** manualmente no itch.io e no sandbox da Playgama após o
    teste humano; conferir o hash do ZIP antes de cada upload.
 7. **CrazyGames:** pedir detalhes pelo suporte usando o rascunho de
-   [`docs/research/crazygames-feedback.md`](research/crazygames-feedback.md),
+   [`docs/research/crazygames-feedback.md`](../../research/crazygames-feedback.md),
    depois reenviar a 0.5.1 como nova submissão, com assets e mensagem de
    mudanças.
 8. **GameFlare:** follow-up único no suporte; não criar conta duplicada.
@@ -469,26 +469,26 @@ projéteis de debug; não é playtest humano nem cobre 4–6/Endless.
 
 ### Essenciais
 
-- [`docs/GDD_Bricklike.md`](GDD_Bricklike.md) — fonte de design v1.6.
-- [`docs/gdd-gap-analysis.md`](gdd-gap-analysis.md) — implementado × pendente.
-- [`docs/spec-tecnica-publicacao.md`](spec-tecnica-publicacao.md) — guia único
+- [`docs/GDD_Bricklike.md`](../../GDD_Bricklike.md) — fonte de design v1.6.
+- [`docs/gdd-gap-analysis.md`](../../gdd-gap-analysis.md) — implementado × pendente.
+- [`docs/spec-tecnica-publicacao.md`](../../spec-tecnica-publicacao.md) — guia único
   de publicação: estratégia, portais, arquitetura, ads, save, QA e release. O
   antigo plano de baixa fricção está arquivado em
-  [`old/plans/plano-baixa-fricao.md`](old/plans/plano-baixa-fricao.md).
-- [`docs/build-release.md`](build-release.md) — build, ZIP, CI e runbook.
-- [`docs/release/portal-metadata.md`](release/portal-metadata.md) — textos em
+  [`old/plans/plano-baixa-fricao.md`](../plans/plano-baixa-fricao.md).
+- [`docs/build-release.md`](../../build-release.md) — build, ZIP, CI e runbook.
+- [`docs/release/portal-metadata.md`](../../release/portal-metadata.md) — textos em
   inglês.
-- [`docs/release/submission-checklist.md`](release/submission-checklist.md) —
+- [`docs/release/submission-checklist.md`](../../release/submission-checklist.md) —
   checklist manual.
-- [`docs/release/status.md`](release/status.md) — status/URLs de publicação.
-- [`docs/release/crazygames-review.md`](release/crazygames-review.md) —
+- [`docs/release/status.md`](../../release/status.md) — status/URLs de publicação.
+- [`docs/release/crazygames-review.md`](../../release/crazygames-review.md) —
   diagnóstico, reprovações, preview medido e plano.
-- [`docs/research/crazygames-feedback.md`](research/crazygames-feedback.md) —
+- [`docs/research/crazygames-feedback.md`](../../research/crazygames-feedback.md) —
   canais, QA tool e rascunho de suporte.
-- [`docs/qa/playtest-kit.md`](qa/playtest-kit.md) — protocolo de playtest.
-- [`docs/qa/performance-testing.md`](qa/performance-testing.md) — protocolo de
+- [`docs/qa/playtest-kit.md`](../../qa/playtest-kit.md) — protocolo de playtest.
+- [`docs/qa/performance-testing.md`](../../qa/performance-testing.md) — protocolo de
   performance.
-- [`scripts/perf-smoke.mjs`](../scripts/perf-smoke.mjs) — smoke de performance.
+- [`scripts/perf-smoke.mjs`](../../../scripts/perf-smoke.mjs) — smoke de performance.
 
 ### Arquivo histórico
 

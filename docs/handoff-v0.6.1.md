@@ -14,7 +14,8 @@ a `0.6.1` aparece após o push desta fase)
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`
 
 > Este documento substitui o handoff da v0.6.0 como fonte atual. O
-> [`handoff-v0.6.0.md`](handoff-v0.6.0.md) fica como histórico da build anterior.
+> [`handoff-v0.6.0.md`](old/handoffs/handoff-v0.6.0.md) fica como histórico da
+> build anterior.
 > O GDD (`docs/GDD_Bricklike.md`, v1.8) é a fonte de design; o gap analysis
 > (`docs/gdd-gap-analysis.md`) mostra implementado × pendente.
 
@@ -343,12 +344,11 @@ playtest humano da 0.6.1.
 
 ### Essenciais
 
+- [`docs/README.md`](README.md) — índice e porta de entrada.
 - [`docs/GDD_Bricklike.md`](GDD_Bricklike.md) — fonte de design v1.8.
 - [`docs/gdd-gap-analysis.md`](gdd-gap-analysis.md) — implementado × pendente.
 - [`docs/perks-e-metaprogressao.md`](perks-e-metaprogressao.md) — catálogo,
   economia e Tier 4.
-- [`docs/plano-v0.6.0-metaprogressao.md`](plano-v0.6.0-metaprogressao.md) —
-  plano histórico da metaprogressão.
 - [`docs/spec-tecnica-publicacao.md`](spec-tecnica-publicacao.md) — guia de
   publicação, arquitetura, ads, save e QA.
 - [`docs/build-release.md`](build-release.md) — build, ZIP, CI e runbook.
@@ -361,9 +361,14 @@ playtest humano da 0.6.1.
 
 ### Histórico
 
-- [`docs/handoff-v0.6.0.md`](handoff-v0.6.0.md) — onboarding da build anterior.
-- [`docs/handoff-v0.5.1.md`](handoff-v0.5.1.md) — onboarding da build publicada.
-- `docs/handoff-v0.4.0.md` — onboarding da 0.4.0.
+- [`docs/old/handoffs/handoff-v0.6.0.md`](old/handoffs/handoff-v0.6.0.md) —
+  onboarding da build anterior.
+- [`docs/old/handoffs/handoff-v0.5.1.md`](old/handoffs/handoff-v0.5.1.md) —
+  onboarding da build publicada.
+- [`docs/old/handoffs/handoff-v0.4.0.md`](old/handoffs/handoff-v0.4.0.md) —
+  onboarding da 0.4.0.
+- [`docs/old/plans/plano-v0.6.0-metaprogressao.md`](old/plans/plano-v0.6.0-metaprogressao.md)
+  — plano concluído da metaprogressão.
 - `docs/old/handoffs/` — handoffs anteriores.
 - `docs/old/plans/` — planos MVP, v0.2.0, Endless e revisão visual v0.4.0.
 - `docs/old/qa/` — relatórios M6, device matrix, performance e run-log.

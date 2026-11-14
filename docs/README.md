@@ -1,22 +1,20 @@
 # docs — índice
 
-Ponto de entrada para a próxima sessão. Os documentos abaixo são a fonte atual;
-o histórico fica em `docs/old/` e nos handoffs arquivados.
+Ponto de entrada para a próxima sessão. Apenas os documentos **atuais** ficam na
+raiz de `docs/`; todo o histórico está em [`old/`](old/README.md) e não deve ser
+usado como fonte de decisão.
 
 ## Comece por aqui
 
-1. **[Handoff v0.6.1](handoff-v0.6.1.md)** — estado do jogo, Tier 4, economia
-   de Sparks, Workshop, save v2, arquitetura, invariantes, gates, portais,
-   riscos e próximos passos.
+1. **[Handoff v0.6.1](handoff-v0.6.1.md)** — estado atual do jogo, arquitetura,
+   invariantes, gates, portais, riscos e próximos passos.
 2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.8).
-3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente.
-4. **[Guia de publicação web](spec-tecnica-publicacao.md)** — estratégia,
+3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente na `main`.
+4. **[Guia único de publicação](spec-tecnica-publicacao.md)** — estratégia,
    arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
    CrazyGames, ads, save, metadata, QA e release.
-5. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo, Tier 4,
-   economia de Sparks e meta horizontal.
-6. **[Plano v0.6.0](plano-v0.6.0-metaprogressao.md)** — plano histórico da
-   implementação da metaprogressão.
+5. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo de 22
+   perks, Tier 4, economia de Sparks e meta horizontal.
 
 ## Operação e release
 
@@ -50,16 +48,16 @@ o histórico fica em `docs/old/` e nos handoffs arquivados.
 - `bad-decision-games-logo/` — fontes originais da logomarca do estúdio.
 - Assets usados pelo jogo: `../public/bad-decision-games/` e
   `../public/how-to-play/`.
-- Assets de loja: `../store/` — da 0.5.1; revisão humana pendente antes de
-  qualquer upload da 0.6.1.
+- Assets de loja: `../store/` — regenerados da 0.6.1; revisão humana pendente
+  antes de qualquer upload.
 
 ## Histórico
 
-- [Handoff v0.6.0](handoff-v0.6.0.md) — onboarding da build anterior, mantido
-  como referência histórica.
-- [Handoff v0.5.1](handoff-v0.5.1.md) — onboarding da build publicada,
-  mantido como referência histórica.
-- [Handoff v0.4.0](handoff-v0.4.0.md) — onboarding anterior, mantido como
-  referência histórica.
-- [Arquivo `old/`](old/README.md) — handoffs, planos, QA e release do MVP.
-  Não usar como fonte atual.
+Todo o material abaixo é histórico e não substitui os documentos acima.
+
+- [Índice do arquivo](old/README.md).
+- `old/handoffs/` — handoffs v0.3.0, v0.4.0, v0.5.0, v0.5.1 e v0.6.0.
+- `old/plans/` — planos MVP, v0.2.0, Endless, revisão visual v0.4.0,
+  metaprogressão v0.6.0 e plano de baixa fricção (absorvido pelo guia único).
+- `old/qa/` — relatórios de QA, device matrix, performance e baseline do MVP.
+- `old/release/` — revisão G7 e validação técnica do pacote `0.1.0-mvp`.

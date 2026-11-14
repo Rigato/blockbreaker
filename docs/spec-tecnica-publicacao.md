@@ -736,7 +736,7 @@ aumentar ads.
 [Addicting](https://www.addictinggames.com/about/user-submission-agreement) ·
 [Discord](https://support-dev.discord.com/hc/en-us/articles/17299902720919-Premium-Apps-Payout)
 
-**Bricklike:** [`handoff-v0.5.1.md`](handoff-v0.5.1.md) ·
+**Bricklike:** [`handoff-v0.5.1.md`](old/handoffs/handoff-v0.5.1.md) ·
 [`release/status.md`](release/status.md) ·
 [`release/crazygames-review.md`](release/crazygames-review.md) ·
 [`research/crazygames-feedback.md`](research/crazygames-feedback.md) ·

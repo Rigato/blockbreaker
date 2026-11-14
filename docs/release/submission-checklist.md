@@ -14,9 +14,10 @@ GameFlare bloqueado por acesso).
 
 ## Pré-requisitos comuns
 
-- [ ] Teste humano da 0.6.1 concluído: Tier 4, economia/anti-farm, card do
+- [ ] Teste humano final da 0.6.1 concluído: Tier 4, economia/anti-farm, card do
       Workshop, HUD/results, migração de save v1→v2, tutorial, ads mock e
-      layout de portal. **Pendente.**
+      layout de portal. **Básico concluído em 2026-11-12; falta o teste focado
+      em portal.**
 - [ ] ZIP final 0.6.1 gerado pelo pipeline de release, com `index.html` e
       `playgama-bridge-config.json` na raiz e Bridge local
       (`./playgama-bridge.js`, sem request ao CDN da Playgama). **Gerado:
@@ -29,11 +30,10 @@ GameFlare bloqueado por acesso).
       `docs/release/portal-metadata.md` para Tier 4 + economia de Sparks +
       Workshop + 6 níveis/20 ondas (22 com tutorial).
       **Pendente de revisão humana.**
-- [ ] Capas revisadas e aprovadas em `store/covers/`. **Pendente; capas atuais
-      são da 0.5.1.**
-- [x] Screenshots, capas e vídeos **da 0.5.1** (tutorial, fase 1 com 2 ondas,
-      controles touch, 7 cards, Frost Sentinel e Endless). **Revisão humana
-      pendente; regeneração para a 0.6.1 ainda não feita.**
+- [ ] Capas revisadas e aprovadas em `store/covers/`. **Regeneradas da 0.6.1;
+      revisão humana pendente.**
+- [x] Screenshots, capas e vídeos **da 0.6.1** (tutorial, campanha, controles
+      touch, 7 cards, Frost Sentinel e Endless). **Revisão humana pendente.**
 - [x] How to Play (5 páginas, 780×468) da 0.5.1; About Us (logomarca Bad
       Decision Games) revisado na 0.4.0. **Revisão humana pendente.**
 - [ ] Nome **Bricklike** consistente em todos os portais. **Pendente de revisão

@@ -5,9 +5,9 @@ Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
 
-A `0.6.1` é **local e não publicada**. itch.io e o sandbox da Playgama seguem
-com a `0.5.1`; CrazyGames está pausado até 2026-11-26; GameFlare segue bloqueado.
-Nenhuma tag ou GitHub Release foi criada.
+A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12; não
+há tag nem GitHub Release. CrazyGames está pausado até 2026-11-26; GameFlare
+segue bloqueado.
 
 ## Implementado
 
@@ -87,7 +87,7 @@ Nenhuma tag ou GitHub Release foi criada.
 
 | Item | Estado |
 |---|---|
-| Playtest humano da 0.6.1 | pendente |
+| Playtest humano da 0.6.1 | básico concluído em 2026-11-12; aprofundar Tier 4, economia e Workshop |
 | Compreensão do tutorial/skip e dos coach marks | pendente |
 | Edge assist em celular real (borda, gesto do navegador) | pendente |
 | Playtest humano das fases 4–6 | pendente |
@@ -104,12 +104,12 @@ Nenhuma tag ou GitHub Release foi criada.
 | Performance em hardware real / 4 GB RAM | pendente; protocolo em `docs/qa/performance-testing.md` e script `scripts/perf-smoke.mjs` |
 | Aviso de storage em fallback real | pendente |
 | Mixagem final de áudio | pendente |
-| Screenshots/capas/vídeos da 0.6.1 | os atuais são da 0.5.1; revisão/regeneração pendente |
+| Screenshots/capas/vídeos da 0.6.1 | regenerados; revisão humana pendente antes de reutilizar |
 | Fill/limites reais de ads na Playgama/CrazyGames | pendente |
 | Playgama sandbox stats | amostra pequena (17/100 qualifying plays; 5:42; 1,70 ad/play); não concluir qualidade/retenção |
 | CrazyGames | 0.3.0 e 0.4.0 reprovadas; 0.5.1 submetida em 2026-11-11; submissão pausada até 2026-11-26 |
 | Tag e GitHub Release | nenhuma criada; decisão humana pendente |
-| Submissão manual nos portais | 0.6.1 não submetida; usuário |
+| Submissão manual nos portais | 0.6.1 publicada no itch.io e no sandbox da Playgama; CrazyGames e GameFlare pendentes |
 
 ## Leitura rápida
 
@@ -124,7 +124,8 @@ results** e promoveu o **Workshop** a card com contagem e progresso. Tudo isso
 está no código e coberto por testes.
 
 O que falta é majoritariamente **validação humana** do Tier 4, da economia e do
-card do Workshop, **distribuição** (publicar a 0.6.1, retomar CrazyGames após
-2026-11-26, resolver GameFlare) e **assets de loja da 0.6.1**. A moldura desktop
+card do Workshop, **distribuição** (a 0.6.1 já está no itch.io e no sandbox da
+Playgama; retomar CrazyGames após 2026-11-26 e resolver GameFlare) e **revisão
+dos assets de loja da 0.6.1**. A moldura desktop
 foi deliberadamente descartada; o risco de apresentação em iframe desktop
 continua registrado, mas não será resolvido por letterbox nesta linha.

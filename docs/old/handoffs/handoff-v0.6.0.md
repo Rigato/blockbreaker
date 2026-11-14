@@ -1,7 +1,7 @@
 # Handoff — Bricklike v0.6.0
 
 > **Documento histórico.** Este handoff descreve a v0.6.0 e foi substituído pelo
-> [`handoff-v0.6.1.md`](handoff-v0.6.1.md) como fonte atual. A v0.6.0 é a build
+> [`handoff-v0.6.1.md`](../../handoff-v0.6.1.md) como fonte atual. A v0.6.0 é a build
 > anterior; a v0.5.1 continua sendo a versão publicada no itch.io e no sandbox
 > da Playgama.
 
@@ -336,20 +336,20 @@ playtest humano da 0.6.0.
 
 ### Essenciais
 
-- [`docs/GDD_Bricklike.md`](GDD_Bricklike.md) — fonte de design v1.7.
-- [`docs/gdd-gap-analysis.md`](gdd-gap-analysis.md) — implementado × pendente.
-- [`docs/perks-e-metaprogressao.md`](perks-e-metaprogressao.md) — desenho do
+- [`docs/GDD_Bricklike.md`](../../GDD_Bricklike.md) — fonte de design v1.7.
+- [`docs/gdd-gap-analysis.md`](../../gdd-gap-analysis.md) — implementado × pendente.
+- [`docs/perks-e-metaprogressao.md`](../../perks-e-metaprogressao.md) — desenho do
   catálogo e da metaprogressão.
-- [`docs/plano-v0.6.0-metaprogressao.md`](plano-v0.6.0-metaprogressao.md) —
+- [`docs/old/plans/plano-v0.6.0-metaprogressao.md`](../plans/plano-v0.6.0-metaprogressao.md) —
   plano por fases e critérios de aceite.
-- [`docs/spec-tecnica-publicacao.md`](spec-tecnica-publicacao.md) — guia de
+- [`docs/spec-tecnica-publicacao.md`](../../spec-tecnica-publicacao.md) — guia de
   publicação, arquitetura, ads, save e QA.
-- [`docs/build-release.md`](build-release.md) — build, ZIP, CI e runbook.
-- [`docs/release/status.md`](release/status.md) — status/URLs de publicação.
-- [`docs/release/submission-checklist.md`](release/submission-checklist.md) —
+- [`docs/build-release.md`](../../build-release.md) — build, ZIP, CI e runbook.
+- [`docs/release/status.md`](../../release/status.md) — status/URLs de publicação.
+- [`docs/release/submission-checklist.md`](../../release/submission-checklist.md) —
   checklist manual.
-- [`docs/qa/playtest-kit.md`](qa/playtest-kit.md) — protocolo de playtest.
-- [`docs/qa/performance-testing.md`](qa/performance-testing.md) — protocolo de
+- [`docs/qa/playtest-kit.md`](../../qa/playtest-kit.md) — protocolo de playtest.
+- [`docs/qa/performance-testing.md`](../../qa/performance-testing.md) — protocolo de
   performance.
 
 ### Histórico
