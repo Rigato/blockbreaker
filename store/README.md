@@ -52,13 +52,14 @@ Cinco recortes 5:3 em **780×468**, gerados do mesmo build `0.6.1`:
 
 Vídeo regenerado a partir do build `0.6.1`, com as capas atuais:
 
-- `bricklike-preview.mp4`: 1920×1080 (16:9), 19,1 s, ~2,6 MB, H.264, silencioso.
-- `bricklike-preview-portrait.mp4`: 1080×1620 (2:3), 19,1 s, ~4,5 MB, H.264,
+- `bricklike-preview.mp4`: 1920×1080 (16:9), 19,1 s, ~2,3 MB, H.264, silencioso.
+- `bricklike-preview-portrait.mp4`: 1080×1620 (2:3), 19,1 s, ~4,1 MB, H.264,
   silencioso.
 
-Os dois mostram o menu atual com o card do Workshop, o seletor de 7 cards, o
-tutorial, gameplay com laser e multiball, level-up e Frost Sentinel. Terminam na
-capa correspondente, com o logo **BRICKLIKE**. Veja `video/README.md`.
+Os dois mostram o menu atual com o card do Workshop, o mapa da campanha com nós
+e bottom sheet, o tutorial, gameplay com laser e multiball, level-up e Frost
+Sentinel. Terminam na capa correspondente, com o logo **BRICKLIKE**. Veja
+`video/README.md`.
 
 ## Uso por portal
 

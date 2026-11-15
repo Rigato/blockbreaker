@@ -7,14 +7,16 @@ real e sem áudio.
 
 | Arquivo | Especificação | Uso |
 |---|---|---|
-| `bricklike-preview.mp4` | 1920×1080 (16:9), 19,1 s, H.264, ~2,6 MB | CrazyGames landscape / portais |
-| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 19,1 s, H.264, ~4,5 MB | CrazyGames portrait / mobile |
+| `bricklike-preview.mp4` | 1920×1080 (16:9), 19,1 s, H.264, ~2,3 MB | CrazyGames landscape / portais |
+| `bricklike-preview-portrait.mp4` | 1080×1620 (2:3), 19,1 s, H.264, ~4,1 MB | CrazyGames portrait / mobile |
 
 ## Conteúdo
 
 - Menu atual com a campanha em progresso e o card de progressão do Workshop
   (42 Sparks, 13/22 desbloqueados, 9 left e barra de progresso).
-- Seletor de campanha com os sete cards (tutorial + seis fases) e scroll real.
+- Seletor de campanha em mapa: nós hexagonais das sete etapas ligados pelo
+  caminho do mundo, parallax ao rolar a tela e bottom sheet com o nó atual
+  (Ruined Halls, nível 2, botão **Play** e métricas).
 - Tutorial com o coach mark “Move & Launch” e o lançamento da bola.
 - Gameplay com multiball, Prism Laser e o HUD atual.
 - Level-up com três cards.
