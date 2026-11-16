@@ -80,10 +80,10 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
 
   const phaseSelect = new PhaseSelect({
     root: options.root,
-    onStart: (phaseId) => {
+    onStart: (phaseId, startWaveIndex) => {
       selectedPhaseId = phaseId;
       phaseSelect.close();
-      controller.startPhase(phaseId);
+      controller.startPhase(phaseId, startWaveIndex);
     },
     onBack: () => {
       phaseSelect.close();
@@ -91,6 +91,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
     },
     onEndless: handleEndless,
     isEndlessUnlocked: () => lastSnapshot.endlessUnlocked,
+    debug: options.debug,
   });
 
   const settings = new SettingsDialog({

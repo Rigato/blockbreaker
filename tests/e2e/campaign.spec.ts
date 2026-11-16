@@ -66,6 +66,19 @@ test.describe('v0.2 campaign runtime', () => {
 
     await jump('phase-6', 4);
     await expect(page.locator('.hud__boss-name')).toContainText('Void Herald');
+
+    await jump('phase-7', 0);
+    await expect(page.locator('#debug-phase')).toContainText('Splashdown Docks');
+
+    await jump('phase-12', 4);
+    await expect(page.locator('.hud__boss-name')).toContainText('Lattice Hierophant');
+
+    await jump('phase-18', 3);
+    await expect(page.locator('.hud__chip--rule')).toContainText('TIME');
+    await expect(page.locator('.hud__chip--rule-extra')).toContainText('GUST');
+
+    await jump('phase-18', 4);
+    await expect(page.locator('.hud__boss-name')).toContainText('The Last Engine');
     await page.waitForTimeout(1_200);
 
     expect(monitor.pageErrors).toEqual([]);

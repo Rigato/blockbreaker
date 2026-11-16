@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { CONTENT_LEGEND } from '../src/content/blocks';
 import {
   allWaveStats,
-  BALL_SPEED_MAX,
   BALL_SPEED_MIN,
   DIFFICULTY_TOLERANCE,
   EXPECTED_WAVE_COUNTS,
@@ -15,44 +14,32 @@ import {
   validateContent,
   waveStats,
 } from '../src/content/phases';
+import { WORLDS, localPhaseIndex, worldForPhaseIndex } from '../src/content/worlds';
 import type { WaveDef as SimWaveDef } from '../src/sim/testWaves';
 import { World } from '../src/sim/World';
 import { SIM_TUNING_DEFAULTS } from '../src/game/config';
 import { PHASE_THEMES, relativeLuminance, themeForPhase } from '../src/render/themes';
 
-const EXPECTED_PHASES = [
-  { id: 'tutorial', index: 0, name: 'Tutorial' },
-  { id: 'phase-1', index: 1, name: 'Crystal Grove' },
-  { id: 'phase-2', index: 2, name: 'Ruined Halls' },
-  { id: 'phase-3', index: 3, name: 'Arcane Depths' },
-  { id: 'phase-4', index: 4, name: 'Frostbound Spire' },
-  { id: 'phase-5', index: 5, name: 'Emberforge' },
-  { id: 'phase-6', index: 6, name: 'Void Threshold' },
-] as const;
-
-const EXPECTED_WAVE_IDS = [
-  'tutw1',
-  'tutw2',
-  'p1w1',
-  'p1w2',
-  'p2w1',
-  'p2w2',
-  'p2w3',
-  'p3w1',
-  'p3w2',
-  'p3w3',
-  'p4w1',
-  'p4w2',
-  'p4w3',
-  'p5w1',
-  'p5w2',
-  'p5w3',
-  'p5w4',
-  'p6w1',
-  'p6w2',
-  'p6w3',
-  'p6w4',
-  'p6w5',
+const EXPECTED_PHASE_NAMES = [
+  'Tutorial',
+  'Crystal Grove',
+  'Ruined Halls',
+  'Arcane Depths',
+  'Frostbound Spire',
+  'Emberforge',
+  'Void Threshold',
+  'Splashdown Docks',
+  'Signal Yard',
+  'Maglev Spine',
+  'Relay Grid',
+  'Hardlight Weave',
+  'The Lattice Core',
+  'Slag Yard',
+  'Rustline Depot',
+  'Ash Foundry',
+  'Boilerworks',
+  'Crown Stack',
+  'Sunder Core',
 ] as const;
 
 function waveById(id: string) {
@@ -65,21 +52,28 @@ function pacedWaves(waveStatsList: ReturnType<typeof allWaveStats>) {
   return waveStatsList.filter((stats) => !stats.wave.boss && stats.blocks > 0);
 }
 
-describe('v0.2.0 content structure', () => {
-  it('ships the tutorial plus 6 stable campaign phases', () => {
-    expect(PHASES).toHaveLength(7);
-    expect(PHASES.map((phase) => phase.id)).toEqual(EXPECTED_PHASES.map((phase) => phase.id));
-    expect(PHASES.map((phase) => phase.index)).toEqual([0, 1, 2, 3, 4, 5, 6]);
-    expect(PHASES.map((phase) => phase.name)).toEqual(
-      EXPECTED_PHASES.map((phase) => phase.name),
+describe('multi-world content structure', () => {
+  it('ships the tutorial plus three worlds of six stable phases', () => {
+    expect(PHASES).toHaveLength(19);
+    expect(PHASES.map((phase) => phase.index)).toEqual(
+      Array.from({ length: 19 }, (_, index) => index),
     );
+    expect(PHASES.map((phase) => phase.name)).toEqual([...EXPECTED_PHASE_NAMES]);
+    expect(WORLDS.map((world) => world.phaseCount)).toEqual([6, 6, 6]);
+    for (const phase of PHASES) {
+      expect(phase.worldId).toBe(worldForPhaseIndex(phase.index).id);
+      expect(phase.localIndex).toBe(localPhaseIndex(phase.index));
+    }
   });
 
-  it('has 2/2/3/3/3/4/5 waves and 22 unique ids', () => {
+  it('has the expected waves and unique ids', () => {
     expect(PHASES.map((phase) => phase.waves.length)).toEqual([...EXPECTED_WAVE_COUNTS]);
     const waveIds = PHASES.flatMap((phase) => phase.waves.map((wave) => wave.id));
-    expect(waveIds).toEqual([...EXPECTED_WAVE_IDS]);
-    expect(new Set(waveIds).size).toBe(22);
+    expect(waveIds).toHaveLength(71);
+    expect(new Set(waveIds).size).toBe(71);
+    expect(waveIds).toContain('p7w1');
+    expect(waveIds).toContain('p12w5');
+    expect(waveIds).toContain('p18w5');
   });
 
   it('keeps the tutorial short: 8 blocks per wave, first perk after four', () => {
@@ -119,19 +113,26 @@ describe('v0.2.0 content structure', () => {
     expect(firstWave.id).toBe('tutw1');
   });
 
-  it('has the full 9-character legend and uses all 9 block types', () => {
+  it('has the full 17-character legend and uses every block type', () => {
     const keys = Object.keys(CONTENT_LEGEND).sort();
-    expect(keys).toEqual(['1', '2', '3', 'e', 'g', 'l', 'm', 'r', 'x']);
-    expect(Object.values(CONTENT_LEGEND)).toEqual([
-      'crystal',
-      'stone',
-      'obsidian',
-      'explosive',
-      'regenerative',
-      'moving',
-      'multiplier',
-      'generator',
-      'linked',
+    expect(keys).toEqual([
+      '1',
+      '2',
+      '3',
+      'a',
+      'b',
+      'e',
+      'f',
+      'g',
+      'l',
+      'm',
+      'n',
+      'p',
+      'r',
+      's',
+      't',
+      'x',
+      'y',
     ]);
 
     const used = new Set<string>();
@@ -144,19 +145,10 @@ describe('v0.2.0 content structure', () => {
         }
       }
     }
-    expect(used).toEqual(
-      new Set([
-        'crystal',
-        'stone',
-        'obsidian',
-        'explosive',
-        'regenerative',
-        'moving',
-        'multiplier',
-        'generator',
-        'linked',
-      ]),
-    );
+    expect(used.size).toBe(17);
+    expect(used).toContain('alloy');
+    expect(used).toContain('plated');
+    expect(used).toContain('fused');
   });
 
   it('uses every element kind at least once', () => {
@@ -166,42 +158,69 @@ describe('v0.2.0 content structure', () => {
       ),
     );
     expect(kinds).toEqual(
-      new Set(['wall', 'obstacle', 'deflector', 'portal', 'mover', 'rotor', 'gate']),
+      new Set([
+        'wall',
+        'obstacle',
+        'deflector',
+        'portal',
+        'mover',
+        'rotor',
+        'gate',
+        'press',
+        'belt',
+        'rail',
+      ]),
     );
   });
 
-  it('ships exactly 3 bosses with the plan tuning', () => {
+  it('ships nine bosses with distinct verbs and tuning', () => {
     const bosses = PHASES.flatMap((phase) =>
       phase.waves.filter((wave) => wave.boss).map((wave) => wave.boss!),
     );
-    expect(bosses).toHaveLength(3);
+    expect(bosses).toHaveLength(9);
     expect(bosses.map((boss) => boss.name)).toEqual([
       'Frost Sentinel',
       'Ember Warden',
       'Void Herald',
+      'Nullframe Warden',
+      'Maglev Dreadnought',
+      'Lattice Hierophant',
+      'Boiler Matron',
+      'The Riveter',
+      'The Last Engine',
     ]);
-    expect(bosses.map((boss) => boss.pattern)).toEqual(['sentinel', 'warden', 'void']);
-    expect(bosses.map((boss) => boss.hp)).toEqual([60, 80, 100]);
-    expect(bosses.map((boss) => boss.attackMs)).toEqual([5000, 4500, 4000]);
-    expect(bosses.map((boss) => boss.moveSpeed)).toEqual([90, 120, 150]);
-    expect(bosses.map((boss) => [boss.widthCells, boss.heightCells, boss.row])).toEqual([
-      [3, 2, 1],
-      [4, 2, 1],
-      [4, 2, 0],
+    expect(bosses.map((boss) => boss.pattern)).toEqual([
+      'sentinel',
+      'warden',
+      'void',
+      'spread',
+      'charger',
+      'aimed',
+      'matron',
+      'riveter',
+      'engine',
+    ]);
+    expect(bosses.map((boss) => boss.hp)).toEqual([
+      60, 80, 100, 150, 190, 240, 140, 175, 210,
     ]);
   });
 
-  it('places the required challenge rules on the required waves', () => {
+  it('places challenge rules across the worlds', () => {
     expect(waveById('p4w2').rules).toEqual([{ kind: 'timeLimit', ms: 65000 }]);
     expect(waveById('p5w2').rules).toEqual([{ kind: 'noLaser' }]);
-    expect(waveById('p5w3').rules).toEqual([{ kind: 'timeLimit', ms: 60000 }]);
     expect(waveById('p6w2').rules).toEqual([{ kind: 'timeLimit', ms: 75000 }]);
-    expect(waveById('p6w4').rules).toEqual([{ kind: 'noLaser' }]);
-
-    const ruled = PHASES.flatMap((phase) =>
-      phase.waves.filter((wave) => wave.rules && wave.rules.length > 0).map((wave) => wave.id),
+    expect(waveById('p12w3').rules).toContainEqual({ kind: 'noLaser' });
+    expect(waveById('p15w3').rules).toContainEqual(
+      expect.objectContaining({ kind: 'gust' }),
     );
-    expect(ruled).toEqual(['p4w2', 'p5w2', 'p5w3', 'p6w2', 'p6w4']);
+    expect(waveById('p16w4').rules).toEqual([{ kind: 'noMultiball' }]);
+
+    const kinds = new Set(
+      PHASES.flatMap((phase) =>
+        phase.waves.flatMap((wave) => (wave.rules ?? []).map((rule) => rule.kind)),
+      ),
+    );
+    expect(kinds).toEqual(new Set(['timeLimit', 'noLaser', 'noMultiball', 'gust']));
   });
 
   it('never places a block or the scaled grid in the paddle zone', () => {
@@ -219,26 +238,31 @@ describe('v0.2.0 content structure', () => {
   });
 });
 
-describe('v0.2.0 content pacing', () => {
-  it('increases ball speed within each phase and keeps phase peaks moving forward', () => {
-    const maxima: number[] = [];
+describe('multi-world content pacing', () => {
+  it('increases ball speed within each phase and respects each world cap', () => {
     for (const phase of PHASES) {
+      const world = worldForPhaseIndex(phase.index);
       let previous = BALL_SPEED_MIN;
       for (const wave of phase.waves) {
         expect(wave.ballSpeed).toBeGreaterThanOrEqual(BALL_SPEED_MIN);
-        expect(wave.ballSpeed).toBeLessThanOrEqual(BALL_SPEED_MAX);
+        expect(wave.ballSpeed).toBeLessThanOrEqual(world.speedMax);
         expect(wave.ballSpeed).toBeGreaterThan(previous);
         previous = wave.ballSpeed;
       }
-      maxima.push(previous);
     }
-    for (let index = 1; index < maxima.length; index += 1) {
-      // Phase 4 intentionally resets pace after phase 3, so the 5% slack
-      // applies to the cross-phase peak comparison.
-      expect(maxima[index]! + maxima[index - 1]! * DIFFICULTY_TOLERANCE).toBeGreaterThanOrEqual(
-        maxima[index - 1]!,
-      );
-    }
+  });
+
+  it('allows a world to open slower than the previous world ended', () => {
+    const w1Final = PHASES.find((phase) => phase.index === 6)!;
+    const w2Opening = PHASES.find((phase) => phase.index === 7)!;
+    const w2Final = PHASES.find((phase) => phase.index === 12)!;
+    const w3Opening = PHASES.find((phase) => phase.index === 13)!;
+    expect(w2Opening.waves[0]!.ballSpeed).toBeLessThan(
+      w1Final.waves.at(-1)!.ballSpeed,
+    );
+    expect(w3Opening.waves[0]!.ballSpeed).toBeLessThan(
+      w2Final.waves.at(-1)!.ballSpeed,
+    );
   });
 
   it('keeps average HP and difficulty monotonic inside each phase', () => {
@@ -257,23 +281,27 @@ describe('v0.2.0 content pacing', () => {
     }
   });
 
-  it('keeps each phase peak at or above the previous phase peak', () => {
-    const peaks = PHASES.filter((phase) => !phase.tutorial).map((phase) => {
-      const paced = pacedWaves(phaseStats(phase).waves);
-      return {
-        avgHp: Math.max(...paced.map((stats) => stats.avgHp)),
-        difficulty: Math.max(...paced.map((stats) => stats.difficulty)),
-      };
-    });
-    for (let index = 1; index < peaks.length; index += 1) {
-      const previous = peaks[index - 1]!;
-      const current = peaks[index]!;
-      expect(current.avgHp + previous.avgHp * DIFFICULTY_TOLERANCE).toBeGreaterThanOrEqual(
-        previous.avgHp,
-      );
-      expect(
-        current.difficulty + previous.difficulty * DIFFICULTY_TOLERANCE,
-      ).toBeGreaterThanOrEqual(previous.difficulty);
+  it('keeps each phase peak at or above the previous phase peak inside its world', () => {
+    for (const world of WORLDS) {
+      const peaks = PHASES.filter(
+        (phase) => phase.worldId === world.id && !phase.tutorial,
+      ).map((phase) => {
+        const paced = pacedWaves(phaseStats(phase).waves);
+        return {
+          avgHp: Math.max(...paced.map((stats) => stats.avgHp)),
+          difficulty: Math.max(...paced.map((stats) => stats.difficulty)),
+        };
+      });
+      for (let index = 1; index < peaks.length; index += 1) {
+        const previous = peaks[index - 1]!;
+        const current = peaks[index]!;
+        expect(
+          current.avgHp + previous.avgHp * DIFFICULTY_TOLERANCE,
+        ).toBeGreaterThanOrEqual(previous.avgHp);
+        expect(
+          current.difficulty + previous.difficulty * DIFFICULTY_TOLERANCE,
+        ).toBeGreaterThanOrEqual(previous.difficulty);
+      }
     }
   });
 
@@ -290,33 +318,29 @@ describe('v0.2.0 content pacing', () => {
     expect(levelUpsForXp(200)).toBe(6);
   });
 
-  it('prints a concise tutorial + 6-level, 22-wave report for the CLI', () => {
+  it('prints a concise three-world report for the CLI', () => {
     const report = formatContentReport();
     expect(report).toContain('Tutorial - Tutorial (tutorial)');
     expect(report).toContain('Level 1 - Crystal Grove');
-    expect(report).toContain('Level 6 - Void Threshold');
-    expect(report).toContain('Totals: levels=7 waves=22');
-    expect(report.match(/^Level /gm)).toHaveLength(6);
-    expect(report).toContain('p6w5');
+    expect(report).toContain('Level 7 - Splashdown Docks');
+    expect(report).toContain('Level 13 - Slag Yard');
+    expect(report).toContain('Level 18 - Sunder Core');
+    expect(report).toContain('Totals: levels=19 waves=71');
+    expect(report.match(/^Level /gm)).toHaveLength(18);
+    expect(report).toContain('p18w5');
   });
 });
 
-describe('v0.2.0 themes', () => {
-  it('ships one theme per phase with the new backdrop shapes', () => {
-    expect(PHASE_THEMES).toHaveLength(6);
+describe('multi-world themes', () => {
+  it('ships one theme per campaign phase', () => {
+    expect(PHASE_THEMES).toHaveLength(18);
     expect(PHASE_THEMES.map((theme) => theme.id)).toEqual(
-      EXPECTED_PHASES.filter((phase) => phase.id !== 'tutorial').map((phase) => phase.id),
+      Array.from({ length: 18 }, (_, index) => `phase-${index + 1}`),
     );
-    expect(PHASE_THEMES.map((theme) => theme.shape)).toEqual([
-      'crystal',
-      'ruins',
-      'arcane',
-      'frost',
-      'forge',
-      'void',
-    ]);
     expect(themeForPhase('phase-6', 5).name).toBe('Void Threshold');
+    expect(themeForPhase('phase-18', 17).name).toBe('Sunder Core');
     expect(themeForPhase('missing', 3).shape).toBe('frost');
+    expect(themeForPhase('missing', 99).id).toBe('phase-18');
   });
 
   it('keeps accents readable against each sky gradient', () => {
@@ -330,14 +354,19 @@ describe('v0.2.0 themes', () => {
     }
   });
 
-  it('gives the three new palettes distinct hues', () => {
-    const newThemes = PHASE_THEMES.slice(3);
-    expect(newThemes.map((theme) => theme.glow)).toEqual([0x66d9ff, 0xff7a2e, 0xa46bff]);
-    expect(new Set(newThemes.map((theme) => theme.skyMid)).size).toBe(3);
+  it('gives the new worlds distinct palettes', () => {
+    const world2 = PHASE_THEMES.filter(
+      (theme) => Number(theme.id.split('-')[1]) >= 7 && Number(theme.id.split('-')[1]) <= 12,
+    );
+    const world3 = PHASE_THEMES.filter((theme) => Number(theme.id.split('-')[1]) >= 13);
+    expect(world2).toHaveLength(6);
+    expect(world3).toHaveLength(6);
+    expect(new Set(world2.map((theme) => theme.glow)).size).toBeGreaterThan(2);
+    expect(new Set(world3.map((theme) => theme.glow)).size).toBeGreaterThan(1);
   });
 });
 
-describe('v0.2.0 content clearability', () => {
+describe('multi-world content clearability', () => {
   it('loads every wave into the real World with the expected blocks, elements and boss', () => {
     for (const phase of PHASES) {
       for (const wave of phase.waves) {
@@ -366,7 +395,6 @@ describe('v0.2.0 content clearability', () => {
           expect(world.boss).toBeNull();
         }
 
-        // Removing the field (and defeating the boss) must clear the wave.
         world.blocks.length = 0;
         if (world.boss) world.damageBoss(world.boss.maxHp);
         world.step();

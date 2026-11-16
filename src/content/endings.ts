@@ -1,4 +1,5 @@
 import type { EndingSummary } from '../game/contracts';
+import { localPhaseIndex } from './worlds';
 
 export interface EndingInput {
   phaseIndex: number;
@@ -47,10 +48,83 @@ const VICTORY_EPILOGUES: Readonly<Record<number, Epilogue>> = {
       'Beyond the anvil, the void waits.',
   },
   6: {
-    title: 'Campaign complete',
+    title: 'The Vale holds',
     body:
-      'The Void Herald falls, and the threshold closes behind you. Six realms hold ' +
-      'their breath, then bloom with light. The tower is free, and its song is yours.',
+      'The Void Herald falls, but the threshold does not close. It stabilises, ' +
+      'brightens, and pulls you through. On the other side, a dying machine answers.',
+  },
+  7: {
+    title: 'The docks answer',
+    body:
+      'The flooded docks light up one lamp at a time. Somewhere above, a lattice ' +
+      'of signal towers turns its dishes toward you.',
+  },
+  8: {
+    title: 'Signal acquired',
+    body:
+      'The Nullframe Warden breaks apart into falling plates. The yard goes quiet, ' +
+      'then routes every remaining dish to the rail line ahead.',
+  },
+  9: {
+    title: 'The spine runs',
+    body:
+      'The maglev spine carries you upward in a wash of blue light. The machine ' +
+      'is not trying to stop you anymore. It is trying to keep you.',
+  },
+  10: {
+    title: 'The grid goes dark',
+    body:
+      'The Dreadnought derails, and half the grid goes with it. In the sudden dark, ' +
+      'the hardlight weave begins to fold itself into armor.',
+  },
+  11: {
+    title: 'Light takes shape',
+    body:
+      'The weave resolves into a corridor of white geometry. At its end, the core ' +
+      'of the Lattice waits with the patience of a machine that has all the time left.',
+  },
+  12: {
+    title: 'The Lattice relents',
+    body:
+      'The Hierophant falls silent. The core opens a vent you did not know existed, ' +
+      'and the light of the Lattice pours down into a rust-red dark.',
+  },
+  13: {
+    title: 'Slag and sodium',
+    body:
+      'The yard settles under a sodium lamp. The machine above is gone; the machine ' +
+      'below is still warm, and still working.',
+  },
+  14: {
+    title: 'The depot moves',
+    body:
+      'Rusted belts grind into motion, carrying old cargo toward a foundry that ' +
+      'should have been cold a hundred years ago.',
+  },
+  15: {
+    title: 'The foundry breathes',
+    body:
+      'The molds are still full. The circuits still carry current. The ash on the ' +
+      'floor lifts as one, pointing toward the boilers.',
+  },
+  16: {
+    title: 'Pressure drops',
+    body:
+      'The Boiler Matron sighs out its last breath. The pipes knock twice, then ' +
+      'fall silent. Somewhere above, a piston tests its range.',
+  },
+  17: {
+    title: 'The stack clears',
+    body:
+      'The Riveter lets go of the tower. Its last piston falls into the dark. For ' +
+      'the first time, the sky above the Crown Stack is visible.',
+  },
+  18: {
+    title: 'The engine stops',
+    body:
+      'The Last Engine shudders, locks, and dies. Above you, the lights of the ' +
+      'Lattice go out one by one. Below, the Vale is already growing over the ruins. ' +
+      'The circle is closed.',
   },
 };
 
@@ -108,6 +182,6 @@ export function endingForResult(input: EndingInput): EndingSummary | null {
     id: isCampaignFinale ? CAMPAIGN_ID : `epilogue-phase-${phaseIndex}`,
     title: epilogue.title,
     body: epilogue.body,
-    rank: victoryRank(phaseIndex, score),
+    rank: victoryRank(localPhaseIndex(phaseIndex), score),
   };
 }

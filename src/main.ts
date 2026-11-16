@@ -89,7 +89,7 @@ async function start(): Promise<void> {
       : platform;
 
   const { BlockBreakerGame: GameClass } = await import('./game/Game');
-  game = new GameClass(canvasHost, gamePlatform);
+  game = new GameClass(canvasHost, gamePlatform, options.debug);
   game.resize(layout.size.width, layout.size.height);
   await game.ready;
 

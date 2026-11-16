@@ -55,6 +55,12 @@ export function elementColor(kind: RuntimeElement['kind'], accent: number): numb
       return blend(0xff9a4d, accent, 0.25);
     case 'gate':
       return blend(0xff6b7a, accent, 0.24);
+    case 'press':
+      return blend(0xc9a36a, accent, 0.22);
+    case 'belt':
+      return blend(0x8c4a32, accent, 0.2);
+    case 'rail':
+      return blend(0x35e8ff, accent, 0.28);
     default:
       return accent;
   }
@@ -131,6 +137,107 @@ export function drawElement(
     case 'gate':
       drawGate(graphics, element, accent, options);
       return;
+    case 'press':
+      drawPress(graphics, element, accent);
+      return;
+    case 'belt':
+      drawBelt(graphics, element, accent);
+      return;
+    case 'rail':
+      drawRail(graphics, element, accent);
+      return;
+  }
+}
+
+function drawPress(
+  graphics: Phaser.GameObjects.Graphics,
+  element: RuntimeElement,
+  accent: number,
+): void {
+  const { left, top, width, height } = element;
+  const body = elementColor('press', accent);
+  const light = blend(body, 0xffffff, 0.4);
+  const dark = blend(body, 0x05070c, 0.65);
+
+  graphics.fillStyle(0x03050a, 0.95);
+  graphics.fillRect(left - 1, top - 1, width + 2, height + 2);
+  graphics.fillStyle(body, 1);
+  graphics.fillRect(left, top, width, height);
+  graphics.fillStyle(light, 0.5);
+  graphics.fillRect(left + 2, top + 2, width - 4, 3);
+  graphics.fillStyle(dark, 0.7);
+  graphics.fillRect(left + 2, top + height - 5, width - 4, 3);
+
+  // Hazard chevrons on the striking face.
+  const step = Math.max(6, Math.round(width / 6));
+  graphics.fillStyle(blend(body, 0xffffff, 0.55), 0.65);
+  for (let x = left + 4; x < left + width - 4; x += step) {
+    graphics.fillTriangle(
+      x,
+      top + height * 0.55,
+      x + step * 0.5,
+      top + height * 0.35,
+      x + step * 0.5,
+      top + height * 0.55,
+    );
+  }
+
+  // Guide rails above the press.
+  graphics.lineStyle(1, blend(accent, 0xffffff, 0.35), 0.35);
+  graphics.lineBetween(left + 4, 0, left + 4, top - 2);
+  graphics.lineBetween(left + width - 4, 0, left + width - 4, top - 2);
+}
+
+function drawBelt(
+  graphics: Phaser.GameObjects.Graphics,
+  element: RuntimeElement,
+  accent: number,
+): void {
+  const { left, top, width, height } = element;
+  const body = elementColor('belt', accent);
+  const direction = element.directionSign >= 0 ? 1 : -1;
+  graphics.fillStyle(0x05070c, 0.55);
+  graphics.fillRect(left, top, width, height);
+  graphics.fillStyle(body, 0.28);
+  graphics.fillRect(left + 2, top + 2, width - 4, height - 4);
+
+  const y = top + height / 2;
+  const step = Math.max(10, Math.round(width / 5));
+  graphics.lineStyle(2, blend(body, 0xffffff, 0.45), 0.8);
+  for (let x = left + 6; x < left + width - 6; x += step) {
+    const tipX = x + direction * 5;
+    graphics.lineBetween(x, y - 5, tipX, y);
+    graphics.lineBetween(x, y + 5, tipX, y);
+  }
+}
+
+function drawRail(
+  graphics: Phaser.GameObjects.Graphics,
+  element: RuntimeElement,
+  accent: number,
+): void {
+  const { left, top, width, height } = element;
+  const body = elementColor('rail', accent);
+  const direction = element.directionSign >= 0 ? 1 : -1;
+  const glow = blend(body, 0xffffff, 0.35);
+
+  graphics.fillStyle(0x05070c, 0.72);
+  graphics.fillRect(left, top + height * 0.28, width, Math.max(2, height * 0.12));
+  graphics.fillRect(left, top + height * 0.6, width, Math.max(2, height * 0.12));
+  graphics.fillStyle(body, 0.45);
+  graphics.fillRect(left, top + height * 0.3, width, 2);
+  graphics.fillRect(left, top + height * 0.62, width, 2);
+  graphics.fillStyle(glow, 0.9);
+  for (let x = left + 6; x < left + width - 6; x += 12) {
+    const baseX = direction > 0 ? x : x + 6;
+    graphics.fillTriangle(
+      baseX,
+      top + height * 0.46,
+      baseX - direction * 4,
+      top + height * 0.4,
+      baseX - direction * 4,
+      top + height * 0.52,
+    );
   }
 }
 

@@ -17,7 +17,7 @@ import type {
   RewardedResult,
   SaveRepository,
   SaveSnapshot,
-  SaveV2,
+  SaveV3,
   SettingsV1,
   SimTuning,
   SparksBreakdown,
@@ -36,6 +36,14 @@ import { getUnlockedPerkIds } from '../content/meta';
 import { PERK_CATALOG } from '../content/perks';
 import { CAMPAIGN_PHASE_COUNT, PHASES } from '../content/phases';
 import { summarizePhase } from '../content/phasePresentation';
+import {
+  WORLDS,
+  isWorldFinal,
+  lastPhaseIndex,
+  localPhaseIndex,
+  worldById,
+  worldForPhaseIndex,
+} from '../content/worlds';
 import type { PhaseDef, WaveDef } from '../content/types';
 import { InputController } from '../input/Input';
 import { MemoryStorage } from '../platform/MemoryStorage';
@@ -52,6 +60,7 @@ import {
   COMBO_SPARK_MILESTONES,
   SPARKS_PER_BOSS,
   SPARKS_PER_PHASE_CLEAR,
+  SPARKS_PER_WORLD_CLEAR,
   RunSparkWaveClaims,
   capRunSparks,
   getMetaState as buildMetaState,
@@ -155,7 +164,7 @@ export class BlockBreakerGame implements GameCommands {
   private levelUpRevealAt = 0;
   private ballRespawnLeftMs = 0;
   private adBusy = false;
-  private save: SaveV2 = createDefaultSave();
+  private save: SaveV3 = createDefaultSave();
   private settings: SettingsV1 = createDefaultSettings();
   private readonly clock = new FixedStepClock();
   private pendingLaunch = false;
@@ -167,8 +176,14 @@ export class BlockBreakerGame implements GameCommands {
   private readonly tutorialCompleted = new Set<TutorialStep>();
   private lastInterstitialAt = Number.NEGATIVE_INFINITY;
   private lastRewardedAt = Number.NEGATIVE_INFINITY;
+  private readonly debug: boolean;
 
-  constructor(parent: HTMLElement, platform?: PlatformService) {
+  constructor(
+    parent: HTMLElement,
+    platform?: PlatformService,
+    debug = false,
+  ) {
+    this.debug = debug;
     let resolveReady: () => void = () => {
       // Replaced synchronously below.
     };
@@ -304,9 +319,11 @@ export class BlockBreakerGame implements GameCommands {
   // -------------------------------------------------------------------------
 
   startRun(): void {
+    const info = this.getPhaseSelectInfo();
     const target =
-      [...this.getPhaseSelectInfo()].reverse().find((phase) => phase.unlocked) ??
-      this.getPhaseSelectInfo()[0];
+      info.find((phase) => phase.unlocked && phase.clears === 0) ??
+      [...info].reverse().find((phase) => phase.unlocked) ??
+      info[0];
     if (target) this.startPhase(target.id);
   }
 
@@ -378,14 +395,18 @@ export class BlockBreakerGame implements GameCommands {
     return { ok: true, meta };
   }
 
-  startPhase(phaseId: string): void {
+  startPhase(phaseId: string, startWaveIndex = 0): void {
     const phase = PHASES.find((candidate) => candidate.id === phaseId);
-    if (!phase || phase.index > this.save.unlockedPhase) return;
+    if (!phase) return;
+    if (!this.debug && phase.index > this.save.unlockedPhase) return;
 
     this.mode = 'campaign';
     this.currentWaveDef = null;
     this.currentPhase = phase;
-    this.currentWaveIndex = 0;
+    this.currentWaveIndex = Math.max(
+      0,
+      Math.min(phase.waves.length - 1, Math.floor(startWaveIndex)),
+    );
     this.phaseElapsedMs = 0;
     this.phaseResult = null;
     this.runScore = 0;
@@ -402,21 +423,23 @@ export class BlockBreakerGame implements GameCommands {
     this.tutorialCompleted.clear();
     this.waveIntroUntil = 0;
     this.runState.startRun(this.runSeed, getUnlockedPerkIds(this.save.meta));
-    this.loadPhaseWave(0);
+    this.loadPhaseWave(this.currentWaveIndex);
     this.scene.setPhase(phase.id, phase.index);
     this.scene.setMenuMode(false);
     this.audio.setSuspended(false);
     this.phase = 'playing';
     this.sendPlatform('level_started', {
-      world: phase.id,
-      level: phase.index,
+      world: phase.worldId ?? phase.id,
+      level: localPhaseIndex(phase.index),
     });
     this.focusGameplay();
     this.clock.reset();
     this.pendingLaunch = false;
     this.input.resetTarget();
     this.syncHud(true);
-    if (phase.tutorial) this.openTutorialStep('move');
+    if (phase.tutorial) {
+      this.openTutorialStep(this.currentWaveIndex === 0 ? 'move' : 'specials');
+    }
   }
 
   restartPhase(): void {
@@ -567,12 +590,28 @@ export class BlockBreakerGame implements GameCommands {
       const stats = getPhaseStats(this.save, phase.id);
       const theme = themeForPhase(phase.id, phase.index);
       const summary = summarizePhase(phase);
+      const world = worldById(phase.worldId ?? '') ?? worldForPhaseIndex(phase.index);
+      const finalIndex = lastPhaseIndex(world);
+      const worldCleared = (getPhaseStats(this.save, `phase-${finalIndex}`).clears ?? 0) > 0;
       return {
         id: phase.id,
         name: phase.name,
         index: phase.index,
+        worldId: world.id,
+        worldIndex: WORLDS.findIndex((candidate) => candidate.id === world.id) + 1,
+        worldName: world.name,
+        worldNumeral: world.numeral,
+        worldAccent: world.accent,
+        worldPhaseIndex: localPhaseIndex(phase.index),
+        worldPhaseCount: world.phaseCount,
+        isWorldFinal: isWorldFinal(phase),
+        worldUnlocked:
+          this.debug ||
+          world.id === 'w1' ||
+          world.firstIndex <= this.save.unlockedPhase,
+        worldCleared,
         tutorial: phase.tutorial === true,
-        unlocked: phase.index <= this.save.unlockedPhase,
+        unlocked: this.debug || phase.index <= this.save.unlockedPhase,
         bestTimeMs: stats.bestTimeMs,
         bestScore: stats.bestScore,
         attempts: stats.attempts,
@@ -583,6 +622,7 @@ export class BlockBreakerGame implements GameCommands {
         features: summary.features,
         bossName: summary.bossName,
         waves: phase.waves.length,
+        waveNames: phase.waves.map((wave) => wave.name),
       };
     });
   }
@@ -984,36 +1024,7 @@ export class BlockBreakerGame implements GameCommands {
   debugStartWave(phaseId: string, waveIndex: number): void {
     const phase = PHASES.find((candidate) => candidate.id === phaseId);
     if (!phase) return;
-
-    const previousUnlock = this.save.unlockedPhase;
-    if (phase.index > previousUnlock) {
-      this.save = { ...this.save, unlockedPhase: phase.index };
-    }
-    this.startPhase(phaseId);
-    this.save = { ...this.save, unlockedPhase: previousUnlock };
-    if (this.currentPhase?.id !== phase.id) return;
-
-    const index = Math.max(0, Math.min(phase.waves.length - 1, Math.floor(waveIndex)));
-    if (index === 0) return;
-
-    this.currentWaveIndex = index;
-    this.waveScoreAtStart = 0;
-    this.pendingPerkBalls = 0;
-    this.nextWaveAt = 0;
-    this.levelUpRevealAt = 0;
-    this.ballRespawnLeftMs = 0;
-    this.loadPhaseWave(index);
-    this.scene.setPhase(phase.id, phase.index);
-    this.phase = 'playing';
-    this.pendingLaunch = false;
-    this.input.resetTarget();
-    this.clock.reset();
-    this.syncHud(true);
-    if (phase.tutorial) {
-      const step: TutorialStep = index === 0 ? 'move' : 'specials';
-      this.tutorialCompleted.delete(step);
-      this.openTutorialStep(step);
-    }
+    this.startPhase(phaseId, waveIndex);
   }
 
   destroy(): void {
@@ -1458,6 +1469,8 @@ export class BlockBreakerGame implements GameCommands {
     const nextPhase = victory
       ? PHASES.find((candidate) => candidate.index === phase.index + 1) ?? null
       : null;
+    const world = worldById(phase.worldId ?? '') ?? worldForPhaseIndex(phase.index);
+    const worldFinal = isWorldFinal(phase);
     const score = this.runScore;
     const timeMs = Math.max(0, Math.round(this.phaseElapsedMs));
     const ending = endingForResult({
@@ -1470,7 +1483,8 @@ export class BlockBreakerGame implements GameCommands {
     });
 
     // Wave, boss and combo Sparks were awarded as they happened. A victory
-    // adds the phase-clear reward, plus the one-time first-clear bonus.
+    // adds the phase-clear reward, the one-time first-clear bonus and the
+    // world-clear bonus (only when the world's final phase was not cleared).
     const previousStats = getPhaseStats(this.save, phase.id);
     if (victory) {
       const firstClear = previousStats.clears === 0;
@@ -1478,6 +1492,9 @@ export class BlockBreakerGame implements GameCommands {
       this.awardSparks(SPARKS_PER_PHASE_CLEAR, 'clear');
       if (phaseClear > SPARKS_PER_PHASE_CLEAR) {
         this.awardSparks(phaseClear - SPARKS_PER_PHASE_CLEAR, 'firstClear');
+      }
+      if (worldFinal && firstClear) {
+        this.awardSparks(SPARKS_PER_WORLD_CLEAR, 'firstClear');
       }
     }
     const sparksEarned = this.runSparks;
@@ -1488,6 +1505,12 @@ export class BlockBreakerGame implements GameCommands {
       phaseName: phase.name,
       phaseIndex: phase.index,
       phaseCount: CAMPAIGN_PHASE_COUNT,
+      worldId: world.id,
+      worldName: world.name,
+      worldNumeral: world.numeral,
+      worldPhaseIndex: localPhaseIndex(phase.index),
+      worldPhaseCount: world.phaseCount,
+      isWorldFinal: worldFinal,
       tutorial: phase.tutorial === true,
       victory,
       score,
@@ -1522,8 +1545,8 @@ export class BlockBreakerGame implements GameCommands {
     this.audio.play(victory ? 'victory' : 'defeat');
     if (victory) this.scene.celebrate();
     this.sendPlatform(victory ? 'level_completed' : 'level_failed', {
-      world: phase.id,
-      level: phase.index,
+      world: phase.worldId ?? phase.id,
+      level: localPhaseIndex(phase.index),
     });
     this.syncHud(true);
 
@@ -1925,7 +1948,10 @@ export class BlockBreakerGame implements GameCommands {
     );
     if (this.ballRespawnLeftMs > 0) return;
 
-    const target = 1 + this.runState.modifiers.multiballLevel;
+    const target = Math.min(
+      this.world.maxBalls,
+      1 + this.runState.modifiers.multiballLevel,
+    );
     if (this.world.outcome === 'playing' && this.world.balls.length < target) {
       this.world.spawnBall();
     }
@@ -1970,15 +1996,27 @@ export class BlockBreakerGame implements GameCommands {
           }
         : null;
     const timeLimitRemainingMs = this.world.timeLimitRemainingMs;
-    const rule =
-      this.world.noLaserRule
-        ? { kind: 'noLaser' as const, remainingMs: null }
-        : timeLimitRemainingMs !== null
-          ? {
-              kind: 'timeLimit' as const,
-              remainingMs: Math.max(0, Math.ceil(timeLimitRemainingMs / 250) * 250),
-            }
-          : null;
+    const world = phase ? worldById(phase.worldId ?? '') ?? worldForPhaseIndex(phase.index) : null;
+    const worldCleared = world
+      ? (getPhaseStats(this.save, `phase-${lastPhaseIndex(world)}`).clears ?? 0) > 0
+      : false;
+    const activeRules: {
+      kind: 'timeLimit' | 'noLaser' | 'noMultiball' | 'gust';
+      remainingMs: number | null;
+    }[] = [];
+    if (timeLimitRemainingMs !== null) {
+      activeRules.push({
+        kind: 'timeLimit',
+        remainingMs: Math.max(0, Math.ceil(timeLimitRemainingMs / 250) * 250),
+      });
+    }
+    if (this.world.noLaserRule) activeRules.push({ kind: 'noLaser', remainingMs: null });
+    if (this.world.noMultiballRule) {
+      activeRules.push({ kind: 'noMultiball', remainingMs: null });
+    }
+    if (this.world.gustRule) activeRules.push({ kind: 'gust', remainingMs: null });
+    const rule = activeRules[0] ?? null;
+    const extraRule = activeRules[1] ?? null;
     const multiplierState = this.world.multiplierState;
     const multiplier = multiplierState
       ? {
@@ -2026,6 +2064,13 @@ export class BlockBreakerGame implements GameCommands {
       phaseName: phase?.name ?? '',
       phaseIndex: phase?.index ?? 0,
       phaseCount: endless ? 0 : CAMPAIGN_PHASE_COUNT,
+      worldId: world?.id,
+      worldName: world?.name,
+      worldNumeral: world?.numeral,
+      worldPhaseIndex: phase ? localPhaseIndex(phase.index) : undefined,
+      worldPhaseCount: world?.phaseCount,
+      isWorldFinal: phase ? isWorldFinal(phase) : undefined,
+      worldCleared,
       isTutorial: phase?.tutorial === true,
       waveId: wave?.id ?? '',
       waveName: wave?.name ?? '',
@@ -2063,6 +2108,7 @@ export class BlockBreakerGame implements GameCommands {
           ? { name: boss.name, hp: boss.hp, maxHp: boss.maxHp, phase: boss.phase }
           : null,
       rule,
+      extraRule,
       multiplier,
       combo,
       waveIntro,

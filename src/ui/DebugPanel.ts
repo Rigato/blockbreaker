@@ -427,9 +427,12 @@ export class DebugPanel {
   private applyProgression(snapshot: HudSnapshot): void {
     this.seedValue.textContent = String(snapshot.seed);
     this.levelXpValue.textContent = `${snapshot.level} · ${snapshot.xp}/${snapshot.xpToNext}`;
-    this.phaseValue.textContent = `${snapshot.phaseName} (${snapshot.phaseIndex}/${Math.max(
+    const localPhase = snapshot.worldPhaseIndex ?? snapshot.phaseIndex;
+    const worldCount = snapshot.worldPhaseCount ?? 6;
+    const worldPrefix = snapshot.worldNumeral ? `${snapshot.worldNumeral} · ` : '';
+    this.phaseValue.textContent = `${worldPrefix}${snapshot.phaseName} (${localPhase}/${Math.max(
       1,
-      snapshot.phaseCount,
+      worldCount,
     )})`;
     this.waveValue.textContent = `${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
   }

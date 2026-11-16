@@ -23,14 +23,8 @@ export const WORLD1_DEPTHS = {
   front: 1.15,
 } as const;
 
-export interface WorldNodePoint {
-  /** Horizontal centre inside the 390-wide viewBox. */
-  readonly x: number;
-  /** Vertical centre inside the 900-tall viewBox. */
-  readonly y: number;
-  /** Which side of the node carries its name plate. */
-  readonly labelSide: 'left' | 'right';
-}
+export type { WorldNodePoint } from './types';
+import type { MapDef, WorldNodePoint } from './types';
 
 /** Tutorial plus campaign phases 1..6, in phase index order. */
 export const WORLD1_NODE_POINTS: readonly WorldNodePoint[] = [
@@ -258,3 +252,31 @@ export const WORLD1_FRONT_ART = `
   <circle cx='120' cy='950' r='26' fill='url(#psm-fgbC)' opacity='.12'/>
   <circle cx='300' cy='1000' r='20' fill='url(#psm-fgbV)' opacity='.10'/>
 </svg>`;
+
+/** Complete map definition consumed by `PhaseSelect`. */
+export const WORLD1_MAP: MapDef = {
+  id: 'w1',
+  numeral: 'I',
+  name: WORLD1_NAME,
+  accent: '#7ef9ff',
+  width: WORLD1_WIDTH,
+  height: WORLD1_HEIGHT,
+  frontHeight: WORLD1_FRONT_HEIGHT,
+  depths: WORLD1_DEPTHS,
+  nodePoints: WORLD1_NODE_POINTS,
+  fallbackPoint: WORLD1_FALLBACK_POINT,
+  endlessPoint: WORLD1_ENDLESS_POINT,
+  trailPath: WORLD1_TRAIL_PATH,
+  trailSegments: WORLD1_TRAIL_SEGMENTS,
+  trailGroupId: WORLD1_TRAIL_GROUP_ID,
+  farArt: WORLD1_FAR_ART,
+  midArt: WORLD1_MID_ART,
+  nearArt: WORLD1_NEAR_ART,
+  frontArt: WORLD1_FRONT_ART,
+  trailColors: {
+    doneSoft: '#FFC96B',
+    doneGradient: '#FFC96B',
+    doneGlow: '#FFF6DE',
+    locked: '#2A3A48',
+  },
+};

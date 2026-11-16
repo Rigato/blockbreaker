@@ -2,7 +2,7 @@ import type { GameCommands, HudSnapshot, PhaseSelectInfo } from '../game/contrac
 import { en } from '../i18n/en';
 import '../styles/menu-footer.css';
 
-const APP_VERSION = '0.6.1';
+const APP_VERSION = '0.7.0';
 
 export interface MenuOptions {
   root: HTMLElement;
@@ -98,7 +98,6 @@ export class Menu {
   private nodes: HTMLElement[] = [];
   private nodesSignature = '__unset__';
   private endlessUnlocked = false;
-  private lastCampaignComplete = false;
 
   constructor(options: MenuOptions) {
     this.controller = options.controller;
@@ -439,9 +438,8 @@ export class Menu {
   }
 
   update(snapshot: HudSnapshot, phases: readonly PhaseSelectInfo[]): void {
-    this.lastCampaignComplete = snapshot.campaignComplete;
     this.updateNodes(phases);
-    this.updateCampaign(snapshot, phases);
+    this.updateCampaign(phases);
     this.updateEndless(snapshot);
     this.updateWorkshop(snapshot);
   }
@@ -491,7 +489,7 @@ export class Menu {
     this.nodesRow.hidden = !hasPhases;
     if (!hasPhases) return;
 
-    const complete = this.lastCampaignComplete;
+    const complete = phases.length > 0 && phases.every((phase) => phase.clears > 0);
     const cleared = phases.filter((phase) => phase.clears > 0).length;
     const current = complete
       ? null
@@ -513,8 +511,8 @@ export class Menu {
     }
   }
 
-  private updateCampaign(snapshot: HudSnapshot, phases: readonly PhaseSelectInfo[]): void {
-    const complete = snapshot.campaignComplete;
+  private updateCampaign(phases: readonly PhaseSelectInfo[]): void {
+    const complete = phases.length > 0 && phases.every((phase) => phase.clears > 0);
     const cleared = phases.filter((phase) => phase.clears > 0).length;
     const current = complete
       ? null
@@ -525,14 +523,16 @@ export class Menu {
     } else if (current) {
       this.campaignStatus.textContent = current.tutorial
         ? en.menuCurrentTutorial
-        : en.menuCurrentLevel
-            .replace('{{index}}', String(current.index))
+        : en.menuCurrentWorld
+            .replace('{{world}}', current.worldNumeral)
+            .replace('{{index}}', String(current.worldPhaseIndex))
             .replace('{{name}}', current.name);
     } else if (phases.length > 0) {
       const last = phases[phases.length - 1];
       this.campaignStatus.textContent = last
-        ? en.menuCurrentLevel
-            .replace('{{index}}', String(last.index))
+        ? en.menuCurrentWorld
+            .replace('{{world}}', last.worldNumeral)
+            .replace('{{index}}', String(last.worldPhaseIndex))
             .replace('{{name}}', last.name)
         : en.menuCampaignSub;
     } else {

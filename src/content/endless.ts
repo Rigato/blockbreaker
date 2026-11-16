@@ -38,6 +38,14 @@ const CHAR_BY_TYPE: Readonly<Record<BlockTypeId, string>> = {
   multiplier: 'x',
   generator: 'g',
   linked: 'l',
+  alloy: 'a',
+  bastion: 'b',
+  entangled: 'n',
+  relay: 'y',
+  phased: 'p',
+  plated: 't',
+  fused: 'f',
+  splitting: 's',
 };
 
 const BOSS_NAMES = ['Frost Sentinel', 'Ember Warden', 'Void Herald'] as const;

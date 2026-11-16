@@ -12,7 +12,7 @@ import {
   type Aabb,
 } from './collision';
 import { createRng } from './rng';
-import type { LevelElement, WaveDef } from '../content/types';
+import type { BossPattern, LevelElement, WaveDef } from '../content/types';
 
 export const FIELD_WIDTH = GAME_CONFIG.logicalWidth;
 export const BLOCK_TOP = 160;
@@ -110,6 +110,12 @@ export interface Block {
   regen?: BlockRegen;
   generator?: BlockGenerator;
   linkGroup?: number;
+  /** Entangled pair group; damage mirrors to the partner once. */
+  pairGroup?: number;
+  /** Phased blocks alternate between armored and exposed. */
+  armored?: boolean;
+  /** Splitting blocks stop after the configured generation. */
+  generation?: number;
 }
 
 export interface Projectile {
@@ -162,6 +168,8 @@ export interface RuntimeElement {
   /** Closed window for gates, in milliseconds. */
   closedMs: number;
   pairId?: string;
+  /** -1 left, 1 right; used by belts and rails. */
+  directionSign: number;
 }
 
 /** Boss runtime entity. */
@@ -179,7 +187,7 @@ export interface Boss {
   attackTimerMs: number;
   phase: number;
   hurtMs: number;
-  pattern: 'sentinel' | 'warden' | 'void';
+  pattern: BossPattern;
 }
 
 /** Boss projectile that falls towards the paddle. */
@@ -315,6 +323,7 @@ export class World {
   private destroyedBlocks = 0;
   private explosionDepth = 0;
   private linkDepth = 0;
+  private entangledDepth = 0;
   /** Perk-local kill counters, reset when the perk is acquired. */
   private explosiveCoreProgress = 0;
   private bombardierKillProgress = 0;
@@ -339,6 +348,11 @@ export class World {
   private gridRows = 0;
   private timeLimitRemainingMsValue: number | null = null;
   private noLaserValue = false;
+  private noMultiballValue = false;
+  private gustStrengthValue = 0;
+  private gustPeriodValue: number = GAME_CONFIG.elements.gustPeriodMs;
+  /** Relays keep gates/movers/rotors/presses powered while at least one is alive. */
+  private relayPowerOn = true;
 
   constructor(options: {
     wave: WaveDef;
@@ -391,6 +405,21 @@ export class World {
     return this.noLaserValue;
   }
 
+  /** True while the active wave allows only one ball. */
+  get noMultiballRule(): boolean {
+    return this.noMultiballValue;
+  }
+
+  /** True while the active wave applies lateral gust forces. */
+  get gustRule(): boolean {
+    return this.gustStrengthValue > 0;
+  }
+
+  /** True while relay blocks are still powering the field elements. */
+  get relayPowered(): boolean {
+    return this.relayPowerOn;
+  }
+
   /** Re-seeds the deterministic launch/multiball RNG for a new run or wave. */
   setSeed(seed: number): void {
     this.rng = createRng((seed >>> 0) || 1);
@@ -401,9 +430,12 @@ export class World {
     return { ...this.modifiersValue };
   }
 
-  /** Maximum simultaneous balls allowed by the current modifiers. */
+  /** Maximum simultaneous balls allowed by the current modifiers and rules. */
   get maxBalls(): number {
-    return Math.min(MAX_BALLS, Math.max(1, Math.floor(this.modifiersValue.maxBalls)));
+    const cap = this.noMultiballValue
+      ? 1
+      : Math.min(MAX_BALLS, Math.max(1, Math.floor(this.modifiersValue.maxBalls)));
+    return cap;
   }
 
   get safetyCharges(): number {
@@ -527,6 +559,7 @@ export class World {
     this.running = false;
     this.paddle.x = FIELD_WIDTH / 2;
     this.paddle.vx = 0;
+    this.relayPowerOn = true;
     this.resetEffectState();
     this.buildBlocks(wave);
     this.buildElements(wave);
@@ -545,6 +578,7 @@ export class World {
     this.running = true;
     this.paddle.x = FIELD_WIDTH / 2;
     this.paddle.vx = 0;
+    this.relayPowerOn = true;
     this.resetEffectState();
     this.blocks.length = 0;
     this.buildBlocks(this.wave);
@@ -563,6 +597,7 @@ export class World {
     this.destroyedBlocks = 0;
     this.explosionDepth = 0;
     this.linkDepth = 0;
+    this.entangledDepth = 0;
     this.explosiveCoreProgress = 0;
     this.bombardierKillProgress = 0;
     this.bombardierChargeArmed = false;
@@ -582,11 +617,25 @@ export class World {
   private applyRules(wave: WaveDef): void {
     this.timeLimitRemainingMsValue = null;
     this.noLaserValue = false;
+    this.noMultiballValue = false;
+    this.gustStrengthValue = 0;
+    this.gustPeriodValue = GAME_CONFIG.elements.gustPeriodMs;
     for (const rule of wave.rules ?? []) {
       if (rule.kind === 'timeLimit') {
         this.timeLimitRemainingMsValue = Math.max(0, rule.ms);
       } else if (rule.kind === 'noLaser') {
         this.noLaserValue = true;
+      } else if (rule.kind === 'noMultiball') {
+        this.noMultiballValue = true;
+      } else if (rule.kind === 'gust') {
+        this.gustStrengthValue = Math.max(
+          0,
+          rule.strength ?? GAME_CONFIG.elements.gustStrength,
+        );
+        this.gustPeriodValue = Math.max(
+          500,
+          rule.periodMs ?? GAME_CONFIG.elements.gustPeriodMs,
+        );
       }
     }
   }
@@ -982,6 +1031,7 @@ export class World {
 
     this.updateBlockBehaviors(dtMs);
     this.updateElements();
+    this.applyGust(dt);
     this.updateBoss(dt, dtMs);
     this.updateBalls(dt, dtMs);
     this.updateTurret(dtMs);
@@ -1121,6 +1171,10 @@ export class World {
             maxSpawns: GAME_CONFIG.elements.generatorMaxSpawns,
             spawned: 0,
           };
+        } else if (type.behavior === 'phased') {
+          block.armored = false;
+        } else if (type.behavior === 'splitting') {
+          block.generation = 0;
         }
 
         this.blocks.push(block);
@@ -1131,10 +1185,14 @@ export class World {
     this.gridRows = Math.max(this.gridRows, rowCount);
     this.gridColumns = Math.max(this.gridColumns, columns);
     this.assignLinkGroups();
+    this.assignEntangledPairs();
   }
 
   private assignLinkGroups(): void {
-    const linked = this.blocks.filter((block) => BLOCK_TYPES[block.type].behavior === 'linked');
+    const linked = this.blocks.filter((block) => {
+      const behavior = BLOCK_TYPES[block.type].behavior;
+      return behavior === 'linked' || behavior === 'fused';
+    });
     const byCell = new Map<string, Block>();
     for (const block of linked) {
       block.linkGroup = undefined;
@@ -1171,6 +1229,20 @@ export class World {
     }
   }
 
+  /**
+   * Entangled blocks are paired deterministically by reading order. The pair
+   * mirrors one point of damage; it is not a chain and never recurses.
+   */
+  private assignEntangledPairs(): void {
+    const entangled = this.blocks.filter(
+      (block) => BLOCK_TYPES[block.type].behavior === 'entangled',
+    );
+    for (let index = 0; index < entangled.length; index += 1) {
+      const block = entangled[index]!;
+      block.pairGroup = Math.floor(index / 2);
+    }
+  }
+
   private buildElements(wave: WaveDef): void {
     for (const definition of wave.elements ?? []) {
       const widthCells = definition.widthCells ?? 1;
@@ -1201,6 +1273,12 @@ export class World {
         angleRad: 0,
         lengthPx: 0,
         closedMs: 0,
+        directionSign:
+          definition.kind === 'belt' || definition.kind === 'rail'
+            ? definition.direction === 'left'
+              ? -1
+              : 1
+            : 0,
       };
 
       if (definition.kind === 'deflector') {
@@ -1230,6 +1308,11 @@ export class World {
         element.phaseMs = definition.phaseMs ?? 0;
         element.closedMs = Math.max(0, definition.closedMs);
         element.active = this.gateClosed(element);
+      } else if (definition.kind === 'press') {
+        element.axis = 'vertical';
+        element.rangePx = definition.rangeCells * this.cell;
+        element.periodMs = Math.max(1, definition.periodMs);
+        element.phaseMs = definition.phaseMs ?? 0;
       }
 
       this.elements.push(element);
@@ -1311,6 +1394,14 @@ export class World {
         }
       }
 
+      if (BLOCK_TYPES[block.type].behavior === 'phased') {
+        const cycle =
+          GAME_CONFIG.elements.phasedArmoredMs +
+          GAME_CONFIG.elements.phasedExposedMs;
+        const elapsed = (this.timeMs + block.row * 137 + block.col * 89) % cycle;
+        block.armored = elapsed < GAME_CONFIG.elements.phasedArmoredMs;
+      }
+
       if (block.regen) {
         const regen = block.regen;
         regen.timerMs -= dtMs;
@@ -1384,6 +1475,52 @@ export class World {
     return null;
   }
 
+  /** Splitting: leaves up to two crystals in adjacent empty cells, once. */
+  private spawnSplittingBlocks(source: Block): void {
+    if ((source.generation ?? 0) >= 1) return;
+    if (this.gridColumns <= 0 || this.gridRows <= 0) return;
+    const directions = [
+      [0, -1],
+      [0, 1],
+      [-1, 0],
+      [1, 0],
+    ] as const;
+    let spawned = 0;
+    for (const [dRow, dCol] of directions) {
+      if (spawned >= GAME_CONFIG.elements.splittingSpawns) break;
+      const row = source.row + dRow;
+      const col = source.col + dCol;
+      if (row < 0 || row >= this.gridRows || col < 0 || col >= this.gridColumns) continue;
+      if (this.blockAt(row, col)) continue;
+
+      const type = BLOCK_TYPES.crystal;
+      const block: Block = {
+        id: `${row}:${col}`,
+        type: 'crystal',
+        hp: type.hp,
+        maxHp: type.hp,
+        row,
+        col,
+        left: this.offsetX + col * this.cell + BLOCK_GAP / 2,
+        top: BLOCK_TOP + row * this.cell + BLOCK_GAP / 2,
+        width: this.cell - BLOCK_GAP,
+        height: this.cell - BLOCK_GAP,
+        flashMs: 0,
+        generation: 1,
+      };
+      this.blocks.push(block);
+      this.pushEvent({
+        type: 'block:spawned',
+        blockId: block.id,
+        blockType: block.type,
+        sourceBlockId: source.id,
+        row,
+        col,
+      });
+      spawned += 1;
+    }
+  }
+
   private blockAt(row: number, col: number): Block | undefined {
     return this.blocks.find((block) => block.row === row && block.col === col);
   }
@@ -1394,16 +1531,36 @@ export class World {
 
   private updateElements(): void {
     for (const element of this.elements) {
-      if (element.kind === 'mover') {
+      if (!this.relayPowerOn) {
+        if (
+          element.kind === 'mover' ||
+          element.kind === 'rotor' ||
+          element.kind === 'gate' ||
+          element.kind === 'press'
+        ) {
+          element.active = false;
+        }
+        continue;
+      }
+      if (element.kind === 'mover' || element.kind === 'press') {
         if (element.periodMs <= 0) continue;
         const phase = ((this.timeMs + element.phaseMs) / element.periodMs) * Math.PI * 2;
-        const offset = Math.sin(phase) * element.rangePx;
-        if (element.axis === 'horizontal') {
-          element.left = element.baseLeft + offset;
-          element.top = element.baseTop;
-        } else {
+        if (element.kind === 'press') {
+          // Press travels down and back; the plate is always solid.
+          const offset = ((Math.sin(phase) + 1) / 2) * element.rangePx;
           element.left = element.baseLeft;
           element.top = element.baseTop + offset;
+          element.active = true;
+        } else {
+          const offset = Math.sin(phase) * element.rangePx;
+          if (element.axis === 'horizontal') {
+            element.left = element.baseLeft + offset;
+            element.top = element.baseTop;
+          } else {
+            element.left = element.baseLeft;
+            element.top = element.baseTop + offset;
+          }
+          element.active = true;
         }
       } else if (element.kind === 'rotor') {
         if (element.periodMs <= 0) continue;
@@ -1411,6 +1568,7 @@ export class World {
         const centreX = element.left + element.width / 2;
         const centreY = element.top + element.height / 2;
         this.setSegment(element, centreX, centreY);
+        element.active = true;
       } else if (element.kind === 'gate') {
         element.active = this.gateClosed(element);
       }
@@ -1418,8 +1576,13 @@ export class World {
   }
 
   private isSolidElement(element: RuntimeElement): boolean {
-    if (element.kind === 'wall' || element.kind === 'obstacle' || element.kind === 'mover') {
-      return true;
+    if (
+      element.kind === 'wall' ||
+      element.kind === 'obstacle' ||
+      element.kind === 'mover' ||
+      element.kind === 'press'
+    ) {
+      return this.relayPowerOn || element.kind === 'wall' || element.kind === 'obstacle';
     }
     return element.kind === 'gate' && element.active;
   }
@@ -1542,11 +1705,56 @@ export class World {
 
       this.moveBall(ball, dt);
       if (!this.balls.includes(ball)) continue;
+      this.applyBallElements(ball, dt, dtMs);
       if (ball.y - ball.radius > this.height + LOSS_MARGIN) {
         this.removeBall(ball);
         continue;
       }
       this.updateAntiStall(ball, dtMs);
+    }
+  }
+
+  /** Gust: lateral acceleration that preserves the ball's current speed. */
+  private applyGust(dt: number): void {
+    if (this.gustStrengthValue <= 0) return;
+    const phase = (this.timeMs / this.gustPeriodValue) * Math.PI * 2;
+    const direction = Math.sin(phase) >= 0 ? 1 : -1;
+    const strength = Math.abs(Math.sin(phase)) * this.gustStrengthValue;
+    for (const ball of this.balls) {
+      if (ball.stuck) continue;
+      const speed = Math.hypot(ball.vx, ball.vy);
+      if (speed <= 0) continue;
+      ball.vx += direction * strength * dt;
+      const nextSpeed = Math.hypot(ball.vx, ball.vy) || 1;
+      ball.vx = (ball.vx / nextSpeed) * speed;
+      ball.vy = (ball.vy / nextSpeed) * speed;
+    }
+  }
+
+  /** Belts rotate and rails accelerate any ball overlapping them. */
+  private applyBallElements(ball: Ball, dt: number, dtMs: number): void {
+    if (ball.stuck) return;
+    for (const element of this.elements) {
+      if (element.kind !== 'belt' && element.kind !== 'rail') continue;
+      const box = aabbFromRect(element.left, element.top, element.width, element.height);
+      if (!circleOverlapsAabb(ball.x, ball.y, ball.radius, box)) continue;
+
+      if (element.kind === 'belt') {
+        const degrees =
+          element.directionSign *
+          GAME_CONFIG.elements.beltDegPer100Ms *
+          (dtMs / 100);
+        rotateVelocity(ball, degrees);
+      } else {
+        ball.vx +=
+          element.directionSign * GAME_CONFIG.elements.railAcceleration * dt;
+        const speed = Math.hypot(ball.vx, ball.vy);
+        const hardMax = GAME_CONFIG.ball.hardMaxSpeed;
+        if (speed > hardMax) {
+          ball.vx = (ball.vx / speed) * hardMax;
+          ball.vy = (ball.vy / speed) * hardMax;
+        }
+      }
     }
   }
 
@@ -1932,8 +2140,25 @@ export class World {
     sourceBallId: number,
     allowLinks = true,
     triggerOverkill = false,
+    sourceKind: 'ball' | 'tool' = sourceBallId > 0 ? 'ball' : 'tool',
   ): boolean {
     if (damage <= 0 || !this.blocks.includes(block)) return false;
+    const behavior = BLOCK_TYPES[block.type].behavior;
+
+    // Phased armor: the ball bounces off the shell without dealing damage.
+    if (behavior === 'phased' && block.armored) {
+      block.flashMs = 60;
+      return false;
+    }
+
+    // Plated blocks shrug off tool damage (laser, turret, explosions, chains).
+    if (behavior === 'plated' && sourceKind === 'tool') {
+      damage = Math.max(
+        1,
+        damage - GAME_CONFIG.elements.platedToolReduction,
+      );
+    }
+
     if (block.regen) block.regen.timerMs = block.regen.everyMs;
     const hpBefore = block.hp;
     block.flashMs = 80;
@@ -1955,8 +2180,32 @@ export class World {
       );
       if (splash > 0) this.splashOverkill(block, splash, sourceBallId);
     }
-    if (allowLinks) this.propagateLinks(block, sourceBallId);
+    if (allowLinks) {
+      this.propagateLinks(block, sourceBallId);
+      this.propagateEntangled(block, sourceBallId);
+    }
     return destroyed;
+  }
+
+  /** Entangled: mirrors one point of damage to the paired block, once. */
+  private propagateEntangled(block: Block, sourceBallId: number): void {
+    if (this.entangledDepth >= 1 || block.pairGroup === undefined) return;
+    const behavior = BLOCK_TYPES[block.type].behavior;
+    if (behavior !== 'entangled') return;
+    const partner = this.blocks.find(
+      (candidate) =>
+        candidate !== block &&
+        candidate.pairGroup === block.pairGroup &&
+        BLOCK_TYPES[candidate.type].behavior === 'entangled',
+    );
+    if (!partner) return;
+
+    this.entangledDepth += 1;
+    try {
+      this.applyDamage(partner, 1, sourceBallId, false, false, 'tool');
+    } finally {
+      this.entangledDepth -= 1;
+    }
   }
 
   /**
@@ -1977,7 +2226,7 @@ export class World {
         1,
     );
     for (const target of targets) {
-      this.applyDamage(target, damage, sourceBallId, false, false);
+      this.applyDamage(target, damage, sourceBallId, false, false, 'tool');
     }
   }
 
@@ -1987,7 +2236,8 @@ export class World {
       (candidate) =>
         candidate !== block &&
         candidate.linkGroup === block.linkGroup &&
-        BLOCK_TYPES[candidate.type].behavior === 'linked',
+        (BLOCK_TYPES[candidate.type].behavior === 'linked' ||
+          BLOCK_TYPES[candidate.type].behavior === 'fused'),
     );
     if (linked.length === 0) return;
 
@@ -2001,7 +2251,7 @@ export class World {
     this.linkDepth += 1;
     try {
       for (const candidate of linked) {
-        this.applyDamage(candidate, 1, sourceBallId, false);
+        this.applyDamage(candidate, 1, sourceBallId, false, false, 'tool');
       }
     } finally {
       this.linkDepth -= 1;
@@ -2064,6 +2314,13 @@ export class World {
       this.activateMultiplier();
     } else if (behavior === 'explosive') {
       this.explode(block, 2, 1, sourceBallId);
+    } else if (behavior === 'relay') {
+      const stillPowered = this.blocks.some(
+        (candidate) => BLOCK_TYPES[candidate.type].behavior === 'relay',
+      );
+      if (!stillPowered) this.relayPowerOn = false;
+    } else if (behavior === 'splitting') {
+      this.spawnSplittingBlocks(block);
     }
 
     this.maybeExplodePerk(block, sourceBallId);
@@ -2121,7 +2378,7 @@ export class World {
     try {
       for (const target of targets) {
         const isCenter = target.row === block.row && target.col === block.col;
-        this.applyDamage(target, isCenter ? centerDamage : damage, sourceBallId);
+        this.applyDamage(target, isCenter ? centerDamage : damage, sourceBallId, true, false, 'tool');
       }
     } finally {
       this.explosionDepth -= 1;
@@ -2214,7 +2471,9 @@ export class World {
     if (boss.hurtMs > 0) boss.hurtMs = Math.max(0, boss.hurtMs - dtMs);
     boss.phase = this.bossPhase(boss);
 
-    boss.x += boss.vx * dt;
+    const dash =
+      boss.pattern === 'charger' && Math.sin(this.timeMs / 700) > 0.65 ? 2.5 : 1;
+    boss.x += boss.vx * dt * dash;
     const half = boss.width / 2;
     if (boss.x - half < 0) {
       boss.x = half;
@@ -2235,16 +2494,37 @@ export class World {
   }
 
   private spawnBossShards(boss: Boss): void {
-    const count = boss.pattern === 'sentinel' ? 1 : boss.pattern === 'warden' ? 2 : 3;
+    const counts: Record<BossPattern, number> = {
+      sentinel: 1,
+      warden: 2,
+      void: 3,
+      spread: 3,
+      charger: 1,
+      aimed: 1,
+      matron: 2,
+      riveter: 3,
+      engine: 4,
+    };
+    const count = counts[boss.pattern] ?? 1;
+    const aimed = boss.pattern === 'aimed' || boss.pattern === 'riveter';
     for (let index = 0; index < count; index += 1) {
       const offset = count === 1 ? 0 : (index / (count - 1) - 0.5) * boss.width * 0.7;
+      let vx = 0;
+      if (boss.pattern === 'spread' || boss.pattern === 'riveter') {
+        vx = count === 1 ? 0 : (index / (count - 1) - 0.5) * 220;
+      } else if (aimed) {
+        const dx = this.paddle.x - (boss.x + offset);
+        const dy = Math.max(1, this.paddle.y - boss.y);
+        const length = Math.hypot(dx, dy) || 1;
+        vx = (dx / length) * BOSS_SHARD_SPEED * 0.45;
+      }
       this.bossShards.push({
         id: this.nextId++,
         bossId: boss.id,
         x: boss.x + offset,
         y: boss.y + boss.height + BOSS_SHARD_RADIUS,
-        vx: 0,
-        vy: BOSS_SHARD_SPEED,
+        vx,
+        vy: boss.pattern === 'engine' ? BOSS_SHARD_SPEED * 1.15 : BOSS_SHARD_SPEED,
         radius: BOSS_SHARD_RADIUS,
       });
     }

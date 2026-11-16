@@ -5,7 +5,7 @@ function victory(overrides: Partial<Parameters<typeof endingForResult>[0]> = {})
   return endingForResult({
     phaseIndex: 1,
     phaseName: 'Crystal Grove',
-    phaseCount: 6,
+    phaseCount: 18,
     victory: true,
     score: 0,
     timeMs: 60_000,
@@ -24,24 +24,32 @@ describe('endingForResult', () => {
     expect(ending?.body).not.toContain('**');
   });
 
-  it('ends phase 6 with the campaign finale', () => {
-    const ending = victory({
+  it('ends phase 6 with the world I epilogue and phase 18 with the campaign finale', () => {
+    const worldOne = victory({
       phaseIndex: 6,
       phaseName: 'Void Threshold',
       score: 6000,
     });
+    expect(worldOne?.id).toBe('epilogue-phase-6');
+    expect(worldOne?.title).toBe('The Vale holds');
+    expect(worldOne?.body.toLowerCase()).toContain('void herald');
 
-    expect(ending?.id).toBe('campaign-complete');
-    expect(ending?.title).toBe('Campaign complete');
-    expect(ending?.rank).toBe('S');
-    expect(ending?.body.toLowerCase()).toContain('void herald');
+    const finale = victory({
+      phaseIndex: 18,
+      phaseName: 'Sunder Core',
+      score: 6000,
+    });
+    expect(finale?.id).toBe('campaign-complete');
+    expect(finale?.title).toBe('The engine stops');
+    expect(finale?.rank).toBe('S');
+    expect(finale?.body.toLowerCase()).toContain('lattice');
   });
 
   it('uses the defeat note and rank B when the run falls', () => {
     const ending = endingForResult({
       phaseIndex: 2,
       phaseName: 'Ruined Halls',
-      phaseCount: 6,
+      phaseCount: 18,
       victory: false,
       score: 99_999,
       timeMs: 1_000,

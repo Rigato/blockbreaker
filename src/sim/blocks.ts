@@ -9,7 +9,15 @@ export type BlockTypeId =
   | 'moving'
   | 'multiplier'
   | 'generator'
-  | 'linked';
+  | 'linked'
+  | 'alloy'
+  | 'bastion'
+  | 'entangled'
+  | 'relay'
+  | 'phased'
+  | 'plated'
+  | 'fused'
+  | 'splitting';
 
 /** Simulation behaviour attached to a block type. */
 export type BlockBehavior =
@@ -19,7 +27,13 @@ export type BlockBehavior =
   | 'moving'
   | 'multiplier'
   | 'generator'
-  | 'linked';
+  | 'linked'
+  | 'entangled'
+  | 'relay'
+  | 'phased'
+  | 'plated'
+  | 'fused'
+  | 'splitting';
 
 export interface BlockType {
   id: BlockTypeId;
@@ -43,6 +57,14 @@ export const BLOCK_TYPES: Record<BlockTypeId, BlockType> = {
   multiplier: { id: 'multiplier', hp: 1, score: 30, color: 0xffd84d, behavior: 'multiplier' },
   generator: { id: 'generator', hp: 3, score: 40, color: 0xc084ff, behavior: 'generator' },
   linked: { id: 'linked', hp: 2, score: 20, color: 0x5ce1e6, behavior: 'linked' },
+  alloy: { id: 'alloy', hp: 4, score: 40, color: 0x7fd4ff, behavior: 'none' },
+  bastion: { id: 'bastion', hp: 5, score: 50, color: 0xd7f4ff, behavior: 'none' },
+  entangled: { id: 'entangled', hp: 3, score: 35, color: 0xff9de2, behavior: 'entangled' },
+  relay: { id: 'relay', hp: 2, score: 25, color: 0xffb03a, behavior: 'relay' },
+  phased: { id: 'phased', hp: 3, score: 35, color: 0x9d7bff, behavior: 'phased' },
+  plated: { id: 'plated', hp: 4, score: 40, color: 0xc9a36a, behavior: 'plated' },
+  fused: { id: 'fused', hp: 3, score: 30, color: 0xff6b5c, behavior: 'fused' },
+  splitting: { id: 'splitting', hp: 2, score: 20, color: 0x8dff7a, behavior: 'splitting' },
 };
 
 export function isBlockTypeId(value: string): value is BlockTypeId {

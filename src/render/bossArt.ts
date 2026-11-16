@@ -35,6 +35,20 @@ export function bossColor(pattern: Boss['pattern']): number {
       return 0xff8a3d;
     case 'void':
       return 0xb388ff;
+    case 'spread':
+      return 0x35e8ff;
+    case 'charger':
+      return 0xffb03a;
+    case 'aimed':
+      return 0xff4d8d;
+    case 'matron':
+      return 0xd9a441;
+    case 'riveter':
+      return 0xc8452c;
+    case 'engine':
+      return 0xff7a5c;
+    default:
+      return 0xffffff;
   }
 }
 
@@ -91,9 +105,9 @@ export function drawBoss(
 
   aura(graphics, boss, blend(color, accent, 0.2), timeMs, reducedMotion);
 
-  if (boss.pattern === 'sentinel') {
+  if (boss.pattern === 'sentinel' || boss.pattern === 'matron') {
     drawSentinel(graphics, boss, color, accent, timeMs);
-  } else if (boss.pattern === 'warden') {
+  } else if (boss.pattern === 'warden' || boss.pattern === 'charger' || boss.pattern === 'riveter') {
     drawWarden(graphics, boss, color, accent, timeMs);
   } else {
     drawVoid(graphics, boss, color, accent, timeMs, reducedMotion);

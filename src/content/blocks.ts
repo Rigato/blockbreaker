@@ -14,6 +14,14 @@ export const CONTENT_LEGEND = {
   x: 'multiplier',
   g: 'generator',
   l: 'linked',
+  a: 'alloy',
+  b: 'bastion',
+  n: 'entangled',
+  y: 'relay',
+  p: 'phased',
+  t: 'plated',
+  f: 'fused',
+  s: 'splitting',
 } as const satisfies Record<string, BlockTypeId>;
 
 export type ContentLegendChar = keyof typeof CONTENT_LEGEND;

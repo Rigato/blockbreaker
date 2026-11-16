@@ -357,10 +357,15 @@ export class HudOverlay {
       ? `${en.endless} · ${en.hudWave} ${Math.max(1, result.waveReached ?? 1)}`
       : tutorial
         ? en.phaseTutorial
-        : `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
-            1,
-            result.phaseCount,
-          )}`;
+        : result.worldNumeral && result.worldPhaseIndex !== undefined
+          ? en.overlayWorldPhase
+              .replace('{{world}}', result.worldNumeral)
+              .replace('{{index}}', String(result.worldPhaseIndex))
+              .replace('{{count}}', String(result.worldPhaseCount ?? 6))
+          : `${en.phaseLabel} ${result.phaseIndex} ${en.phaseOf} ${Math.max(
+              1,
+              result.phaseCount,
+            )}`;
 
     this.resultsEndless.hidden = !endless;
     if (endless) {
@@ -382,6 +387,8 @@ export class HudOverlay {
 
     const showNext = !endless && result.victory && result.nextPhaseId !== null;
     this.nextButton.hidden = !showNext;
+    this.nextButton.textContent =
+      result.isWorldFinal === true ? en.overlayNextWorld : en.overlayNextPhase;
 
     this.renderPerks(result.perks);
 

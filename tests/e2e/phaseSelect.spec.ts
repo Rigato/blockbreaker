@@ -112,7 +112,7 @@ test.describe('phase select map', () => {
   });
 
   test('map: locked phases stay disabled and keep the lock class', async ({ page }) => {
-    await page.goto('/?debug=1&resetSave=1');
+    await page.goto('/?resetSave=1');
     await openCampaign(page);
 
     const locked = page.locator('.phase-node[data-phase-index="3"]');
@@ -156,5 +156,48 @@ test.describe('phase select map', () => {
     expect(await layerTranslateY(near)).toBe(0);
     const nearTransform = await near.evaluate((element) => getComputedStyle(element).transform);
     expect(['none', 'matrix(1, 0, 0, 1, 0, 0)']).toContain(nearTransform);
+  });
+});
+
+test.describe('multi-world map and debug wave chooser', () => {
+  test.use({ viewport: { width: 390, height: 844 }, reducedMotion: 'no-preference' });
+
+  test('switches between the three worlds and loads a chosen debug wave', async ({ page }) => {
+    await page.goto('/?debug=1&resetSave=1');
+    await openCampaign(page);
+
+    const tabs = page.locator('.phase-select__world-tab');
+    await expect(tabs).toHaveCount(3);
+
+await page.locator('.phase-select__world-tab[data-world-id="w2"]').click();
+    await expect(page.locator('.phase-node[data-phase-id="phase-7"]')).toBeVisible();
+    await expect(page.locator('.phase-node[data-phase-id="phase-12"]')).toHaveCount(1);
+    await expect(page.locator('.phase-node[data-phase-id="tutorial"]')).toHaveCount(0);
+
+await page.locator('.phase-select__world-tab[data-world-id="w3"]').click();
+    await expect(page.locator('.phase-node[data-phase-id="phase-13"]')).toBeVisible();
+    await expect(page.locator('.phase-node[data-phase-id="phase-18"]')).toHaveCount(1);
+
+await page.locator('.phase-select__world-tab[data-world-id="w1"]').click();
+    await selectPhase(page, 'phase-2');
+
+    const waveSelect = page.locator('.phase-sheet__wave-select');
+    await expect(waveSelect).toBeVisible();
+    await waveSelect.selectOption('2');
+    await playSelectedPhase(page);
+
+    await expect(page.locator('#debug-wave-info')).toContainText('3/3');
+    await expect(page.locator('#debug-wave-info')).toContainText('Hall of Echoes');
+  });
+
+  test('keeps worlds II and III sealed on a fresh non-debug save', async ({ page }) => {
+    await page.goto('/?resetSave=1');
+    await openCampaign(page);
+
+    const worldTwo = page.locator('.phase-select__world-tab[data-world-id="w2"]');
+    await expect(worldTwo).toHaveClass(/is-locked/);
+    await worldTwo.click();
+    await expect(page.locator('.phase-select__world-pop')).toBeVisible();
+    await expect(page.locator('.phase-select__world-pop')).toContainText('CRYSTAL VALE');
   });
 });

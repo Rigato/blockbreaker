@@ -2176,7 +2176,8 @@ button {
   display: none;
 }
 
-.hud__chip--rule {
+.hud__chip--rule,
+.hud__chip--rule-extra {
   border-color: rgba(255, 212, 121, 0.5);
   color: var(--gold);
 }

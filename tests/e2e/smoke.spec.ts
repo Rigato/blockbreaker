@@ -179,7 +179,8 @@ test.describe('smoke', () => {
     const saved = await page.evaluate(() => localStorage.getItem('bb.save'));
     expect(saved).not.toBeNull();
 
-    await page.goto('/?debug=1');
+    // Reload without debug so the sequential unlock gate is exercised normally.
+    await page.goto('/');
     await waitForMenu(page);
     await collapseDebugPanel(page);
     await page.locator('#campaign-button').click();

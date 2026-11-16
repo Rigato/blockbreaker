@@ -135,6 +135,14 @@ const DEEP_SHADE: Partial<Record<BlockTypeId, number>> = {
   multiplier: 0x3a2a06,
   generator: 0x1e0f38,
   linked: 0x05323a,
+  alloy: 0x062838,
+  bastion: 0x20303a,
+  entangled: 0x3a0a28,
+  relay: 0x3a2406,
+  phased: 0x1a0f38,
+  plated: 0x2a1c0c,
+  fused: 0x300a06,
+  splitting: 0x0a2a18,
 };
 
 export interface BlockPalette {
@@ -230,6 +238,38 @@ export function drawBlock(
     case 'linked':
       drawLinked(graphics, block, palette, accent, hash);
       break;
+    case 'alloy':
+      drawStone(graphics, left, top, width, height, palette, hash);
+      break;
+    case 'bastion':
+      drawObsidian(graphics, left, top, width, height, palette, accent, hash);
+      break;
+    case 'entangled':
+      drawLinked(graphics, block, palette, accent, hash);
+      break;
+    case 'relay':
+      drawGenerator(graphics, block, palette, accent, hash);
+      break;
+    case 'phased':
+      drawCrystal(graphics, left, top, width, height, palette, hash);
+      break;
+    case 'plated':
+      drawStone(graphics, left, top, width, height, palette, hash);
+      break;
+    case 'fused':
+      drawLinked(graphics, block, palette, accent, hash);
+      break;
+    case 'splitting':
+      drawGenerator(graphics, block, palette, accent, hash);
+      break;
+  }
+
+  // Phased armor: an extra hardlight shell while damage is ignored.
+  if (type.behavior === 'phased' && block.armored) {
+    graphics.lineStyle(2, blend(accent, 0xffffff, 0.55), 0.9);
+    graphics.strokePoints(steppedRect(left + 3, top + 3, width - 6, height - 6, 0, step), true);
+    graphics.lineStyle(1, 0xffffff, 0.45);
+    graphics.strokePoints(steppedRect(left + 6, top + 6, width - 12, height - 12, 0, step), true);
   }
 
   // The gloss layer sits above every material: sheen, accent rim, sparkle.

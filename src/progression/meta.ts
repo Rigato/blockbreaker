@@ -24,6 +24,9 @@ export const SPARKS_PER_PHASE_CLEAR = 6;
 /** Extra Sparks awarded the first time a phase is cleared. */
 export const SPARKS_PER_FIRST_CLEAR = 6;
 
+/** One-time bonus for clearing the final phase of a world. */
+export const SPARKS_PER_WORLD_CLEAR = 30;
+
 /** Consecutive block hits that each grant one Spark, once per wave. */
 export const COMBO_SPARK_MILESTONES = [5, 10, 15] as const;
 

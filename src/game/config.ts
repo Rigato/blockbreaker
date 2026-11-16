@@ -26,7 +26,10 @@ export const GAME_CONFIG = {
     radius: 9,
     baseSpeed: 520,
     speedPerWave: 40,
+    /** Authored campaign cap; per-world limits live in `content/worlds.ts`. */
     maxSpeed: 780,
+    /** Absolute in-run cap for rails and other speed boosts. */
+    hardMaxSpeed: 1100,
     maxBalls: 8,
     /** Long cooldown before a lost Multiball extra respawns. */
     respawnMs: 10_000,
@@ -113,6 +116,14 @@ export const GAME_CONFIG = {
     multiplierScoreFactor: 2,
     bossCorrosionStacks: 3,
     bossCorrosionStep: 0.06,
+    phasedArmoredMs: 2200,
+    phasedExposedMs: 1800,
+    platedToolReduction: 1,
+    splittingSpawns: 2,
+    beltDegPer100Ms: 18,
+    railAcceleration: 900,
+    gustStrength: 140,
+    gustPeriodMs: 11_000,
   },
 
   debug: {

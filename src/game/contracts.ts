@@ -114,14 +114,25 @@ export interface SaveV1 {
   updatedAt: number;
 }
 
-/** Persisted save. Active runs are intentionally not saved. */
-export interface SaveV2 {
-  version: 2;
-  /** 0 = tutorial only; 1..6 = campaign phases unlocked. */
+/** Persisted save (v3). Active runs are intentionally not saved. */
+export interface SaveV3 {
+  version: 3;
+  /** 0 = tutorial only; 1..18 = global campaign phase unlocked. */
   unlockedPhase: number;
   phases: Record<string, PhaseStats>;
   endless: EndlessStats;
-  /** True once phase 6 has been cleared; unlocks Endless mode. */
+  /** True once world I phase 6 has been cleared; unlocks Endless mode. */
+  campaignComplete: boolean;
+  meta: MetaProgress;
+  updatedAt: number;
+}
+
+/** Legacy v2 shape kept so `parseSave` can migrate existing players. */
+export interface SaveV2 {
+  version: 2;
+  unlockedPhase: number;
+  phases: Record<string, PhaseStats>;
+  endless: EndlessStats;
   campaignComplete: boolean;
   meta: MetaProgress;
   updatedAt: number;
@@ -164,14 +175,14 @@ export interface SettingsV1 {
 }
 
 export interface SaveSnapshot {
-  save: SaveV2;
+  save: SaveV3;
   settings: SettingsV1;
 }
 
 /** Persistence boundary used by the M3 game; backed by PlatformService storage. */
 export interface SaveRepository {
   load(): Promise<SaveSnapshot>;
-  save(save: SaveV2): Promise<void>;
+  save(save: SaveV3): Promise<void>;
   saveSettings(settings: SettingsV1): Promise<void>;
   reset(): Promise<void>;
 }
@@ -298,8 +309,23 @@ export interface LaserHudState {
 export interface PhaseSelectInfo {
   id: string;
   name: string;
-  /** 0 for the optional tutorial, 1..6 for the campaign. */
+  /** Global ordinal: 0 tutorial, 1..18 campaign. */
   index: number;
+  /** World id (`w1`, `w2`, `w3`). */
+  worldId: string;
+  worldIndex: number;
+  worldName: string;
+  worldNumeral: string;
+  worldAccent: string;
+  /** 1-based phase position inside its world; 0 for the tutorial. */
+  worldPhaseIndex: number;
+  worldPhaseCount: number;
+  /** True for the last phase of a world. */
+  isWorldFinal: boolean;
+  /** True when the whole world is unlocked for this save. */
+  worldUnlocked: boolean;
+  /** True when the world's final phase has a recorded clear. */
+  worldCleared: boolean;
   /** True for the tutorial phase that gates the campaign on a fresh save. */
   tutorial: boolean;
   unlocked: boolean;
@@ -319,6 +345,8 @@ export interface PhaseSelectInfo {
   bossName: string | null;
   /** Number of waves in the phase. */
   waves: number;
+  /** Wave names in order; used by the debug wave chooser. */
+  waveNames?: readonly string[];
 }
 
 /** Epilogue and rank shown on the results screen. */
@@ -335,6 +363,12 @@ export interface PhaseResult {
   phaseName: string;
   phaseIndex: number;
   phaseCount: number;
+  worldId?: string;
+  worldName?: string;
+  worldNumeral?: string;
+  worldPhaseIndex?: number;
+  worldPhaseCount?: number;
+  isWorldFinal?: boolean;
   /** True when the result belongs to the tutorial phase. */
   tutorial?: boolean;
   victory: boolean;
@@ -388,6 +422,13 @@ export interface HudSnapshot {
   phaseName: string;
   phaseIndex: number;
   phaseCount: number;
+  worldId?: string;
+  worldName?: string;
+  worldNumeral?: string;
+  worldPhaseIndex?: number;
+  worldPhaseCount?: number;
+  isWorldFinal?: boolean;
+  worldCleared?: boolean;
   waveId: string;
   waveName: string;
   /** 1-based index within the current phase. */
@@ -436,7 +477,15 @@ export interface HudSnapshot {
   /** Boss health for the current wave; optional until integrated. */
   boss?: { name: string; hp: number; maxHp: number; phase: number } | null;
   /** Active wave challenge; optional until integrated. */
-  rule?: { kind: 'timeLimit' | 'noLaser'; remainingMs: number | null } | null;
+  rule?: {
+    kind: 'timeLimit' | 'noLaser' | 'noMultiball' | 'gust';
+    remainingMs: number | null;
+  } | null;
+  /** Secondary active rule for waves that combine two challenges. */
+  extraRule?: {
+    kind: 'timeLimit' | 'noLaser' | 'noMultiball' | 'gust';
+    remainingMs: number | null;
+  } | null;
   /** Multiplier block buff; optional until integrated. */
   multiplier?: { xpFactor: number; scoreFactor: number; remainingMs: number } | null;
   /** Consecutive-block combo; optional until integrated. */
@@ -574,8 +623,8 @@ export interface GameCommands {
   debugVictory(): void;
 
   // M3 — phases, save and results
-  /** Starts a specific content phase from its first wave. */
-  startPhase(phaseId: string): void;
+  /** Starts a specific content phase, optionally at a debug wave index. */
+  startPhase(phaseId: string, startWaveIndex?: number): void;
   /** Acknowledges the open tutorial coach mark and resumes/advances it. */
   acknowledgeTutorial(): void;
   /** Completes the tutorial immediately and unlocks level 1. */

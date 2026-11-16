@@ -19,6 +19,7 @@ export {
   SPARKS_PER_BOSS,
   SPARKS_PER_FIRST_CLEAR,
   SPARKS_PER_PHASE_CLEAR,
+  SPARKS_PER_WORLD_CLEAR,
   RunSparkWaveClaims,
   capRunSparks,
   getMetaState,

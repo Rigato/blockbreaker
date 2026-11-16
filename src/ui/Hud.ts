@@ -70,6 +70,7 @@ export class Hud {
   private readonly sparksChip: HTMLElement;
   private readonly sparksToast: HTMLElement;
   private readonly challengeChip: HTMLElement;
+  private readonly challengeChipExtra: HTMLElement;
   private readonly multiplierChip: HTMLElement;
   private readonly comboChip: HTMLElement;
   private readonly waveIntro: HTMLElement;
@@ -88,7 +89,7 @@ export class Hud {
   private laserCooldownMs = 0;
   private laserTimer: ReturnType<typeof setInterval> | null = null;
   private bossSignature = '';
-  private ruleKind: 'timeLimit' | 'noLaser' | null = null;
+  private ruleKind: 'timeLimit' | 'noLaser' | 'noMultiball' | 'gust' | null = null;
   private ruleEndsAt = 0;
   private ruleTimer: ReturnType<typeof setInterval> | null = null;
   private waveIntroText = '';
@@ -275,6 +276,11 @@ export class Hud {
     challengeChip.hidden = true;
     challengeChip.setAttribute('role', 'status');
 
+    const challengeChipExtra = document.createElement('span');
+    this.challengeChipExtra = challengeChipExtra;
+    challengeChipExtra.className = 'hud__chip hud__chip--rule-extra';
+    challengeChipExtra.hidden = true;
+
     const multiplierChip = document.createElement('span');
     this.multiplierChip = multiplierChip;
     multiplierChip.className = 'hud__chip hud__chip--multiplier';
@@ -293,7 +299,14 @@ export class Hud {
     sparksToast.setAttribute('aria-live', 'polite');
     sparksToast.setAttribute('aria-atomic', 'true');
 
-    chips.append(sparksChip, challengeChip, multiplierChip, comboChip, sparksToast);
+    chips.append(
+      sparksChip,
+      challengeChip,
+      challengeChipExtra,
+      multiplierChip,
+      comboChip,
+      sparksToast,
+    );
 
     const pauseButton = document.createElement('button');
     this.pauseButton = pauseButton;
@@ -491,9 +504,14 @@ export class Hud {
       this.waveText.dataset.compact = `${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
       this.waveText.dataset.compactShort = `${snapshot.waveIndex}/${snapshot.waveCount} · ${snapshot.waveName}`;
     } else {
-      this.waveKicker.textContent = `${en.phaseLabel} ${snapshot.phaseIndex}/${Math.max(
+      const worldLabel = snapshot.worldNumeral
+        ? `${snapshot.worldNumeral} · `
+        : '';
+      const localPhase = snapshot.worldPhaseIndex ?? snapshot.phaseIndex;
+      const worldCount = snapshot.worldPhaseCount ?? 6;
+      this.waveKicker.textContent = `${worldLabel}${en.phaseLabel} ${localPhase}/${Math.max(
         1,
-        snapshot.phaseCount,
+        worldCount,
       )} · ${snapshot.waveName}`;
       this.waveText.textContent = `${snapshot.phaseName} · ${en.hudWave} ${snapshot.waveIndex}/${snapshot.waveCount}`;
       // Compact line: wave count first so ellipsis never clips the count.
@@ -551,7 +569,7 @@ export class Hud {
     this.updatePerks(snapshot.perks);
     this.updateBoss(snapshot.boss ?? null);
     this.updateSparks(snapshot.runSparks ?? 0);
-    this.updateRule(snapshot.rule ?? null);
+    this.updateRule(snapshot.rule ?? null, snapshot.extraRule ?? null);
     this.updateMultiplier(snapshot.multiplier ?? null);
     this.updateCombo(snapshot.combo ?? null);
     this.updateWaveIntro(snapshot.waveIntro ?? null);
@@ -808,9 +826,13 @@ export class Hud {
     }
   }
 
-  private updateRule(rule: HudSnapshot['rule'] | null): void {
+  private updateRule(
+    rule: HudSnapshot['rule'] | null,
+    extraRule: HudSnapshot['rule'] | null = null,
+  ): void {
     this.stopRuleTimer();
     this.ruleKind = rule?.kind ?? null;
+    this.renderRuleChip(this.challengeChipExtra, extraRule);
 
     if (!rule) {
       this.challengeChip.hidden = true;
@@ -832,12 +854,50 @@ export class Hud {
       return;
     }
 
+    if (rule.kind === 'noMultiball') {
+      this.challengeChip.textContent = en.hudChallengeNoMultiball;
+      this.challengeChip.setAttribute('aria-label', en.hudChallengeNoMultiball);
+      this.ruleKind = 'noMultiball';
+      this.syncChipsVisibility();
+      return;
+    }
+
+    if (rule.kind === 'gust') {
+      this.challengeChip.textContent = en.hudChallengeGust;
+      this.challengeChip.setAttribute('aria-label', en.hudChallengeGust);
+      this.ruleKind = 'gust';
+      this.syncChipsVisibility();
+      return;
+    }
+
     this.ruleKind = 'timeLimit';
     this.ruleEndsAt =
       performance.now() + Math.max(0, rule.remainingMs ?? 0);
     this.syncRuleClock();
     this.startRuleTimer();
     this.syncChipsVisibility();
+  }
+
+  private renderRuleChip(
+    chip: HTMLElement,
+    rule: HudSnapshot['rule'] | null,
+  ): void {
+    if (!rule) {
+      chip.hidden = true;
+      chip.textContent = '';
+      return;
+    }
+    const text =
+      rule.kind === 'timeLimit'
+        ? en.hudChallengeTime
+        : rule.kind === 'noLaser'
+          ? en.hudChallengeNoLaser
+          : rule.kind === 'noMultiball'
+            ? en.hudChallengeNoMultiball
+            : en.hudChallengeGust;
+    chip.hidden = false;
+    chip.textContent = text;
+    chip.setAttribute('aria-label', text);
   }
 
   private syncRuleClock(): void {
@@ -911,6 +971,7 @@ export class Hud {
     this.chips.hidden =
       this.sparksChip.hidden &&
       this.challengeChip.hidden &&
+      this.challengeChipExtra.hidden &&
       this.multiplierChip.hidden &&
       this.comboChip.hidden;
   }

@@ -29,17 +29,13 @@ import {
 } from '../src/render/themes';
 
 describe('phase themes', () => {
-  it('maps the six phase ids to distinct shapes and palettes', () => {
+  it('maps every phase id to a palette and keeps the first six shapes', () => {
     const themes = PHASE_THEMES.map((theme) => themeForPhase(theme.id, theme.index));
-    expect(themes.map((theme) => theme.id)).toEqual([
-      'phase-1',
-      'phase-2',
-      'phase-3',
-      'phase-4',
-      'phase-5',
-      'phase-6',
-    ]);
-    expect(themes.map((theme) => theme.shape)).toEqual([
+    expect(themes).toHaveLength(18);
+    expect(themes.map((theme) => theme.id)).toEqual(
+      Array.from({ length: 18 }, (_, index) => `phase-${index + 1}`),
+    );
+    expect(themes.slice(0, 6).map((theme) => theme.shape)).toEqual([
       'crystal',
       'ruins',
       'arcane',
@@ -47,16 +43,16 @@ describe('phase themes', () => {
       'forge',
       'void',
     ]);
-    expect(new Set(themes.map((theme) => theme.accent)).size).toBe(6);
-    expect(new Set(themes.map((theme) => theme.skyTop)).size).toBe(6);
-    expect(new Set(themes.map((theme) => theme.name)).size).toBe(6);
+    expect(new Set(themes.slice(0, 6).map((theme) => theme.accent)).size).toBe(6);
+    expect(new Set(themes.map((theme) => theme.skyTop)).size).toBeGreaterThan(10);
+    expect(new Set(themes.map((theme) => theme.name)).size).toBe(18);
   });
 
   it('falls back to the phase index, then phase 1', () => {
     expect(themeForPhase('unknown', 1).id).toBe('phase-2');
     expect(themeForPhase('unknown', 4).id).toBe('phase-5');
     expect(themeForPhase('unknown', -4).id).toBe('phase-1');
-    expect(themeForPhase('unknown', 99).id).toBe('phase-6');
+    expect(themeForPhase('unknown', 99).id).toBe('phase-18');
     expect(themeForPhase('unknown', Number.NaN).id).toBe('phase-1');
   });
 
@@ -192,12 +188,12 @@ describe('block art helpers', () => {
 });
 
 describe('block type catalog', () => {
-  it('has nine distinct types with distinct colours and behaviours', () => {
+  it('has seventeen distinct types with distinct colours and behaviours', () => {
     const types = Object.values(BLOCK_TYPES);
-    expect(types).toHaveLength(9);
-    expect(new Set(types.map((type) => type.id)).size).toBe(9);
-    expect(new Set(types.map((type) => type.color)).size).toBe(9);
-    expect(new Set(types.map((type) => type.behavior)).size).toBe(7);
+    expect(types).toHaveLength(17);
+    expect(new Set(types.map((type) => type.id)).size).toBe(17);
+    expect(new Set(types.map((type) => type.color)).size).toBe(17);
+    expect(new Set(types.map((type) => type.behavior)).size).toBe(13);
     for (const type of types) {
       expect(type.hp).toBeGreaterThan(0);
       expect(type.score).toBeGreaterThan(0);
@@ -208,6 +204,12 @@ describe('block type catalog', () => {
     expect(BLOCK_TYPES.multiplier.behavior).toBe('multiplier');
     expect(BLOCK_TYPES.generator.behavior).toBe('generator');
     expect(BLOCK_TYPES.linked.behavior).toBe('linked');
+    expect(BLOCK_TYPES.entangled.behavior).toBe('entangled');
+    expect(BLOCK_TYPES.relay.behavior).toBe('relay');
+    expect(BLOCK_TYPES.phased.behavior).toBe('phased');
+    expect(BLOCK_TYPES.plated.behavior).toBe('plated');
+    expect(BLOCK_TYPES.fused.behavior).toBe('fused');
+    expect(BLOCK_TYPES.splitting.behavior).toBe('splitting');
   });
 });
 
@@ -226,7 +228,18 @@ describe('element art helpers', () => {
   });
 
   it('gives every element kind its own readable base colour', () => {
-    const kinds = ['wall', 'obstacle', 'deflector', 'portal', 'mover', 'rotor', 'gate'] as const;
+    const kinds = [
+      'wall',
+      'obstacle',
+      'deflector',
+      'portal',
+      'mover',
+      'rotor',
+      'gate',
+      'press',
+      'belt',
+      'rail',
+    ] as const;
     const colors = kinds.map((kind) => elementColor(kind, 0xffffff));
     for (const color of colors) {
       expect(color).toBeGreaterThanOrEqual(0);
@@ -238,9 +251,19 @@ describe('element art helpers', () => {
 });
 
 describe('boss art helpers', () => {
-  it('assigns distinct signature colours to the three patterns', () => {
-    const colors = [bossColor('sentinel'), bossColor('warden'), bossColor('void')];
-    expect(new Set(colors).size).toBe(3);
+  it('assigns distinct signature colours to every pattern', () => {
+    const colors = [
+      bossColor('sentinel'),
+      bossColor('warden'),
+      bossColor('void'),
+      bossColor('spread'),
+      bossColor('charger'),
+      bossColor('aimed'),
+      bossColor('matron'),
+      bossColor('riveter'),
+      bossColor('engine'),
+    ];
+    expect(new Set(colors).size).toBe(9);
     expect(bossHurtColor('void', 0)).toBe(bossColor('void'));
     expect(bossHurtColor('void', 1)).toBe(0xffffff);
     expect(bossHurtColor('sentinel', 2)).toBe(0xffffff);

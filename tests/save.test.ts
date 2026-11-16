@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type {
   PhaseResult,
-  SaveV2,
+  SaveV3,
   SettingsV1,
   StorageService,
 } from '../src/game/contracts';
@@ -38,7 +38,7 @@ function makeResult(overrides: Partial<PhaseResult> = {}): PhaseResult {
   };
 }
 
-function makeSave(overrides: Partial<SaveV2> = {}): SaveV2 {
+function makeSave(overrides: Partial<SaveV3> = {}): SaveV3 {
   return {
     ...createDefaultSave(123),
     ...overrides,
@@ -60,7 +60,7 @@ class ThrowingStorage implements StorageService {
 describe('save defaults', () => {
   it('creates a version 2 save at the tutorial with empty meta', () => {
     expect(createDefaultSave(42)).toEqual({
-      version: 2,
+      version: 3,
       unlockedPhase: 0,
       phases: {},
       endless: { bestWave: 0, bestScore: 0, runs: 0 },
@@ -77,7 +77,7 @@ describe('save defaults', () => {
       music: true,
       screenShake: true,
     });
-    expect(MAX_PHASE).toBe(6);
+    expect(MAX_PHASE).toBe(18);
   });
 });
 
@@ -93,7 +93,7 @@ describe('safe parse', () => {
   });
 
   it('rejects future or unknown versions', () => {
-    for (const version of [0, 3, 99, '2']) {
+    for (const version of [0, 4, 99, '2']) {
       const raw = JSON.stringify({ version, unlockedPhase: 3, phases: {} });
       expect(parseSave(raw, 9)).toEqual(createDefaultSave(9));
     }
@@ -119,8 +119,8 @@ describe('safe parse', () => {
 
     const save = parseSave(raw, 555);
 
-    expect(save.version).toBe(2);
-    expect(save.unlockedPhase).toBe(6);
+    expect(save.version).toBe(3);
+    expect(save.unlockedPhase).toBe(18);
     expect(save.updatedAt).toBe(555);
     expect(save.meta).toEqual({ sparks: 0, unlocks: [] });
     expect(save.phases['phase-1']).toEqual({
@@ -139,15 +139,16 @@ describe('safe parse', () => {
     expect(save).toEqual(createDefaultSave(3));
   });
 
-  it('clamps unlockedPhase into 0..6', () => {
+  it('clamps unlockedPhase into 0..18', () => {
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 0 })).unlockedPhase).toBe(0);
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: -3 })).unlockedPhase).toBe(0);
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 2 })).unlockedPhase).toBe(2);
     expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 4 })).unlockedPhase).toBe(4);
-    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 7 })).unlockedPhase).toBe(6);
+    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 7 })).unlockedPhase).toBe(7);
+    expect(parseSave(JSON.stringify({ version: 1, unlockedPhase: 99 })).unlockedPhase).toBe(18);
   });
 
-  it('migrates a v1 save with unlockedPhase 3 into version 2', () => {
+  it('migrates a v1 save with unlockedPhase 3 into version 3', () => {
     const raw = JSON.stringify({
       version: 1,
       unlockedPhase: 3,
@@ -160,7 +161,7 @@ describe('safe parse', () => {
     });
 
     const save = parseSave(raw, 2000);
-    expect(save.version).toBe(2);
+    expect(save.version).toBe(3);
     expect(save.unlockedPhase).toBe(3);
     expect(save.meta).toEqual({ sparks: 0, unlocks: [] });
 
@@ -262,7 +263,7 @@ describe('safe parse', () => {
 
     const save = parseSave(raw, 100);
     expect(save).toEqual({
-      version: 2,
+      version: 3,
       unlockedPhase: 2,
       phases: {},
       endless: { bestWave: 0, bestScore: 0, runs: 0 },
@@ -291,8 +292,8 @@ describe('safe parse', () => {
 
   it('preserves v2 campaign and endless progress while sanitizing meta', () => {
     const raw = JSON.stringify({
-      version: 2,
-      unlockedPhase: 5,
+      version: 3,
+      unlockedPhase: 7,
       phases: {
         'phase-4': { bestScore: 4000, bestTimeMs: 80_000, attempts: 2, clears: 1, bestLevel: 8 },
       },
@@ -304,8 +305,8 @@ describe('safe parse', () => {
 
     const save = parseSave(raw, 999);
     expect(save).toMatchObject({
-      version: 2,
-      unlockedPhase: 6,
+      version: 3,
+      unlockedPhase: 7,
       endless: { bestWave: 18, bestScore: 9000, runs: 4 },
       campaignComplete: true,
       meta: { sparks: 47, unlocks: ['sticky_paddle'] },
@@ -352,8 +353,8 @@ describe('StorageSaveRepository', () => {
   it('round-trips save and settings through storage keys', async () => {
     const storage = new MemoryStorage();
     const repository = new StorageSaveRepository(storage);
-    const save: SaveV2 = {
-      version: 2,
+    const save: SaveV3 = {
+      version: 3,
       unlockedPhase: 2,
       phases: {
         'phase-1': {
@@ -461,7 +462,7 @@ describe('StorageSaveRepository', () => {
     });
   });
 
-  it('loads a legacy v1 save as v2', async () => {
+  it('loads a legacy v1 save as v3', async () => {
     const storage = new MemoryStorage();
     await storage.set(
       [GAME_CONFIG.storage.saveKey],
@@ -470,7 +471,7 @@ describe('StorageSaveRepository', () => {
     const repository = new StorageSaveRepository(storage, undefined, () => 20);
 
     const snapshot = await repository.load();
-    expect(snapshot.save.version).toBe(2);
+    expect(snapshot.save.version).toBe(3);
     expect(snapshot.save.unlockedPhase).toBe(4);
     expect(snapshot.save.meta).toEqual({ sparks: 0, unlocks: [] });
   });
@@ -495,7 +496,7 @@ describe('applyPhaseResult', () => {
     expect(next.campaignComplete).toBe(false);
   });
 
-  it('unlocks phases sequentially up to phase 6 and clamps there', () => {
+  it('unlocks phases sequentially and opens world II after phase 6', () => {
     let save = createDefaultSave();
 
     for (let index = 1; index <= 5; index += 1) {
@@ -516,7 +517,7 @@ describe('applyPhaseResult', () => {
       makeResult({ phaseId: 'phase-6', phaseIndex: 6, nextPhaseId: null }),
       60,
     );
-    expect(save.unlockedPhase).toBe(6);
+    expect(save.unlockedPhase).toBe(7);
     expect(save.campaignComplete).toBe(true);
     expect(save.updatedAt).toBe(60);
   });
@@ -633,7 +634,7 @@ describe('applyPhaseResult', () => {
         },
       },
     });
-    const frozen = JSON.parse(JSON.stringify(save)) as SaveV2;
+    const frozen = JSON.parse(JSON.stringify(save)) as SaveV3;
     Object.freeze(save);
     Object.freeze(save.meta);
     Object.freeze(save.meta.unlocks);
@@ -646,7 +647,7 @@ describe('applyPhaseResult', () => {
     expect(next).not.toBe(save);
     expect(next.phases).not.toBe(save.phases);
     expect(next.phases['phase-1']).not.toBe(save.phases['phase-1']);
-    expect(next.version).toBe(2);
+    expect(next.version).toBe(3);
   });
 
   it('returns fresh default stats for unknown phases', () => {

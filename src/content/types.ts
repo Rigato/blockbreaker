@@ -56,6 +56,26 @@ export interface GateElement extends LevelElementBase {
   readonly phaseMs?: number;
 }
 
+/** Industrial press: a solid AABB that slams down and retracts on a cycle. */
+export interface PressElement extends LevelElementBase {
+  readonly kind: 'press';
+  readonly rangeCells: number;
+  readonly periodMs: number;
+  readonly phaseMs?: number;
+}
+
+/** Conveyor belt: nudges the ball's direction without changing its speed. */
+export interface BeltElement extends LevelElementBase {
+  readonly kind: 'belt';
+  readonly direction: 'left' | 'right';
+}
+
+/** Maglev rail: accelerates the ball along the rail up to the hard speed cap. */
+export interface RailElement extends LevelElementBase {
+  readonly kind: 'rail';
+  readonly direction: 'left' | 'right';
+}
+
 /** Discriminated union of every phase element. */
 export type LevelElement =
   | WallElement
@@ -64,7 +84,22 @@ export type LevelElement =
   | PortalElement
   | MoverElement
   | RotorElement
-  | GateElement;
+  | GateElement
+  | PressElement
+  | BeltElement
+  | RailElement;
+
+/** Boss attack pattern. The first three are campaign-1 patterns. */
+export type BossPattern =
+  | 'sentinel'
+  | 'warden'
+  | 'void'
+  | 'spread'
+  | 'charger'
+  | 'aimed'
+  | 'matron'
+  | 'riveter'
+  | 'engine';
 
 /** Boss entity definition for the final wave of a phase. */
 export interface BossDef {
@@ -76,15 +111,23 @@ export interface BossDef {
   readonly row: number;
   readonly attackMs: number;
   readonly moveSpeed: number;
-  readonly pattern: 'sentinel' | 'warden' | 'void';
+  readonly pattern: BossPattern;
 }
 
 /** Optional per-wave challenge rule. */
 export type WaveRule =
   | { readonly kind: 'timeLimit'; readonly ms: number }
-  | { readonly kind: 'noLaser' };
+  | { readonly kind: 'noLaser' }
+  | { readonly kind: 'noMultiball' }
+  | {
+      readonly kind: 'gust';
+      /** Full left/right cycle in milliseconds. */
+      readonly periodMs?: number;
+      /** Peak lateral speed in logical units per second. */
+      readonly strength?: number;
+    };
 
-/** Final M3 content contract. */
+/** Final content contract. */
 export interface WaveDef {
   readonly id: string;
   readonly name: string;
@@ -103,12 +146,16 @@ export interface WaveDef {
   readonly intro?: string;
 }
 
-/** One campaign phase. Wave count varies per phase in v0.2.0. */
+/** One campaign phase. Wave count varies per phase. */
 export interface PhaseDef {
   readonly id: string;
-  /** 0 for the tutorial, 1..6 for campaign phases. */
+  /** Global ordinal: 0 is the tutorial, 1..6 world I, 7..12 world II, 13..18 world III. */
   readonly index: number;
   readonly name: string;
+  /** Owning world id (`w1`, `w2`, `w3`). */
+  readonly worldId?: string;
+  /** 1-based phase position inside its world. */
+  readonly localIndex?: number;
   /** Marks the optional first-run tutorial phase. */
   readonly tutorial?: boolean;
   /** Short flavour line shown on the campaign selection screen. */

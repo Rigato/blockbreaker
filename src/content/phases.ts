@@ -13,6 +13,23 @@ import {
   PHASE_6_WAVES,
   TUTORIAL_WAVES,
 } from './waves';
+import {
+  PHASE_7_WAVES,
+  PHASE_8_WAVES,
+  PHASE_9_WAVES,
+  PHASE_10_WAVES,
+  PHASE_11_WAVES,
+  PHASE_12_WAVES,
+} from './wavesWorld2';
+import {
+  PHASE_13_WAVES,
+  PHASE_14_WAVES,
+  PHASE_15_WAVES,
+  PHASE_16_WAVES,
+  PHASE_17_WAVES,
+  PHASE_18_WAVES,
+} from './wavesWorld3';
+import { CAMPAIGN_PHASE_COUNT as WORLD_CAMPAIGN_PHASE_COUNT, worldForPhaseIndex } from './worlds';
 
 /** Stable phase order consumed by the game and by the content validator. */
 export const PHASES: readonly PhaseDef[] = [
@@ -21,6 +38,8 @@ export const PHASES: readonly PhaseDef[] = [
     index: 0,
     name: 'Tutorial',
     tagline: 'Learn the rhythm of the field.',
+    worldId: 'w1',
+    localIndex: 0,
     tutorial: true,
     waves: TUTORIAL_WAVES,
   },
@@ -29,6 +48,8 @@ export const PHASES: readonly PhaseDef[] = [
     index: 1,
     name: 'Crystal Grove',
     tagline: 'Where the first shards fall.',
+    worldId: 'w1',
+    localIndex: 1,
     waves: PHASE_1_WAVES,
   },
   {
@@ -36,6 +57,8 @@ export const PHASES: readonly PhaseDef[] = [
     index: 2,
     name: 'Ruined Halls',
     tagline: 'Stone and ruin remember.',
+    worldId: 'w1',
+    localIndex: 2,
     waves: PHASE_2_WAVES,
   },
   {
@@ -43,6 +66,8 @@ export const PHASES: readonly PhaseDef[] = [
     index: 3,
     name: 'Arcane Depths',
     tagline: 'Magic runs deep.',
+    worldId: 'w1',
+    localIndex: 3,
     waves: PHASE_3_WAVES,
   },
   {
@@ -50,6 +75,8 @@ export const PHASES: readonly PhaseDef[] = [
     index: 4,
     name: 'Frostbound Spire',
     tagline: 'Cold steel, colder sentries.',
+    worldId: 'w1',
+    localIndex: 4,
     waves: PHASE_4_WAVES,
   },
   {
@@ -57,6 +84,8 @@ export const PHASES: readonly PhaseDef[] = [
     index: 5,
     name: 'Emberforge',
     tagline: 'Forge your build in fire.',
+    worldId: 'w1',
+    localIndex: 5,
     waves: PHASE_5_WAVES,
   },
   {
@@ -64,15 +93,132 @@ export const PHASES: readonly PhaseDef[] = [
     index: 6,
     name: 'Void Threshold',
     tagline: 'Nothing returns unchanged.',
+    worldId: 'w1',
+    localIndex: 6,
     waves: PHASE_6_WAVES,
+  },
+  {
+    id: 'phase-7',
+    index: 7,
+    name: 'Splashdown Docks',
+    tagline: 'Something answered the portal.',
+    worldId: 'w2',
+    localIndex: 1,
+    waves: PHASE_7_WAVES,
+  },
+  {
+    id: 'phase-8',
+    index: 8,
+    name: 'Signal Yard',
+    tagline: 'Every dish is pointed at you.',
+    worldId: 'w2',
+    localIndex: 2,
+    waves: PHASE_8_WAVES,
+  },
+  {
+    id: 'phase-9',
+    index: 9,
+    name: 'Maglev Spine',
+    tagline: 'Ride the rail or be run over.',
+    worldId: 'w2',
+    localIndex: 3,
+    waves: PHASE_9_WAVES,
+  },
+  {
+    id: 'phase-10',
+    index: 10,
+    name: 'Relay Grid',
+    tagline: 'Kill the power, kill the defense.',
+    worldId: 'w2',
+    localIndex: 4,
+    waves: PHASE_10_WAVES,
+  },
+  {
+    id: 'phase-11',
+    index: 11,
+    name: 'Hardlight Weave',
+    tagline: 'Light, folded into armor.',
+    worldId: 'w2',
+    localIndex: 5,
+    waves: PHASE_11_WAVES,
+  },
+  {
+    id: 'phase-12',
+    index: 12,
+    name: 'The Lattice Core',
+    tagline: 'The machine wants its caretaker back.',
+    worldId: 'w2',
+    localIndex: 6,
+    waves: PHASE_12_WAVES,
+  },
+  {
+    id: 'phase-13',
+    index: 13,
+    name: 'Slag Yard',
+    tagline: 'Everything ends up here.',
+    worldId: 'w3',
+    localIndex: 1,
+    waves: PHASE_13_WAVES,
+  },
+  {
+    id: 'phase-14',
+    index: 14,
+    name: 'Rustline Depot',
+    tagline: 'Nothing runs on time.',
+    worldId: 'w3',
+    localIndex: 2,
+    waves: PHASE_14_WAVES,
+  },
+  {
+    id: 'phase-15',
+    index: 15,
+    name: 'Ash Foundry',
+    tagline: 'The molds are still full.',
+    worldId: 'w3',
+    localIndex: 3,
+    waves: PHASE_15_WAVES,
+  },
+  {
+    id: 'phase-16',
+    index: 16,
+    name: 'Boilerworks',
+    tagline: 'Pressure keeps the dead upright.',
+    worldId: 'w3',
+    localIndex: 4,
+    waves: PHASE_16_WAVES,
+  },
+  {
+    id: 'phase-17',
+    index: 17,
+    name: 'Crown Stack',
+    tagline: 'Climb until the sky is a wall.',
+    worldId: 'w3',
+    localIndex: 5,
+    waves: PHASE_17_WAVES,
+  },
+  {
+    id: 'phase-18',
+    index: 18,
+    name: 'Sunder Core',
+    tagline: 'The engine is still on.',
+    worldId: 'w3',
+    localIndex: 6,
+    waves: PHASE_18_WAVES,
   },
 ];
 
-/** Waves per phase in display order: tutorial + six campaign phases. */
-export const EXPECTED_WAVE_COUNTS = [2, 2, 3, 3, 3, 4, 5] as const;
 
-/** Number of campaign phases (the tutorial is not counted). */
-export const CAMPAIGN_PHASE_COUNT = 6;
+
+/** Waves per phase in display order: tutorial + three worlds of six phases. */
+export const EXPECTED_WAVE_COUNTS = [
+  2,
+  2, 3, 3, 3, 4, 5,
+  3, 3, 3, 4, 4, 5,
+  4, 4, 4, 5, 5, 5,
+] as const;
+
+/** Number of campaign phases across every world (tutorial excluded). */
+export const CAMPAIGN_PHASE_COUNT = WORLD_CAMPAIGN_PHASE_COUNT;
 
 /** Conservative validation viewport. Matches the real minimum world height. */
 export const CONTENT_EVALUATION_HEIGHT = 1280;
@@ -86,6 +232,7 @@ export const PADDLE_ZONE_TOP =
 export const MAX_WAVE_ROWS = 12;
 
 export const BALL_SPEED_MIN = 500;
+/** World I authored cap; later worlds raise it via `WORLDS.speedMax`. */
 export const BALL_SPEED_MAX = 780;
 /** Relative slack (5%) for the monotonic difficulty and speed checks. */
 export const DIFFICULTY_TOLERANCE = 0.05;
@@ -470,6 +617,20 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
           if (element.phaseMs !== undefined && !Number.isFinite(element.phaseMs)) {
             push(elementPath, 'gate phaseMs must be finite when present');
           }
+        } else if (element.kind === 'press') {
+          if (!Number.isFinite(element.rangeCells) || element.rangeCells <= 0) {
+            push(elementPath, 'press rangeCells must be > 0');
+          }
+          if (!Number.isFinite(element.periodMs) || element.periodMs <= 0) {
+            push(elementPath, 'press periodMs must be > 0');
+          }
+          if (element.phaseMs !== undefined && !Number.isFinite(element.phaseMs)) {
+            push(elementPath, 'press phaseMs must be finite when present');
+          }
+        } else if (element.kind === 'belt' || element.kind === 'rail') {
+          if (element.direction !== 'left' && element.direction !== 'right') {
+            push(elementPath, `${element.kind} direction must be left or right`);
+          }
         }
       });
 
@@ -538,9 +699,16 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
           if (!Number.isFinite(rule.ms) || rule.ms <= 0) {
             push(wavePath, `timeLimit ms must be > 0, found ${rule.ms}`);
           }
-        } else if (rule.kind === 'noLaser') {
+        } else if (rule.kind === 'noLaser' || rule.kind === 'noMultiball') {
           if (Object.keys(rule as unknown as Record<string, unknown>).length !== 1) {
-            push(wavePath, 'noLaser rule must not carry a payload');
+            push(wavePath, `${rule.kind} rule must not carry a payload`);
+          }
+        } else if (rule.kind === 'gust') {
+          if (rule.periodMs !== undefined && (!Number.isFinite(rule.periodMs) || rule.periodMs <= 0)) {
+            push(wavePath, 'gust periodMs must be > 0 when present');
+          }
+          if (rule.strength !== undefined && (!Number.isFinite(rule.strength) || rule.strength <= 0)) {
+            push(wavePath, 'gust strength must be > 0 when present');
           }
         } else {
           push(wavePath, `unknown wave rule "${String((rule as { kind?: unknown }).kind)}"`);
@@ -557,16 +725,18 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
       }
     });
 
-    // Per-phase pacing and speed checks.
+    // Per-phase pacing and speed checks. Each world owns its authored cap, so
+    // world II may start slower than world I ended (an intentional overlap).
+    const world = worldForPhaseIndex(phase.index);
     let previousSpeed = Number.NEGATIVE_INFINITY;
     phase.waves.forEach((wave) => {
       const wavePath = `${phasePath}/${wave.id || 'wave'}`;
       if (!Number.isFinite(wave.ballSpeed)) {
         push(wavePath, 'ballSpeed must be a finite number');
-      } else if (wave.ballSpeed < BALL_SPEED_MIN || wave.ballSpeed > BALL_SPEED_MAX) {
+      } else if (wave.ballSpeed < BALL_SPEED_MIN || wave.ballSpeed > world.speedMax) {
         push(
           wavePath,
-          `ballSpeed ${wave.ballSpeed} outside ${BALL_SPEED_MIN}-${BALL_SPEED_MAX}`,
+          `ballSpeed ${wave.ballSpeed} outside ${BALL_SPEED_MIN}-${world.speedMax} for ${world.id}`,
         );
       }
       if (wave.ballSpeed <= previousSpeed) {
@@ -614,8 +784,16 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     const previous = phaseStatsList[index - 1];
     if (!previous) return;
     // The tutorial deliberately uses only a few tougher blocks; it is not a
-    // difficulty step for the campaign curve.
+    // difficulty step for the campaign curve. Worlds intentionally overlap:
+    // world II may open slower/lighter than world I ended, so the peak check
+    // is scoped to phases of the same world.
     if (stats.phase.tutorial || previous.phase.tutorial) return;
+    if (
+      worldForPhaseIndex(stats.phase.index).id !==
+      worldForPhaseIndex(previous.phase.index).id
+    ) {
+      return;
+    }
     const currentPeak = phasePeaks(stats);
     const previousPeak = phasePeaks(previous);
     if (!didNotRegress(currentPeak.avgHp, previousPeak.avgHp)) {
