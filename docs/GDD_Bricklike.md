@@ -3,21 +3,22 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.8  
-**Data:** 2026-11-12  
-**Status:** v0.6.1 publicada no itch.io e no sandbox da Playgama; testes básicos ok; CrazyGames pausado até 2026-11-26; GameFlare bloqueado  
+**Versão:** 1.9  
+**Data:** 2026-11-16  
+**Status:** v0.7.0-dev implementada na `main` local; Mundos II/III, save v3 e debug de ondas. Não publicada; sem tag/release.  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha atual tem **6 fases e 20 ondas**, **9 tipos de bloco**, **7 elementos de fase**, **3 chefes** e **22 perks**. Com o **tutorial** da v0.5.1, o seletor mostra **7 cards e 22 ondas** no total. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica.
+A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutorial: **19 fases e 71 ondas**), **17 tipos de bloco**, **10 elementos de fase**, **9 chefes** e **22 perks**. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica. A **v0.7.0-dev** adiciona os Mundos **II · Neon Lattice** e **III · Rustwake**, save v3, 9 chefes, blocos/elementos novos, kit físico de belt/rail/gust e debug de ondas; está implementada localmente, sem publicação.
 
 ### Como ler os status
 
 - **Confirmado:** escolha expressa pelo jogador ou consolidada no design.
-- **v0.6.1:** implementado e validado no ciclo atual (Tier 4, economia de Sparks, feedback de HUD e card do Workshop).
+- **v0.7.0-dev:** implementado localmente (Mundos II/III, save v3, kit físico, mapas por mundo e debug de ondas); não publicado.
+- **v0.6.1:** implementado e validado no ciclo anterior (Tier 4, economia de Sparks, feedback de HUD e card do Workshop).
 - **v0.6.0:** implementado e validado no ciclo anterior (perks reworkadas, primeira economia de Sparks, Workshop e save v2).
 - **v0.5.1:** implementado e validado no ciclo anterior (tutorial, controles touch e política de ads).
 - **v0.4.0:** implementado e validado no ciclo anterior (apresentação, ads e UX).
@@ -52,13 +53,13 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 6. Receber XP por blocos destruídos e preencher a barra de nível.
 7. Ao subir de nível, pausar a partida e escolher um entre três perks aleatórios.
 8. Retomar a onda com a nova combinação de habilidades; limpar todos os blocos — e o **chefe**, quando houver — para iniciar a próxima onda.
-9. Sobreviver às ondas com **desafio** (`timeLimit`, `noLaser`) e concluir a fase; as fases 4–6 terminam em chefe e a fase 6 fecha a campanha.
+9. Sobreviver às ondas com **desafio** (`timeLimit`, `noLaser`, `noMultiball`, `gust`) e concluir a fase; as fases finais de cada mundo terminam em chefe e a fase 18 fecha a campanha.
 10. Acumular **Sparks** ao concluir ondas, chefes e fases; no menu, gastar Sparks no **Workshop** para desbloquear novas perks para as próximas runs.
 
 **Derrota:** nenhuma bolinha permanece ativa em jogo, ou o tempo de uma onda com `timeLimit` chega a zero.  
 **Vitória de fase:** limpar todas as ondas previstas, incluindo o chefe quando a onda o define.  
 **Tutorial:** 2 ondas, 16 blocos e 32 XP; concluir ou pular libera o level 1 em save novo.  
-**Campanha:** 6 fases, com ondas por fase 2/3/3/3/4/5 (total 20). Com o tutorial, são 7 cards e 22 ondas.
+**Campanha:** 3 mundos de 6 fases. Mundo I 20 ondas, Mundo II 22, Mundo III 27 (69 no total); com o tutorial, 19 fases e 71 ondas.
 
 ### Modo Endless (v0.3.0)
 
@@ -99,9 +100,9 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - **Fundo do menu:** camada Phaser de apresentação com bolinhas luminosas
   quicando, trilhas curtas e partículas discretas. A onda 1 da fase 1 não é
   mais usada como fundo. Respeita reduced motion.
-- **Seleção de fases:** tela cheia com cards temáticos por fase (ícone, accent,
-  tagline, features, chefe, dificuldade e melhores resultados). Com o tutorial,
-  são 7 cards; fases 4–6 destacam o chefe.
+- **Seleção de fases:** um mapa-trilha por mundo, com nós temáticos, bottom
+  sheet, parallax e pílulas I/II/III. O Mundo I tem tutorial + 6 fases; os
+  Mundos II/III têm 6 fases cada; fases finais destacam o chefe.
 - **Settings:** diálogo com **Sound**, **Music** e **Screen shake**,
   persistidos em `bb.settings`. O pause oferece os mesmos três controles.
 - **How to Play:** diálogo de cinco páginas com screenshots reais e textos
@@ -147,6 +148,8 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - **Regras de onda:**
   - `timeLimit`: a onda tem contagem regressiva; se o tempo zerar antes da limpeza, a run termina em derrota. O HUD mostra o tempo restante.
   - `noLaser`: o Prism Laser fica desabilitado apenas naquela onda; o perk continua adquirido para as ondas seguintes.
+  - `noMultiball`: a onda permite apenas uma bola; perks de multiball não criam extras.
+  - `gust`: rajadas laterais em ciclo; a aceleração é normalizada para preservar a velocidade da bola.
 - Ofertas são três cards distintos, sem reroll; um perk interno de fallback (**Arcane Insight**, +XP) preenche a oferta quando faltam opções elegíveis.
 
 ### Ataques do rebatedor
@@ -159,7 +162,11 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 
 ### Blocos
 
-A campanha usa 9 tipos. `behavior` dirige a simulação e o renderer; `hp`, `score` e a arte continuam sendo a fonte de verdade. A resistência é comunicada por cor, material, pips de HP e estado visual, sem depender exclusivamente da cor.
+O Mundo I usa 9 tipos; a campanha completa usa **17**. `behavior` dirige a
+simulação e o renderer; `hp`, `score` e a arte continuam sendo a fonte de
+verdade. A resistência é comunicada por cor, material, pips de HP e estado
+visual, sem depender exclusivamente da cor. Os 8 tipos dos Mundos II/III estão
+detalhados na seção “Campanha multi-mundo”.
 
 | id | char | HP | Score | Comportamento |
 |---|---|---:|---:|---|
@@ -239,15 +246,55 @@ Regras:
 | 5 | Emberforge | 4 | 682 / 704 / 726 / 748 | forge | multiplier, linked, portal, gate, mover, rotor, Ember Warden |
 | 6 | Void Threshold | 5 | 704 / 726 / 748 / 770 / 780 | void | generator e todos os especiais, rotor, mover, Void Herald |
 
-- Com o tutorial: **7 cards**, **22 ondas**, **743 blocos**, **1.809 XP** no conteúdo validado.
-- Campanha pura: **6 fases**, **20 ondas**, **727 blocos**, **1.777 XP**.
+- Com o tutorial: **19 fases**, **71 ondas**, **2.785 blocos**, **9.409 XP** no conteúdo validado.
+- Campanha pura: **18 fases**, **69 ondas**; Mundo I 727 blocos / 1.777 XP.
 - Blocos por fase (sem tutorial): 54 / 90 / 94 / 103 / 136 / 250.
 - XP por fase (sem tutorial): 76 / 212 / 262 / 229 / 348 / 650.
 - Tutorial: 16 blocos, 32 XP, 2 level ups.
 - Cada fase termina em results; a vitória desbloqueia a fase seguinte.
-- A fase 6 termina com o Void Herald e um encerramento de campanha.
+- A fase 6 termina com o Void Herald e fecha o Mundo I; a fase 18 termina com o Last Engine e fecha a campanha.
 - A fase 6 inclui uma onda alta (12 linhas esparsas) para exercitar o zoom de layout.
 - A dificuldade (HP médio × densidade) não regride entre ondas e fases; o validador permite tolerância de 5% e exclui ondas de chefe do ritmo por densidade.
+
+### Campanha multi-mundo (v0.7.0)
+
+A campanha passa a ter **três mundos de seis fases**, com o tutorial apenas no
+Mundo I. A progressão é contínua por `unlockedPhase` (0..18):
+
+| Mundo | Fases | Ondas | Velocidades | Chefes |
+|---|---|---:|---|---|
+| I · Crystal Vale | 1–6 | 20 | 616–780 | Frost Sentinel, Ember Warden, Void Herald |
+| II · Neon Lattice | 7–12 | 22 | 640–896 | Nullframe Warden, Maglev Dreadnought, Lattice Hierophant |
+| III · Rustwake | 13–18 | 27 | 700–920 | Boiler Matron, The Riveter, The Last Engine |
+
+- As velocidades têm **overlap** entre mundos: o Mundo II abre em 640, abaixo
+  do fim do Mundo I; o Mundo III abre em 700, abaixo do fim do Mundo II.
+- O teto por mundo é **780 / 900 / 920**; rails podem elevar a velocidade em
+  jogo até o **hard cap de 1.100**.
+- O clear da fase 6 abre o Mundo II e o clear da fase 12 abre o Mundo III.
+- O primeiro clear da fase final de cada mundo paga **+30 Sparks**.
+- Totais validados: **19 fases, 71 ondas, 2.785 blocos, 9.409 XP**.
+- Save **v3**; `campaignComplete` continua significando “Mundo I concluído” e
+  libera o Endless. O clear dos Mundos II/III é derivado de `phases`.
+
+#### Blocos e elementos dos mundos novos
+
+- Blocos: `alloy` (HP 4), `bastion` (HP 5), `entangled`, `relay`, `phased`,
+  `plated`, `fused`, `splitting`.
+- Elementos: `press` (AABB vertical), `belt` (gira o vetor preservando o
+  módulo) e `rail` (acelera até o hard cap).
+- Regras: `noMultiball` (uma bola) e `gust` (aceleração lateral normalizada
+  para preservar a velocidade).
+- Chefes novos usam os padrões `spread`, `charger`, `aimed`, `matron`,
+  `riveter` e `engine`, reutilizando a entidade de chefe existente.
+
+#### Mapas de seleção por mundo
+
+Cada mundo tem seu próprio mapa-trilha em `390×900`, com quatro camadas
+parallax (0.6/0.8/1.0/1.15) e paleta própria. O header traz as pílulas
+`I / II / III`; tutorial e nó ∞ existem apenas no Mundo I. Em `?debug=1`, todas
+as fases e mundos aparecem desbloqueados e o sheet permite escolher a onda
+inicial.
 
 ### Zoom dinâmico do campo
 
@@ -266,13 +313,13 @@ Não é zoom de câmera (isso quebraria o mapeamento de input). É uma **escala 
 | Momento | Decisão confirmada |
 |---|---|
 | Dentro da run | Perks e níveis formam uma build temporária. A derrota descarta a run. |
-| Entre fases | Progressão sequencial: vencer uma fase desbloqueia a próxima. O tutorial libera o level 1; as fases 4–6 desbloqueiam em sequência, de 4 para 5 e de 5 para 6. |
+| Entre fases | Progressão sequencial: vencer uma fase desbloqueia a próxima. O tutorial libera o level 1; a fase 6 libera o Mundo II e a fase 12 libera o Mundo III. |
 | Tutorial | Em save novo, `unlockedPhase = 0` (tutorial). Concluir ou pular grava o clear do tutorial e libera o level 1. Save antigo com `unlockedPhase >= 1` continua sem repetir. |
 | Ao perder | Reiniciar a fase perdida imediatamente, sem limite de tentativas; fases já desbloqueadas permanecem disponíveis. |
 | Second Chance | Revive a run uma vez por run, com uma bola. É um perk único; não é uma vida extra por bolinha. Pode coexistir com o rewarded revive (dois revives por run, um de cada). |
-| Modo Endless | Run infinita separada da campanha. O save v2 guarda `endless` com `bestWave`, `bestScore` e `runs`; não altera `unlockedPhase`. |
-| Salvamento | Save schema v2 (`bb.save`), com `unlockedPhase` de 0 a 6 (0 = tutorial), estatísticas por fase e `meta: { sparks, unlocks }`. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
-| Compatibilidade | Saves v1 continuam válidos e migram para v2 com `sparks = 0` e `unlocks = []`; `unlockedPhase` é limitado a 0..6 e campos malformados caem em defaults. |
+| Modo Endless | Run infinita separada da campanha. O save v3 guarda `endless` com `bestWave`, `bestScore` e `runs`; não altera `unlockedPhase`. |
+| Salvamento | Save schema v3 (`bb.save`), com `unlockedPhase` de 0 a 18 (0 = tutorial; 1–6 Mundo I, 7–12 Mundo II, 13–18 Mundo III), estatísticas por fase e `meta: { sparks, unlocks }`. Não retomar uma run interrompida; sair do jogo perde a run ativa. |
+| Compatibilidade | Saves v1 e v2 continuam válidos e migram para v3; `sparks = 0`/`unlocks = []` quando ausentes; `unlockedPhase` é limitado a 0..18 e campos malformados caem em defaults. |
 | Metaprogressão | **Horizontal (v0.6.1):** Sparks desbloqueiam perks no Workshop; não há bônus permanentes de atributos nem poder pago. |
 | Competição | Estatísticas pessoais e recordes por fase; rankings globais e conquistas continuam fora do escopo. |
 
@@ -365,8 +412,8 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 
 - Arte 2D em pixel art colorida, com blocos temáticos que representam materiais e estruturas, em vez de formas geométricas genéricas.
 - **6 temas procedurais:** Crystal Grove, Ruined Halls, Arcane Depths, Frostbound Spire, Emberforge e Void Threshold, com backdrops, silhuetas, parallax, frames e acentos próprios.
-- **Arte procedural dos novos blocos e elementos:** os 9 blocos têm assinatura visual própria; paredes, obstáculos, defletores, portais, movers, rotores e gates são desenhados pelo renderer.
-- **Chefes procedurais:** Frost Sentinel, Ember Warden e Void Herald, com shards e feedback de dano/fase.
+- **Arte procedural dos novos blocos e elementos:** os 17 blocos têm assinatura visual própria; paredes, obstáculos, defletores, portais, movers, rotores, gates, presses, belts e rails são desenhados pelo renderer.
+- **Chefes procedurais:** Frost Sentinel, Ember Warden e Void Herald no Mundo I; Nullframe Warden, Maglev Dreadnought e Lattice Hierophant no Mundo II; Boiler Matron, The Riveter e The Last Engine no Mundo III, com shards e feedback de dano/fase.
 - A leitura não depende só de cor: facetas, material, pips de HP e cracks.
 - A direção sonora continua música eletrônica acelerada, com SFX sintetizados em WebAudio e sem samples licenciados.
 - Reduced motion e budgets de partículas/trails continuam respeitados.
@@ -462,11 +509,28 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 | Gates | 396 testes em 32 arquivos; 37 E2E em 10 spec files; ZIP 0.6.1 local, 20 arquivos |
 | Publicação | 0.6.1 publicada no itch.io/Playgama em 2026-11-12; sem tag/release |
 
+### O que entrou na v0.7.0-dev
+
+| Item | Entrega |
+|---|---|
+| Mundos | II · Neon Lattice (6 fases / 22 ondas) e III · Rustwake (6 fases / 27 ondas) |
+| Totais | 19 fases, 71 ondas, 2.785 blocos, 9.409 XP |
+| Blocos | 8 novos: alloy, bastion, entangled, relay, phased, plated, fused e splitting |
+| Elementos | press, belt e rail |
+| Regras | noMultiball e gust |
+| Chefes | 6 novos, três por mundo, com padrões spread/charger/aimed/matron/riveter/engine |
+| Save | v3, `unlockedPhase` 0..18, migração v1/v2→v3 |
+| Velocidade | overlap entre mundos e teto por mundo 780/900/920; hard cap 1.100 para rails |
+| Mapas | um mapa-trilha por mundo, pílulas I/II/III no header |
+| Debug | todas as fases desbloqueadas em `?debug=1` e seletor de onda no sheet |
+| Economia | +30 Sparks no primeiro clear de cada mundo |
+| Gates | 419 unit, 43 E2E, validação de conteúdo verde |
+
 ### O que continua fora
 
 - Bônus permanentes de atributos, leaderboards e conquistas.
 - Cosméticos, desafios com recompensa e reroll de oferta.
-- Mundos sci-fi/industrial, localização e landscape jogável.
+- Mundo IV, localização e landscape jogável.
 - **Moldura/letterbox desktop:** decisão do dono é não fazer nesta linha; o shell portrait centralizado é intencional.
 - Editor de fases e pipeline procedural.
 - Backend, contas e cloud save.
@@ -477,7 +541,7 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 ### Distribuição
 
 - Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
-- **Um build, 6 fases:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração. O Bridge é **local** no boot (`./playgama-bridge.js`), sem request ao CDN da Playgama.
+- **Um build, 3 mundos:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração. O Bridge é **local** no boot (`./playgama-bridge.js`), sem request ao CDN da Playgama.
 - O **itch.io recebeu a `0.6.1`** manualmente em 2026-11-12; `0.1.0-mvp` é histórica.
 - A **0.6.1 é a linha atual** e está publicada no itch.io e no sandbox da Playgama; testes básicos ok.
 - **Playgama:** build 0.6.1 em sandbox, com milestones pendentes; medir retenção/ads da nova build.
@@ -498,7 +562,7 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 - Jogo totalmente gratuito; receita somente de publicidade.
 - Modelo escolhido: anúncios convencionais conforme cada portal e anúncios recompensados opcionais que concedem uma vantagem ao jogador.
 - **Interstitials em pausas naturais (política 0.5.1, mantida na 0.6.1):**
-  - campanha: somente quando há próxima onda e a onda limpa é múltipla de 3 — na prática, fase 5 após a onda 3 e fase 6 após a onda 3; nunca no fim da fase;
+  - campanha: somente quando há próxima onda e a onda limpa é múltipla de 3 — em qualquer mundo, nunca no fim da fase; o tutorial não tem ads;
   - Endless: a cada 4 ondas;
   - tutorial: nenhum ad;
   - saída dos results (Next/Retry/Menu): se não houve outro interstitial nos últimos 60 s; após rewarded revive, o ad dos results ainda pode aparecer na segunda morte;
@@ -519,7 +583,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 - Expansão da metaprogressão: cosméticos, desafios com recompensa e reroll de oferta.
 - Outros usos de rewarded ads (bônus, rerolls) após definir benefícios e limites para preservar o equilíbrio.
 - Rankings globais e conquistas, condicionados aos recursos dos portais.
-- Mundos temáticos sci-fi/futurista e industrial/pós-apocalíptico.
+- Mundo IV e expansões temáticas além de Neon Lattice/Rustwake.
 - Localização para outros idiomas.
 - Modo landscape jogável.
 - Editor de fases ou pipeline procedural.
@@ -530,7 +594,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 
 | Tema | Pendência / observação |
 |---|---|
-| Conteúdo | A campanha de 6 fases / 20 ondas está fechada; com o tutorial, são 7 cards / 22 ondas. Não há novas fases da campanha nesta versão. O Endless é gerado proceduralmente. |
+| Conteúdo | A campanha de 3 mundos / 18 fases / 69 ondas está fechada; com o tutorial, são 19 fases / 71 ondas. O Endless é gerado proceduralmente. |
 | Tutorial | Implementado com 2 ondas, 16 blocos, 32 XP e 2 level ups; skip e coach marks cobertos por testes. Falta validar compreensão em teste humano. |
 | Endless | Uma fase infinita implementada; balanceamento das ondas altas e dos chefes ainda depende de playtest humano. |
 | Ondas | Distribuição decidida: tutorial 2; campanha 2/3/3/3/4/5. A fase 1 encurtada e as ondas 4–6 estão implementadas e validadas. |
@@ -539,7 +603,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | Save v2 | Implementado com `meta: { sparks, unlocks }` e inalterado na 0.6.1; migração v1→v2 coberta por testes. Falta validar save antigo real no navegador. |
 | Workshop | Implementado com card de progressão, quatro tiers, 12 cards, custos, compra, persistência, contagem e barra; E2E e layout 320/390 cobertos. Falta teste em iframe de portal. |
 | Chefes | Três chefes definidos (Frost Sentinel, Ember Warden, Void Herald) com HP, padrão, shards e corrosão. Ajuste de dificuldade segue aberto para playtest. |
-| Regras de onda | `timeLimit` e `noLaser` implementados nas ondas definidas. Novas combinações de desafio ficam para o futuro. |
+| Regras de onda | `timeLimit`, `noLaser`, `noMultiball` e `gust` implementados nas ondas definidas. Novas regras ficam para o futuro. |
 | Zoom | Escala 0,68–1,0 implementada e validada no conteúdo. Testar legibilidade em telas pequenas reais. |
 | Balanceamento | Ainda depende de playtest humano; o bot de QA não substitui jogador. |
 | Rewarded ads | Revive uma vez por run implementado; outros usos ficam para o futuro. |
@@ -580,6 +644,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.6` | 2026-11-11 | v0.5.1: tutorial jogável/pulável com 2 ondas e gate do level 1; campanha em 20 ondas (2/3/3/3/4/5); 743/1.809 com tutorial; edge assist do toque; gate explícito do laser; nova política de ads; aviso de storage; segunda reprovação da CrazyGames e decisão de não fazer moldura desktop. |
 | `1.7` | 2026-11-12 | v0.6.0 local: perks Momentum, Bombardier, Boss Slayer e Hot Streak; 10 starters e 9 unlocks; Sparks e Workshop; save v2 com migração; ofertas filtradas; gates com 375 testes e 36 E2E. Build não publicada; 0.5.1 segue no itch.io/Playgama; CrazyGames pausado até 2026-11-26. |
 | `1.8` | 2026-11-12 | v0.6.1 publicada no itch.io/Playgama: Tier 4 com Overkill, Shield Bash e Conductor; catálogo em 22 perks e 12 unlocks em quatro tiers; economia por onda, combo, clear/first clear, teto 250 e anti-farm; chip/toast no HUD; results com breakdown; Workshop como card com contagem e progresso; gates com 396 testes e 37 E2E. Testes básicos ok; sem tag/release. |
+| `1.9` | 2026-11-16 | v0.7.0-dev local: Mundos II (Neon Lattice) e III (Rustwake), 18 fases/71 ondas, 8 blocos e 3 elementos novos, 6 chefes, save v3, overlap de velocidade entre mundos, hard cap 1.100 para rails, mapas por mundo com pílulas I/II/III e debug de ondas. Gates com 419 unit e 43 E2E; não publicada, sem tag/release. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |

@@ -6,17 +6,22 @@ usado como fonte de decisão.
 
 ## Comece por aqui
 
-1. **[Handoff v0.6.1](handoff-v0.6.1.md)** — estado atual do jogo, arquitetura,
+1. **[Handoff v0.7.0](handoff-v0.7.0.md)** — estado atual do jogo, arquitetura,
    invariantes, gates, portais, riscos e próximos passos.
-2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.8).
+2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.9).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente na `main`.
-4. **[Guia único de publicação](spec-tecnica-publicacao.md)** — estratégia,
+4. **[Mundos II/III — implementação](design/worlds-II-III-implementation.md)** —
+   escopo, conteúdo, save v3, mapas e debug da v0.7.0-dev.
+5. **[Guia único de publicação](spec-tecnica-publicacao.md)** — estratégia,
    arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
    CrazyGames, ads, save, metadata, QA e release.
-5. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo de 22
+6. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo de 22
    perks, Tier 4, economia de Sparks e meta horizontal.
-6. **[Spec — mapa de seleção de fases](phase-select-map-spec.md)** — rework do
-   mundo 1 (mapa + parallax); **implementado**, gates verdes.
+7. **[Proposta — rework e expansão de perks](design/perks-rework-v0.7.md)** —
+   26 perks, 8 starters + 18 unlocks, 4 adições, 2 substituições e 12 tunes;
+   **proposta, nada implementado**.
+8. **[Spec — mapa de seleção de fases](phase-select-map-spec.md)** — rework do
+   mapa + parallax e expansão multi-mundo; **implementado**, gates verdes.
    Backup do estado anterior em [`design/phase-select-map-backup-v1.md`](design/phase-select-map-backup-v1.md).
 
 ## Operação e release

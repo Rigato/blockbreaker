@@ -8,8 +8,9 @@ técnica ou a ordem de entrada.
 **Como usar:** §0–§1 decidem a estratégia; §2–§4 implementam; §5–§9 validam e
 publicam; §10 é o checklist; §11 são anti-padrões; §12 é o case study.
 
-> **Base:** aprendizados do Bricklike até 2026-11-11. Estado na data: 0.5.1 no
-> itch.io e no sandbox da Playgama; CrazyGames em review; GameFlare bloqueado por
+> **Base:** aprendizados do Bricklike até 2026-11-16. Estado na data: 0.6.1
+> publicada no itch.io e no sandbox da Playgama; 0.7.0-dev local, com Mundos
+> II/III e save v3; CrazyGames pausado até 2026-11-26; GameFlare bloqueado por
 > acesso à conta; nenhuma tag ou GitHub Release.
 >
 > Este arquivo consolida o antigo `spec-tecnica-publicacao.md` e o
@@ -527,8 +528,9 @@ npm run package
 npm run test:e2e
 ```
 
-Referência Bricklike 0.5.1: **329 testes**/29 arquivos; **31 E2E**/9 specs; **7
-níveis, 22 ondas, 743 blocos, 1.809 XP**.
+Referência Bricklike 0.7.0-dev: **419 testes**/34 arquivos; **43 E2E**/12
+specs; **19 fases, 71 ondas, 2.785 blocos, 9.409 XP**. A referência histórica
+0.5.1 era 329 testes/29 arquivos, 31 E2E/9 specs e 7 níveis/22 ondas.
 
 ### 9.2 Matriz de teste
 

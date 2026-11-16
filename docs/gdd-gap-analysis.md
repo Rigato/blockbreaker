@@ -1,13 +1,15 @@
-# Bricklike — GDD × estado atual (2026-11-12)
+# Bricklike — GDD × estado atual (2026-11-16)
 
-Comparação entre o GDD v1.8 e o build de desenvolvimento `0.6.1` na `main`.
+Comparação entre o GDD v1.9 e o build de desenvolvimento `0.7.0` na `main`.
 Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
 
 A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12; não
 há tag nem GitHub Release. CrazyGames está pausado até 2026-11-26; GameFlare
-segue bloqueado.
+segue bloqueado. A **v0.7.0-dev** (2026-11-16) adiciona Mundos II/III, save v3,
+9 chefes, 17 blocos, 10 elementos e debug de ondas; está implementada localmente,
+sem publicação.
 
 ## Implementado
 
@@ -17,12 +19,21 @@ segue bloqueado.
 | Gate do tutorial | save novo `unlockedPhase = 0`; concluir/pular libera o level 1 | implementado e testado |
 | Save antigo | `unlockedPhase >= 1` continua sem repetir o tutorial | implementado e testado no parse |
 | Coach marks | 5 modais pausados com Got it: mover/lançar, XP/perk, blocos especiais, chefes e Endless | implementado |
-| Campanha | 6 fases, 20 ondas (2/3/3/3/4/5) | implementado e validado |
-| Totais | 743 blocos / 1.809 XP com tutorial; 727 / 1.777 na campanha pura | validado |
+| Campanha | 6 fases, 20 ondas (2/3/3/3/4/5) no Mundo I | implementado e validado |
+| Mundos II/III | Neon Lattice 6 fases/22 ondas; Rustwake 6 fases/27 ondas | implementado e validado |
+| Totais | 2.785 blocos / 9.409 XP; 19 fases / 71 ondas com tutorial | validado |
+| Save v3 | `unlockedPhase` 0..18; migração v1/v2→v3 | implementado e testado |
+| Blocos novos | alloy, bastion, entangled, relay, phased, plated, fused, splitting | implementado e testado |
+| Elementos novos | press, belt, rail | implementado e testado |
+| Regras novas | noMultiball, gust | implementado e testado |
+| Chefes novos | Nullframe Warden, Maglev Dreadnought, Lattice Hierophant, Boiler Matron, The Riveter, The Last Engine | implementado e testado |
+| Mapas multi-mundo | um mapa por mundo, pílulas I/II/III | implementado e E2E |
+| Debug de ondas | todas as fases/mundos em `?debug=1` + seletor de onda | implementado e E2E |
+| Clear de mundo | +30 Sparks no primeiro clear da fase final | implementado |
 | Blocos | 9 tipos, incluindo 6 especiais | implementado |
 | Elementos | 7 tipos (wall, obstacle, deflector, portal, mover, rotor, gate) | implementado |
 | Chefes | Frost Sentinel, Ember Warden, Void Herald | implementado |
-| Desafios | `timeLimit` e `noLaser` | implementado |
+| Desafios | `timeLimit`, `noLaser`, `noMultiball` e `gust` | implementado |
 | Zoom de layout | escala 0,68–1,0 | implementado |
 | Perks | 22 no catálogo (10 starters + 12 unlocks), com níveis e sinergias | implementado |
 | Perks reworkadas | Momentum, Bombardier, Boss Slayer e Hot Streak | implementado e testado |
@@ -41,14 +52,14 @@ segue bloqueado.
 | Metaprogressão | horizontal, sem bônus permanentes de atributos | implementado |
 | Workshop | card no menu com ícone, saldo, badge, `X / 22 unlocked`, `N left` e barra; diálogo com 4 tiers e 12 cards | implementado e testado |
 | Ofertas filtradas | perks bloqueadas nunca aparecem; compradas entram na pool; Conductor exige Prism Laser | implementado e testado |
-| Save v2 | `version: 2`, `meta: { sparks, unlocks }`, migração v1→v2; inalterado na 0.6.1 | implementado e testado |
+| Save v3 | `version: 3`, `unlockedPhase` 0..18, migração v1/v2→v3 | implementado e testado |
 | Encerramentos | epílogos, rank S/A/B, final de campanha e epílogo do tutorial | implementado |
 | Endless | run infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas | implementado |
 | Save de campanha | `unlockedPhase` 0..6, `campaignComplete`, `endless`, `phases` | implementado |
 | Settings | som, música e screen shake | implementado |
 | Aviso de storage | “Progress may not be saved” + popup em memória/fallback | implementado |
 | Desbloqueio do Endless | ao concluir a campanha; tutorial não conta | implementado |
-| Menu/seleção | Campaign/Endless, 7 cards com tutorial, fundo animado, card do Workshop | implementado |
+| Menu/seleção | Campaign/Endless, mapas por mundo com 19 fases, fundo animado, card do Workshop | implementado |
 | How to Play | diálogo de 5 páginas com screenshots | implementado |
 | About Us | logomarca e texto do estúdio | implementado |
 | HUD legível | compacto em iframes estreitos | implementado |
@@ -72,7 +83,7 @@ segue bloqueado.
 | Reroll e ban de perk | backlog | não implementar sem antes medir a pool atual |
 | Leaderboard do Endless | backlog | ranking global continua fora |
 | Rankings globais / conquistas | backlog | dependem dos recursos dos portais |
-| Mundos sci-fi/industrial | backlog | novos temas e conteúdo |
+| Mundo IV | backlog | próximo tema; Mundos II/III já implementados |
 | Localização | backlog | catálogo de strings por locale antes |
 | Landscape jogável | backlog | hoje só portrait + guarda de rotação |
 | Moldura/letterbox desktop | decisão | **não fazer nesta linha**; shell portrait centralizado é intencional. Risco residual em iframe desktop. |
@@ -80,8 +91,8 @@ segue bloqueado.
 | Backend, contas e cloud save | backlog | sem servidor próprio |
 | Full Launch CrazyGames | backlog | Data/User modules, entrada direta no gameplay, progresso na conta |
 | Poki, GameDistribution, Famobi | backlog | avaliar depois de retenção provada |
-| Novas combinações de desafio | pendência | além de `timeLimit` e `noLaser` |
-| Conteúdo além das 6 fases | não planejado no GDD | campanha fechada; Endless cobre o longo prazo |
+| Novas combinações de desafio | parcial | noMultiball e gust implementados; avaliar novas regras |
+| Conteúdo além dos 3 mundos | backlog | campanha atual fechada em 18 fases; Mundos II/III implementados |
 
 ## Pendências de validação (não são features)
 
@@ -113,19 +124,15 @@ segue bloqueado.
 
 ## Leitura rápida
 
-O GDD v1.8 e o build **estão alinhados em conteúdo de campanha**: as 6 fases, o
-tutorial, os 9 blocos, 7 elementos, 3 chefes, 22 perks e o Endless estão
-implementados. A `0.6.0` fechou a lacuna de **metaprogressão horizontal** com 10
-starters, 9 unlocks, Sparks, Workshop e save v2. A `0.6.1` completou o **Tier 4**
-com Overkill, Shield Bash e Conductor, levou o catálogo a 12 unlocks em quatro
-tiers, reformulou a **economia de Sparks** (fórmula por onda, combo, clear/first
-clear, teto 250 e anti-farm), adicionou **chip/toast no HUD**, **breakdown nos
-results** e promoveu o **Workshop** a card com contagem e progresso. Tudo isso
-está no código e coberto por testes.
+O GDD v1.9 e o build local **estão alinhados**: 19 fases (tutorial + 3 mundos),
+71 ondas, 17 blocos, 10 elementos, 9 chefes, 22 perks, Endless, save v3 e
+metaprogressão horizontal. A `0.7.0-dev` adicionou Mundos II/III, overlap de
+velocidade, belt/rail/gust, mapas por mundo e debug de ondas. Tudo isso está no
+código e coberto por 419 testes unitários + 43 E2E.
 
-O que falta é majoritariamente **validação humana** do Tier 4, da economia e do
-card do Workshop, **distribuição** (a 0.6.1 já está no itch.io e no sandbox da
-Playgama; retomar CrazyGames após 2026-11-26 e resolver GameFlare) e **revisão
-dos assets de loja da 0.6.1**. A moldura desktop
-foi deliberadamente descartada; o risco de apresentação em iframe desktop
-continua registrado, mas não será resolvido por letterbox nesta linha.
+O que falta é majoritariamente **validação humana** das 69 ondas de campanha,
+dos 6 chefes novos, do balance de Spark e do feel de belt/rail/gust, além de
+**distribuição** (a 0.6.1 ainda é a build publicada; a 0.7.0 não foi publicada)
+e **revisão de assets de loja**. A moldura desktop foi deliberadamente
+descartada; o risco de apresentação em iframe desktop continua registrado, mas
+não será resolvido por letterbox nesta linha.

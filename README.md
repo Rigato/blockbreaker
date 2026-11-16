@@ -2,23 +2,42 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.6.1 — Tier 4 perks, Sparks economy and Workshop card**: the
-**v0.2.0 campaign base** (6 phases, 20 waves, 9 block types, 7 phase elements,
-3 bosses, now 22 perks), the **v0.3.0 Endless mode**, the **v0.4.0
-presentation/menu/HUD/ads** pass, the **v0.5.1 tutorial, touch edge assist,
-laser gate and revised ad cadence**, the **v0.6.0 perk reworks, first Sparks
-economy, perk unlocks and save v2**, and the **v0.6.1 Tier 4 perks, reworked
-Sparks economy and Workshop progression card**.
+line is **v0.7.0-dev — Worlds II/III, save v3 and the physical kit**: the
+**v0.2.0 campaign base**, the **v0.3.0 Endless mode**, the **v0.4.0
+presentation/menu/HUD/ads** pass, the **v0.5.1 tutorial/touch/laser/ads** pass,
+the **v0.6.x metaprogression and Tier 4**, and the **v0.7.0 two new worlds**
+(Neon Lattice and Rustwake), 18 campaign phases, 9 bosses, 17 block types,
+10 elements and per-world trail maps.
 
 The **v0.6.1 build is live** on itch.io and in the Playgama sandbox after basic
-testing. The **v0.5.1 build** is the previous release. CrazyGames is paused until
-2026-11-26 after the 0.5.1 submission; GameFlare remains blocked by account
-access.
-No tag or GitHub Release has been created. The GitHub Pages review build tracks
-`main`; this phase did not commit or push, so it still shows v0.6.0.
+testing. The **v0.7.0-dev line is local and unpublished**. CrazyGames is paused
+until 2026-11-26 after the 0.5.1 submission; GameFlare remains blocked by account
+access. No tag or GitHub Release has been created.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
+
+## v0.7.0-dev — Worlds II/III, save v3 and physical kit
+
+- **Three worlds:** World I Crystal Vale (6 phases / 20 waves), World II Neon
+  Lattice (6 / 22) and World III Rustwake (6 / 27). The campaign now has
+  **18 phases + tutorial, 71 waves, 2,785 blocks and 9,409 XP**.
+- **New blocks:** alloy, bastion, entangled, relay, phased, plated, fused and
+  splitting. **New elements:** press, belt and rail. **New rules:** noMultiball
+  and gust.
+- **New bosses:** Nullframe Warden, Maglev Dreadnought, Lattice Hierophant,
+  Boiler Matron, The Riveter and The Last Engine; 9 bosses total.
+- **Speed overlap:** World II opens slower than World I ended (640 vs 780) and
+  World III opens slower than World II ended (700 vs 896); authored caps are
+  780/900/920 with a 1,100 hard cap for rails.
+- **Maps:** one parallax trail map per world, with I/II/III pills in the header.
+  The tutorial and Endless ring live only in World I.
+- **Save v3:** `unlockedPhase` 0..18, v1/v2 migration, world II opens after
+  phase 6 and world III after phase 12. Endless still opens after phase 6.
+- **Debug:** `?debug=1` unlocks every phase/world and the phase sheet exposes a
+  `Start wave` picker.
+- **Gates:** 419 unit tests / 34 files, 43 E2E / 12 spec files, content
+  validation green; the package/release step was not run.
 
 ## v0.6.1 — Tier 4 perks, Sparks economy and Workshop card
 

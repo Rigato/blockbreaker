@@ -1,7 +1,8 @@
 # Spec — Rework do seletor de fases: mapa-trilha (Direção A + parallax)
 
-**Status:** implementada em 2026-11-14; bateria de gates completa verde
-(typecheck, 397 unit, validate:content, bridge, build, 41 e2e, package).
+**Status:** implementada em 2026-11-14 e expandida para multi-mundo em
+2026-11-16; bateria de gates verde (typecheck, 419 unit, validate:content,
+bridge, build, 43 e2e). O `package` não foi executado nesta linha.
 **Pré-requisito:** [`design/phase-select-map-backup-v1.md`](design/phase-select-map-backup-v1.md)
 (estado pré-parallax) e a decisão de seguir para implementação.
 **Escopo:** apenas `src/ui/PhaseSelect.ts` + CSS da tela (+ testes). Nenhum
@@ -240,3 +241,35 @@ Regras do contrato:
 
 - `docs/design/phase-select-map-mockup.html` — **mockup aprovado** (fonte da
   arte: SVGs das 4 camadas, paleta, animações). Extrair daqui para o código.
+
+---
+
+## 11. Expansão multi-mundo (v0.7.0)
+
+A implementação de 2026-11-16 estendeu o mapa-trilha para três mundos.
+
+- **Um mapa por mundo**, não um macro-mapa. `WORLD1_MAP`, `WORLD2_MAP` e
+  `WORLD3_MAP` implementam a interface `MapDef` de `src/ui/map/types.ts`.
+- O header troca o slot único `II` selado por três pílulas `I / II / III`
+  (`role="tablist"`), com estados `is-active`, `is-locked` e `is-clear`.
+- Em ≤430 px as pílulas mostram só o numeral; o nome do mundo ativo aparece no
+  sheet e no `aria-label`. Alvos continuam ≥44 px.
+- Tutorial e nó ∞ existem apenas no Mundo I; os Mundos II/III têm seis nós e um
+  portal de chegada decorativo.
+- O progresso `N / M` e os segmentos são por mundo.
+- O sheet inclui o mundo no subtítulo e o rank usa o **índice local** da fase.
+- Em `?debug=1`, todas as fases e mundos aparecem desbloqueados e o sheet
+  mostra `Start wave` com um `<select>` de ondas. `onStart(phaseId,
+  startWaveIndex)` leva a escolha ao `GameCommands.startPhase`.
+- O painel de debug fica atrás do mapa (`z-index`), para não interceptar as
+  pílulas de mundo.
+- `data-phase-index` continua global (1..18); `data-world-id` identifica o
+  mundo. Os testes E2E usam ambos.
+
+Critérios de aceite adicionais:
+
+1. 7 nós no Mundo I (tutorial + 6), 6 nós nos Mundos II/III.
+2. Pílulas I/II/III visíveis e operáveis em 320/390/430 e 800×450.
+3. Mundo bloqueado abre o popover `Sealed — finish <mundo anterior>`.
+4. Troca de mundo remonta as quatro camadas e centraliza o nó atual.
+5. Em debug, escolher uma onda e tocar Play inicia a fase naquela onda.
