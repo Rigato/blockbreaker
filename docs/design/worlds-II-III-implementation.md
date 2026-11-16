@@ -169,7 +169,7 @@ Mundo III: `(66,806) (298,708) (118,596) (300,480) (112,346) (262,168)`.
 | `node scripts/validate-bridge-config.mjs` | verde |
 | `npm run build` | verde |
 | `npm run test:e2e` | 43 testes / 12 spec files |
-| `npm run package` | não executado; publicação continua manual e não aprovada |
+| `npm run package` | não executado localmente; CI gerou artifact web ZIP, sem publicação |
 
 Cobertura nova principal:
 

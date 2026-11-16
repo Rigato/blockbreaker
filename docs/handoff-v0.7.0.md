@@ -171,10 +171,11 @@ npm run test:e2e
 | Bridge config | ✅ schema 2.4.1, sem URLs externas |
 | `npm run build` | ✅ bundle Vite |
 | `npm run test:e2e` | ✅ 43 testes / 12 spec files |
-| `npm run package` | não executado; publicação manual e não aprovada |
+| `npm run package` | não executado localmente; CI gerou artifact web ZIP, sem publicação |
 
-> O `package` não foi rodado porque esta linha não foi publicada e o dono não
-> pediu release. Nenhuma tag/release foi criada.
+> O `package` local não foi rodado porque esta linha não foi publicada. O CI
+> empacota o build e sobe o artifact, mas não publica em portal. Nenhuma
+> tag/release foi criada.
 
 ---
 

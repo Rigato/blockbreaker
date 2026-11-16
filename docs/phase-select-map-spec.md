@@ -2,7 +2,8 @@
 
 **Status:** implementada em 2026-11-14 e expandida para multi-mundo em
 2026-11-16; bateria de gates verde (typecheck, 419 unit, validate:content,
-bridge, build, 43 e2e). O `package` não foi executado nesta linha.
+bridge, build, 43 e2e). O `package` local não foi executado; o CI gerou o
+artifact web ZIP sem publicar.
 **Pré-requisito:** [`design/phase-select-map-backup-v1.md`](design/phase-select-map-backup-v1.md)
 (estado pré-parallax) e a decisão de seguir para implementação.
 **Escopo:** apenas `src/ui/PhaseSelect.ts` + CSS da tela (+ testes). Nenhum
