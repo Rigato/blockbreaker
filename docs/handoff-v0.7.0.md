@@ -109,11 +109,15 @@
 
 ### 2.8 Tutorial simplificado (2026-11-23)
 
-- `tutw1`: 4 blocos de 1 HP; destruir 3 (75%) enche a barra de tutorial e abre
-  a primeira escolha de perk.
+- `tutw1`: 4 blocos de 1 HP, quatro linhas abaixo do topo; destruir 3 (75%)
+  enche a barra de tutorial e abre a primeira escolha de perk.
 - `tutw2`: 5 blocos de 1 HP, 2 de 2 HP e 1 explosivo.
 - `GAME_CONFIG.progression.tutorialFirstLevelXp = 3`; a curva normal (8/20/26)
   volta a valer depois do level 2. `RunState.startRun` aceita `firstLevelXp`.
+- Paddle do tutorial **2× mais largo** (`GAME_CONFIG.tutorial`).
+- Quando resta um bloco, a bola é levemente girada na direção dele sem mudar a
+  velocidade (`lastBlockMagnetTurnRate`); a UI desenha anel e tether. A regra
+  vive em `RunModifiers`, pronta para virar perk depois.
 - Coach marks reduzidos de 5 para 2 (mover/lançar e blocos especiais); o
   level-up overlay ensina a perk sem um coach mark extra. Chefes/Endless ficam
   no How to Play.
@@ -121,6 +125,14 @@
   em contraste alto, ambos com 44 px de toque.
 - Totais: 12 blocos, 15 XP, 1 level up; validador permite 1 level up só no
   tutorial.
+
+### 2.9 Feedback visual de dano (2026-11-23)
+
+- Giant Ball passou de +15% para **+40% de raio por nível** (máx. 2, +80%).
+- A bola usa uma rampa fixa por dano-base: branco (1) → amarelo (2) → laranja
+  (3) → vermelho (4) → roxo (5+). Glow e rastro usam a mesma cor; buffs
+  temporários não trocam a cor.
+- `BALL_DAMAGE_COLORS` / `ballColorForDamage` ficam em `render/themes.ts`.
 
 ---
 
@@ -182,7 +194,7 @@ npm run test:e2e
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | ✅ |
-| `npm test` | ✅ 420 testes / 34 arquivos |
+| `npm test` | ✅ 424 testes / 34 arquivos |
 | `npm run validate:content` | ✅ 19 fases / 71 ondas / 2.781 blocos / 9.392 XP |
 | Bridge config | ✅ schema 2.4.1, sem URLs externas |
 | `npm run build` | ✅ bundle Vite |
@@ -199,9 +211,10 @@ npm run test:e2e
 
 1. Abra `?debug=1&resetSave=1`.
 2. No menu, abra **Campaign**. As pílulas I/II/III devem estar todas ativas.
-3. Com save novo, jogue o tutorial: confira 4 blocos de 1 HP na onda 1, a
-   primeira perk após 3 blocos e o explosivo na onda 2; o skip deve estar
-   visível e com toque confortável em 320 px.
+3. Com save novo, jogue o tutorial: confira 4 blocos de 1 HP quatro linhas
+   abaixo, o paddle 2×, a primeira perk após 3 blocos e o explosivo na onda 2;
+   deixe um bloco vivo para ver o anel/ímã. O skip deve estar visível e com
+   toque confortável em 320 px.
 4. Troque para o Mundo II e III; confira 6 nós em cada mapa.
 5. Selecione uma fase e escolha a onda inicial no seletor `Start wave`.
 6. Teste:
@@ -223,7 +236,7 @@ npm run test:e2e
 | Área | Estado | Ação |
 |---|---|---|
 | Playtest humano | não feito | testar 69 ondas de campanha, 9 chefes, belt/rail/gust e platinas |
-| Tutorial novo | 2 ondas / 15 XP / 1 perk | medir tempo até a primeira perk, skip e leitura em 320 px |
+| Tutorial novo | 2 ondas / 15 XP / 1 perk / paddle 2× / ímã | medir tempo até a primeira perk, skip, leitura em 320 px e se o ímã resolve o último bloco |
 | Balance W2/W3 | validado por conteúdo | calibrar HP, XP e duração com playtest |
 | Velocidade 896/920 | implementada | testar legibilidade em 320 px e hardware baixo |
 | Hard cap 1.100 | implementado | validar rails em ondas densas e com multiball |

@@ -15,6 +15,7 @@ import {
   type TrajectoryPoint,
 } from './trajectory';
 import {
+  ballColorForDamage,
   FX_COUNTS,
   hexToCss,
   PARTICLE_BUDGET,
@@ -981,12 +982,21 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
   private updateTrails(dt: number): void {
     if (!this.world.isRunning || this.world.balls.length === 0) return;
     const interval = this.reducedMotion ? 90 : 32;
-    const life = this.reducedMotion ? 110 : 180;
+    const damage = this.world.modifiers.ballDamage;
+    const color = ballColorForDamage(damage);
+    const life = (this.reducedMotion ? 110 : 180) + Math.min(4, damage) * 18;
+    const radiusScale = 0.8 + Math.min(4, damage) * 0.06;
     this.trailTimer += dt;
     if (this.trailTimer < interval) return;
     this.trailTimer %= interval;
     for (const ball of this.world.balls) {
-      this.effects.emitTrail(ball.x, ball.y, ball.radius * 0.85, this.theme.accent, life);
+      this.effects.emitTrail(
+        ball.x,
+        ball.y,
+        ball.radius * radiusScale,
+        color,
+        life,
+      );
     }
   }
 
@@ -1699,16 +1709,38 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
       graphics.strokeCircle(fx.x, fx.y, fx.radius * (0.55 + progress * 0.9));
     }
 
-    // Balls.
+    // Tutorial magnet: ring the last block and tether live balls to it.
+    const magnetRate = world.modifiers.lastBlockMagnetTurnRate;
+    if (magnetRate > 0 && world.blocks.length === 1) {
+      const target = world.blocks[0]!;
+      const targetX = target.left + target.width / 2;
+      const targetY = target.top + target.height / 2;
+      const pulse = 0.5 + 0.5 * Math.sin(world.timeMs / 180);
+      graphics.lineStyle(2, 0xffd479, 0.45 + 0.25 * pulse);
+      graphics.strokeCircle(
+        targetX,
+        targetY,
+        Math.max(target.width, target.height) * 0.68 + pulse * 3,
+      );
+      for (const ball of world.balls) {
+        if (ball.stuck) continue;
+        graphics.lineStyle(1, 0xffd479, 0.1 + 0.08 * pulse);
+        graphics.lineBetween(ball.x, ball.y, targetX, targetY);
+      }
+    }
+
+    // Balls: the core and trail climb a damage colour ramp.
+    const ballDamage = world.modifiers.ballDamage;
+    const ballColor = ballColorForDamage(ballDamage);
     for (const ball of world.balls) {
       const blink = ball.spawnGraceMs > 0 && Math.floor(time / 60) % 2 === 0;
-      graphics.fillStyle(this.theme.accent, 0.16);
+      graphics.fillStyle(ballColor, 0.16);
       graphics.fillCircle(ball.x, ball.y, ball.radius * 2.1);
-      graphics.fillStyle(this.theme.accent, 0.32);
+      graphics.fillStyle(ballColor, 0.32);
       graphics.fillCircle(ball.x, ball.y, ball.radius * 1.35);
-      graphics.fillStyle(0xffffff, blink ? 0.6 : 1);
+      graphics.fillStyle(ballColor, blink ? 0.6 : 1);
       graphics.fillCircle(ball.x, ball.y, ball.radius);
-      graphics.fillStyle(0x9fdcff, 0.95);
+      graphics.fillStyle(ballDamage > 1 ? 0xffffff : 0x9fdcff, 0.95);
       graphics.fillCircle(ball.x - ball.radius * 0.28, ball.y - ball.radius * 0.3, ball.radius * 0.42);
 
       if (ball.stuck && ball.sticky) {

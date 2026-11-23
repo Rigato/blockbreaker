@@ -18,6 +18,7 @@ import {
   type TrajectoryPoint,
 } from '../src/render/trajectory';
 import {
+  ballColorForDamage,
   clampParticleRequest,
   FX_COUNTS,
   PARTICLE_BUDGET,
@@ -63,6 +64,19 @@ describe('phase themes', () => {
       expect(accent).toBeGreaterThan(sky + 0.15);
       expect(relativeLuminance(theme.frameBright)).toBeGreaterThan(sky);
     }
+  });
+});
+
+describe('ball damage ramp', () => {
+  it('moves white → yellow → orange → red → purple as damage grows', () => {
+    expect(ballColorForDamage(1)).toBe(0xffffff);
+    expect(ballColorForDamage(2)).toBe(0xffd84d);
+    expect(ballColorForDamage(3)).toBe(0xff9f43);
+    expect(ballColorForDamage(4)).toBe(0xff5f5f);
+    expect(ballColorForDamage(5)).toBe(0xc77dff);
+    expect(ballColorForDamage(99)).toBe(0xc77dff);
+    expect(ballColorForDamage(0)).toBe(0xffffff);
+    expect(ballColorForDamage(Number.NaN)).toBe(0xffffff);
   });
 });
 

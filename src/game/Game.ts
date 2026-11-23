@@ -423,6 +423,12 @@ export class BlockBreakerGame implements GameCommands {
       firstLevelXp: phase.tutorial
         ? GAME_CONFIG.progression.tutorialFirstLevelXp
         : undefined,
+      paddleWidthMultiplier: phase.tutorial
+        ? GAME_CONFIG.tutorial.paddleWidthMultiplier
+        : undefined,
+      lastBlockMagnetTurnRate: phase.tutorial
+        ? GAME_CONFIG.tutorial.lastBlockMagnetTurnRate
+        : undefined,
     });
     this.loadPhaseWave(this.currentWaveIndex);
     this.scene.setPhase(phase.id, phase.index);

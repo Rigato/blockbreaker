@@ -38,7 +38,7 @@ metaprogressão horizontal (Sparks + Workshop) e Tier 4. Não inclui novo mundo.
 | Power Ball | Dano | Baseline simples e confiável | Manter |
 | Quick Study | Economia | Forte; pode snowballar | Manter; monitorar |
 | Arcane Turret | Dano automático | Boa para mobile/atenção dividida | Manter |
-| Giant Ball | Controle | +30% de raio; consistência | Manter |
+| Giant Ball | Controle | +80% de raio (2 níveis; +40%/nível desde 2026-11-23); consistência | Manter |
 | Sticky Paddle | Controle | Nicho; pode confundir com multiball | Bloquear; clarear texto |
 | Safety Net | Defesa | Forte no Endless | Manter |
 | Prism Laser | Dano ativo | Assinatura; exige lançamento | Manter |

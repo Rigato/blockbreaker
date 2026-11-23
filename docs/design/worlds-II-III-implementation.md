@@ -165,7 +165,7 @@ Mundo III: `(66,806) (298,708) (118,596) (300,480) (112,346) (262,168)`.
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | verde |
-| `npm test` | 420 testes / 34 arquivos |
+| `npm test` | 424 testes / 34 arquivos |
 | `npm run validate:content` | 19 fases, 71 ondas, 2.781 blocos, 9.392 XP |
 | `node scripts/validate-bridge-config.mjs` | verde |
 | `npm run build` | verde |

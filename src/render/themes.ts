@@ -457,6 +457,26 @@ export function hexToCss(color: number): string {
   return `#${(color & 0xffffff).toString(16).padStart(6, '0')}`;
 }
 
+/**
+ * Ball tint by base ball damage: white → yellow → orange → red → purple.
+ * Level 1 is the neutral ball; Power Ball and future damage perks climb the
+ * ramp. Transient buffs do not change the tint, so the read stays stable.
+ */
+export const BALL_DAMAGE_COLORS = [
+  0xffffff,
+  0xffd84d,
+  0xff9f43,
+  0xff5f5f,
+  0xc77dff,
+] as const;
+
+export function ballColorForDamage(damage: number): number {
+  const tier = Number.isFinite(damage)
+    ? Math.max(1, Math.min(BALL_DAMAGE_COLORS.length, Math.floor(damage)))
+    : 1;
+  return BALL_DAMAGE_COLORS[tier - 1]!;
+}
+
 /** Relative luminance helper used to assert palette readability in tests. */
 export function relativeLuminance(color: number): number {
   const channel = (value: number): number => {

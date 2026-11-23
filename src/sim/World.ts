@@ -678,6 +678,7 @@ export class World {
       ...modifiers,
       paddleWidthMultiplier: Math.max(0.1, modifiers.paddleWidthMultiplier),
       ballRadiusMultiplier: Math.max(0.1, modifiers.ballRadiusMultiplier),
+      lastBlockMagnetTurnRate: Math.max(0, modifiers.lastBlockMagnetTurnRate),
       xpMultiplier: Math.max(0, modifiers.xpMultiplier),
       ballDamage: Math.max(1, Math.floor(modifiers.ballDamage)),
       maxBalls: Math.max(1, Math.min(MAX_BALLS, Math.floor(modifiers.maxBalls))),
@@ -1032,6 +1033,7 @@ export class World {
     this.updateBlockBehaviors(dtMs);
     this.updateElements();
     this.applyGust(dt);
+    this.applyLastBlockMagnet(dt);
     this.updateBoss(dt, dtMs);
     this.updateBalls(dt, dtMs);
     this.updateTurret(dtMs);
@@ -1711,6 +1713,39 @@ export class World {
         continue;
       }
       this.updateAntiStall(ball, dtMs);
+    }
+  }
+
+  /**
+   * Tutorial/future-perk assist: when one block remains, turn each ball toward
+   * it without changing speed. This prevents the last-block stall that makes
+   * a short tutorial feel unfair; it is disabled by a 0 turn rate.
+   */
+  private applyLastBlockMagnet(dt: number): void {
+    const turnRate = this.modifiersValue.lastBlockMagnetTurnRate;
+    if (turnRate <= 0 || this.blocks.length !== 1) return;
+
+    const target = this.blocks[0]!;
+    const targetX = target.left + target.width / 2;
+    const targetY = target.top + target.height / 2;
+
+    for (const ball of this.balls) {
+      if (ball.stuck) continue;
+      const speed = Math.hypot(ball.vx, ball.vy);
+      if (speed <= 0) continue;
+
+      const current = Math.atan2(ball.vy, ball.vx);
+      const desired = Math.atan2(targetY - ball.y, targetX - ball.x);
+      const delta = Math.atan2(
+        Math.sin(desired - current),
+        Math.cos(desired - current),
+      );
+      const maxTurn = turnRate * dt;
+      const turn = Math.max(-maxTurn, Math.min(maxTurn, delta));
+      const next = current + turn;
+
+      ball.vx = Math.cos(next) * speed;
+      ball.vy = Math.sin(next) * speed;
     }
   }
 

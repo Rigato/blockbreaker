@@ -28,8 +28,15 @@ export const TUTORIAL_WAVES: readonly WaveDef[] = [
   {
     id: 'tutw1',
     name: 'First Steps',
-    // Four one-hit bricks: three destroyed (75%) fill the tutorial XP bar.
-    rows: ['..1111..'],
+    // Four one-hit bricks, four rows lower so the first rally is quick to
+    // reach. Three destroyed (75%) fill the tutorial XP bar.
+    rows: [
+      '........',
+      '........',
+      '........',
+      '........',
+      '..1111..',
+    ],
     legend: CONTENT_LEGEND,
     ballSpeed: 520,
   },

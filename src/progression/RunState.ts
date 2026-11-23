@@ -40,6 +40,8 @@ export class RunState implements ProgressionService {
   private readonly levels = new Map<string, number>();
   private currentOffers: PerkOffer[] = [];
   private firstLevelXp: number | undefined;
+  private basePaddleWidthMultiplier = 1;
+  private lastBlockMagnetTurnRate = 0;
   private rng = createRng(0);
   private unlockedPerkIds: ReadonlySet<string> = new Set(
     PERK_CATALOG.map((definition) => definition.id),
@@ -87,6 +89,16 @@ export class RunState implements ProgressionService {
   ): void {
     this.currentSeed = seed;
     this.firstLevelXp = options.firstLevelXp;
+    this.basePaddleWidthMultiplier =
+      Number.isFinite(options.paddleWidthMultiplier) &&
+      (options.paddleWidthMultiplier ?? 0) > 0
+        ? options.paddleWidthMultiplier!
+        : 1;
+    this.lastBlockMagnetTurnRate =
+      Number.isFinite(options.lastBlockMagnetTurnRate) &&
+      (options.lastBlockMagnetTurnRate ?? 0) > 0
+        ? options.lastBlockMagnetTurnRate!
+        : 0;
     this.unlockedPerkIds = unlockedPerkIds === undefined
       ? new Set(PERK_CATALOG.map((definition) => definition.id))
       : new Set(unlockedPerkIds);
@@ -281,8 +293,10 @@ export class RunState implements ProgressionService {
       1 - laserCooldownStep * overchargeLevel,
     );
 
-    modifiers.paddleWidthMultiplier = 1 + widePaddleStep * widePaddle;
+    modifiers.paddleWidthMultiplier =
+      this.basePaddleWidthMultiplier * (1 + widePaddleStep * widePaddle);
     modifiers.ballRadiusMultiplier = 1 + giantBallStep * giantBall;
+    modifiers.lastBlockMagnetTurnRate = this.lastBlockMagnetTurnRate;
     modifiers.ballDamage = 1 + powerBall;
     modifiers.xpMultiplier =
       1 + quickStudyStep * quickStudy + fallbackXpStep * fallback;

@@ -61,6 +61,20 @@ describe('G4 XP curve', () => {
     expect(run.xpToNext).toBe(20);
   });
 
+  it('applies tutorial run assists on top of perk modifiers', () => {
+    const run = new RunState();
+    run.startRun(7, undefined, {
+      paddleWidthMultiplier: 2,
+      lastBlockMagnetTurnRate: 3.5,
+    });
+
+    expect(run.modifiers.paddleWidthMultiplier).toBe(2);
+    expect(run.modifiers.lastBlockMagnetTurnRate).toBe(3.5);
+
+    run.grantPerk('wide_paddle');
+    expect(run.modifiers.paddleWidthMultiplier).toBeCloseTo(2.24);
+  });
+
   it('carries overflow XP into the next level', () => {
     const run = progressed();
     const gain = run.addXp(25);
@@ -190,7 +204,7 @@ describe('M2 derived modifiers', () => {
 
     const modifiers = run.modifiers;
     expect(modifiers.paddleWidthMultiplier).toBeCloseTo(1.12);
-    expect(modifiers.ballRadiusMultiplier).toBeCloseTo(1.15);
+    expect(modifiers.ballRadiusMultiplier).toBeCloseTo(1.4);
     expect(modifiers.ballDamage).toBe(2);
     expect(modifiers.xpMultiplier).toBeCloseTo(1.2);
     expect(modifiers.maxBalls).toBe(8);
@@ -224,6 +238,7 @@ describe('M2 derived modifiers', () => {
     expect(BASE_RUN_MODIFIERS).toEqual({
       paddleWidthMultiplier: 1,
       ballRadiusMultiplier: 1,
+      lastBlockMagnetTurnRate: 0,
       ballDamage: 1,
       xpMultiplier: 1,
       maxBalls: 8,

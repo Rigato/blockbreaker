@@ -85,9 +85,17 @@ describe('multi-world content structure', () => {
     expect(stats.hp).toBe(15);
     expect(stats.levelUps).toBe(1);
 
-    // The first wave must be the simplest possible field: 1 HP only.
+    // The first wave must be the simplest possible field: 1 HP only, four
+    // rows lower so the first rally reaches the blocks quickly.
     const firstWave = tutorial!.waves[0]!;
-    expect(firstWave.rows.join('')).toBe('..1111..');
+    expect(firstWave.rows).toHaveLength(5);
+    expect(firstWave.rows.slice(0, 4)).toEqual([
+      '........',
+      '........',
+      '........',
+      '........',
+    ]);
+    expect(firstWave.rows[4]).toBe('..1111..');
 
     // 3 of 4 kills (75%) fill the tutorial bar.
     expect(GAME_CONFIG.progression.tutorialFirstLevelXp).toBe(3);

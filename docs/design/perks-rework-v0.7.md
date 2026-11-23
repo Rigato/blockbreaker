@@ -2,6 +2,10 @@
 
 **Status:** proposta de design. Nada implementado.
 **Data:** 2026-11-16
+
+> **Nota (2026-11-23):** o Giant Ball atual passou a **+40% de raio por
+> nível** (máx. +80%) e a bola ganhou cor por dano. A recomendação de +12%
+> abaixo é anterior a esse tune e deve ser reavaliada antes de implementar.
 **Base:** v0.6.1 — 22 perks, 10 starters + 12 unlocks, economia de Sparks
 com teto de 250/run.
 **Escopo:** catálogo de perks, split starter/locked, Workshop, pré-requisitos e

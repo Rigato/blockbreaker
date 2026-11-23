@@ -19,6 +19,9 @@ sem publicação.
 | Gate do tutorial | save novo `unlockedPhase = 0`; concluir/pular libera o level 1 | implementado e testado |
 | Save antigo | `unlockedPhase >= 1` continua sem repetir o tutorial | implementado e testado no parse |
 | Coach marks | 2 modais pausados com Continue: mover/lançar e blocos especiais | implementado |
+| Assistências do tutorial | paddle 2×; ímã do último bloco com anel/tether | implementado e testado |
+| Feedback de dano | bola branco → amarelo → laranja → vermelho → roxo; glow/rastro na cor | implementado |
+| Giant Ball | +40% de raio por nível, máx. 2 (+80%) | implementado |
 | Campanha | 6 fases, 20 ondas (2/3/3/3/4/5) no Mundo I | implementado e validado |
 | Mundos II/III | Neon Lattice 6 fases/22 ondas; Rustwake 6 fases/27 ondas | implementado e validado |
 | Totais | 2.781 blocos / 9.392 XP; 19 fases / 71 ondas com tutorial | validado |
@@ -128,7 +131,7 @@ O GDD v1.9 e o build local **estão alinhados**: 19 fases (tutorial + 3 mundos),
 71 ondas, 17 blocos, 10 elementos, 9 chefes, 22 perks, Endless, save v3 e
 metaprogressão horizontal. A `0.7.0-dev` adicionou Mundos II/III, overlap de
 velocidade, belt/rail/gust, mapas por mundo e debug de ondas. Tudo isso está no
-código e coberto por 420 testes unitários + 43 E2E.
+código e coberto por 424 testes unitários + 43 E2E.
 
 O que falta é majoritariamente **validação humana** das 69 ondas de campanha,
 dos 6 chefes novos, do balance de Spark e do feel de belt/rail/gust, além de

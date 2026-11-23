@@ -68,9 +68,18 @@ export const GAME_CONFIG = {
     tutorialFirstLevelXp: 3,
   },
 
+  /** First-run assists. They are run modifiers so a future perk can reuse them. */
+  tutorial: {
+    /** Training wheels: the tutorial paddle is twice the campaign width. */
+    paddleWidthMultiplier: 2,
+    /** Radians per second the ball turns toward the last block. */
+    lastBlockMagnetTurnRate: 3.5,
+  },
+
   perks: {
     widePaddleStep: 0.12,
-    giantBallStep: 0.15,
+    /** Giant Ball is deliberately chunky: two levels nearly double the radius. */
+    giantBallStep: 0.4,
     quickStudyStep: 0.2,
     turretBaseMs: 3200,
     turretStepMs: 400,
@@ -142,6 +151,7 @@ export const FIXED_STEP_SECONDS = 1 / GAME_CONFIG.fixedStepHz;
 export const BASE_RUN_MODIFIERS: RunModifiers = {
   paddleWidthMultiplier: 1,
   ballRadiusMultiplier: 1,
+  lastBlockMagnetTurnRate: 0,
   ballDamage: 1,
   xpMultiplier: 1,
   maxBalls: GAME_CONFIG.ball.maxBalls,

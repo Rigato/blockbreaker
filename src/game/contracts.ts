@@ -191,6 +191,11 @@ export interface SaveRepository {
 export interface RunModifiers {
   paddleWidthMultiplier: number;
   ballRadiusMultiplier: number;
+  /**
+   * Radians per second each ball turns toward the last remaining block.
+   * 0 disables the assist; the tutorial enables it and a future perk may too.
+   */
+  lastBlockMagnetTurnRate: number;
   ballDamage: number;
   xpMultiplier: number;
   maxBalls: number;
@@ -524,6 +529,10 @@ export interface RunStartOptions {
    * first perk arrives after a few blocks; campaign and Endless omit it.
    */
   readonly firstLevelXp?: number;
+  /** Multiplier applied on top of every paddle-width perk. */
+  readonly paddleWidthMultiplier?: number;
+  /** Radians per second the ball turns toward the last remaining block. */
+  readonly lastBlockMagnetTurnRate?: number;
 }
 
 /**

@@ -19,10 +19,21 @@ decidir uma frente por vez.
   level-up overlay ensina a perk; chefes/Endless saíram do tutorial.
 - Texto 15–17 px, botão **Continue** e **Skip tutorial** em contraste alto,
   alvos de 44 px.
+- Onda 1 desceu quatro linhas; o paddle do tutorial é **2× mais largo**.
+- Quando resta um bloco, a bola é levemente girada na direção dele sem mudar a
+  velocidade, com anel dourado e tether. A regra é um `RunModifiers`
+  (`lastBlockMagnetTurnRate`) e pode virar perk depois.
 - Totais: 12 blocos, 15 XP, 1 level up; totais do conteúdo: 2.781 blocos /
   9.392 XP.
-- Gates: 420 unitários / 34 arquivos; 43 E2E / 12 specs; validação de conteúdo
+- Gates: 424 unitários / 34 arquivos; 43 E2E / 12 specs; validação de conteúdo
   verde.
+
+### 1.1 Feedback visual de dano (2026-11-23)
+
+- Giant Ball: **+40% de raio por nível**, máximo 2 (+80%).
+- Bola: branco (dano 1) → amarelo (2) → laranja (3) → vermelho (4) → roxo
+  (5+), com glow e rastro na mesma cor. Buffs temporários não trocam a cor.
+- A rampa fica em `BALL_DAMAGE_COLORS` / `ballColorForDamage`.
 
 **Decisão registrada:** o tutorial não volta ao modelo antigo. A primeira onda
 não é dimensionada pela curva de XP da campanha; o tutorial tem barra e ritmo

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { SIM_TUNING_DEFAULTS } from '../src/game/config';
+import { BASE_RUN_MODIFIERS, SIM_TUNING_DEFAULTS } from '../src/game/config';
 import type { WaveDef } from '../src/content/types';
 import { World } from '../src/sim/World';
+import { addBall, addBlock, createWorld, NO_INPUT } from './helpers/world';
 
 function makeWorld(wave: WaveDef): World {
   const world = new World({
@@ -249,4 +250,40 @@ describe('new boss patterns', () => {
       expect(world.bossShards).toHaveLength(shards);
     });
   }
+});
+
+describe('last-block magnet assist', () => {
+  it('turns a free ball toward the last block without changing speed', () => {
+    const world = createWorld(1);
+    addBlock(world, { left: 600, top: 200, width: 90, height: 90 });
+    const ball = addBall(world, { x: 200, y: 800, vx: 0, vy: -500 });
+    world.applyRunModifiers({
+      ...BASE_RUN_MODIFIERS,
+      lastBlockMagnetTurnRate: 3.5,
+    });
+
+    for (let step = 0; step < 60; step += 1) {
+      world.step(NO_INPUT, 1000 / 120);
+    }
+
+    expect(ball.vx).toBeGreaterThan(50);
+    expect(Math.hypot(ball.vx, ball.vy)).toBeCloseTo(500, 4);
+  });
+
+  it('stays off while more than one block remains', () => {
+    const world = createWorld(1);
+    addBlock(world, { left: 600, top: 200, width: 90, height: 90 });
+    addBlock(world, { left: 100, top: 200, width: 90, height: 90 });
+    const ball = addBall(world, { x: 200, y: 800, vx: 0, vy: -500 });
+    world.applyRunModifiers({
+      ...BASE_RUN_MODIFIERS,
+      lastBlockMagnetTurnRate: 3.5,
+    });
+
+    for (let step = 0; step < 60; step += 1) {
+      world.step(NO_INPUT, 1000 / 120);
+    }
+
+    expect(ball.vx).toBe(0);
+  });
 });
