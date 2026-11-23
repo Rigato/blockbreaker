@@ -33,12 +33,13 @@ chefes, mapas de seleção, debug de ondas e testes.
 ```text
 19 fases (tutorial + 18)
 71 ondas
-2.785 blocos
-9.409 XP
+2.781 blocos
+9.392 XP
 ```
 
-O validador confirma 8 colunas, no máximo 12 linhas, 2–16 level ups por fase,
-curva intra-mundo monotônica e nenhum grid na zona do paddle.
+O validador confirma 8 colunas, no máximo 12 linhas, 1–16 level ups por fase
+(1 no tutorial, 2–16 na campanha), curva intra-mundo monotônica e nenhum grid
+na zona do paddle.
 
 ### 2.2 Mundo II — Neon Lattice
 
@@ -164,8 +165,8 @@ Mundo III: `(66,806) (298,708) (118,596) (300,480) (112,346) (262,168)`.
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | verde |
-| `npm test` | 419 testes / 34 arquivos |
-| `npm run validate:content` | 19 fases, 71 ondas, 2.785 blocos, 9.409 XP |
+| `npm test` | 420 testes / 34 arquivos |
+| `npm run validate:content` | 19 fases, 71 ondas, 2.781 blocos, 9.392 XP |
 | `node scripts/validate-bridge-config.mjs` | verde |
 | `npm run build` | verde |
 | `npm run test:e2e` | 43 testes / 12 spec files |

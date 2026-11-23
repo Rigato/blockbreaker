@@ -61,6 +61,11 @@ export const GAME_CONFIG = {
     xpCurveMultiplier: 0.65,
     /** Extra first-level discount so the first perk arrives quickly. */
     firstLevelXpFactor: 0.6,
+    /**
+     * Tutorial-only first level threshold. Four 1 HP blocks are enough for
+     * three kills (75%) to fill the bar and teach the perk choice.
+     */
+    tutorialFirstLevelXp: 3,
   },
 
   perks: {

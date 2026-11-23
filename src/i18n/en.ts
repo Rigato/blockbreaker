@@ -79,22 +79,13 @@ export const en = {
   workshopStatusUnknown: 'That perk is not available.',
 
   tutorialSkip: 'Skip tutorial',
-  tutorialAck: 'Got it',
+  tutorialAck: 'Continue',
   tutorialStep: 'Tutorial · {{current}} / {{total}}',
-  tutorialMoveTitle: 'Move & launch',
+  tutorialMoveTitle: 'Move and launch',
   tutorialMoveBody: 'Drag to move the paddle. Tap the field to launch the ball.',
-  tutorialLevelTitle: 'Break & level up',
-  tutorialLevelBody:
-    'Every destroyed block gives XP. When the bar fills, choose one of three perks.',
   tutorialSpecialsTitle: 'Special blocks',
   tutorialSpecialsBody:
-    'Explosive blocks damage nearby bricks. Use them to clear the field faster.',
-  tutorialBossesTitle: 'Bosses',
-  tutorialBossesBody:
-    'Levels 4–6 end with a boss. Dodge its shards and break its core before it corrodes your paddle.',
-  tutorialEndlessTitle: 'Endless',
-  tutorialEndlessBody:
-    'Clear all six campaign levels to unlock Endless: infinite waves and a boss every five waves.',
+    'The glowing block explodes and damages nearby bricks. Use it to clear the field faster.',
 
   endlessLockedTitle: 'Endless is locked',
   endlessLockedBody: 'Clear all 6 campaign levels to unlock Endless mode.',
@@ -120,7 +111,7 @@ export const en = {
   howToPage: '{{current}} / {{total}}',
   howToGoToPage: 'Go to page {{index}}',
   howToCurrentPage: 'Page {{index}}',
-  howToPage1Title: 'Move & launch',
+  howToPage1Title: 'Move and launch',
   howToPage1Body:
     'Drag, move the mouse or use the arrow keys to move the paddle. Tap, click or press V to launch the ball.',
   howToPage1Alt: 'The paddle following the pointer and the ball launching upward',

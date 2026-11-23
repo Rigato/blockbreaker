@@ -2300,22 +2300,23 @@ button {
   position: absolute;
   right: 10px;
   left: 10px;
-  z-index: 5;
+  z-index: 6;
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 3px 10px;
+  grid-template-columns: auto auto;
+  gap: 10px 14px;
   align-items: center;
-  max-width: 390px;
+  justify-content: space-between;
+  max-width: 420px;
   margin: 0 auto;
-  padding: clamp(10px, 2.8cqw, 14px) clamp(12px, 3.2cqw, 16px);
-  border: 1px solid rgba(100, 231, 255, 0.55);
-  border-radius: 10px;
+  padding: clamp(14px, 4cqw, 18px);
+  border: 1px solid rgba(100, 231, 255, 0.75);
+  border-radius: 12px;
   background:
-    linear-gradient(180deg, rgba(10, 28, 52, 0.98), rgba(4, 10, 22, 0.97));
+    linear-gradient(180deg, rgba(10, 28, 52, 0.995), rgba(4, 10, 22, 0.985));
   box-shadow:
-    0 0 0 100vmax rgba(2, 6, 14, 0.34),
-    0 0 26px rgba(100, 231, 255, 0.2),
-    0 18px 38px rgba(0, 0, 0, 0.62);
+    0 0 0 100vmax rgba(2, 6, 14, 0.5),
+    0 0 32px rgba(100, 231, 255, 0.3),
+    0 20px 44px rgba(0, 0, 0, 0.7);
   pointer-events: none;
 }
 
@@ -2360,10 +2361,11 @@ button {
 
 .hud__tutorial-step {
   grid-column: 1 / -1;
-  color: var(--cyan);
-  font-family: var(--font-pixel);
-  font-size: clamp(8px, 2.1cqw, 10px);
-  letter-spacing: 0.12em;
+  color: var(--cyan-bright);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -2371,25 +2373,28 @@ button {
   grid-column: 1 / -1;
   color: var(--cyan-bright);
   font-family: var(--font-display);
-  font-size: clamp(14px, 3.6cqw, 19px);
-  line-height: 1.2;
+  font-size: clamp(19px, 5cqw, 22px);
+  line-height: 1.25;
 }
 
 .hud__tutorial-body {
   grid-column: 1 / -1;
   margin: 0;
-  color: var(--muted);
-  font-size: clamp(10px, 2.45cqw, 13px);
-  line-height: 1.4;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: clamp(15px, 3.9cqw, 17px);
+  line-height: 1.5;
 }
 
 .hud__tutorial-ack,
 .hud__tutorial-skip {
-  padding: 7px 12px;
-  border-radius: 6px;
-  font: inherit;
-  font-size: clamp(9px, 2.2cqw, 11px);
-  letter-spacing: 0.04em;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: var(--font-ui);
+  font-size: clamp(14px, 3.6cqw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
   pointer-events: auto;
   touch-action: manipulation;
 }
@@ -2397,26 +2402,43 @@ button {
 .hud__tutorial-ack {
   grid-column: 1;
   justify-self: start;
-  border: 1px solid var(--cyan);
-  background: rgba(100, 231, 255, 0.18);
-  color: var(--cyan-bright);
-  font-weight: 700;
+  border: 1px solid var(--cyan-bright);
+  background: var(--cyan);
+  color: #04101c;
+  box-shadow: 0 0 18px rgba(100, 231, 255, 0.35);
 }
 
 .hud__tutorial-skip {
   grid-column: 2;
   justify-self: end;
-  border: 1px solid rgba(126, 231, 255, 0.25);
-  background: transparent;
-  color: var(--dim);
+  border: 1px solid rgba(126, 231, 255, 0.6);
+  background: rgba(100, 231, 255, 0.12);
+  color: var(--cyan-bright);
 }
 
 .hud__tutorial-ack:hover,
-.hud__tutorial-ack:focus-visible,
+.hud__tutorial-ack:focus-visible {
+  border-color: #ffffff;
+  background: var(--cyan-bright);
+  color: #04101c;
+}
+
 .hud__tutorial-skip:hover,
 .hud__tutorial-skip:focus-visible {
   border-color: var(--cyan-bright);
+  background: rgba(100, 231, 255, 0.22);
   color: #ffffff;
+}
+
+.hud__tutorial-ack:focus-visible,
+.hud__tutorial-skip:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.hud__tutorial-ack:active,
+.hud__tutorial-skip:active {
+  transform: translateY(1px);
 }
 
 .hud__tutorial.is-bottom.is-new,

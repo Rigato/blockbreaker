@@ -20,8 +20,10 @@ test.describe('first-run tutorial', () => {
     await page.locator(HUD).waitFor({ state: 'visible' });
     const coach = page.locator('.hud__tutorial');
     await expect(coach).toBeVisible();
-    await expect(coach).toContainText('Move & launch');
+    await expect(coach).toContainText('Move and launch');
     await expect(page.locator('#tutorial-ack')).toBeVisible();
+    // The tutorial uses its own short first bar: 3 XP, not the campaign's 8.
+    await expect(page.locator('.hud__xp-line')).toContainText('0/3');
 
     await page.locator('#tutorial-skip').click();
     await expect(page.locator('.overlay--results')).toBeVisible();
@@ -50,7 +52,7 @@ test.describe('first-run tutorial', () => {
     await waitForMenu(page);
     await startTutorial(page);
 
-    await expect(page.locator('.hud__tutorial')).toContainText('Move & launch');
+    await expect(page.locator('.hud__tutorial')).toContainText('Move and launch');
     await page.locator('#tutorial-ack').click();
     await expect(page.locator('.hud__tutorial')).toBeHidden();
     await expect(page.locator('.hud__hint')).toHaveText('Tap / click / V to launch');

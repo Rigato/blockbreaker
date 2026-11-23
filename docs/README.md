@@ -23,6 +23,9 @@ usado como fonte de decisão.
 8. **[Spec — mapa de seleção de fases](phase-select-map-spec.md)** — rework do
    mapa + parallax e expansão multi-mundo; **implementado**, gates verdes.
    Backup do estado anterior em [`design/phase-select-map-backup-v1.md`](design/phase-select-map-backup-v1.md).
+9. **[Overhaul — direções e próximos passos](design/overhaul-direcoes.md)** —
+   tutorial novo implementado; pierce, densidade, progressão e público
+   registrados para decisão. Nada além do tutorial está implementado.
 
 ## Operação e release
 

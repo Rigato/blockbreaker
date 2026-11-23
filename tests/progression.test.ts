@@ -43,6 +43,24 @@ describe('G4 XP curve', () => {
     expect(run.xpToNext).toBe(26);
   });
 
+  it('uses a short first bar in the tutorial and the normal curve afterwards', () => {
+    const run = new RunState();
+    run.startRun(7, undefined, { firstLevelXp: 3 });
+
+    expect(run.level).toBe(1);
+    expect(run.xpToNext).toBe(3);
+    expect(xpToNextForLevel(1, 3)).toBe(3);
+
+    expect(run.addXp(3)).toMatchObject({
+      level: 2,
+      xp: 0,
+      xpToNext: 20,
+      levelsGained: 1,
+      pendingLevelUps: 1,
+    });
+    expect(run.xpToNext).toBe(20);
+  });
+
   it('carries overflow XP into the next level', () => {
     const run = progressed();
     const gain = run.addXp(25);

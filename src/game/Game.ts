@@ -173,7 +173,6 @@ export class BlockBreakerGame implements GameCommands {
   private reviveUsed = false;
   private adReviveUsed = false;
   private tutorialStep: TutorialStep | null = null;
-  private readonly tutorialCompleted = new Set<TutorialStep>();
   private lastInterstitialAt = Number.NEGATIVE_INFINITY;
   private lastRewardedAt = Number.NEGATIVE_INFINITY;
   private readonly debug: boolean;
@@ -350,7 +349,6 @@ export class BlockBreakerGame implements GameCommands {
     this.reviveUsed = false;
     this.adReviveUsed = false;
     this.tutorialStep = null;
-    this.tutorialCompleted.clear();
     this.waveIntroUntil = 0;
     this.runState.startRun(this.runSeed, getUnlockedPerkIds(this.save.meta));
     this.loadEndlessWave(1);
@@ -420,9 +418,12 @@ export class BlockBreakerGame implements GameCommands {
     this.reviveUsed = false;
     this.adReviveUsed = false;
     this.tutorialStep = null;
-    this.tutorialCompleted.clear();
     this.waveIntroUntil = 0;
-    this.runState.startRun(this.runSeed, getUnlockedPerkIds(this.save.meta));
+    this.runState.startRun(this.runSeed, getUnlockedPerkIds(this.save.meta), {
+      firstLevelXp: phase.tutorial
+        ? GAME_CONFIG.progression.tutorialFirstLevelXp
+        : undefined,
+    });
     this.loadPhaseWave(this.currentWaveIndex);
     this.scene.setPhase(phase.id, phase.index);
     this.scene.setMenuMode(false);
@@ -489,26 +490,7 @@ export class BlockBreakerGame implements GameCommands {
       return;
     }
 
-    const step = this.tutorialStep;
-    this.tutorialCompleted.add(step);
     this.tutorialStep = null;
-
-    if (step === 'levelup') {
-      this.audio.setSuspended(false);
-      this.startLevelUp();
-      return;
-    }
-    if (step === 'bosses') {
-      this.tutorialStep = 'endless';
-      this.syncHud(true);
-      return;
-    }
-    if (step === 'endless') {
-      this.audio.setSuspended(false);
-      this.finishPhase(true);
-      return;
-    }
-
     this.phase = 'playing';
     this.audio.setSuspended(false);
     this.focusGameplay();
@@ -568,7 +550,6 @@ export class BlockBreakerGame implements GameCommands {
     this.reviveUsed = false;
     this.adReviveUsed = false;
     this.tutorialStep = null;
-    this.tutorialCompleted.clear();
     this.waveIntroUntil = 0;
     this.runState.reset();
     const preview = PHASES[0]?.waves[0];
@@ -679,7 +660,6 @@ export class BlockBreakerGame implements GameCommands {
     this.reviveUsed = false;
     this.adReviveUsed = false;
     this.tutorialStep = null;
-    this.tutorialCompleted.clear();
     this.waveIntroUntil = 0;
     const preview = PHASES[0]?.waves[0];
     if (preview) {
@@ -751,7 +731,6 @@ export class BlockBreakerGame implements GameCommands {
     this.syncHud(true);
     if (this.currentPhase.tutorial) {
       const step: TutorialStep = this.currentWaveIndex === 0 ? 'move' : 'specials';
-      this.tutorialCompleted.delete(step);
       this.openTutorialStep(step);
     }
   }
@@ -802,7 +781,6 @@ export class BlockBreakerGame implements GameCommands {
     this.input.resetTarget();
     this.syncHud(true);
     if (this.currentPhase.tutorial) {
-      this.tutorialCompleted.delete('specials');
       this.openTutorialStep('specials');
     }
   }
@@ -1284,14 +1262,6 @@ export class BlockBreakerGame implements GameCommands {
       'wave',
     );
 
-    // The tutorial finishes with two short "what's next" coach marks before
-    // the results screen. Everyone else goes straight to the phase results.
-    if (lastCampaignWave && this.currentPhase.tutorial) {
-      this.tutorialCompleted.delete('bosses');
-      this.openTutorialStep('bosses');
-      return;
-    }
-
     // Never put a wave interstitial between the last block and the phase
     // results. The natural break belongs after the player leaves the results.
     if (lastCampaignWave) {
@@ -1758,13 +1728,8 @@ export class BlockBreakerGame implements GameCommands {
       return;
     }
     if (leveledUp) {
-      if (
-        this.currentPhase?.tutorial &&
-        !this.tutorialCompleted.has('levelup')
-      ) {
-        this.openTutorialStep('levelup');
-        return;
-      }
+      // The level-up overlay itself teaches the perk choice; no extra coach
+      // mark or click is needed in the tutorial.
       this.startLevelUp();
       return;
     }
@@ -1833,11 +1798,6 @@ export class BlockBreakerGame implements GameCommands {
           break;
         case 'paddle:hit':
           this.audio.play('paddle');
-          break;
-        case 'ball:launched':
-          if (this.currentPhase?.tutorial && this.tutorialStep === 'move') {
-            this.tutorialStep = 'levelup';
-          }
           break;
         case 'ball:lost':
           this.audio.play('ball-lost');
@@ -2052,7 +2012,7 @@ export class BlockBreakerGame implements GameCommands {
         ? {
             step: this.tutorialStep,
             stepIndex: this.tutorialStepIndex(),
-            stepCount: 5,
+            stepCount: 2,
             canSkip: true,
             position: this.tutorialPosition(this.tutorialStep),
           }
@@ -2128,11 +2088,7 @@ export class BlockBreakerGame implements GameCommands {
     switch (step) {
       case 'move':
         return 'bottom';
-      case 'levelup':
-        return 'top';
       case 'specials':
-      case 'bosses':
-      case 'endless':
       default:
         return 'center';
     }
@@ -2142,16 +2098,9 @@ export class BlockBreakerGame implements GameCommands {
     switch (this.tutorialStep ?? 'move') {
       case 'move':
         return 1;
-      case 'levelup':
-        return 2;
       case 'specials':
-        return 3;
-      case 'bosses':
-        return 4;
-      case 'endless':
-        return 5;
       default:
-        return 1;
+        return 2;
     }
   }
 

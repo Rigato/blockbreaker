@@ -102,8 +102,9 @@ Preencher uma linha por run. Template: `docs/qa/run-log-template.csv`.
 ## Agregação e comparação com §1.2
 
 - **Tutorial:** mediana de `tutorial_s`, taxa de skip, quantos completaram sem
-  ajuda e quantos entenderam os cinco coach marks. Meta inicial: tutorial ≤ 90 s
-  e skip compreendido; ajustar após os dados.
+  ajuda, quantos entenderam os dois coach marks e tempo até a primeira perk
+  (3 blocos). Meta inicial: tutorial ≤ 90 s e skip compreendido; ajustar após
+  os dados.
 - **Diversão:** contar quantos dos 5 completaram a fase 1 (2 ondas) em ≤3
   tentativas e quantos deram intenção de repetir ≥4/5. Meta: 4 de 5.
 - **Ritmo:** mediana e faixa de `duration_s`; contar `level_ups` por run.

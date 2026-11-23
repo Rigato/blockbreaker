@@ -396,18 +396,13 @@ export interface PhaseResult {
 }
 
 /** Contextual tutorial coach marks shown only during the tutorial phase. */
-export type TutorialStep =
-  | 'move'
-  | 'levelup'
-  | 'specials'
-  | 'bosses'
-  | 'endless';
+export type TutorialStep = 'move' | 'specials';
 
 export type TutorialPosition = 'bottom' | 'top' | 'center';
 
 export interface TutorialState {
   step: TutorialStep;
-  /** 1-based position in the five tutorial steps. */
+  /** 1-based position in the tutorial steps. */
   stepIndex: number;
   stepCount: number;
   canSkip: boolean;
@@ -522,6 +517,15 @@ export interface PerkChoice {
   spawnedBalls: number;
 }
 
+/** Optional per-run progression tuning. */
+export interface RunStartOptions {
+  /**
+   * XP required for the first level. The tutorial uses a shorter bar so the
+   * first perk arrives after a few blocks; campaign and Endless omit it.
+   */
+  readonly firstLevelXp?: number;
+}
+
 /**
  * Pure progression contract implemented by S2. The game owns when XP is
  * granted and when the level-up overlay is shown; this service owns the curve,
@@ -536,7 +540,11 @@ export interface ProgressionService {
   readonly modifiers: RunModifiers;
   readonly perks: readonly PerkState[];
 
-  startRun(seed: number, unlockedPerkIds?: Iterable<string>): void;
+  startRun(
+    seed: number,
+    unlockedPerkIds?: Iterable<string>,
+    options?: RunStartOptions,
+  ): void;
   reset(): void;
   /** Applies the Quick Study multiplier and queues level ups. */
   addXp(baseAmount: number): XpGain;

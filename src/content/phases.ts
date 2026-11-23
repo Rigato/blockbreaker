@@ -272,12 +272,12 @@ export interface ContentIssue {
 }
 
 /** How many level ups a wave/phase XP pool can produce. */
-export function levelUpsForXp(xp: number): number {
+export function levelUpsForXp(xp: number, firstLevelXp?: number): number {
   let remaining = Math.max(0, xp);
   let level = 1;
   let levelUps = 0;
-  while (remaining >= xpCostForLevel(level)) {
-    remaining -= xpCostForLevel(level);
+  while (remaining >= xpCostForLevel(level, firstLevelXp)) {
+    remaining -= xpCostForLevel(level, firstLevelXp);
     level += 1;
     levelUps += 1;
   }
@@ -359,7 +359,10 @@ export function phaseStats(phase: PhaseDef): PhaseStats {
     density,
     avgHp,
     difficulty: avgHp * density,
-    levelUps: levelUpsForXp(hp),
+    levelUps: levelUpsForXp(
+      hp,
+      phase.tutorial ? GAME_CONFIG.progression.tutorialFirstLevelXp : undefined,
+    ),
     maxBallSpeed,
   };
 }
@@ -746,9 +749,13 @@ export function validateContent(phases: readonly PhaseDef[] = PHASES): ContentIs
     });
 
     const stats = phaseStats(phase);
-    // The tutorial and the shortened opener intentionally deliver fewer perks.
-    if (stats.levelUps < 2 || stats.levelUps > 16) {
-      push(phasePath, `expected 2-16 level ups, found ${stats.levelUps}`);
+    // The tutorial deliberately delivers one perk; campaign phases deliver 2-16.
+    const minLevelUps = phase.tutorial ? 1 : 2;
+    if (stats.levelUps < minLevelUps || stats.levelUps > 16) {
+      push(
+        phasePath,
+        `expected ${minLevelUps}-16 level ups, found ${stats.levelUps}`,
+      );
     }
 
     // Block-density pace only compares boss-less waves, so a final boss wave

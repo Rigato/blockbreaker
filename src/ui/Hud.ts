@@ -1009,20 +1009,15 @@ export class Hud {
     const copy =
       tutorial.step === 'move'
         ? { title: en.tutorialMoveTitle, body: en.tutorialMoveBody }
-        : tutorial.step === 'levelup'
-          ? { title: en.tutorialLevelTitle, body: en.tutorialLevelBody }
-          : tutorial.step === 'specials'
-            ? { title: en.tutorialSpecialsTitle, body: en.tutorialSpecialsBody }
-            : tutorial.step === 'bosses'
-              ? { title: en.tutorialBossesTitle, body: en.tutorialBossesBody }
-              : { title: en.tutorialEndlessTitle, body: en.tutorialEndlessBody };
+        : { title: en.tutorialSpecialsTitle, body: en.tutorialSpecialsBody };
 
     this.tutorialStepLabel.textContent = en.tutorialStep
       .replace('{{current}}', String(tutorial.stepIndex))
       .replace('{{total}}', String(tutorial.stepCount));
     this.tutorialTitle.textContent = copy.title;
     this.tutorialBody.textContent = copy.body;
-    this.tutorialAck.hidden = !tutorial.canSkip;
+    // Continue always closes the card; skipping is the optional secondary path.
+    this.tutorialAck.hidden = false;
     this.tutorialSkip.hidden = !tutorial.canSkip;
     this.tutorialPanel.classList.remove('is-bottom', 'is-top', 'is-center', 'is-new');
     this.tutorialPanel.classList.add(`is-${tutorial.position}`);

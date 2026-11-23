@@ -1,7 +1,7 @@
 # Handoff — Bricklike v0.7.0-dev
 
 **Fonte de onboarding para a próxima sessão.**
-**Data:** 2026-11-16
+**Data:** 2026-11-16 · **Atualizado:** 2026-11-23 (tutorial simplificado)
 **Branch:** `main` (alterações locais)
 **Versão do package:** `0.7.0`
 **Build:** local; **não publicada**, sem tag/release
@@ -25,6 +25,7 @@
 | Versão publicada | `0.6.1` (itch.io + Playgama sandbox) |
 | Mundos | I · Crystal Vale; II · Neon Lattice; III · Rustwake |
 | Campanha | 18 fases + tutorial; 69 ondas de campanha / 71 com tutorial |
+| Tutorial | 2 ondas, 12 blocos, 15 XP, 1 level up, 2 coach marks |
 | Blocos | 17 tipos (9 originais + 8 novos) |
 | Elementos | 10 tipos (7 originais + press, belt, rail) |
 | Chefes | 9 (3 por mundo) |
@@ -66,7 +67,7 @@
   elementos `press`, `belt`; regra `gust`; `noMultiball` em ondas selecionadas.
 - Chefes: Nullframe Warden, Maglev Dreadnought, Lattice Hierophant, Boiler
   Matron, The Riveter e The Last Engine.
-- Totais validados: **19 fases, 71 ondas, 2.785 blocos, 9.409 XP**.
+- Totais validados: **19 fases, 71 ondas, 2.781 blocos, 9.392 XP**.
 
 ### 2.4 Velocidade e física
 
@@ -105,6 +106,21 @@
 - Fórmula por onda/combo/chefe/clear e teto de 250 por run permanecem.
 - Tier 5/6 e consumíveis **não** foram implementados; ficam para o rework de
   perks/economia.
+
+### 2.8 Tutorial simplificado (2026-11-23)
+
+- `tutw1`: 4 blocos de 1 HP; destruir 3 (75%) enche a barra de tutorial e abre
+  a primeira escolha de perk.
+- `tutw2`: 5 blocos de 1 HP, 2 de 2 HP e 1 explosivo.
+- `GAME_CONFIG.progression.tutorialFirstLevelXp = 3`; a curva normal (8/20/26)
+  volta a valer depois do level 2. `RunState.startRun` aceita `firstLevelXp`.
+- Coach marks reduzidos de 5 para 2 (mover/lançar e blocos especiais); o
+  level-up overlay ensina a perk sem um coach mark extra. Chefes/Endless ficam
+  no How to Play.
+- Texto do tutorial em 15–17 px, botão primário **Continue** e **Skip tutorial**
+  em contraste alto, ambos com 44 px de toque.
+- Totais: 12 blocos, 15 XP, 1 level up; validador permite 1 level up só no
+  tutorial.
 
 ---
 
@@ -166,8 +182,8 @@ npm run test:e2e
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | ✅ |
-| `npm test` | ✅ 419 testes / 34 arquivos |
-| `npm run validate:content` | ✅ 19 fases / 71 ondas / 2.785 blocos / 9.409 XP |
+| `npm test` | ✅ 420 testes / 34 arquivos |
+| `npm run validate:content` | ✅ 19 fases / 71 ondas / 2.781 blocos / 9.392 XP |
 | Bridge config | ✅ schema 2.4.1, sem URLs externas |
 | `npm run build` | ✅ bundle Vite |
 | `npm run test:e2e` | ✅ 43 testes / 12 spec files |
@@ -183,9 +199,12 @@ npm run test:e2e
 
 1. Abra `?debug=1&resetSave=1`.
 2. No menu, abra **Campaign**. As pílulas I/II/III devem estar todas ativas.
-3. Troque para o Mundo II e III; confira 6 nós em cada mapa.
-4. Selecione uma fase e escolha a onda inicial no seletor `Start wave`.
-5. Teste:
+3. Com save novo, jogue o tutorial: confira 4 blocos de 1 HP na onda 1, a
+   primeira perk após 3 blocos e o explosivo na onda 2; o skip deve estar
+   visível e com toque confortável em 320 px.
+4. Troque para o Mundo II e III; confira 6 nós em cada mapa.
+5. Selecione uma fase e escolha a onda inicial no seletor `Start wave`.
+6. Teste:
    - `rail` no Mundo II: a bola deve acelerar além da velocidade da onda.
    - `belt` no Mundo III: a direção muda, a velocidade não.
    - `gust`: a bola curva, a velocidade não.
@@ -193,9 +212,9 @@ npm run test:e2e
    - `phased`: a bola ricocheteia sem dano enquanto o anel estiver ativo.
    - `plated`: laser/torreta/explosão causam 1 a menos; bola causa dano cheio.
    - `relay`: destruir o último relay desliga os elementos.
-6. Chegue ao chefe de cada mundo e confira padrão/nome/HP.
-7. Em save não-debug, confirme que II/III ficam selados até os clears 6/12.
-8. Confira que o save existente v2 abre com `version: 3` e mantém progresso.
+7. Chegue ao chefe de cada mundo e confira padrão/nome/HP.
+8. Em save não-debug, confirme que II/III ficam selados até os clears 6/12.
+9. Confira que o save existente v2 abre com `version: 3` e mantém progresso.
 
 ---
 
@@ -204,6 +223,7 @@ npm run test:e2e
 | Área | Estado | Ação |
 |---|---|---|
 | Playtest humano | não feito | testar 69 ondas de campanha, 9 chefes, belt/rail/gust e platinas |
+| Tutorial novo | 2 ondas / 15 XP / 1 perk | medir tempo até a primeira perk, skip e leitura em 320 px |
 | Balance W2/W3 | validado por conteúdo | calibrar HP, XP e duração com playtest |
 | Velocidade 896/920 | implementada | testar legibilidade em 320 px e hardware baixo |
 | Hard cap 1.100 | implementado | validar rails em ondas densas e com multiball |
@@ -219,10 +239,16 @@ npm run test:e2e
 
 ## 8. Próximos passos
 
-1. Playtest manual da v0.7.0-dev: Mundo II inteiro, depois Mundo III.
-2. Medir tempo de run, Sparks por mundo, TTK dos 6 chefes e legibilidade a 320 px.
-3. Validar belt/rail/gust em multiball e com `timeLimit`.
-4. Testar migração real de save v1/v2→v3 e o debug de ondas.
-5. Rodar `npm run package` apenas quando houver decisão de release.
-6. Atualizar assets de loja e screenshots antes de qualquer publicação.
-7. Integrar o rework de perks (fluxo separado) e, depois, Tier 5/6/consumíveis.
+1. Playtest do tutorial novo: tempo até a primeira perk, leitura do texto,
+   clique no skip e comprehension em 320 px.
+2. Playtest manual da v0.7.0-dev: Mundo II inteiro, depois Mundo III.
+3. Medir tempo de run, Sparks por mundo, TTK dos 6 chefes e legibilidade a 320 px.
+4. Validar belt/rail/gust em multiball e com `timeLimit`.
+5. Testar migração real de save v1/v2→v3 e o debug de ondas.
+6. Rodar `npm run package` apenas quando houver decisão de release.
+7. Atualizar assets de loja e screenshots antes de qualquer publicação.
+8. Integrar o rework de perks (fluxo separado) e, depois, Tier 5/6/consumíveis.
+
+> As frentes de overhaul discutidas (pierce, densidade, progressão, público)
+> estão registradas em [`design/overhaul-direcoes.md`](design/overhaul-direcoes.md).
+> A próxima indicada é o pierce; nada além do tutorial foi implementado.

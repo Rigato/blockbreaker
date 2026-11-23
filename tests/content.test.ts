@@ -17,7 +17,7 @@ import {
 import { WORLDS, localPhaseIndex, worldForPhaseIndex } from '../src/content/worlds';
 import type { WaveDef as SimWaveDef } from '../src/sim/testWaves';
 import { World } from '../src/sim/World';
-import { SIM_TUNING_DEFAULTS } from '../src/game/config';
+import { GAME_CONFIG, SIM_TUNING_DEFAULTS } from '../src/game/config';
 import { PHASE_THEMES, relativeLuminance, themeForPhase } from '../src/render/themes';
 
 const EXPECTED_PHASE_NAMES = [
@@ -76,14 +76,28 @@ describe('multi-world content structure', () => {
     expect(waveIds).toContain('p18w5');
   });
 
-  it('keeps the tutorial short: 8 blocks per wave, first perk after four', () => {
+  it('keeps the tutorial short: four 1 HP blocks, first perk at three kills', () => {
     const tutorial = PHASES.find((phase) => phase.tutorial);
     expect(tutorial).toBeDefined();
     const stats = phaseStats(tutorial!);
-    expect(stats.waves.map((wave) => wave.blocks)).toEqual([8, 8]);
-    expect(stats.blocks).toBe(16);
-    expect(stats.hp).toBe(32);
-    expect(stats.levelUps).toBe(2);
+    expect(stats.waves.map((wave) => wave.blocks)).toEqual([4, 8]);
+    expect(stats.blocks).toBe(12);
+    expect(stats.hp).toBe(15);
+    expect(stats.levelUps).toBe(1);
+
+    // The first wave must be the simplest possible field: 1 HP only.
+    const firstWave = tutorial!.waves[0]!;
+    expect(firstWave.rows.join('')).toBe('..1111..');
+
+    // 3 of 4 kills (75%) fill the tutorial bar.
+    expect(GAME_CONFIG.progression.tutorialFirstLevelXp).toBe(3);
+    expect(
+      GAME_CONFIG.progression.tutorialFirstLevelXp / stats.waves[0]!.blocks,
+    ).toBeCloseTo(0.75);
+
+    // Wave 2 introduces 2 HP blocks and an explosive block.
+    expect(tutorial!.waves[1]!.rows.join('')).toContain('e');
+    expect(tutorial!.waves[1]!.rows.join('')).toContain('2');
   });
 
   it('produces no validator issues', () => {
@@ -305,12 +319,19 @@ describe('multi-world content pacing', () => {
     }
   });
 
-  it('offers 2-16 level ups per phase on the G4 curve', () => {
+  it('offers 2-16 level ups per campaign phase and one in the tutorial', () => {
     for (const phase of PHASES) {
       const stats = phaseStats(phase);
-      expect(stats.levelUps).toBeGreaterThanOrEqual(2);
+      expect(stats.levelUps).toBeGreaterThanOrEqual(phase.tutorial ? 1 : 2);
       expect(stats.levelUps).toBeLessThanOrEqual(16);
-      expect(stats.levelUps).toBe(levelUpsForXp(stats.hp));
+      expect(stats.levelUps).toBe(
+        levelUpsForXp(
+          stats.hp,
+          phase.tutorial
+            ? GAME_CONFIG.progression.tutorialFirstLevelXp
+            : undefined,
+        ),
+      );
     }
     expect(levelUpsForXp(20)).toBe(1);
     expect(levelUpsForXp(90)).toBe(4);

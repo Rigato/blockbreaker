@@ -16,23 +16,28 @@ import type { WaveDef } from './types';
  */
 
 /**
- * First-run tutorial: two short waves that teach movement, the launch,
- * XP/level-ups and one special block. It is intentionally lighter than the
+ * First-run tutorial: two short waves that teach movement, the launch, the
+ * first perk and one special block. It is intentionally lighter than the
  * campaign opener and gates level 1 on a fresh save.
+ *
+ * Wave 1 has four 1 HP blocks. The tutorial XP bar needs 3 XP for level 1, so
+ * destroying three of the four (75%) grants the first perk instead of asking
+ * the new player to clear a full 2 HP formation first.
  */
 export const TUTORIAL_WAVES: readonly WaveDef[] = [
   {
     id: 'tutw1',
     name: 'First Steps',
-    // Eight stone bricks: the first four destroyed grant the first perk (8 XP).
-    rows: ['..2222..', '22....22'],
+    // Four one-hit bricks: three destroyed (75%) fill the tutorial XP bar.
+    rows: ['..1111..'],
     legend: CONTENT_LEGEND,
     ballSpeed: 520,
   },
   {
     id: 'tutw2',
     name: 'Spark Practice',
-    rows: ['..2e22..', '.22..22.'],
+    // Five 1 HP, two 2 HP and one explosive block: success first, then nuance.
+    rows: ['..1e11..', '.12..21.'],
     legend: CONTENT_LEGEND,
     ballSpeed: 560,
   },

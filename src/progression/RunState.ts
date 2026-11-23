@@ -5,6 +5,7 @@ import type {
   PerkSummary,
   ProgressionService,
   RunModifiers,
+  RunStartOptions,
   XpGain,
 } from '../game/contracts';
 import { BASE_RUN_MODIFIERS, GAME_CONFIG } from '../game/config';
@@ -18,8 +19,8 @@ import { createRng } from '../sim/rng';
 import { xpCostForLevel } from './xp';
 
 /** XP required to advance from `level` (1-based) to the next level. */
-export function xpToNextForLevel(level: number): number {
-  return xpCostForLevel(level);
+export function xpToNextForLevel(level: number, firstLevelXp?: number): number {
+  return xpCostForLevel(level, firstLevelXp);
 }
 
 /** Alias matching the curve named in the plan. */
@@ -38,6 +39,7 @@ export class RunState implements ProgressionService {
   private currentPendingLevelUps = 0;
   private readonly levels = new Map<string, number>();
   private currentOffers: PerkOffer[] = [];
+  private firstLevelXp: number | undefined;
   private rng = createRng(0);
   private unlockedPerkIds: ReadonlySet<string> = new Set(
     PERK_CATALOG.map((definition) => definition.id),
@@ -56,7 +58,7 @@ export class RunState implements ProgressionService {
   }
 
   get xpToNext(): number {
-    return xpToNextForLevel(this.currentLevel);
+    return xpToNextForLevel(this.currentLevel, this.firstLevelXp);
   }
 
   get pendingLevelUps(): number {
@@ -78,8 +80,13 @@ export class RunState implements ProgressionService {
     return acquired;
   }
 
-  startRun(seed: number, unlockedPerkIds?: Iterable<string>): void {
+  startRun(
+    seed: number,
+    unlockedPerkIds?: Iterable<string>,
+    options: RunStartOptions = {},
+  ): void {
     this.currentSeed = seed;
+    this.firstLevelXp = options.firstLevelXp;
     this.unlockedPerkIds = unlockedPerkIds === undefined
       ? new Set(PERK_CATALOG.map((definition) => definition.id))
       : new Set(unlockedPerkIds);
