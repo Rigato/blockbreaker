@@ -11,7 +11,7 @@ pelo responsável; a tag e o GitHub Release continuam manuais. A `0.6.1` foi pub
 
 ## Comece por aqui
 
-1. `docs/handoff-v0.6.1.md` — onboarding da sessão atual.
+1. `docs/handoff-v0.7.1.md` — onboarding da sessão atual.
 2. `docs/release/portal-metadata.md` — textos em inglês por portal.
 3. `docs/release/submission-checklist.md` — campos e passos de cada portal.
 4. `docs/release/status.md` — status/URLs de publicação.

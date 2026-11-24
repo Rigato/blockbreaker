@@ -1,9 +1,9 @@
 # Portal metadata — Bricklike
 
 Draft de metadata em inglês para revisão humana antes de qualquer submissão.
-A submissão é **manual**, feita pelo usuário. A `0.5.1` já está publicada no
-itch.io/Playgama; este draft descreve a próxima submissão e ainda não foi
-enviado para a `0.6.1`.
+A submissão é **manual**, feita pelo usuário. A `0.6.1` está publicada no
+itch.io/Playgama; a `0.7.1` é a linha local fechada em 2026-11-24 e ainda não
+foi enviada a nenhum portal.
 
 ## Identidade
 
@@ -211,11 +211,12 @@ _(≈260 words.)_
   letterbox shell.
 - The 0.4.0 submission was rejected again with the same generic message. The
   0.5.1 was submitted on 2026-11-11; the submission is paused until
-  2026-11-26. The 0.6.1 is local and has not been submitted.
+  2026-11-26. The 0.6.1 is published; the 0.7.1 is local and has not been
+  submitted.
 - **Screenshots, covers and the preview video were regenerated from the 0.5.1
   build** (tutorial, level 1 with two waves, touch controls). They still need
-  human review and regeneration for the 0.6.1 before submitting; do not claim
-  they are published.
+  human review and regeneration for the **0.7.1** before submitting; do not
+  claim they are current.
 - Full Launch requirements (Data/User modules, direct-to-gameplay landing,
   account-linked progress) are **out of scope** for this milestone.
 - Re-check CrazyGames' current Basic Launch rules on the submission date.
@@ -229,10 +230,10 @@ _(≈260 words.)_
 - Do not use the technical name `blockbreaker` as player-facing marketing copy.
 - Keep the description, screenshots and covers in sync with the current build.
 - The store covers, screenshots and videos are from the **0.5.1** build and are
-  pending human review. Review and regenerate them against the 0.6.1 before
-  submitting.
+  pending human review. Review and regenerate them against the **0.7.1**
+  before submitting.
 - Do not promise ads on itch.io or GameFlare: those portals do not serve the
   in-game interstitials used on Playgama/CrazyGames.
 - Do not claim CrazyGames approved the 0.5.1; the submission is paused until
-  2026-11-26. The 0.5.1 is live on itch.io and in the Playgama sandbox; the
-  0.6.1 is local and unpublished.
+  2026-11-26. The 0.6.1 is live on itch.io and in the Playgama sandbox; the
+  0.7.1 is local and unpublished.

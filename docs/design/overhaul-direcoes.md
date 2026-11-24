@@ -3,7 +3,7 @@
 **Status:** documento de trabalho; tutorial e pierce implementados; densidade,
 progressão e público seguem em aberto.
 **Data:** 2026-11-23 · **Atualizado:** 2026-11-24
-**Base:** `0.7.0-dev` local, 18 fases + tutorial, save v3, 22 perks.
+**Base:** `0.7.1` local, 18 fases + tutorial, save v3, 22 perks.
 **Objetivo:** registrar as conversas de overhaul para não perdê-las e permitir
 decidir uma frente por vez.
 
@@ -121,7 +121,7 @@ conteúdo: `unlockedPhase` 0..18 e estatísticas por `phase-N`.
 | Mundos selecionáveis / mapa ramificado | save v4 + UI | alto |
 | Run contínua entre fases | fluxo + talvez save v4 | muito alto |
 
-**Janela:** a `0.7.0` não foi publicada; só existem saves v1/v2 reais da
+**Janela:** a `0.7.1` não foi publicada; só existem saves v1/v2 reais da
 `0.6.1`. Se a progressão mudar de modelo, este é o momento mais barato para um
 save v4 — migrar v1/v2 direto e não carregar uma população v3.
 
@@ -178,7 +178,7 @@ skip, mortes por run, leitura de HP dos blocos, intenção de repetir.
 
 1. Tutorial e pierce estão implementados; medir os dois em playtest.
 2. Decidir o spine de progressão no papel; se mudar, planejar save v4 antes de
-   publicar a 0.7.0.
+   publicar a 0.7.1.
 3. Testar densidade (8×10/8×12; depois 9 colunas) com o pierce já ativo.
 4. Só então autorar conteúdo em massa.
 5. Reavaliar layout desktop se o público-alvo justificar.
@@ -188,6 +188,6 @@ skip, mortes por run, leitura de HP dos blocos, intenção de repetir.
 ## 8. Referências
 
 - [GDD](../GDD_Bricklike.md)
-- [Handoff v0.7.0](../handoff-v0.7.0.md)
+- [Handoff v0.7.1](../handoff-v0.7.1.md)
 - [Perks — proposta de rework](../design/perks-rework-v0.7.md)
 - [Spec de publicação](../spec-tecnica-publicacao.md)

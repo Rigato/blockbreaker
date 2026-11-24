@@ -6,12 +6,13 @@ usado como fonte de decisão.
 
 ## Comece por aqui
 
-1. **[Handoff v0.7.0](handoff-v0.7.0.md)** — estado atual do jogo, arquitetura,
-   invariantes, gates, portais, riscos e próximos passos.
-2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.9).
+1. **[Handoff v0.7.1](handoff-v0.7.1.md)** — estado atual do jogo, arquitetura,
+   invariantes, gates, riscos e o backlog completo para as mudanças profundas
+   (densidade, progressão, público, perks).
+2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.13).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente na `main`.
 4. **[Mundos II/III — implementação](design/worlds-II-III-implementation.md)** —
-   escopo, conteúdo, save v3, mapas e debug da v0.7.0-dev.
+   escopo, conteúdo, save v3, mapas e debug da linha 0.7.
 5. **[Guia único de publicação](spec-tecnica-publicacao.md)** — estratégia,
    arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
    CrazyGames, ads, save, metadata, QA e release.

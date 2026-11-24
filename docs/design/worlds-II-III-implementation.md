@@ -1,8 +1,8 @@
-# Mundos II e III — especificação implementada (v0.7.0-dev)
+# Mundos II e III — especificação implementada (linha 0.7)
 
 **Status:** implementado na `main` local; não publicado, sem tag e sem release.
-**Data:** 2026-11-16
-**Base:** v0.6.1 → v0.7.0-dev
+**Data:** 2026-11-24
+**Base:** v0.6.1 → linha 0.7 (v0.7.1)
 **Escopo:** arquitetura multi-mundo, save v3, dois mundos novos, física nova,
 chefes, mapas de seleção, debug de ondas e testes.
 

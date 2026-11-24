@@ -159,21 +159,20 @@ unzip -t release/blockbreaker-web.zip
 - [ ] Rotação preserva progresso (pausa + overlay).
 - [ ] ZIP ≤ 250 MB, ≤ 1.500 arquivos, paths ≤ 240 caracteres.
 - [ ] Sem logo do Bridge no mock; modo mock sem analytics.
-- [ ] Screenshots/capas/vídeos da 0.6.1 revisados/regenerados; os assets atuais
-      ainda são os da 0.5.1.
+- [ ] Screenshots/capas/vídeos da 0.7.1 revisados/regenerados; os assets atuais
+      ainda são os da linha anterior.
 
 ## Pacote atual
 
-Referência de 2026-11-12, versão **0.6.1**, build local na linha atual (sem
-upload, tag ou GitHub Release):
+Referência de 2026-11-24, versão **0.7.1**, build local na linha atual (sem
+upload, tag ou GitHub Release; a 0.6.1 é a publicada):
 
 | Item | Valor |
 |---|---|
 | ZIP | `release/blockbreaker-web.zip` |
-| Tamanho | 1.514.492 bytes (~1.482 KiB) |
-| Descomprimido | 3.068.148 bytes |
+| Tamanho | 1.542.118 bytes (~1.506 KiB) |
 | Arquivos | 20 |
-| SHA-256 | `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8` |
+| SHA-256 | `d54afb8584e450b9a2b5e5de06c010b1dcf1a3d4cc1c88e98a59e27918a534c6` |
 | Raiz | `index.html` + `playgama-bridge-config.json` |
 | Conteúdo | 5 HowTo, 2 logos, JS/CSS/fontes, licenças, Bridge local |
 
@@ -183,15 +182,14 @@ antes de qualquer upload. O manifesto também registra `fileCount: 20`,
 
 ## Release por tag — somente após aprovação humana
 
-**Não crie tag ou release sem decisão explícita.** A `0.6.1` está na linha
-atual de desenvolvimento e ainda não foi tagueada nem publicada. A `0.5.1` é a
-build publicada no itch.io e no sandbox da Playgama. A submissão em itch.io,
-GameFlare, Playgama e
+**Não crie tag ou release sem decisão explícita.** A `0.7.1` é a linha local
+atual e ainda não foi tagueada nem publicada. A `0.6.1` é a build publicada no
+itch.io e no sandbox da Playgama. A submissão em itch.io, GameFlare, Playgama e
 CrazyGames é manual e feita pelo responsável.
 
 Pré-requisitos:
 
-1. Teste humano da 0.6.1 concluído e CI verde no commit que receberá a tag; o
+1. Teste humano da 0.7.1 concluído e CI verde no commit que receberá a tag; o
    `release.yml` não roda E2E.
 2. `npm run package` local limpo, com `unzip -t` OK.
 3. `package.json` e `release/manifest.json` na mesma versão da tag.
@@ -203,15 +201,15 @@ git switch main
 git pull --ff-only
 git status                      # deve estar limpo
 
-git tag -a v0.6.1 -m "Bricklike v0.6.1"
-git push origin v0.6.1
+git tag -a v0.7.1 -m "Bricklike v0.7.1"
+git push origin v0.7.1
 ```
 
 Conferência:
 
 ```bash
 gh run list --workflow Release --limit 1
-gh release view v0.6.1 --json name,assets,url
+gh release view v0.7.1 --json name,assets,url
 ```
 
 Fallback manual **somente** se o workflow falhar e o build local estiver
@@ -219,9 +217,9 @@ validado:
 
 ```bash
 npm run build && npm run package
-gh release create v0.6.1 \
+gh release create v0.7.1 \
   release/blockbreaker-web.zip release/manifest.json \
-  --title "Bricklike v0.6.1" \
+  --title "Bricklike v0.7.1" \
   --generate-notes
 ```
 

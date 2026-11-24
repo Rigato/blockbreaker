@@ -1,6 +1,7 @@
 # Submission checklist — Bricklike
 
 **Versão publicada:** `0.6.1` no itch.io e no sandbox da Playgama (2026-11-12).  
+**Linha local:** `0.7.1` fechada em 2026-11-24; **não publicada**, sem tag/release.  
 **Build anterior:** `0.5.1`.  
 **CrazyGames:** `0.5.1` submetida em 2026-11-11; submissão pausada até 2026-11-26.  
 **Status global:** testes básicos ok; assets de loja regenerados da 0.6.1;

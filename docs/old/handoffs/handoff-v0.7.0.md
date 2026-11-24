@@ -1,4 +1,7 @@
-# Handoff — Bricklike v0.7.0-dev
+# Handoff — Bricklike v0.7.0-dev (histórico)
+
+> **Histórico:** substituído pelo [`handoff-v0.7.1.md`](../../handoff-v0.7.1.md)
+> em 2026-11-24.
 
 **Fonte de onboarding para a próxima sessão.**
 **Data:** 2026-11-16 · **Atualizado:** 2026-11-23 (tutorial simplificado)
@@ -11,7 +14,7 @@
 
 > Este documento substitui o `handoff-v0.6.1.md` como fonte atual. O handoff
 > anterior fica como histórico. O GDD v1.9 e
-> [`design/worlds-II-III-implementation.md`](design/worlds-II-III-implementation.md)
+> [`design/worlds-II-III-implementation.md`](../design/worlds-II-III-implementation.md)
 > são as fontes de design desta linha.
 
 ---
@@ -281,6 +284,6 @@ npm run test:e2e
 9. Integrar o rework de perks (fluxo separado) e, depois, Tier 5/6/consumíveis.
 
 > As frentes de overhaul discutidas (densidade, progressão, público) estão
-> registradas em [`design/overhaul-direcoes.md`](design/overhaul-direcoes.md).
+> registradas em [`design/overhaul-direcoes.md`](../design/overhaul-direcoes.md).
 > O tutorial e o pierce estão implementados; a próxima decisão é densidade ou
 > progressão.

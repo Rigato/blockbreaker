@@ -9,7 +9,7 @@ técnica ou a ordem de entrada.
 publicam; §10 é o checklist; §11 são anti-padrões; §12 é o case study.
 
 > **Base:** aprendizados do Bricklike até 2026-11-16. Estado na data: 0.6.1
-> publicada no itch.io e no sandbox da Playgama; 0.7.0-dev local, com Mundos
+> publicada no itch.io e no sandbox da Playgama; 0.7.1 local, com Mundos
 > II/III e save v3; CrazyGames pausado até 2026-11-26; GameFlare bloqueado por
 > acesso à conta; nenhuma tag ou GitHub Release.
 >
@@ -528,7 +528,7 @@ npm run package
 npm run test:e2e
 ```
 
-Referência Bricklike 0.7.0-dev: **428 testes**/35 arquivos; **43 E2E**/12
+Referência Bricklike 0.7.1: **428 testes**/35 arquivos; **43 E2E**/12
 specs; **19 fases, 71 ondas, 2.781 blocos, 9.392 XP**. A referência histórica
 0.5.1 era 329 testes/29 arquivos, 31 E2E/9 specs e 7 níveis/22 ondas.
 

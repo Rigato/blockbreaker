@@ -1,6 +1,8 @@
 # Handoff — Bricklike v0.6.1
 
-**Histórico:** substituído por [`handoff-v0.7.0.md`](handoff-v0.7.0.md) em 2026-11-16.
+**Histórico:** substituído por [`handoff-v0.7.0.md`](handoff-v0.7.0.md) em
+2026-11-16 e depois pelo [`handoff-v0.7.1.md`](../../handoff-v0.7.1.md) em
+2026-11-24. Os links abaixo refletem a estrutura de `docs/` da época.
 **Fonte única de onboarding para a próxima sessão.**  
 **Data:** 2026-11-12  
 **Branch:** `main`  

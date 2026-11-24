@@ -1,9 +1,9 @@
 # Status de publicação — Bricklike
 
 Versão publicada: **`0.6.1`** no **itch.io** e no **sandbox da Playgama**  
-Build local: **`0.6.1`** (sem tag ou GitHub Release)  
+Build local: **`0.7.1`** (fechada localmente; não publicada, sem tag ou GitHub Release)  
 CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**  
-Atualizado em: 2026-11-12  
+Atualizado em: 2026-11-24  
 Responsável pela submissão: **usuário (manual)**
 
 Este arquivo é o registro de publicação. O `0.1.0-mvp` foi a primeira versão
@@ -12,6 +12,10 @@ também está no sandbox da Playgama e foi submetida ao CrazyGames em 2026-11-11
 A `0.6.1` foi publicada manualmente no **itch.io** e no **sandbox da Playgama**
 em 2026-11-12; o responsável fez testes básicos e considerou tudo ok. Nenhuma
 tag ou GitHub Release foi criada.
+
+A **0.7.1** é a linha local atual, com Mundos II/III, save v3, tutorial
+simplificado/assistido, Giant Ball maior, cor da bola por dano e pierce. Ela
+**não foi publicada** em nenhum portal; itch.io e Playgama continuam na `0.6.1`.
 
 ## Estado em 2026-11-12
 

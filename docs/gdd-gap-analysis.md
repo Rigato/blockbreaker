@@ -1,13 +1,13 @@
-# Bricklike — GDD × estado atual (2026-11-16)
+# Bricklike — GDD × estado atual (2026-11-24)
 
-Comparação entre o GDD v1.9 e o build de desenvolvimento `0.7.0` na `main`.
+Comparação entre o GDD v1.13 e o build de desenvolvimento `0.7.1` na `main`.
 Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
 
 A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12; não
 há tag nem GitHub Release. CrazyGames está pausado até 2026-11-26; GameFlare
-segue bloqueado. A **v0.7.0-dev** (2026-11-16) adiciona Mundos II/III, save v3,
+segue bloqueado. A **v0.7.1** (2026-11-24) adiciona Mundos II/III, save v3,
 9 chefes, 17 blocos, 10 elementos e debug de ondas; está implementada localmente,
 sem publicação.
 
@@ -129,15 +129,16 @@ sem publicação.
 
 ## Leitura rápida
 
-O GDD v1.9 e o build local **estão alinhados**: 19 fases (tutorial + 3 mundos),
+O GDD v1.13 e o build local **estão alinhados**: 19 fases (tutorial + 3 mundos),
 71 ondas, 17 blocos, 10 elementos, 9 chefes, 22 perks, Endless, save v3 e
-metaprogressão horizontal. A `0.7.0-dev` adicionou Mundos II/III, overlap de
-velocidade, belt/rail/gust, mapas por mundo e debug de ondas. Tudo isso está no
-código e coberto por 428 testes unitários + 43 E2E.
+metaprogressão horizontal. A `0.7.1` adicionou Mundos II/III, overlap de
+velocidade, belt/rail/gust, mapas por mundo, debug de ondas, tutorial
+simplificado/assistido e pierce. Tudo isso está no código e coberto por 428
+testes unitários + 43 E2E.
 
 O que falta é majoritariamente **validação humana** das 69 ondas de campanha,
 dos 6 chefes novos, do balance de Spark e do feel de belt/rail/gust, além de
-**distribuição** (a 0.6.1 ainda é a build publicada; a 0.7.0 não foi publicada)
+**distribuição** (a 0.6.1 ainda é a build publicada; a 0.7.1 não foi publicada)
 e **revisão de assets de loja**. A moldura desktop foi deliberadamente
 descartada; o risco de apresentação em iframe desktop continua registrado, mas
 não será resolvido por letterbox nesta linha.
