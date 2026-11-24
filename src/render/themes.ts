@@ -412,6 +412,7 @@ export const TRAIL_BUDGET = 48;
 export const FX_COUNTS = {
   blockHit: 3,
   blockBreak: 9,
+  pierce: 6,
   paddleHit: 3,
   ballLost: 8,
   explosion: 16,

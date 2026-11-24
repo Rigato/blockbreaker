@@ -1794,6 +1794,12 @@ export class BlockBreakerGame implements GameCommands {
           this.runState.addXp(event.xp);
           this.audio.play('block-break');
           break;
+        case 'block:pierced':
+          this.audio.play('pierce', {
+            rate: 1 + Math.min(3, Math.max(1, event.damage)) * 0.05,
+            volume: 0.8,
+          });
+          break;
         case 'block:hit':
           if (event.hp > 0) {
             this.audio.play('block-damage', {

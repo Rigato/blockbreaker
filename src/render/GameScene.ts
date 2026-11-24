@@ -436,6 +436,25 @@ export class GameScene extends Phaser.Scene implements ScenePresentation {
         this.shake(1.6, 100);
         return;
       }
+      case 'block:pierced': {
+        const color = ballColorForDamage(this.world.modifiers.ballDamage);
+        this.effects.emitRing(event.x, event.y, 20, color, 220, 2);
+        this.effects.emitBurst(
+          event.x,
+          event.y,
+          scaleFxCount(FX_COUNTS.pierce, this.reducedMotion),
+          color,
+          {
+            speed: 170,
+            life: 300,
+            size: 2.2,
+            gravity: 60,
+            altColor: 0xffffff,
+            jitter: 8,
+          },
+        );
+        return;
+      }
       case 'paddle:hit': {
         this.paddlePulseMs = 170;
         const paddle = this.world.paddle;

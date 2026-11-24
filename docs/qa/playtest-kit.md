@@ -109,6 +109,9 @@ Preencher uma linha por run. Template: `docs/qa/run-log-template.csv`.
   tentativas e quantos deram intenção de repetir ≥4/5. Meta: 4 de 5.
 - **Ritmo:** mediana e faixa de `duration_s`; contar `level_ups` por run.
   Meta: 120–300 s e 3–5 level ups.
+- **Pierce:** com Power Ball, contar quantos blocos a bola atravessa por rally,
+  se o jogador entende por que ela não quicou e se a bola continua legível em
+  multiball. Observar TTK e a interação com Overkill.
 - **Variedade:** arquétipos distintos escolhidos entre todos os participantes.
   Meta: ≥3. Para dominância, por perk: `escolhas / ofertas em que apareceu`;
   sinalizar >70%.

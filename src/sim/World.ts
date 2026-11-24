@@ -231,6 +231,14 @@ export type SimEvent =
       maxHp: number;
       xp: number;
     }
+  | {
+      type: 'block:pierced';
+      blockId: string;
+      ballId: number;
+      x: number;
+      y: number;
+      damage: number;
+    }
   | { type: 'block:healed'; blockId: string; hp: number }
   | {
       type: 'block:spawned';
@@ -1849,12 +1857,13 @@ export class World {
       ball.y += ball.vy * remaining * hit.t;
       remaining *= 1 - hit.t;
 
+      let pierced = false;
       if (collider.kind === 'paddle') {
         this.handlePaddleHit(ball, hit.nx, hit.ny);
         if (ball.stuck) break;
       } else if (collider.kind === 'block' && collider.block) {
-        this.handleBlockHit(ball, collider.block);
-        reflectVelocity(ball, hit.nx, hit.ny);
+        pierced = this.handleBlockHit(ball, collider.block);
+        if (!pierced) reflectVelocity(ball, hit.nx, hit.ny);
       } else if (collider.kind === 'boss' && collider.boss) {
         this.handleBossBallHit(ball, collider.boss);
         reflectVelocity(ball, hit.nx, hit.ny);
@@ -1870,8 +1879,12 @@ export class World {
         }
       }
 
-      ball.x += hit.nx * hit.depth;
-      ball.y += hit.ny * hit.depth;
+      // A pierced ball keeps its line and skips the separation nudge; the
+      // block is already gone, so the next sweep starts inside the old cell.
+      if (!pierced) {
+        ball.x += hit.nx * hit.depth;
+        ball.y += hit.ny * hit.depth;
+      }
       impacts += 1;
     }
   }
@@ -2086,7 +2099,12 @@ export class World {
     }
   }
 
-  private handleBlockHit(ball: Ball, block: Block): void {
+  /**
+   * Applies one direct ball hit. Returns `true` when the hit destroys the
+   * block with at least 1 full excess damage, so the ball continues through
+   * it instead of bouncing. Overkill still uses the same excess for splash.
+   */
+  private handleBlockHit(ball: Ball, block: Block): boolean {
     let cooldowns = this.blockCooldowns.get(ball.id);
     if (!cooldowns) {
       cooldowns = new Map();
@@ -2118,10 +2136,25 @@ export class World {
     const detonateBombardier = this.bombardierChargeArmed;
     if (detonateBombardier) this.bombardierChargeArmed = false;
 
-    this.applyDamage(block, damage, ball.id, true, true);
+    const hpBefore = block.hp;
+    const destroyed = this.applyDamage(block, damage, ball.id, true, true);
+    // Require a full point of excess: 2 damage vs 2 HP destroys and bounces;
+    // 3 vs 2 pierces. Fractional Momentum damage cannot sneak past the gate.
+    const pierced = destroyed && damage - hpBefore >= 1 - 1e-9;
+    if (pierced) {
+      this.pushEvent({
+        type: 'block:pierced',
+        blockId: block.id,
+        ballId: ball.id,
+        x: block.left + block.width / 2,
+        y: block.top + block.height / 2,
+        damage,
+      });
+    }
 
     if (detonateBombardier) this.detonateBombardier(block, ball.id);
     this.refreshHotStreak();
+    return pierced;
   }
 
   /** Ball damage including Momentum and an active Hot Streak buff. */

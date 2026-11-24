@@ -480,6 +480,32 @@ export class AudioService implements AudioController {
         });
         return crack;
       }
+      case 'pierce': {
+        // A short upward zip: the ball punched through instead of bouncing.
+        const zip = this.tone({
+          type: 'sawtooth',
+          frequency: 980 * rateVariation,
+          endFrequency: 260 * rateVariation,
+          duration: 0.08 / rate,
+          gain: 0.09 * volume,
+          detune: 10,
+        });
+        this.tone({
+          type: 'sine',
+          frequency: 2100 * rateVariation,
+          endFrequency: 1500 * rateVariation,
+          duration: 0.06 / rate,
+          gain: 0.05 * volume,
+          delay: 0.008,
+        });
+        this.noise({
+          duration: 0.05 / rate,
+          gain: 0.05 * volume,
+          filterType: 'highpass',
+          filterFrequency: 2600 * rate,
+        });
+        return zip;
+      }
       case 'ball-lost': {
         return this.tone({
           type: 'sawtooth',

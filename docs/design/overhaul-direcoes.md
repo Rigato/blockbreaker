@@ -1,7 +1,8 @@
 # Overhaul — direções discutidas e próximos passos
 
-**Status:** documento de trabalho; nada aqui além do tutorial está implementado.
-**Data:** 2026-11-23
+**Status:** documento de trabalho; tutorial e pierce implementados; densidade,
+progressão e público seguem em aberto.
+**Data:** 2026-11-23 · **Atualizado:** 2026-11-24
 **Base:** `0.7.0-dev` local, 18 fases + tutorial, save v3, 22 perks.
 **Objetivo:** registrar as conversas de overhaul para não perdê-las e permitir
 decidir uma frente por vez.
@@ -25,7 +26,7 @@ decidir uma frente por vez.
   (`lastBlockMagnetTurnRate`) e pode virar perk depois.
 - Totais: 12 blocos, 15 XP, 1 level up; totais do conteúdo: 2.781 blocos /
   9.392 XP.
-- Gates: 424 unitários / 34 arquivos; 43 E2E / 12 specs; validação de conteúdo
+- Gates: 428 unitários / 35 arquivos; 43 E2E / 12 specs; validação de conteúdo
   verde.
 
 ### 1.1 Feedback visual de dano (2026-11-23)
@@ -44,38 +45,37 @@ ainda mostram o tutorial antigo; regenerar antes de publicar.
 
 ---
 
-## 2. Próximo passo — bola atravessar blocos (pierce)
+## 2. Pierce — implementado (2026-11-24)
 
-**Status:** não implementado. É a próxima frente provável.
+**Status:** implementado como regra base.
 
-**Regra desejada:** se o dano da bola for maior que a vida atual do bloco
-(excesso ≥ 1), a bola destrói e atravessa sem quicar. Se o dano for igual ou
-menor que a vida, ela quica. Exemplos: dano 2 contra bloco de 1 HP atravessa;
-dano 2 contra bloco de 2 HP destrói e quica; dano 1 contra bloco de 1 HP
-destrói e quica.
+**Regra:** hit direto da bola que destrói o bloco com **excesso ≥ 1** atravessa
+sem quicar; dano igual ou menor quica. Exemplos: 2×1 atravessa; 2×2 destrói e
+quica; 3×2 atravessa; dano fracionário só atravessa se o excedente chegar a 1
+inteiro.
 
-**Por que existe:** compensar o aumento de blocos no campo e dar sensação de
-poder com perks de dano, sem aumentar a dificuldade de execução.
+**Escopo:** só bola. Laser, projétil, explosão, link e Shield Bash não
+perfuram; chefe e elementos também não. `phased` blindado continua bloqueando.
 
-**Onde mexe:** `World.handleBlockHit` / `moveBallAabb` (retornar “perfurou” e
-não refletir), eventos/FX, testes de simulação. A mudança de simulação é
-pequena; o custo está em balanceamento e leitura.
+**Implementação:** `World.handleBlockHit` retorna `pierced`; `moveBallAabb`
+pula reflexo e separação e segue o sweep. Evento `block:pierced`, SFX `pierce`
+e anel/partículas na cor do dano. Testes em `tests/pierce.test.ts`.
 
-**Decisões em aberto:**
+**Overkill:** continua usando o mesmo excesso para splash; os dois coexistem.
+Fica em observação no playtest: se pierce + Overkill dominar, separar o splash
+para o caso em que a bola quica (ou limitar o splash).
 
-- Regra base ou perk exclusiva (ex.: “Piercing Ball”)?
-- Excesso mínimo 1 (mais frequente) ou 2 (mais raro e especial)?
-- Sem decay ou perder 1 de dano por bloco atravessado na mesma passada?
-- Limite de perfurações por rally?
-- Overkill: hoje usa o mesmo excesso para splash nos quatro vizinhos. Pierce e
-  Overkill acontecem juntos, ou o splash fica só quando a bola quica?
-- Como telegrafar: FX, som e uma linha no How to Play.
+**Ainda em aberto (playtest):**
+
+- Excesso mínimo 1 já entrou; avaliar se 2 é melhor para o late game.
+- Sem decay por enquanto; testar perda de 1 de dano por bloco atravessado.
+- Limite de perfurações por rally, se a bola ficar “sumida” em ondas densas.
 - Impacto em combo/Momentum/Hot Streak, XP, level-ups, Sparks e duração das
   ondas.
+- Como explicar no How to Play e se vale um indicador de “pierce pronto”.
 
 **Padrão de conteúdo que combina:** “cascalho” de 1 HP na frente e âncoras de
-4–5 HP atrás. O cascalho vira espetáculo; as âncoras seguram a bola. Evita
-trivializar a fase sem nerfar a mecânica.
+4–5 HP atrás. O cascalho vira espetáculo; as âncoras seguram a bola.
 
 ---
 
@@ -176,14 +176,12 @@ skip, mortes por run, leitura de HP dos blocos, intenção de repetir.
 
 ## 7. Ordem sugerida
 
-1. Fechar o tutorial (feito) e medir em playtest.
-2. Implementar o pierce como protótipo isolado, com teste de simulação e
-   playtest de uma fase.
-3. Decidir o spine de progressão no papel; se mudar, planejar save v4 antes de
+1. Tutorial e pierce estão implementados; medir os dois em playtest.
+2. Decidir o spine de progressão no papel; se mudar, planejar save v4 antes de
    publicar a 0.7.0.
-4. Testar densidade (8×10/8×12; depois 9 colunas) com o pierce já ativo.
-5. Só então autorar conteúdo em massa.
-6. Reavaliar layout desktop se o público-alvo justificar.
+3. Testar densidade (8×10/8×12; depois 9 colunas) com o pierce já ativo.
+4. Só então autorar conteúdo em massa.
+5. Reavaliar layout desktop se o público-alvo justificar.
 
 ---
 

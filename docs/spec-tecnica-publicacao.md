@@ -528,7 +528,7 @@ npm run package
 npm run test:e2e
 ```
 
-Referência Bricklike 0.7.0-dev: **424 testes**/34 arquivos; **43 E2E**/12
+Referência Bricklike 0.7.0-dev: **428 testes**/35 arquivos; **43 E2E**/12
 specs; **19 fases, 71 ondas, 2.781 blocos, 9.392 XP**. A referência histórica
 0.5.1 era 329 testes/29 arquivos, 31 E2E/9 specs e 7 níveis/22 ondas.
 

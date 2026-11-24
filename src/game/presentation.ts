@@ -13,6 +13,7 @@ export type SfxId =
   | 'block-hit'
   | 'block-damage'
   | 'block-break'
+  | 'pierce'
   | 'ball-lost'
   | 'laser'
   | 'explosion'

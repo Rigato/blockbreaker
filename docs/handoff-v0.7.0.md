@@ -134,6 +134,19 @@
   temporários não trocam a cor.
 - `BALL_DAMAGE_COLORS` / `ballColorForDamage` ficam em `render/themes.ts`.
 
+### 2.10 Pierce (2026-11-24)
+
+- Regra base: hit direto da bola que destrói o bloco com **excedente ≥ 1**
+  atravessa sem quicar; dano igual ou menor quica.
+- `World.handleBlockHit` retorna `pierced`; `moveBallAabb` pula reflexo e
+  separação quando a bola passa. O sweep continua no mesmo passo.
+- Só bola: laser, projétil, explosão, link e Shield Bash não perfuram; chefe e
+  elementos também não. `phased` blindado continua bloqueando.
+- Overkill continua usando o mesmo excesso para splash; os dois coexistem e
+  ficam em observação.
+- Feedback: evento `block:pierced`, SFX `pierce`, anel/partículas na cor do
+  dano. Testes em `tests/pierce.test.ts` cobrem 2×1, 3×2, 2×2 e 1×1.
+
 ---
 
 ## 3. Arquitetura de arquivos
@@ -194,7 +207,7 @@ npm run test:e2e
 | Gate | Resultado |
 |---|---|
 | `npm run typecheck` | ✅ |
-| `npm test` | ✅ 424 testes / 34 arquivos |
+| `npm test` | ✅ 428 testes / 35 arquivos |
 | `npm run validate:content` | ✅ 19 fases / 71 ondas / 2.781 blocos / 9.392 XP |
 | Bridge config | ✅ schema 2.4.1, sem URLs externas |
 | `npm run build` | ✅ bundle Vite |
@@ -225,6 +238,8 @@ npm run test:e2e
    - `phased`: a bola ricocheteia sem dano enquanto o anel estiver ativo.
    - `plated`: laser/torreta/explosão causam 1 a menos; bola causa dano cheio.
    - `relay`: destruir o último relay desliga os elementos.
+   - pierce: com Power Ball, a bola deve atravessar blocos de 1 HP sem quicar;
+     contra 2 HP com 2 de dano, deve destruir e quicar.
 7. Chegue ao chefe de cada mundo e confira padrão/nome/HP.
 8. Em save não-debug, confirme que II/III ficam selados até os clears 6/12.
 9. Confira que o save existente v2 abre com `version: 3` e mantém progresso.
@@ -237,6 +252,7 @@ npm run test:e2e
 |---|---|---|
 | Playtest humano | não feito | testar 69 ondas de campanha, 9 chefes, belt/rail/gust e platinas |
 | Tutorial novo | 2 ondas / 15 XP / 1 perk / paddle 2× / ímã | medir tempo até a primeira perk, skip, leitura em 320 px e se o ímã resolve o último bloco |
+| Pierce | regra base + FX/SFX | testar Power Ball 1–3, Overkill junto, multiball e ondas densas; medir TTK e se a bola “some” atrás dos blocos |
 | Balance W2/W3 | validado por conteúdo | calibrar HP, XP e duração com playtest |
 | Velocidade 896/920 | implementada | testar legibilidade em 320 px e hardware baixo |
 | Hard cap 1.100 | implementado | validar rails em ondas densas e com multiball |
@@ -254,14 +270,17 @@ npm run test:e2e
 
 1. Playtest do tutorial novo: tempo até a primeira perk, leitura do texto,
    clique no skip e comprehension em 320 px.
-2. Playtest manual da v0.7.0-dev: Mundo II inteiro, depois Mundo III.
-3. Medir tempo de run, Sparks por mundo, TTK dos 6 chefes e legibilidade a 320 px.
-4. Validar belt/rail/gust em multiball e com `timeLimit`.
-5. Testar migração real de save v1/v2→v3 e o debug de ondas.
-6. Rodar `npm run package` apenas quando houver decisão de release.
-7. Atualizar assets de loja e screenshots antes de qualquer publicação.
-8. Integrar o rework de perks (fluxo separado) e, depois, Tier 5/6/consumíveis.
+2. Playtest do pierce: Power Ball 1–3, Overkill junto, multiball e ondas densas;
+   medir TTK e se a bola fica legível ao atravessar vários blocos.
+3. Playtest manual da v0.7.0-dev: Mundo II inteiro, depois Mundo III.
+4. Medir tempo de run, Sparks por mundo, TTK dos 6 chefes e legibilidade a 320 px.
+5. Validar belt/rail/gust em multiball e com `timeLimit`.
+6. Testar migração real de save v1/v2→v3 e o debug de ondas.
+7. Rodar `npm run package` apenas quando houver decisão de release.
+8. Atualizar assets de loja e screenshots antes de qualquer publicação.
+9. Integrar o rework de perks (fluxo separado) e, depois, Tier 5/6/consumíveis.
 
-> As frentes de overhaul discutidas (pierce, densidade, progressão, público)
-> estão registradas em [`design/overhaul-direcoes.md`](design/overhaul-direcoes.md).
-> A próxima indicada é o pierce; nada além do tutorial foi implementado.
+> As frentes de overhaul discutidas (densidade, progressão, público) estão
+> registradas em [`design/overhaul-direcoes.md`](design/overhaul-direcoes.md).
+> O tutorial e o pierce estão implementados; a próxima decisão é densidade ou
+> progressão.

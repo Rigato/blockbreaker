@@ -3,16 +3,16 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.11  
-**Data:** 2026-11-23  
-**Status:** v0.7.0-dev implementada na `main` local; Mundos II/III, save v3, debug de ondas, tutorial simplificado e feedback de bola por dano. Não publicada; sem tag/release.  
+**Versão:** 1.12  
+**Data:** 2026-11-24  
+**Status:** v0.7.0-dev implementada na `main` local; Mundos II/III, save v3, debug de ondas, tutorial simplificado, feedback de bola por dano e pierce. Não publicada; sem tag/release.  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutorial: **19 fases e 71 ondas**), **17 tipos de bloco**, **10 elementos de fase**, **9 chefes** e **22 perks**. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica. A **v0.7.0-dev** adiciona os Mundos **II · Neon Lattice** e **III · Rustwake**, save v3, 9 chefes, blocos/elementos novos, kit físico de belt/rail/gust e debug de ondas; está implementada localmente, sem publicação. Em 2026-11-23 o **tutorial foi simplificado**: 2 ondas, 12 blocos, 15 XP, uma perk e dois coach marks, com botões e texto maiores, paddle 2× e ímã no último bloco. No mesmo dia, **Giant Ball** passou a +40% de raio por nível e a bola ganhou uma rampa de cor por dano (branco → amarelo → laranja → vermelho → roxo).
+A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutorial: **19 fases e 71 ondas**), **17 tipos de bloco**, **10 elementos de fase**, **9 chefes** e **22 perks**. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica. A **v0.7.0-dev** adiciona os Mundos **II · Neon Lattice** e **III · Rustwake**, save v3, 9 chefes, blocos/elementos novos, kit físico de belt/rail/gust e debug de ondas; está implementada localmente, sem publicação. Em 2026-11-23 o **tutorial foi simplificado**: 2 ondas, 12 blocos, 15 XP, uma perk e dois coach marks, com botões e texto maiores, paddle 2× e ímã no último bloco. No mesmo dia, **Giant Ball** passou a +40% de raio por nível e a bola ganhou uma rampa de cor por dano (branco → amarelo → laranja → vermelho → roxo). Em 2026-11-24 entrou o **pierce**: um hit direto da bola que destrói o bloco com pelo menos 1 de dano excedente atravessa em vez de quicar.
 
 ### Como ler os status
 
@@ -138,6 +138,14 @@ Block breaker arcade clássico com elementos roguelite: destruir blocos rende XP
 - **Second Chance** revive a run uma vez por run, com uma bola nova presa ao paddle.
 - Alguns perks alteram propriedades físicas das bolinhas. Perks de bolinha são passivos ou automáticos; poderes ativáveis pertencem ao rebatedor.
 - **Velocidade no Endless:** as regras de laser (bola solta, dano e cooldown) são as mesmas da campanha, mas a velocidade da bola começa em **660**, sobe **14 por onda** e satura em **1100**. O limite de **780** vale apenas para a campanha.
+
+### Pierce (v0.7.0)
+
+- **Regra:** se um hit **direto da bola** destrói o bloco com **pelo menos 1 de dano excedente** (`dano − HP atual ≥ 1`), a bola atravessa sem quicar. Se o dano for igual ou menor que a vida, ela destrói e quica normalmente.
+- Exemplos: 2 de dano contra 1 HP atravessa; 2 contra 2 destrói e quica; 3 contra 2 atravessa. Dano fracionário (Momentum) só atravessa se o excedente chegar a 1 inteiro.
+- **Escopo:** vale apenas para a bola. Laser, projéteis, explosões, links e Shield Bash não atravessam; chefes e elementos não são perfurados. Blocos `phased` blindados continuam bloqueando sem dano.
+- **Overkill:** continua usando o mesmo excesso para o splash nos quatro vizinhos. Os dois efeitos coexistem e ficam em observação no playtest; se ficar dominante, a alternativa é separar pierce e splash.
+- **Feedback:** evento `block:pierced`, SFX próprio (zip curto), anel/partículas na cor do dano e a bola continua na mesma linha. A rampa de cor da bola comunica o potencial de pierce.
 
 ### Ondas, XP e perks
 
@@ -528,7 +536,7 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 | Mapas | um mapa-trilha por mundo, pílulas I/II/III no header |
 | Debug | todas as fases desbloqueadas em `?debug=1` e seletor de onda no sheet |
 | Economia | +30 Sparks no primeiro clear de cada mundo |
-| Gates | 424 unit, 43 E2E, validação de conteúdo verde |
+| Gates | 428 unit, 43 E2E, validação de conteúdo verde |
 
 ### O que continua fora
 
@@ -651,6 +659,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.9` | 2026-11-16 | v0.7.0-dev local: Mundos II (Neon Lattice) e III (Rustwake), 18 fases/71 ondas, 8 blocos e 3 elementos novos, 6 chefes, save v3, overlap de velocidade entre mundos, hard cap 1.100 para rails, mapas por mundo com pílulas I/II/III e debug de ondas. Gates com 419 unit e 43 E2E; não publicada, sem tag/release. |
 | `1.10` | 2026-11-23 | Tutorial simplificado: 2 ondas, 12 blocos, 15 XP e 1 level up; primeira perk em 3 de 4 blocos de 1 HP; segunda onda com 1 HP, 2 HP e explosivo; 2 coach marks com texto maior, **Continue** e **Skip tutorial** em contraste alto. Chefes/Endless saem do tutorial. Totais: 2.781 blocos / 9.392 XP. Gates com 420 unit e 43 E2E. |
 | `1.11` | 2026-11-23 | Onda 1 do tutorial desce 4 linhas; paddle do tutorial 2×; Giant Ball +40%/nível (máx. +80%); bola colorida por dano (branco→amarelo→laranja→vermelho→roxo) com rastro; ímã do último bloco no tutorial com anel/tether, preservando a velocidade. Gates com 424 unit e 43 E2E. |
+| `1.12` | 2026-11-24 | Pierce: hit direto da bola com pelo menos 1 de dano excedente destrói e atravessa sem quicar; igual ou menor quica. Só bola; chefes/elementos/ferramentas ficam de fora. Overkill continua com o mesmo excesso. Evento/SFX/FX próprios. Gates com 428 unit e 43 E2E. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |
