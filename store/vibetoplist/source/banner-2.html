@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #banner {
+    background:
+      radial-gradient(62% 150% at 57% 35%, rgba(255, 47, 190, 0.34) 0%, rgba(120, 10, 92, 0.18) 42%, transparent 70%),
+      radial-gradient(55% 130% at 91% 68%, rgba(255, 170, 40, 0.26) 0%, transparent 64%),
+      radial-gradient(50% 120% at 34% 90%, rgba(122, 76, 192, 0.22) 0%, transparent 65%),
+      linear-gradient(112deg, #08020a 0%, #170414 36%, #240516 60%, #08020a 100%);
+  }
+  .beams {
+    background: repeating-linear-gradient(112deg, transparent 0 26px, rgba(255, 143, 228, 0.045) 26px 28px);
+    mask-image: linear-gradient(90deg, transparent 20%, #000 55%, #000 100%);
+    transform: scale(1.2);
+  }
+  .beam-hot {
+    background: linear-gradient(112deg, transparent 0%, rgba(255, 47, 208, 0.16) 38%, rgba(255, 180, 60, 0.12) 52%, transparent 70%);
+    filter: blur(7px);
+  }
+  .scrim-left {
+    background: linear-gradient(90deg, rgba(6, 1, 9, 1) 0%, rgba(8, 2, 11, 0.97) 32%, rgba(10, 2, 12, 0.72) 46%, rgba(9, 2, 10, 0) 62%);
+  }
+  .headline {
+    position: absolute;
+    font-family: "Silkscreen";
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    color: #ffffff;
+    text-shadow:
+      0 2px 0 #6e0f4e,
+      0 4px 0 #2a0018,
+      3px 6px 0 rgba(0, 0, 0, 0.45),
+      0 0 18px rgba(255, 47, 208, 0.5);
+  }
+  .headline em {
+    font-style: normal;
+    color: #ffe59a;
+    text-shadow: 0 2px 0 #7a3a00, 0 4px 0 #2a1400, 0 0 16px rgba(255, 190, 60, 0.55);
+  }
+  .subline {
+    position: absolute;
+    font-family: "Silkscreen";
+    font-size: 8.5px;
+    letter-spacing: 1.9px;
+    color: #ffd8f5;
+    text-shadow: 0 0 10px rgba(255, 47, 208, 0.5);
+    white-space: nowrap;
+  }
+  .card-glow {
+    position: absolute;
+    background: radial-gradient(circle, rgba(255, 47, 208, 0.28) 0%, transparent 66%);
+    filter: blur(4px);
+  }
+  .perk-card {
+    position: absolute;
+    width: 132px;
+    padding: 6px 7px 7px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(23, 22, 54, 0.97) 0%, rgba(10, 9, 28, 0.98) 100%);
+    border: 1px solid rgba(255, 143, 228, 0.55);
+    box-shadow:
+      0 0 0 1px rgba(2, 6, 13, 0.85),
+      0 5px 12px rgba(0, 0, 0, 0.55),
+      0 0 18px rgba(255, 47, 208, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+  .perk-card .pc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Silkscreen";
+    font-size: 5.4px;
+    letter-spacing: 0.5px;
+    color: #8eeaff;
+  }
+  .perk-card .pc-top b { color: #ff8fe4; font-weight: 400; }
+  .perk-card .pc-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .perk-card .pc-num {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 143, 228, 0.6);
+    border-radius: 3px;
+    font-family: "Silkscreen";
+    font-size: 6px;
+    color: #ffd8f5;
+    background: rgba(255, 47, 208, 0.12);
+  }
+  .perk-card .pc-name {
+    font-family: "Silkscreen";
+    font-weight: 700;
+    font-size: 7.3px;
+    letter-spacing: 0.1px;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+  .perk-card .pc-desc {
+    margin-top: 4px;
+    font-family: "Noto Sans";
+    font-weight: 600;
+    font-size: 5.6px;
+    line-height: 1.35;
+    color: #b9c6da;
+    white-space: nowrap;
+  }
+  .perk-card .pc-foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-family: "Silkscreen";
+    font-size: 5.2px;
+    letter-spacing: 0.4px;
+    color: #9dffd0;
+  }
+  .perk-card .pc-foot span:last-child { color: #ffe59a; }
+  .perk-card .pc-bar {
+    margin-top: 4px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(126, 249, 255, 0.14);
+    overflow: hidden;
+  }
+  .perk-card .pc-bar i {
+    display: block;
+    width: 38%;
+    height: 100%;
+    background: linear-gradient(90deg, #7ef9ff, #9dffd0);
+    box-shadow: 0 0 6px rgba(126, 249, 255, 0.7);
+  }
+  .combo {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 31px;
+    border-radius: 5px;
+    background: linear-gradient(180deg, rgba(40, 8, 30, 0.92), rgba(16, 2, 14, 0.95));
+    border: 1px solid rgba(255, 229, 154, 0.75);
+    box-shadow: 0 0 0 1px rgba(2, 6, 13, 0.8), 0 0 14px rgba(255, 190, 60, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: rotate(6deg);
+  }
+  .combo .c-label {
+    font-family: "Silkscreen";
+    font-size: 4.8px;
+    letter-spacing: 1.1px;
+    color: #ffd8f5;
+  }
+  .combo .c-val {
+    font-family: "Silkscreen";
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1;
+    color: #ffe59a;
+    text-shadow: 0 0 10px rgba(255, 190, 60, 0.8), 0 2px 0 #5a3508;
+  }
+  .wall-frag { position: absolute; width: 190px; height: 120px; }
+  .hit-glow {
+    position: absolute;
+    background: radial-gradient(circle, rgba(255, 245, 200, 0.55) 0%, rgba(255, 190, 60, 0.25) 28%, rgba(255, 47, 208, 0.1) 52%, transparent 70%);
+    filter: blur(1px);
+  }
+  .gold-rays {
+    position: absolute;
+    background: repeating-conic-gradient(from 0deg, rgba(255, 229, 154, 0.42) 0deg 1.4deg, transparent 1.4deg 12deg);
+    mask-image: radial-gradient(circle, rgba(0,0,0,.9) 5%, rgba(0,0,0,.4) 28%, transparent 60%);
+  }
+</style>
+</head>
+<body>
+<div id="banner">
+  <div class="layer bg"></div>
+  <div class="layer beams"></div>
+  <div class="layer beam-hot"></div>
+  <div class="layer" id="stars"></div>
+
+  <div class="layer" id="frag"></div>
+
+  <div class="hit-glow" style="left:508px; top:-14px; width:120px; height:120px;"></div>
+  <div class="gold-rays" style="left:505px; top:-18px; width:126px; height:126px; opacity:.55;"></div>
+  <div class="layer" id="shards"></div>
+
+  <div class="combo" style="left:452px; top:4px;">
+    <span class="c-label">COMBO</span>
+    <span class="c-val">x12</span>
+  </div>
+
+  <svg width="250" height="90" viewBox="0 0 250 90" style="position:absolute; left:320px; top:0; overflow:visible;">
+    <defs>
+      <linearGradient id="t2" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffe59a" stop-opacity="0"/>
+        <stop offset=".4" stop-color="#ff8fe4" stop-opacity=".45"/>
+        <stop offset="1" stop-color="#fff6d6" stop-opacity=".98"/>
+      </linearGradient>
+      <filter id="g2" x="-40%" y="-100%" width="180%" height="300%"><feGaussianBlur stdDeviation="3.4"/></filter>
+    </defs>
+    <path d="M 48 82 C 105 78, 150 58, 221 44" fill="none" stroke="#08020a" stroke-opacity=".82" stroke-width="15" stroke-linecap="round" filter="url(#g2)"/>
+    <path d="M 48 82 C 105 78, 150 58, 221 44" fill="none" stroke="url(#t2)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 48 82 C 105 78, 150 58, 221 44" fill="none" stroke="#ffffff" stroke-opacity=".92" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="111" cy="72" r="2" fill="#fff6d6" opacity=".95"/>
+    <circle cx="155" cy="59" r="1.5" fill="#fff6d6" opacity=".8"/>
+    <circle cx="190" cy="50" r="1.3" fill="#fff6d6" opacity=".65"/>
+  </svg>
+
+  <div class="laser-glow" style="left:359px; top:0; width:18px; height:84px;"></div>
+  <div class="laser" style="left:364px; top:0; width:6px; height:83px;"></div>
+  <div class="spark4" style="left:359px; top:2px; width:12px; height:12px; opacity:.95;"></div>
+
+  <div class="paddle-glow" style="left:302px; top:70px; width:128px; height:28px;"></div>
+  <div class="paddle" style="left:320px; top:81px; width:96px;"><i class="p-diamond"></i></div>
+
+  <div class="ball" style="left:528px; top:32px; width:26px; height:26px;"></div>
+  <div class="spark4" style="left:565px; top:38px; width:13px; height:13px; opacity:.9;"></div>
+
+  <div class="trail" style="left:402px; top:10px; width:34px; transform:rotate(22deg); opacity:.6;"></div>
+  <div class="ball" style="left:386px; top:5px; width:12px; height:12px; box-shadow:0 0 4px 2px rgba(255,255,255,.9),0 0 12px 4px rgba(255,190,60,.5);"></div>
+
+  <div class="trail" style="left:456px; top:68px; width:26px; transform:rotate(18deg); opacity:.5;"></div>
+  <div class="ball" style="left:446px; top:64px; width:10px; height:10px; box-shadow:0 0 4px 2px rgba(255,255,255,.9),0 0 10px 3px rgba(255,190,60,.45);"></div>
+
+  <div class="layer scrim-left"></div>
+  <div class="layer vignette"></div>
+
+  <div class="wordmark" style="left:24px; top:6px; font-size:23px;">
+    <span class="l l-glow">BRICKLIKE</span>
+    <span class="l l-shadow">BRICKLIKE</span>
+    <span class="l l-outline">BRICKLIKE</span>
+    <span class="l l-fill">BRICKLIKE</span>
+  </div>
+
+  <div class="headline" style="left:24px; top:34px;">ONE MORE <em>RUN.</em></div>
+  <div class="subline" style="left:26px; top:68px;">EVERY RUN IS DIFFERENT</div>
+
+  <div class="cta gold" style="left:596px; top:27px; width:110px; font-size:11px;">
+    <span class="play"></span>
+    <span>PLAY FREE</span>
+  </div>
+  <div class="cta-sub" style="left:596px; top:64px; width:110px; color:#ffd8f5; text-shadow:0 1px 2px #08020a;">NO DOWNLOAD</div>
+
+  <div class="layer scanlines"></div>
+</div>
+
+<script>
+  let seed = 4242;
+  const rnd = () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const stars = document.getElementById('stars');
+  for (let i = 0; i < 58; i++) {
+    const s = document.createElement('i');
+    s.className = 'star';
+    const size = rnd() < 0.84 ? 1 : 2;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = Math.round(rnd() * 726) + 'px';
+    s.style.top = Math.round(rnd() * 88) + 'px';
+    s.style.opacity = (0.16 + rnd() * 0.62).toFixed(2);
+    s.style.background = rnd() < 0.5 ? '#ffe9c9' : '#ffd8f5';
+    stars.appendChild(s);
+  }
+
+  // a few loose bricks, tumbling through the hit
+  const frag = document.getElementById('frag');
+  const bricks = [
+    { x: 351, y: -13, s: 28, c: 'gold',    r: 8 },
+    { x: 508, y: 0,  s: 30, c: 'gold',    r: 18 },
+    { x: 576, y: 10, s: 33, c: 'magenta', r: -14 },
+    { x: 520, y: 62, s: 25, c: 'cyan',    r: 28 },
+    { x: 578, y: 64, s: 28, c: 'violet',  r: -22 },
+  ];
+  bricks.forEach(b => {
+    const el = document.createElement('div');
+    el.className = 'brick ' + b.c;
+    el.style.left = b.x + 'px';
+    el.style.top = b.y + 'px';
+    el.style.width = b.s + 'px';
+    el.style.height = b.s + 'px';
+    el.style.transform = 'rotate(' + b.r + 'deg)';
+    el.style.opacity = '.96';
+    el.innerHTML = '<i class="spark"></i><i class="rivets"></i>';
+    frag.appendChild(el);
+  });
+
+  const shards = document.getElementById('shards');
+  const palette = ['#fff6d6','#ffe59a','#e0a62a','#ffd8f5','#ff8fe4','#d43a9e','#e6feff','#8bf4ff'];
+  for (let i = 0; i < 26; i++) {
+    const p = document.createElement('i');
+    p.className = 'shard';
+    const w = 4 + Math.round(rnd() * 12);
+    const h = 3 + Math.round(rnd() * 10);
+    const angle = rnd() * Math.PI * 2;
+    const dist = 20 + rnd() * 105;
+    p.style.width = w + 'px';
+    p.style.height = h + 'px';
+    p.style.left = (566 + Math.cos(angle) * dist) + 'px';
+    p.style.top = (40 + Math.sin(angle) * dist * 0.62 - 5) + 'px';
+    p.style.background = palette[Math.floor(rnd() * palette.length)];
+    p.style.transform = 'rotate(' + Math.round(rnd() * 180) + 'deg)';
+    if (i % 3 === 0) p.style.clipPath = 'polygon(50% 0, 100% 100%, 0 100%)';
+    shards.appendChild(p);
+  }
+</script>
+</body>
+</html>

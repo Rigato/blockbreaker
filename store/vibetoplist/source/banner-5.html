@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #banner {
+    background:
+      radial-gradient(55% 150% at 70% 45%, rgba(38, 180, 190, 0.34) 0%, rgba(8, 70, 90, 0.2) 40%, transparent 70%),
+      radial-gradient(40% 120% at 95% 20%, rgba(72, 224, 255, 0.14) 0%, transparent 60%),
+      linear-gradient(104deg, #02070c 0%, #03121a 36%, #06202a 62%, #02080d 100%);
+  }
+  .dotgrid {
+    background-image: radial-gradient(rgba(126, 249, 255, 0.13) 1px, transparent 1.2px);
+    background-size: 14px 14px;
+    mask-image: radial-gradient(60% 130% at 70% 50%, #000 0%, transparent 72%);
+    opacity: .55;
+  }
+  .scrim-left {
+    background: linear-gradient(90deg, rgba(2, 7, 12, 1) 0%, rgba(2, 7, 12, 0.99) 28%, rgba(2, 7, 12, 0.93) 31%, rgba(2, 7, 12, 0.55) 34%, rgba(2, 7, 12, 0) 35%);
+  }
+  .headline {
+    position: absolute;
+    font-family: "Silkscreen";
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 0.95;
+    letter-spacing: 0.2px;
+    color: #ffffff;
+    text-shadow:
+      0 2px 0 #0a3547,
+      0 4px 0 #02090f,
+      0 0 16px rgba(126, 249, 255, 0.4);
+    white-space: nowrap;
+  }
+  .headline em {
+    font-style: normal;
+    color: #8bf4ff;
+    text-shadow: 0 2px 0 #0b3a4a, 0 4px 0 #040e14, 0 0 16px rgba(72, 224, 255, 0.65);
+  }
+  .subline {
+    position: absolute;
+    font-family: "Noto Sans";
+    font-weight: 700;
+    font-size: 7.6px;
+    letter-spacing: 1.4px;
+    color: #8ba7b2;
+    white-space: nowrap;
+  }
+  .subline b { color: #9dffd0; }
+  .subline .sep { color: #335661; padding: 0 3px; }
+
+  .win-glow {
+    position: absolute;
+    background: radial-gradient(circle, rgba(72, 224, 255, 0.3) 0%, rgba(20, 120, 160, 0.16) 40%, transparent 70%);
+    filter: blur(7px);
+  }
+  .browser {
+    position: absolute;
+    left: 260px;
+    top: 2px;
+    width: 300px;
+    height: 160px;
+    border-radius: 7px;
+    background: #06141d;
+    border: 1px solid rgba(126, 249, 255, 0.5);
+    box-shadow:
+      0 0 0 2px rgba(2, 6, 13, 0.9),
+      0 14px 30px rgba(0, 0, 0, 0.6),
+      0 0 28px rgba(72, 224, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+  }
+  .chrome {
+    position: relative;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 7px;
+    gap: 7px;
+    background: linear-gradient(180deg, #0d2b39 0%, #071a24 100%);
+    border-bottom: 1px solid rgba(126, 249, 255, 0.18);
+  }
+  .dots { display: flex; gap: 3px; }
+  .dots i {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ff8fe4;
+    box-shadow: 0 0 4px rgba(255, 143, 228, 0.6);
+  }
+  .dots i:nth-child(2) { background: #ffe59a; box-shadow: 0 0 4px rgba(255, 229, 154, 0.5); }
+  .dots i:nth-child(3) { background: #9dffd0; box-shadow: 0 0 4px rgba(157, 255, 208, 0.5); }
+  .url {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 12px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: rgba(2, 9, 14, 0.85);
+    border: 1px solid rgba(126, 249, 255, 0.14);
+    font-family: "Noto Sans";
+    font-weight: 700;
+    font-size: 5.6px;
+    letter-spacing: 0.7px;
+    color: #9fc7d4;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .url .live {
+    margin-left: auto;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #9dffd0;
+    box-shadow: 0 0 5px #9dffd0;
+  }
+  .reload {
+    opacity: .65;
+    color: #9fc7d4;
+    font-size: 7px;
+    line-height: 1;
+  }
+  .viewport {
+    position: relative;
+    height: 140px;
+    overflow: hidden;
+    background: #041018;
+  }
+  .viewport img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .viewport .glare {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(118deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 22%, transparent 23%);
+    pointer-events: none;
+  }
+  .viewport .fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 34px;
+    background: linear-gradient(180deg, transparent, rgba(2, 7, 12, 0.85));
+  }
+  .free-tab {
+    position: absolute;
+    left: 8px;
+    bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 15px;
+    padding: 0 7px;
+    border-radius: 3px;
+    background: rgba(4, 16, 24, 0.9);
+    border: 1px solid rgba(157, 255, 208, 0.5);
+    font-family: "Silkscreen";
+    font-size: 5.2px;
+    letter-spacing: 0.8px;
+    color: #9dffd0;
+    box-shadow: 0 0 10px rgba(157, 255, 208, 0.2);
+  }
+  .free-tab .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #9dffd0;
+    box-shadow: 0 0 5px #9dffd0;
+  }
+</style>
+</head>
+<body>
+<div id="banner">
+  <div class="layer bg"></div>
+  <div class="layer dotgrid"></div>
+  <div class="layer grid" style="opacity:.28; mask-image: radial-gradient(55% 130% at 72% 50%, #000 0%, transparent 72%);"></div>
+  <div class="layer" id="stars"></div>
+
+  <div class="layer win-glow" style="left:230px; top:-10px; width:370px; height:160px;"></div>
+
+  <div class="browser">
+    <div class="chrome">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">
+        <svg width="6" height="6" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" fill="#7ef9ff"/><path d="M3.2 4.5V3.2a1.8 1.8 0 0 1 3.6 0v1.3" fill="none" stroke="#7ef9ff" stroke-width="1"/></svg>
+        <span>bricklike</span>
+        <span class="live"></span>
+      </div>
+      <div class="reload">&#10227;</div>
+    </div>
+    <div class="viewport">
+      <img src="../../../public/how-to-play/specials.png" alt="">
+      <div class="glare"></div>
+      <div class="fade"></div>
+    </div>
+  </div>
+
+  <svg width="120" height="90" viewBox="0 0 120 90" style="position:absolute; left:520px; top:0; overflow:visible;">
+    <defs>
+      <linearGradient id="t5" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#7ef9ff" stop-opacity="0"/>
+        <stop offset=".5" stop-color="#7ef9ff" stop-opacity=".45"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity=".98"/>
+      </linearGradient>
+      <filter id="g5" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <path d="M 8 88 C 28 80, 36 60, 52 46" fill="none" stroke="#02070c" stroke-opacity=".75" stroke-width="12" stroke-linecap="round" filter="url(#g5)"/>
+    <path d="M 8 88 C 28 80, 36 60, 52 46" fill="none" stroke="url(#t5)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 8 88 C 28 80, 36 60, 52 46" fill="none" stroke="#ffffff" stroke-opacity=".9" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <div class="ball" style="left:552px; top:36px; width:22px; height:22px;"></div>
+  <div class="spark4" style="left:575px; top:44px; width:12px; height:12px; opacity:.9;"></div>
+
+  <div class="layer" id="shards"></div>
+
+  <div class="layer scrim-left"></div>
+  <div class="layer vignette"></div>
+
+  <div class="wordmark" style="left:24px; top:6px; font-size:24px;">
+    <span class="l l-glow">BRICKLIKE</span>
+    <span class="l l-shadow">BRICKLIKE</span>
+    <span class="l l-outline">BRICKLIKE</span>
+    <span class="l l-fill">BRICKLIKE</span>
+  </div>
+
+  <div class="headline" style="left:24px; top:33px;">NO DOWNLOAD.<br><em>JUST PLAY.</em></div>
+  <div class="subline" style="left:26px; top:72px;"><b>FREE</b><span class="sep">/</span>BROWSER<span class="sep">/</span>MOBILE</div>
+
+  <div class="cta" style="left:596px; top:28px; width:110px;">
+    <span class="play"></span>
+    <span>PLAY FREE</span>
+  </div>
+  <div class="cta-sub" style="left:596px; top:65px; width:110px;">INSTANT PLAY</div>
+
+  <div class="layer scanlines"></div>
+</div>
+
+<script>
+  let seed = 9090;
+  const rnd = () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const stars = document.getElementById('stars');
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('i');
+    s.className = 'star';
+    const size = rnd() < 0.85 ? 1 : 2;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = Math.round(rnd() * 726) + 'px';
+    s.style.top = Math.round(rnd() * 88) + 'px';
+    s.style.opacity = (0.14 + rnd() * 0.5).toFixed(2);
+    stars.appendChild(s);
+  }
+  const shards = document.getElementById('shards');
+  const pal = ['#e6feff','#9cf6ff','#38cfe8','#c39cff','#ffe59a','#ff8fe4'];
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('i');
+    p.className = 'shard';
+    const w = 3 + Math.round(rnd() * 6);
+    const h = 3 + Math.round(rnd() * 7);
+    const a = rnd() * Math.PI * 2;
+    const d = 12 + rnd() * 40;
+    p.style.width = w + 'px';
+    p.style.height = h + 'px';
+    p.style.left = (562 + Math.cos(a) * d) + 'px';
+    p.style.top = (47 + Math.sin(a) * d * 0.7) + 'px';
+    p.style.background = pal[Math.floor(rnd() * pal.length)];
+    p.style.transform = 'rotate(' + Math.round(rnd() * 180) + 'deg)';
+    if (i % 2 === 0) p.style.clipPath = 'polygon(50% 0, 100% 100%, 0 100%)';
+    shards.appendChild(p);
+  }
+</script>
+</body>
+</html>

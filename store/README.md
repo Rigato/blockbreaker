@@ -61,6 +61,12 @@ e bottom sheet, o tutorial, gameplay com laser e multiball, level-up e Frost
 Sentinel. Terminam na capa correspondente, com o logo **BRICKLIKE**. Veja
 `video/README.md`.
 
+## Banners Vibe Toplist — `store/vibetoplist/`
+
+Cinco opções **728×90** para o leaderboard do vibetoplist.com, feitas com a
+fonte, a paleta e a arte do jogo. Formatos exatos em PNG, com folha de contato
+para revisão e fontes HTML/CSS regeneráveis. Veja `vibetoplist/README.md`.
+
 ## Uso por portal
 
 - **itch.io:** ZIP HTML5, capa 16:9 ou 2:3, screenshots, descrição e controles.

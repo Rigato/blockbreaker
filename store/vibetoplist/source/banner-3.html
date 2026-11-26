@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #banner {
+    background:
+      radial-gradient(55% 145% at 61% 44%, rgba(154, 92, 255, 0.42) 0%, rgba(70, 30, 130, 0.2) 42%, transparent 70%),
+      radial-gradient(46% 120% at 92% 22%, rgba(72, 224, 255, 0.2) 0%, transparent 62%),
+      radial-gradient(50% 120% at 30% 100%, rgba(255, 47, 208, 0.12) 0%, transparent 60%),
+      linear-gradient(104deg, #04020b 0%, #0b0620 38%, #170a2e 60%, #05020c 100%);
+  }
+  .scrim-left {
+    background: linear-gradient(90deg, rgba(4, 2, 11, 1) 0%, rgba(5, 2, 13, 0.98) 33%, rgba(7, 3, 16, 0.74) 47%, rgba(7, 3, 16, 0) 63%);
+  }
+  .rings {
+    left: 360px; top: -46px; width: 230px; height: 230px;
+    border: 1px solid rgba(195, 156, 255, 0.18);
+    border-radius: 50%;
+    box-shadow: 0 0 50px rgba(154, 92, 255, 0.12), inset 0 0 50px rgba(154, 92, 255, 0.1);
+  }
+  .rings::before {
+    content: "";
+    position: absolute;
+    inset: 26px;
+    border: 1px dashed rgba(126, 249, 255, 0.22);
+    border-radius: 50%;
+  }
+  .rings::after {
+    content: "";
+    position: absolute;
+    inset: 56px;
+    border: 1px solid rgba(255, 229, 154, 0.12);
+    border-radius: 50%;
+  }
+  .headline {
+    position: absolute;
+    font-family: "Silkscreen";
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 0.95;
+    letter-spacing: 0.2px;
+    color: #ffffff;
+    text-shadow:
+      0 2px 0 #2a1447,
+      0 4px 0 #0b0416,
+      0 0 16px rgba(154, 92, 255, 0.55);
+    white-space: nowrap;
+  }
+  .headline em {
+    font-style: normal;
+    color: #8bf4ff;
+    text-shadow: 0 2px 0 #0b3a4a, 0 4px 0 #051018, 0 0 16px rgba(72, 224, 255, 0.6);
+  }
+  .subline {
+    position: absolute;
+    font-family: "Silkscreen";
+    font-size: 8px;
+    letter-spacing: 1.7px;
+    color: #c9a8ff;
+    text-shadow: 0 0 10px rgba(154, 92, 255, 0.55);
+    white-space: nowrap;
+  }
+  .lvl {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 118px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 229, 154, 0.75);
+    background: linear-gradient(180deg, rgba(44, 18, 68, 0.98), rgba(16, 5, 30, 0.98));
+    box-shadow: 0 0 0 1px rgba(2, 6, 13, 0.9), 0 0 14px rgba(255, 190, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    font-family: "Silkscreen";
+    font-size: 6.2px;
+    letter-spacing: 1.3px;
+    color: #ffe59a;
+    text-shadow: 0 0 8px rgba(255, 190, 60, 0.75);
+    transform: rotate(-2deg);
+    z-index: 6;
+  }
+  .lvl .star4 {
+    width: 7px;
+    height: 7px;
+    background: #ffe59a;
+    clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+    filter: drop-shadow(0 0 4px rgba(255, 190, 60, 0.9));
+  }
+  .card-a { left: 306px; top: 22px; width: 124px; transform: rotate(-3deg); z-index: 2; }
+  .card-b { left: 436px; top: 17px; width: 124px; transform: rotate(3deg); z-index: 3; }
+  .card-b .p-bar i { width: 100%; }
+  .card-b .pick-mark { right: -8px; top: -9px; }
+  .card-glow {
+    position: absolute;
+    background: radial-gradient(circle, rgba(255, 229, 154, 0.2) 0%, rgba(154, 92, 255, 0.22) 38%, transparent 68%);
+    filter: blur(3px);
+  }
+  .float-dia {
+    position: absolute;
+    border: 1px solid rgba(195, 156, 255, 0.7);
+    transform: rotate(45deg);
+    box-shadow: 0 0 10px rgba(154, 92, 255, 0.5), inset 0 0 6px rgba(195, 156, 255, 0.4);
+  }
+</style>
+</head>
+<body>
+<div id="banner">
+  <div class="layer bg"></div>
+  <div class="layer grid" style="opacity:.5; mask-image: radial-gradient(70% 140% at 70% 50%, #000 0%, transparent 70%);"></div>
+  <div class="layer" id="stars"></div>
+  <div class="layer rings"></div>
+
+  <div class="card-glow" style="left:300px; top:-16px; width:310px; height:130px;"></div>
+
+  <div class="layer" id="sparkles"></div>
+
+  <div class="pick-mark" style="left:550px; top:8px; z-index:9;">&#10003;</div>
+
+  <div class="lvl" style="left:368px; top:1px;">
+    <i class="star4"></i>
+    <span>LEVEL UP</span>
+    <i class="star4"></i>
+  </div>
+
+  <div class="perk card-a" style="--edge:rgba(126,249,255,.7); --glow:rgba(72,224,255,.3); --accent:#8eeaff; --accent2:#9dffd0;">
+    <div class="p-top"><span>PERK 1 / 3</span><b>RARE</b></div>
+    <div class="p-row">
+      <div class="p-box">
+        <svg width="10" height="10" viewBox="0 0 16 16"><path d="M4 2v6a4 4 0 0 0 8 0V2" fill="none" stroke="#8eeaff" stroke-width="2"/><path d="M2 2h4M10 2h4" stroke="#8eeaff" stroke-width="2"/><path d="M4 13h8" stroke="#8eeaff" stroke-width="2"/></svg>
+      </div>
+      <div class="p-name">STICKY PADDLE</div>
+    </div>
+    <div class="p-desc">Catch the ball. Release to aim.</div>
+    <div class="p-foot"><span>LV 0 &rarr; 1</span><span>UNIQUE</span></div>
+  </div>
+
+  <div class="perk picked card-b">
+    <div class="p-top"><span>PERK 2 / 3</span><b>RARE</b></div>
+    <div class="p-row">
+      <div class="p-box">
+        <svg width="11" height="11" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.4" fill="none" stroke="#ffe59a" stroke-width="1.6"/><circle cx="8" cy="8" r="1.5" fill="#ffe59a"/><path d="M8 0v4M8 12v4M0 8h4M12 8h4" stroke="#ffe59a" stroke-width="1.6"/></svg>
+      </div>
+      <div class="p-name">CRITICAL STRIKE</div>
+    </div>
+    <div class="p-desc">8% chance for double damage.</div>
+    <div class="p-foot"><span>LV 0 &rarr; 3</span><span>MAX 3</span></div>
+  </div>
+
+  <div class="float-dia" style="left:318px; top:70px; width:7px; height:7px; opacity:.75;"></div>
+  <div class="float-dia" style="left:594px; top:70px; width:5px; height:5px; opacity:.55;"></div>
+  <div class="float-dia" style="left:446px; top:2px; width:4px; height:4px; opacity:.7;"></div>
+
+  <div class="layer scrim-left"></div>
+  <div class="layer vignette"></div>
+
+  <div class="wordmark" style="left:24px; top:6px; font-size:20px;">
+    <span class="l l-glow">BRICKLIKE</span>
+    <span class="l l-shadow">BRICKLIKE</span>
+    <span class="l l-outline">BRICKLIKE</span>
+    <span class="l l-fill">BRICKLIKE</span>
+  </div>
+
+  <div class="headline" style="left:24px; top:31px;">CHOOSE YOUR<br><em>POWER.</em></div>
+  <div class="subline" style="left:26px; top:74px;">22 PERKS &middot; ENDLESS COMBOS</div>
+
+  <div class="cta" style="left:596px; top:28px; width:110px;">
+    <span class="play"></span>
+    <span>PLAY FREE</span>
+  </div>
+  <div class="cta-sub" style="left:596px; top:65px; width:110px;">BUILD YOUR RUN</div>
+
+  <div class="layer scanlines"></div>
+</div>
+
+<script>
+  let seed = 777;
+  const rnd = () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const stars = document.getElementById('stars');
+  for (let i = 0; i < 52; i++) {
+    const s = document.createElement('i');
+    s.className = 'star';
+    const size = rnd() < 0.85 ? 1 : 2;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = Math.round(rnd() * 726) + 'px';
+    s.style.top = Math.round(rnd() * 88) + 'px';
+    s.style.opacity = (0.14 + rnd() * 0.55).toFixed(2);
+    s.style.background = rnd() < 0.55 ? '#e0d0ff' : '#bff7ff';
+    stars.appendChild(s);
+  }
+  const sp = document.getElementById('sparkles');
+  for (let i = 0; i < 9; i++) {
+    const s = document.createElement('i');
+    s.className = 'spark4';
+    const d = 5 + Math.round(rnd() * 7);
+    s.style.width = d + 'px';
+    s.style.height = d + 'px';
+    s.style.left = (330 + Math.round(rnd() * 260)) + 'px';
+    s.style.top = (-2 + Math.round(rnd() * 90)) + 'px';
+    s.style.opacity = (0.3 + rnd() * 0.6).toFixed(2);
+    s.style.background = rnd() < 0.5 ? '#fff6d6' : '#d8ffff';
+    sp.appendChild(s);
+  }
+</script>
+</body>
+</html>

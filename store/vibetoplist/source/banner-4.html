@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #banner {
+    background:
+      radial-gradient(48% 130% at 68% 42%, rgba(122, 76, 192, 0.32) 0%, rgba(20, 70, 110, 0.18) 40%, transparent 70%),
+      radial-gradient(55% 120% at 85% 15%, rgba(72, 224, 255, 0.22) 0%, transparent 62%),
+      linear-gradient(104deg, #020810 0%, #04141f 38%, #071e2c 62%, #02080f 100%);
+  }
+  .aurora {
+    background:
+      radial-gradient(60% 40% at 72% 10%, rgba(126, 249, 255, 0.16) 0%, transparent 70%),
+      radial-gradient(45% 35% at 90% 30%, rgba(154, 92, 255, 0.18) 0%, transparent 70%);
+    filter: blur(6px);
+  }
+  .scrim-left {
+    background: linear-gradient(90deg, rgba(2, 8, 16, 1) 0%, rgba(2, 8, 16, 0.98) 32%, rgba(3, 12, 20, 0.76) 46%, rgba(3, 12, 20, 0) 62%);
+  }
+  .headline {
+    position: absolute;
+    font-family: "Silkscreen";
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: 0.2px;
+    color: #eafcff;
+    text-shadow:
+      0 2px 0 #0d3f55,
+      0 4px 0 #041018,
+      0 0 18px rgba(126, 249, 255, 0.5);
+    white-space: nowrap;
+  }
+  .headline em {
+    font-style: normal;
+    color: #9be9ff;
+    text-shadow: 0 2px 0 #0b3a4a, 0 4px 0 #040e14, 0 0 16px rgba(126, 249, 255, 0.7);
+  }
+  .subline {
+    position: absolute;
+    font-family: "Silkscreen";
+    font-size: 8px;
+    letter-spacing: 1.8px;
+    color: #9ed8ee;
+    text-shadow: 0 0 10px rgba(72, 224, 255, 0.45);
+    white-space: nowrap;
+  }
+  .boss-glow {
+    background: radial-gradient(circle, rgba(126, 249, 255, 0.22) 0%, rgba(122, 76, 192, 0.24) 38%, transparent 70%);
+    filter: blur(5px);
+  }
+  .hp {
+    position: absolute;
+    left: 344px;
+    top: 1px;
+    width: 236px;
+  }
+  .hp-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Silkscreen";
+    font-size: 6.4px;
+    letter-spacing: 0.5px;
+    color: #ffd8f5;
+    text-shadow: 0 1px 2px #02060d, 0 0 7px rgba(255, 95, 168, 0.55);
+    padding: 1px 3px 2px;
+    background: linear-gradient(90deg, rgba(2, 8, 16, 0.82), rgba(2, 8, 16, 0.4));
+    border-radius: 3px 3px 0 0;
+  }
+  .hp-top span:last-child { color: #ffe59a; }
+  .hp-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 95, 168, 0.12);
+    border: 1px solid rgba(255, 143, 228, 0.5);
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(255, 95, 168, 0.25);
+  }
+  .hp-bar i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #ff8fe4 0%, #ff5fa8 55%, #d43a9e 100%);
+    box-shadow: 0 0 8px rgba(255, 95, 168, 0.8);
+  }
+  .ice-spike {
+    position: absolute;
+    background: linear-gradient(180deg, #e8feff 0%, #9be9ff 35%, #2a8fb8 100%);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    filter: drop-shadow(0 0 5px rgba(126, 249, 255, 0.55));
+  }
+  .frost-particle {
+    position: absolute;
+    background: #d8feff;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(200, 250, 255, 0.8);
+  }
+</style>
+</head>
+<body>
+<div id="banner">
+  <div class="layer bg"></div>
+  <div class="layer aurora"></div>
+  <div class="layer grid" style="opacity:.45; mask-image: radial-gradient(60% 130% at 72% 50%, #000 0%, transparent 72%);"></div>
+  <div class="layer" id="snow"></div>
+
+  <div class="layer boss-glow" style="left:348px; top:-30px; width:300px; height:150px;"></div>
+
+  <div class="ice-spike" style="left:8px; top:-2px; width:26px; height:44px; opacity:.35;"></div>
+  <div class="ice-spike" style="left:36px; top:-6px; width:18px; height:30px; opacity:.25;"></div>
+  <div class="ice-spike" style="left:690px; top:-4px; width:24px; height:38px; opacity:.3;"></div>
+
+  <div class="hp">
+    <div class="hp-top"><span>FROST SENTINEL</span><span>PHASE 2</span></div>
+    <div class="hp-bar"><i style="width:68%"></i></div>
+  </div>
+
+  <svg width="200" height="78" viewBox="0 0 200 78" style="position:absolute; left:384px; top:12px; overflow:visible;">
+    <defs>
+      <linearGradient id="crown" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f4ffff"/>
+        <stop offset=".55" stop-color="#9be9ff"/>
+        <stop offset="1" stop-color="#2a8fb8"/>
+      </linearGradient>
+      <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0e4557"/>
+        <stop offset=".5" stop-color="#072535"/>
+        <stop offset="1" stop-color="#030f19"/>
+      </linearGradient>
+      <radialGradient id="iris" cx=".4" cy=".35" r=".72">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset=".32" stop-color="#b8fff2"/>
+        <stop offset=".66" stop-color="#2fd6ff"/>
+        <stop offset="1" stop-color="#0a5a88"/>
+      </radialGradient>
+      <filter id="eyeGlow" x="-120%" y="-120%" width="340%" height="340%">
+        <feGaussianBlur stdDeviation="4"/>
+      </filter>
+    </defs>
+
+    <path d="M12 22 L20 2 L28 22 L37 8 L45 22 L56 0 L66 22 L76 6 L86 22 L98 2 L108 22 L120 9 L130 22 L141 3 L151 22 L162 10 L172 22 L182 5 L190 22 Z" fill="url(#crown)" opacity=".92"/>
+
+    <path d="M6 22 H194 V69 Q194 76 187 76 H13 Q6 76 6 69 Z" fill="url(#face)" stroke="#2a1447" stroke-width="3"/>
+    <path d="M11 27 H189 V64 H11 Z" fill="none" stroke="#126074" stroke-width="1.4" opacity=".85"/>
+    <path d="M11 69 H189" stroke="#7a4cc0" stroke-width="1.4" opacity=".5"/>
+
+    <path d="M32 28 l7 12 -4 8 9 11" fill="none" stroke="#9be9ff" stroke-opacity=".38" stroke-width="1.2"/>
+    <path d="M169 27 l-6 11 3 9 -8 13" fill="none" stroke="#9be9ff" stroke-opacity=".32" stroke-width="1.2"/>
+    <path d="M64 30 l4 9 -3 7" fill="none" stroke="#7ef9ff" stroke-opacity=".22" stroke-width="1"/>
+
+    <path d="M34 51 Q100 20 166 51 Q100 76 34 51Z" fill="#020c14" stroke="#7a4cc0" stroke-width="2.2"/>
+    <path d="M43 51 Q100 28 157 51 Q100 70 43 51Z" fill="#d8feff" opacity=".95"/>
+    <circle cx="100" cy="51" r="14" fill="#2fd6ff" filter="url(#eyeGlow)" opacity=".8"/>
+    <circle cx="100" cy="51" r="11.5" fill="url(#iris)"/>
+    <ellipse cx="100" cy="51" rx="3.8" ry="10" fill="#02060d"/>
+    <circle cx="95" cy="46" r="2.6" fill="#ffffff"/>
+    <path d="M38 43 Q100 18 162 43" fill="none" stroke="#02060d" stroke-width="3" opacity=".55"/>
+
+    <path d="M148 22 l4 8 -3 7 5 8" fill="none" stroke="#d8feff" stroke-opacity=".28" stroke-width="1.4"/>
+    <path d="M54 22 l-3 7 2 6" fill="none" stroke="#d8feff" stroke-opacity=".22" stroke-width="1.2"/>
+  </svg>
+
+  <div class="layer" id="icebits"></div>
+
+  <svg width="130" height="90" viewBox="0 0 130 90" style="position:absolute; left:300px; top:0; overflow:visible;">
+    <defs>
+      <linearGradient id="t4" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#7ef9ff" stop-opacity="0"/>
+        <stop offset=".5" stop-color="#7ef9ff" stop-opacity=".4"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity=".98"/>
+      </linearGradient>
+      <filter id="g4" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <path d="M 40 82 C 55 79, 70 74, 92 67" fill="none" stroke="#020810" stroke-opacity=".8" stroke-width="12" stroke-linecap="round" filter="url(#g4)"/>
+    <path d="M 40 82 C 55 79, 70 74, 92 67" fill="none" stroke="url(#t4)" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 40 82 C 55 79, 70 74, 92 67" fill="none" stroke="#ffffff" stroke-opacity=".9" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+  <div class="paddle-glow" style="left:292px; top:70px; width:110px; height:26px;"></div>
+  <div class="paddle" style="left:300px; top:81px; width:78px; height:8px;"><i class="p-diamond"></i></div>
+  <div class="ball" style="left:376px; top:57px; width:17px; height:17px; box-shadow:0 0 4px 2px rgba(255,255,255,.95),0 0 13px 5px rgba(87,234,255,.7),0 0 26px 9px rgba(40,170,255,.32);"></div>
+  <div class="spark4" style="left:396px; top:62px; width:10px; height:10px; opacity:.9;"></div>
+
+  <div class="layer scrim-left"></div>
+  <div class="layer vignette"></div>
+
+  <div class="wordmark ice" style="left:24px; top:6px; font-size:26px;">
+    <span class="l l-glow">BRICKLIKE</span>
+    <span class="l l-shadow">BRICKLIKE</span>
+    <span class="l l-outline">BRICKLIKE</span>
+    <span class="l l-fill">BRICKLIKE</span>
+  </div>
+
+  <div class="headline" style="left:24px; top:38px;">BREAK THE <em>FROST</em></div>
+  <div class="subline" style="left:26px; top:65px;">9 BOSSES &middot; 3 WORLDS</div>
+
+  <div class="cta gold" style="left:596px; top:28px; width:110px;">
+    <span class="play"></span>
+    <span>PLAY FREE</span>
+  </div>
+  <div class="cta-sub" style="left:596px; top:65px; width:110px; color:#9ed8ee;">NO DOWNLOAD</div>
+
+  <div class="layer scanlines"></div>
+</div>
+
+<script>
+  let seed = 2024;
+  const rnd = () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const snow = document.getElementById('snow');
+  for (let i = 0; i < 64; i++) {
+    const s = document.createElement('i');
+    s.className = 'frost-particle';
+    const size = rnd() < 0.75 ? 1 : 2;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = Math.round(rnd() * 726) + 'px';
+    s.style.top = Math.round(rnd() * 88) + 'px';
+    s.style.opacity = (0.25 + rnd() * 0.65).toFixed(2);
+    snow.appendChild(s);
+  }
+  const bits = document.getElementById('icebits');
+  const pal = ['#e8feff','#9be9ff','#7ef9ff','#c39cff','#ffffff'];
+  for (let i = 0; i < 16; i++) {
+    const p = document.createElement('i');
+    p.className = 'shard';
+    const w = 3 + Math.round(rnd() * 7);
+    const h = 3 + Math.round(rnd() * 8);
+    const a = rnd() * Math.PI * 2;
+    const d = 14 + rnd() * 48;
+    p.style.width = w + 'px';
+    p.style.height = h + 'px';
+    p.style.left = (398 + Math.cos(a) * d) + 'px';
+    p.style.top = (64 + Math.sin(a) * d * 0.6) + 'px';
+    p.style.background = pal[Math.floor(rnd() * pal.length)];
+    p.style.transform = 'rotate(' + Math.round(rnd() * 180) + 'deg)';
+    if (i % 2 === 0) p.style.clipPath = 'polygon(50% 0, 100% 100%, 0 100%)';
+    bits.appendChild(p);
+  }
+</script>
+</body>
+</html>
