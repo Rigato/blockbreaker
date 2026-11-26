@@ -23,7 +23,7 @@ function createFakeBridge(options: FakeBridgeOptions = {}) {
   const listeners = new Map<string, Set<Handler>>();
 
   const raw = {
-    version: '2.4.1',
+    version: '2.4.4',
     isInitialized: true,
     platform: {
       id: 'mock',
@@ -443,5 +443,26 @@ describe('platform source constraints', () => {
     expect(config.platforms.mock.sendAnalyticsEvents).toBe(false);
     expect(config.platforms.mock.showFullLoadingLogo).toBe(false);
     expect(config.advertisement.banner).toBeUndefined();
+  });
+
+  it('ships the exact installed Bridge runtime and version', () => {
+    const installed = readFileSync(
+      new URL('../node_modules/@playgama/bridge/dist/playgama-bridge.js', import.meta.url),
+      'utf8',
+    );
+    const vendored = readFileSync(
+      new URL('../public/playgama-bridge.js', import.meta.url),
+      'utf8',
+    );
+    const pkg = JSON.parse(
+      readFileSync(
+        new URL('../node_modules/@playgama/bridge/package.json', import.meta.url),
+        'utf8',
+      ),
+    ) as { version: string };
+
+    expect(vendored).toBe(installed);
+    expect(pkg.version).toMatch(/^2\.4\./);
+    expect(vendored).toContain(pkg.version);
   });
 });

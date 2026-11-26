@@ -74,6 +74,11 @@ export const GAME_CONFIG = {
     paddleWidthMultiplier: 2,
     /** Radians per second the ball turns toward the last block. */
     lastBlockMagnetTurnRate: 3.5,
+    /**
+     * Turn-rate ceiling as the ball closes in on the last block. A fixed rate
+     * lets a fast ball orbit forever at its natural turning radius.
+     */
+    lastBlockMagnetMaxTurnRate: 20,
   },
 
   perks: {

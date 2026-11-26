@@ -1,6 +1,6 @@
 {
   "name": "blockbreaker",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": true,
   "type": "module",
   "description": "Bricklike — portrait HTML5 arcade roguelite",
@@ -19,7 +19,7 @@
     "preview": "vite preview --host"
   },
   "dependencies": {
-    "@playgama/bridge": "2.4.1",
+    "@playgama/bridge": "2.4.4",
     "phaser": "3.90.0"
   },
   "devDependencies": {

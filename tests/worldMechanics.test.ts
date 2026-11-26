@@ -270,6 +270,29 @@ describe('last-block magnet assist', () => {
     expect(Math.hypot(ball.vx, ball.vy)).toBeCloseTo(500, 4);
   });
 
+  it.each([
+    { speed: 500, y: 650 },
+    { speed: 900, y: 757 },
+  ])(
+    'breaks a stable orbit at speed $speed instead of circling forever',
+    ({ speed, y }) => {
+      const world = createWorld(1);
+      addBlock(world, { left: 315, top: 455, width: 90, height: 90 });
+      addBall(world, { x: 360, y, vx: -speed, vy: 0 });
+      world.applyRunModifiers({
+        ...BASE_RUN_MODIFIERS,
+        lastBlockMagnetTurnRate: 3.5,
+      });
+
+      for (let step = 0; step < 120 * 3; step += 1) {
+        world.step(NO_INPUT, 1000 / 120);
+        if (world.blocks.length === 0) break;
+      }
+
+      expect(world.blocks).toHaveLength(0);
+    },
+  );
+
   it('stays off while more than one block remains', () => {
     const world = createWorld(1);
     addBlock(world, { left: 600, top: 200, width: 90, height: 90 });

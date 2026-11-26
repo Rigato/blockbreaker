@@ -6,10 +6,10 @@ usado como fonte de decisão.
 
 ## Comece por aqui
 
-1. **[Handoff v0.7.1](handoff-v0.7.1.md)** — estado atual do jogo, arquitetura,
+1. **[Handoff v0.7.2](handoff-v0.7.2.md)** — estado atual do jogo, arquitetura,
    invariantes, gates, riscos e o backlog completo para as mudanças profundas
    (densidade, progressão, público, perks).
-2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.13).
+2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.14).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente na `main`.
 4. **[Mundos II/III — implementação](design/worlds-II-III-implementation.md)** —
    escopo, conteúdo, save v3, mapas e debug da linha 0.7.

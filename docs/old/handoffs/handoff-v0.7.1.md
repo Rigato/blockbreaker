@@ -1,5 +1,8 @@
 # Handoff — Bricklike v0.7.1
 
+> **Histórico:** substituído pelo [`handoff-v0.7.2.md`](../../handoff-v0.7.2.md)
+> em 2026-11-26.
+
 **Fonte de onboarding para a próxima sessão.**
 **Data:** 2026-11-24
 **Branch:** `main`

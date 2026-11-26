@@ -30,7 +30,7 @@ function createFakeBridge(storageGet?: () => Promise<unknown>): FakeBridge {
   const listeners = new Map<string, Set<Handler>>();
 
   const raw = {
-    version: '2.4.1',
+    version: '2.4.4',
     isInitialized: true,
     platform: {
       id: 'mock',
@@ -90,7 +90,7 @@ describe('BridgeAdapter', () => {
     expect(adapter.diagnostics).toEqual({
       source: 'bridge',
       storageKind: 'bridge',
-      bridgeVersion: '2.4.1',
+      bridgeVersion: '2.4.4',
       initDurationMs: 12,
     });
   });

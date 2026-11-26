@@ -1,8 +1,8 @@
 # Submission checklist — Bricklike
 
-**Versão publicada:** `0.6.1` no itch.io e no sandbox da Playgama (2026-11-12).  
-**Linha local:** `0.7.1` fechada em 2026-11-24; **não publicada**, sem tag/release.  
-**Build anterior:** `0.5.1`.  
+**Versão publicada:** `0.6.1` no itch.io; jogo **aceito e publicado na Playgama**.  
+**Linha local:** `0.7.2` (2026-11-26), pronta para upload manual; sem tag/release.  
+**Build anterior:** `0.7.1` (em auto-certificação na Playgama; SDK 2.4.1 reprovado).  
 **CrazyGames:** `0.5.1` submetida em 2026-11-11; submissão pausada até 2026-11-26.  
 **Status global:** testes básicos ok; assets de loja regenerados da 0.6.1;
 revisão humana pendente. Nenhuma tag ou GitHub Release foi criada.  
@@ -109,11 +109,11 @@ GameFlare bloqueado por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário no Playgama | pendente de revisão humana |
-| Versão no sandbox | `0.6.1` enviada manualmente | 0.6.1 sandbox |
-| Upload | ZIP com `index.html`, config e Bridge local na raiz | 0.6.1 no sandbox |
+| Versão no sandbox | `0.7.2` pronta para upload manual | pendente de upload |
+| Upload | ZIP com `index.html`, config e Bridge 2.4.4 local na raiz | 0.7.2 local |
 | Bridge | Config validado; sem logo/analytics; safe area ligada | ok nos gates |
 | Eventos | `game_ready`, `level_started/paused/resumed/completed/failed` | pendente de revisão humana |
-| Storage | `bb.save` v2 e `bb.settings` via Bridge; reload preserva | pendente de revisão humana |
+| Storage | `bb.save` v3 e `bb.settings` via Bridge; reload preserva | pendente de revisão humana |
 | Aviso de storage | “Progress may not be saved” em memória/fallback | pendente de teste manual |
 | Interstitial | Tutorial sem ads; campanha só com próxima onda e múltiplo de 3; Endless a cada 4; exits com cooldown de 60 s | implementado; validar no portal |
 | Rewarded | Revive opcional 1x por run; recompensa só no estado `rewarded`; Second Chance coexiste | implementado; validar no portal |
@@ -123,7 +123,7 @@ GameFlare bloqueado por acesso).
 | Orientação | Portrait | pendente de revisão humana |
 | Assets | Capa portrait **1080×1920** e screenshots aprovadas | 0.6.1; revisão humana |
 | Review | Acompanhar a review do portal (~24 h) | pendente de revisão humana |
-| Publicação | Usuário submete e acompanha o status | 0.6.1 no sandbox |
+| Publicação | Usuário sobe a `0.7.2` e acompanha a auto-certificação | jogo publicado; atualização pendente |
 
 **Amostra do sandbox (0.4.0, pequena):** 17/100 qualifying plays; avg play time
 5:42 vs meta 5:00; ad shows/play 1,70 vs meta 0,30; 116 launches, 31 plays,

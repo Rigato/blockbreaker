@@ -1730,17 +1730,36 @@ export class World {
    * a short tutorial feel unfair; it is disabled by a 0 turn rate.
    */
   private applyLastBlockMagnet(dt: number): void {
-    const turnRate = this.modifiersValue.lastBlockMagnetTurnRate;
-    if (turnRate <= 0 || this.blocks.length !== 1) return;
+    const baseTurnRate = this.modifiersValue.lastBlockMagnetTurnRate;
+    if (baseTurnRate <= 0 || this.blocks.length !== 1) return;
 
     const target = this.blocks[0]!;
     const targetX = target.left + target.width / 2;
     const targetY = target.top + target.height / 2;
+    const maxTurnRate = Math.max(
+      baseTurnRate,
+      GAME_CONFIG.tutorial.lastBlockMagnetMaxTurnRate,
+    );
+    // A fixed turn rate lets a fast ball settle into a stable orbit when its
+    // turning radius matches the distance to the block. Tighten the turn as
+    // the ball closes in so the orbit always decays into a hit.
+    const influenceRadius = Math.max(target.width, target.height) * 4;
 
     for (const ball of this.balls) {
       if (ball.stuck) continue;
       const speed = Math.hypot(ball.vx, ball.vy);
       if (speed <= 0) continue;
+
+      const distance = Math.hypot(targetX - ball.x, targetY - ball.y);
+      const hitRadius = Math.hypot(target.width, target.height) / 2 + ball.radius;
+      const proximity = Math.min(
+        1,
+        Math.max(
+          0,
+          1 - (distance - hitRadius) / Math.max(1, influenceRadius - hitRadius),
+        ),
+      );
+      const turnRate = baseTurnRate + (maxTurnRate - baseTurnRate) * proximity;
 
       const current = Math.atan2(ball.vy, ball.vx);
       const desired = Math.atan2(targetY - ball.y, targetX - ball.x);

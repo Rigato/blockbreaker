@@ -1,9 +1,9 @@
 # Status de publicação — Bricklike
 
-Versão publicada: **`0.6.1`** no **itch.io** e no **sandbox da Playgama**  
-Build local: **`0.7.1`** (fechada localmente; não publicada, sem tag ou GitHub Release)  
+Versão publicada: **`0.6.1`** no **itch.io**; jogo **aceito e publicado na Playgama**  
+Build local: **`0.7.2`** (correções de SDK e tutorial; pronta para upload manual, sem tag ou GitHub Release)  
 CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**  
-Atualizado em: 2026-11-24  
+Atualizado em: 2026-11-26  
 Responsável pela submissão: **usuário (manual)**
 
 Este arquivo é o registro de publicação. O `0.1.0-mvp` foi a primeira versão
@@ -13,9 +13,39 @@ A `0.6.1` foi publicada manualmente no **itch.io** e no **sandbox da Playgama**
 em 2026-11-12; o responsável fez testes básicos e considerou tudo ok. Nenhuma
 tag ou GitHub Release foi criada.
 
-A **0.7.1** é a linha local atual, com Mundos II/III, save v3, tutorial
-simplificado/assistido, Giant Ball maior, cor da bola por dano e pierce. Ela
-**não foi publicada** em nenhum portal; itch.io e Playgama continuam na `0.6.1`.
+A **0.7.1** é a linha atual, com Mundos II/III, save v3, tutorial
+simplificado/assistido, Giant Ball maior, cor da bola por dano e pierce. O jogo
+foi **aceito e publicado no catálogo da Playgama**; a atualização da build para
+a `0.7.1` entrou na auto-certificação em 2026-11-26. O itch.io continua na
+`0.6.1`.
+
+## Atualização 2026-11-26 — Playgama e 0.7.2
+
+- A auto-certificação da Playgama reprovou a `0.7.1` por **SDK desatualizado**:
+  o jogo inicializava com Bridge **2.4.1** e a plataforma exige **2.4.4**.
+- A **0.7.2** atualiza `@playgama/bridge` para **2.4.4**, substitui o runtime
+  vendorizado `public/playgama-bridge.js` e revalida o schema da config.
+- A mesma versão corrige o **ímã do último bloco** do tutorial: a bola podia
+  entrar numa órbita estável e nunca atingir o bloco. A taxa de giro agora
+  aumenta perto do alvo; há teste de regressão.
+- O upload da `0.7.2` na Playgama continua **manual** e depende da
+  auto-certificação do portal. Nada foi publicado, tagueado ou lançado por esta
+  sessão.
+
+### Gates da 0.7.2
+
+| Gate | Resultado |
+|---|---|
+| `npm run typecheck` | ✅ |
+| `npm test` | ✅ 431 testes / 35 arquivos |
+| `npm run validate:content` | ✅ 19 fases / 71 ondas / 2.781 blocos / 9.392 XP |
+| Bridge config | ✅ schema 2.4.4, sem logo/analytics, sem URLs externas |
+| `npm run build` | ✅ |
+| `npm run test:e2e` | ✅ 43 testes / 12 spec files |
+| `npm run package` | ✅ 20 arquivos, 1.545.956 bytes, SHA-256 `aa5d2af2…91d3` |
+
+O ZIP 0.7.2 está em `release/blockbreaker-web.zip`; o hash completo está em
+`release/manifest.json`.
 
 ## Estado em 2026-11-12
 
@@ -129,9 +159,9 @@ Números do sandbox da 0.4.0, registrados sem conclusão de qualidade/retenção
 - Ad shows/play **1,70** contra meta **0,30**.
 - **116 launches**, **31 plays**, **5m45s**, **3/2 likes**.
 
-A amostra é pequena demais para concluir qualidade ou retenção. A `0.6.1` já
-está no sandbox; medir novamente a política de ads e a retenção com a nova
-build.
+A amostra é pequena demais para concluir qualidade ou retenção. O jogo foi
+aceito e publicado na Playgama; medir novamente a política de ads e a retenção
+com a build atualizada (`0.7.1` em certificação; `0.7.2` local).
 
 ## Modo Endless
 
@@ -146,7 +176,7 @@ build.
 | Portal | Versão | Status | URL pública | Data | Observação |
 |---|---|---|---|---|---|
 | itch.io | **0.6.1** | **publicado** | — | 2026-11-12 | atualização manual; testes básicos ok; `0.5.1` anterior |
-| Playgama | **0.6.1** | **sandbox** | — | 2026-11-12 | milestones pendentes; medir retenção/ads da 0.6.1 |
+| Playgama | **0.6.1** (0.7.1 em certificação) | **publicado** | — | 2026-11-26 | jogo aceito; `0.7.1` reprovada por SDK 2.4.1; subir `0.7.2` |
 | CrazyGames Basic | 0.5.1 | **pausado** | — | 2026-11-11 | submissão pausada/bloqueada até 2026-11-26 |
 | GameFlare | 0.6.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login |
 

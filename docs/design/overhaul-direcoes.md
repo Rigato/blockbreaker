@@ -3,7 +3,7 @@
 **Status:** documento de trabalho; tutorial e pierce implementados; densidade,
 progressão e público seguem em aberto.
 **Data:** 2026-11-23 · **Atualizado:** 2026-11-24
-**Base:** `0.7.1` local, 18 fases + tutorial, save v3, 22 perks.
+**Base:** `0.7.2` local, 18 fases + tutorial, save v3, 22 perks.
 **Objetivo:** registrar as conversas de overhaul para não perdê-las e permitir
 decidir uma frente por vez.
 
@@ -24,6 +24,9 @@ decidir uma frente por vez.
 - Quando resta um bloco, a bola é levemente girada na direção dele sem mudar a
   velocidade, com anel dourado e tether. A regra é um `RunModifiers`
   (`lastBlockMagnetTurnRate`) e pode virar perk depois.
+- **2026-11-26:** corrigida a órbita estável em que a bola circulava o último
+  bloco sem acertar. A taxa de giro cresce de 3,5 até 20 rad/s conforme a bola
+  se aproxima; há teste de regressão e fuzz de 500 cenários.
 - Totais: 12 blocos, 15 XP, 1 level up; totais do conteúdo: 2.781 blocos /
   9.392 XP.
 - Gates: 428 unitários / 35 arquivos; 43 E2E / 12 specs; validação de conteúdo
@@ -121,7 +124,7 @@ conteúdo: `unlockedPhase` 0..18 e estatísticas por `phase-N`.
 | Mundos selecionáveis / mapa ramificado | save v4 + UI | alto |
 | Run contínua entre fases | fluxo + talvez save v4 | muito alto |
 
-**Janela:** a `0.7.1` não foi publicada; só existem saves v1/v2 reais da
+**Janela:** a `0.7.2` não foi publicada; só existem saves v1/v2 reais da
 `0.6.1`. Se a progressão mudar de modelo, este é o momento mais barato para um
 save v4 — migrar v1/v2 direto e não carregar uma população v3.
 
@@ -188,6 +191,6 @@ skip, mortes por run, leitura de HP dos blocos, intenção de repetir.
 ## 8. Referências
 
 - [GDD](../GDD_Bricklike.md)
-- [Handoff v0.7.1](../handoff-v0.7.1.md)
+- [Handoff v0.7.2](../handoff-v0.7.2.md)
 - [Perks — proposta de rework](../design/perks-rework-v0.7.md)
 - [Spec de publicação](../spec-tecnica-publicacao.md)

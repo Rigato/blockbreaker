@@ -3,22 +3,23 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.13  
-**Data:** 2026-11-24  
-**Status:** linha **0.7.1** fechada localmente na `main`; Mundos II/III, save v3, debug de ondas, tutorial simplificado, feedback de bola por dano e pierce. Não publicada; sem tag/release.  
+**Versão:** 1.14  
+**Data:** 2026-11-26  
+**Status:** linha **0.7.2** local na `main`: Mundos II/III, save v3, tutorial simplificado, pierce, Bridge 2.4.4 e correção do ímã do último bloco. Jogo aceito na Playgama; build em auto-certificação. Sem tag/release.  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutorial: **19 fases e 71 ondas**), **17 tipos de bloco**, **10 elementos de fase**, **9 chefes** e **22 perks**. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica. A **linha 0.7** (fechada como **0.7.1**) adiciona os Mundos **II · Neon Lattice** e **III · Rustwake**, save v3, 9 chefes, blocos/elementos novos, kit físico de belt/rail/gust e debug de ondas; está implementada localmente, sem publicação. Em 2026-11-23 o **tutorial foi simplificado**: 2 ondas, 12 blocos, 15 XP, uma perk e dois coach marks, com botões e texto maiores, paddle 2× e ímã no último bloco. No mesmo dia, **Giant Ball** passou a +40% de raio por nível e a bola ganhou uma rampa de cor por dano (branco → amarelo → laranja → vermelho → roxo). Em 2026-11-24 entrou o **pierce**: um hit direto da bola que destrói o bloco com pelo menos 1 de dano excedente atravessa em vez de quicar. A linha foi fechada como **0.7.1** local, sem publicação.
+A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutorial: **19 fases e 71 ondas**), **17 tipos de bloco**, **10 elementos de fase**, **9 chefes** e **22 perks**. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica. A **linha 0.7** (fechada como **0.7.1**) adiciona os Mundos **II · Neon Lattice** e **III · Rustwake**, save v3, 9 chefes, blocos/elementos novos, kit físico de belt/rail/gust e debug de ondas; está implementada localmente, sem publicação. Em 2026-11-23 o **tutorial foi simplificado**: 2 ondas, 12 blocos, 15 XP, uma perk e dois coach marks, com botões e texto maiores, paddle 2× e ímã no último bloco. No mesmo dia, **Giant Ball** passou a +40% de raio por nível e a bola ganhou uma rampa de cor por dano (branco → amarelo → laranja → vermelho → roxo). Em 2026-11-24 entrou o **pierce**: um hit direto da bola que destrói o bloco com pelo menos 1 de dano excedente atravessa em vez de quicar. A linha foi fechada como **0.7.1** local, sem publicação. Em 2026-11-26 o jogo foi **aceito e publicado no catálogo da Playgama**; a auto-certificação da atualização para a 0.7.1 reprovou o Bridge 2.4.1. A **0.7.2** atualiza o SDK para **2.4.4** e corrige o **ímã do último bloco** do tutorial, que podia deixar a bola em órbita sem atingir o alvo.
 
 ### Como ler os status
 
 - **Confirmado:** escolha expressa pelo jogador ou consolidada no design.
 - **v0.7.0-dev:** implementado localmente (Mundos II/III, save v3, kit físico, mapas por mundo e debug de ondas); não publicado.
 - **v0.7.1:** linha fechada localmente em 2026-11-24; adiciona tutorial simplificado/assistido, Giant Ball maior, cor da bola por dano e pierce. Não publicada.
+- **v0.7.2:** patch de 2026-11-26; Playgama Bridge **2.4.4**, correção do ímã do último bloco e bump de versão. Jogo aceito na Playgama; build em auto-certificação. Sem tag/release.
 - **v0.6.1:** implementado e validado no ciclo anterior (Tier 4, economia de Sparks, feedback de HUD e card do Workshop).
 - **v0.6.0:** implementado e validado no ciclo anterior (perks reworkadas, primeira economia de Sparks, Workshop e save v2).
 - **v0.5.1:** implementado e validado no ciclo anterior (tutorial, controles touch e política de ads).
@@ -572,8 +573,8 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 - Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
 - **Um build, 3 mundos:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração. O Bridge é **local** no boot (`./playgama-bridge.js`), sem request ao CDN da Playgama.
 - O **itch.io recebeu a `0.6.1`** manualmente em 2026-11-12; `0.1.0-mvp` é histórica.
-- A **0.6.1 é a linha atual** e está publicada no itch.io e no sandbox da Playgama; testes básicos ok.
-- **Playgama:** build 0.6.1 em sandbox, com milestones pendentes; medir retenção/ads da nova build.
+- A **0.7.2 é a linha atual** e está implementada localmente; o jogo foi aceito e publicado na Playgama, com a `0.7.1` em auto-certificação.
+- **Playgama:** jogo aceito; a `0.7.1` foi reprovada na auto-certificação por usar Bridge 2.4.1. A `0.7.2` usa 2.4.4 e precisa de upload manual.
 - **CrazyGames:** a 0.3.0 e a 0.4.0 foram reprovadas com a mesma mensagem genérica; a 0.5.1 foi submetida em 2026-11-11. A submissão está **pausada até 2026-11-26**. Decisão: **não fazer moldura/letterbox desktop**.
 - **GameFlare:** conta criada, acesso bloqueado; suporte acionado e sem resposta.
 - Os portais restantes continuam com submissão **manual**; revalidar requisitos na data.
@@ -584,7 +585,7 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 - HTML5 confirmado.
 - **Phaser 3.90, TypeScript estrito, Vite 8 e Git.**
 - Vitest para simulação, progressão, conteúdo e save; Playwright para E2E.
-- Playgama Bridge 2.4.1 para plataforma, storage e anúncios.
+- Playgama Bridge 2.4.4 para plataforma, storage e anúncios.
 
 ### Monetização
 
@@ -678,6 +679,7 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.11` | 2026-11-23 | Onda 1 do tutorial desce 4 linhas; paddle do tutorial 2×; Giant Ball +40%/nível (máx. +80%); bola colorida por dano (branco→amarelo→laranja→vermelho→roxo) com rastro; ímã do último bloco no tutorial com anel/tether, preservando a velocidade. Gates com 424 unit e 43 E2E. |
 | `1.12` | 2026-11-24 | Pierce: hit direto da bola com pelo menos 1 de dano excedente destrói e atravessa sem quicar; igual ou menor quica. Só bola; chefes/elementos/ferramentas ficam de fora. Overkill continua com o mesmo excesso. Evento/SFX/FX próprios. Gates com 428 unit e 43 E2E. |
 | `1.13` | 2026-11-24 | Fechamento da linha **0.7.1** local: GDD consolidado, escopo da versão e handoff novo para mudanças profundas (densidade, progressão, público). Sem publicação/tag/release. |
+| `1.14` | 2026-11-26 | **0.7.2**: Playgama Bridge 2.4.4, runtime vendorizado e correção do ímã do último bloco (taxa de giro adaptativa). Jogo aceito na Playgama; build em auto-certificação. Sem tag/release. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |

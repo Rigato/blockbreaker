@@ -50,6 +50,15 @@ function installedBridgeRuntime() {
   }
 }
 
+/** The runtime that actually ships in public/ and in the ZIP. */
+function vendoredBridgeRuntime() {
+  try {
+    return readFileSync(path.join(ROOT, 'public', 'playgama-bridge.js'), 'utf8');
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Returns a list of human-readable issues; an empty list means the config is
  * valid for the M5 build.
@@ -59,6 +68,7 @@ export function validateBridgeConfig(config, options = {}) {
   const add = (message) => issues.push(message);
   const bridgeVersion = options.bridgeVersion ?? installedBridgeVersion();
   const runtime = options.runtime ?? installedBridgeRuntime();
+  const vendoredRuntime = options.vendoredRuntime ?? vendoredBridgeRuntime();
 
   if (!isRecord(config)) {
     return ['config root must be a JSON object'];
@@ -93,7 +103,7 @@ export function validateBridgeConfig(config, options = {}) {
       add('advertisement.minimumDelayBetweenInterstitial must be a non-negative number');
     }
 
-    // Supported by 2.4.1 and still used by the Playgama platform. Keep it
+    // Supported by 2.4.x and still used by the Playgama platform. Keep it
     // explicit so the Bridge does not fall back to an undocumented default.
     if (
       typeof advertisement.initialInterstitialDelay !== 'number' ||
@@ -178,6 +188,12 @@ export function validateBridgeConfig(config, options = {}) {
         add(`installed Bridge 2.4.x runtime does not read "${key}"`);
       }
     }
+  }
+
+  if (runtime !== null && vendoredRuntime === null) {
+    add('public/playgama-bridge.js is missing: the ZIP would not ship the Bridge runtime');
+  } else if (runtime !== null && vendoredRuntime !== runtime) {
+    add('public/playgama-bridge.js does not match the installed Bridge runtime; re-copy it');
   }
 
   return issues;

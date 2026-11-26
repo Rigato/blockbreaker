@@ -243,6 +243,15 @@ test.describe('smoke', () => {
     await expect(page.locator('canvas')).toBeVisible();
     await expect(page.locator('#debug-platform')).toContainText('mock');
 
+    const bridgeVersion = await page.evaluate(() => {
+      const globals = window as unknown as {
+        bridge?: { version?: string };
+        playgamaBridge?: { version?: string };
+      };
+      return globals.bridge?.version ?? globals.playgamaBridge?.version ?? null;
+    });
+    expect(bridgeVersion).toBe('2.4.4');
+
     expect(monitor.pageErrors).toEqual([]);
     expect(monitor.failedRequests).toEqual([]);
     expect(monitor.consoleErrors).toEqual([]);

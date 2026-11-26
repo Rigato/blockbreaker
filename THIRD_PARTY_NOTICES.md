@@ -8,7 +8,7 @@ This project bundles the following third-party software:
 - Copyright (c) 2024 Richard Davey, Phaser Studio Inc.
 - Full text: `public/licenses/phaser-LICENSE.md`
 
-## Playgama Bridge 2.4.1
+## Playgama Bridge 2.4.4
 
 - License: LGPL-3.0-or-later
 - Source: <https://github.com/Playgama/bridge>

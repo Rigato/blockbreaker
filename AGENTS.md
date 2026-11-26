@@ -12,7 +12,7 @@
 
 - `src/` jogo, `tests/` testes, `docs/` documentação.
 - Stack: Phaser 3.90, TypeScript estrito, Vite 8, Vitest, Playwright,
-  Playgama Bridge 2.4.1.
+  Playgama Bridge 2.4.4.
 - Contexto: `docs/README.md`; consulte sob demanda. `docs/old/` é histórico.
 
 ## Regras

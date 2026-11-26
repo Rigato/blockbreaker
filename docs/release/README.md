@@ -1,17 +1,19 @@
 # Pacote de publicação
 
-Versão do pacote: **`0.6.1`** (publicada no itch.io e no sandbox da Playgama)  
-Build anterior: **`0.5.1`**  
+Versão publicada: **`0.6.1`** no **itch.io**; jogo **aceito e publicado na Playgama**  
+Build local: **`0.7.2`** (correções de SDK e tutorial; pronta para upload manual)  
+Build anterior: **`0.7.1`** (reprovada na auto-certificação por SDK 2.4.1)  
 CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão pausada até 2026-11-26  
-Tag planejada: **`v0.6.1`** (não criada; depende de aprovação humana)
+Tag planejada: **`v0.7.2`** (não criada; depende de aprovação humana)
 
 Este diretório reúne o material para revisão humana e submissão **manual** nos
 portais. Os uploads de itch.io/Playgama e a submissão ao CrazyGames foram feitos
-pelo responsável; a tag e o GitHub Release continuam manuais. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12.
+pelo responsável; a tag e o GitHub Release continuam manuais. A `0.6.1` foi
+publicada no itch.io em 2026-11-12; o jogo foi aceito e publicado na Playgama.
 
 ## Comece por aqui
 
-1. `docs/handoff-v0.7.1.md` — onboarding da sessão atual.
+1. `docs/handoff-v0.7.2.md` — onboarding da sessão atual.
 2. `docs/release/portal-metadata.md` — textos em inglês por portal.
 3. `docs/release/submission-checklist.md` — campos e passos de cada portal.
 4. `docs/release/status.md` — status/URLs de publicação.
@@ -21,15 +23,26 @@ pelo responsável; a tag e o GitHub Release continuam manuais. A `0.6.1` foi pub
 7. `docs/build-release.md` — build, ZIP, CI, ads QA e runbook de tag.
 8. `store/README.md` — índice dos assets de loja.
 
-## Pacote atual (0.6.1)
+## Pacote local atual (0.7.2)
+
+- `release/blockbreaker-web.zip` — 20 arquivos, 1.545.956 bytes,
+  3.193.338 bytes descomprimidos, maior path com 38 caracteres.
+- SHA-256: `aa5d2af25e690b42d681f8c5938572550626ef8adc7897734970925ba23791d3`.
+- Gates: 431 testes em 35 arquivos; 43 E2E em 12 spec files; conteúdo com
+  19 níveis / 71 ondas / 2.781 blocos / 9.392 XP.
+- Bridge 2.4.4 vendorizado; a auto-certificação da Playgama deve inicializar
+  essa versão.
+- O hash pode mudar em um rebuild; confirme em `release/manifest.json` antes de
+  qualquer upload.
+
+## Pacote publicado (0.6.1)
 
 - `release/blockbreaker-web.zip` — 20 arquivos, 1.514.492 bytes
   (~1.482 KiB), 3.068.148 bytes descomprimidos, maior path com 38 caracteres.
 - SHA-256: `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8`.
 - Gates: 396 testes em 32 arquivos; 37 E2E em 10 spec files; conteúdo com
   7 níveis / 22 ondas / 743 blocos / 1.809 XP.
-- O hash pode mudar em um rebuild; confirme em `release/manifest.json` antes de
-  qualquer upload. A 0.6.1 foi publicada no itch.io e no sandbox da Playgama.
+- Publicado no itch.io e no sandbox da Playgama em 2026-11-12.
 
 ## Assets
 
@@ -51,8 +64,9 @@ de reutilizar em portal.
 - A tag e o GitHub Release só devem ser criados depois de teste humano e
   aprovação explícita; nenhuma foi criada.
 - Revalidar as regras de cada portal na data do upload.
-- A `0.6.1` está publicada no itch.io e no sandbox da Playgama; a `0.5.1` é a
-  build anterior.
+- A `0.6.1` está publicada no itch.io; o jogo foi aceito e publicado na
+  Playgama, com a `0.7.1` em auto-certificação. A `0.7.2` é a build local atual
+  e depende de upload manual.
 - CrazyGames reprovou a 0.3.0 e a 0.4.0; a 0.5.1 foi submetida em 2026-11-11 e
   a submissão está pausada até 2026-11-26. O dono decidiu não fazer
   moldura/letterbox desktop; a 0.5.1 usa side art.

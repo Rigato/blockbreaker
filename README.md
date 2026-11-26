@@ -2,42 +2,48 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.7.0-dev — Worlds II/III, save v3 and the physical kit**: the
+line is **v0.7.2 — Playgama Bridge 2.4.4 and the tutorial last-block fix**: the
 **v0.2.0 campaign base**, the **v0.3.0 Endless mode**, the **v0.4.0
 presentation/menu/HUD/ads** pass, the **v0.5.1 tutorial/touch/laser/ads** pass,
-the **v0.6.x metaprogression and Tier 4**, and the **v0.7.0 two new worlds**
-(Neon Lattice and Rustwake), 18 campaign phases, 9 bosses, 17 block types,
-10 elements and per-world trail maps.
+the **v0.6.x metaprogression and Tier 4**, and the **v0.7 two new worlds**
+(Neon Lattice and Rustwake), 18 campaign phases + tutorial, 71 waves, 2,781
+blocks, 9,392 XP, 9 bosses, 17 block types, 10 elements and per-world trail maps.
 
-The **v0.6.1 build is live** on itch.io and in the Playgama sandbox after basic
-testing. The **v0.7.0-dev line is local and unpublished**. CrazyGames is paused
-until 2026-11-26 after the 0.5.1 submission; GameFlare remains blocked by account
-access. No tag or GitHub Release has been created.
+The game is **live on itch.io (v0.6.1)** and **accepted and published on
+Playgama**. The 0.7.1 build update failed Playgama auto-certification because it
+shipped Bridge 2.4.1; v0.7.2 updates to **2.4.4**, vendors the new runtime and
+fixes the tutorial's last-block magnet orbit. The v0.7.2 line is local and
+unpublished; CrazyGames is paused until 2026-11-26; GameFlare remains blocked.
+No tag or GitHub Release has been created.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
 
-## v0.7.0-dev — Worlds II/III, save v3 and physical kit
+## v0.7.2 — Playgama SDK 2.4.4 and tutorial magnet
 
+- **Playgama Bridge 2.4.4:** dependency, vendored `playgama-bridge.js` and test
+  mocks updated; the config validator still accepts the 2.4.x line. No breaking
+  API changes for the game's platform/storage/ads surface.
+- **Last-block magnet:** the fixed 3.5 rad/s turn rate could settle into a
+  stable orbit around the final block. The assist now tightens to 20 rad/s near
+  the target while preserving ball speed, with two regression tests and a
+  500-scenario fuzz pass.
 - **Three worlds:** World I Crystal Vale (6 phases / 20 waves), World II Neon
-  Lattice (6 / 22) and World III Rustwake (6 / 27). The campaign now has
-  **18 phases + tutorial, 71 waves, 2,785 blocks and 9,409 XP**.
+  Lattice (6 / 22) and World III Rustwake (6 / 27). The campaign has
+  **18 phases + tutorial, 71 waves, 2,781 blocks and 9,392 XP**.
 - **New blocks:** alloy, bastion, entangled, relay, phased, plated, fused and
   splitting. **New elements:** press, belt and rail. **New rules:** noMultiball
   and gust.
 - **New bosses:** Nullframe Warden, Maglev Dreadnought, Lattice Hierophant,
   Boiler Matron, The Riveter and The Last Engine; 9 bosses total.
-- **Speed overlap:** World II opens slower than World I ended (640 vs 780) and
-  World III opens slower than World II ended (700 vs 896); authored caps are
-  780/900/920 with a 1,100 hard cap for rails.
 - **Maps:** one parallax trail map per world, with I/II/III pills in the header.
   The tutorial and Endless ring live only in World I.
 - **Save v3:** `unlockedPhase` 0..18, v1/v2 migration, world II opens after
   phase 6 and world III after phase 12. Endless still opens after phase 6.
 - **Debug:** `?debug=1` unlocks every phase/world and the phase sheet exposes a
   `Start wave` picker.
-- **Gates:** 419 unit tests / 34 files, 43 E2E / 12 spec files, content
-  validation green; the package/release step was not run.
+- **Gates:** 431 unit tests / 35 files, 43 E2E / 12 spec files, content
+  validation green, Bridge config valid; ZIP with 20 files, 1,545,956 bytes.
 
 ## v0.6.1 — Tier 4 perks, Sparks economy and Workshop card
 
@@ -66,8 +72,8 @@ access. No tag or GitHub Release has been created.
   and a local 0.6.1 ZIP with 20 files, 1,514,492 bytes (~1,482 KiB), SHA-256
   `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8`
   (the hash may change on the final build).
-- **Publication status:** 0.6.1 is local/unpublished. itch.io and the Playgama
-  sandbox still serve 0.5.1; CrazyGames is paused until 2026-11-26; GameFlare
+- **Publication status:** 0.6.1 was published on itch.io and in the Playgama
+  sandbox on 2026-11-12. CrazyGames is paused until 2026-11-26; GameFlare
   remains blocked. No tag or GitHub Release was created.
 
 ## v0.6.0 — perk reworks, metaprogression and Workshop (historical)
@@ -288,7 +294,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
 - `docs/release/submission-checklist.md` lists every manual field, asset and
   step per portal, all marked **pending human review**.
 - `docs/old/release/g7-review.md` inventories the historical MVP package and
-  defines the G7 review checklist. The current line is `0.6.1` (local); no tag
+  defines the G7 review checklist. The current line is `0.7.2` (local); no tag
   or GitHub Release was created, and the user performs all submissions.
 
 ## M6 — QA, performance and balance
@@ -320,7 +326,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   `closed`/`failed`/15 s timeout. v0.4.0 added wave interstitials and rewarded
   revive; v0.5.1 revised the cadence. No banners or own frequency logic beyond
   the documented breakpoints.
-- Validated Bridge 2.4.1 config: no Bridge loading logo, no analytics,
+- Validated Bridge 2.4.4 config: no Bridge loading logo, no analytics,
   safe-area adaptation and interstitial placement.
 - `npm run package` builds `release/blockbreaker-web.zip` with `index.html` at
   the root, relative paths, manifest with SHA-256 and portal limits enforced
@@ -329,7 +335,7 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   with the ZIP and manifest. GitHub Pages remains the review build.
 - Tested in a subfolder, with the Bridge blocked/fallback, mock/no-ads,
   failed/timed-out interstitial and no external requests to `api.playgama.com`.
-  The current v0.6.1 build loads the Bridge **locally** and makes no request to
+  The current v0.7.2 build loads the Bridge **locally** and makes no request to
   the Playgama CDN at boot.
 - See [docs/build-release.md](docs/build-release.md) for the build, ZIP and
   portal checklist.
@@ -522,13 +528,10 @@ release/                   Generated ZIP + manifest (not committed)
 - [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
-- [Current handoff — v0.6.1](docs/handoff-v0.6.1.md)
-- [Archived handoff — v0.6.0](docs/handoff-v0.6.0.md)
-- [Archived handoff — v0.5.1](docs/handoff-v0.5.1.md)
-- [Archived handoff — v0.4.0](docs/handoff-v0.4.0.md)
+- [Current handoff — v0.7.2](docs/handoff-v0.7.2.md)
+- [Historical handoffs](docs/old/handoffs/)
 - [Web publishing guide](docs/spec-tecnica-publicacao.md) — strategy, portals, architecture, ads, save and QA
 - [Perk and metaprogression design](docs/perks-e-metaprogressao.md) — v0.6.1 catalog, Tier 4 and Sparks economy
-- [v0.6.0 implementation plan](docs/plano-v0.6.0-metaprogressao.md) — historical phases, gates and acceptance criteria
 - [Build and release runbook](docs/build-release.md)
 - [Portal metadata](docs/release/portal-metadata.md)
 - [Submission checklist](docs/release/submission-checklist.md)
