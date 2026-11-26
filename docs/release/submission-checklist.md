@@ -1,9 +1,9 @@
 # Submission checklist — Bricklike
 
 **Versão publicada:** `0.6.1` no itch.io; jogo **aceito e publicado na Playgama**.  
-**Linha local:** `0.7.2` (2026-11-26), pronta para upload manual; sem tag/release.  
-**Build anterior:** `0.7.1` (em auto-certificação na Playgama; SDK 2.4.1 reprovado).  
-**CrazyGames:** `0.5.1` submetida em 2026-11-11; submissão pausada até 2026-11-26.  
+**Linha local:** `0.8.0` (2026-11-26), bridge × clean; sem tag/release.
+**Build anterior:** `0.7.2` (Bridge 2.4.4 + correção do ímã do tutorial).
+**CrazyGames:** `0.5.1` submetida em 2026-11-11; submissão pausada até 2026-11-26; a `0.8.0` **clean** é a candidata ao Basic Launch.
 **Status global:** testes básicos ok; assets de loja regenerados da 0.6.1;
 revisão humana pendente. Nenhuma tag ou GitHub Release foi criada.  
 **Quem submete:** o usuário, manualmente, em cada portal.
@@ -15,16 +15,14 @@ GameFlare bloqueado por acesso).
 
 ## Pré-requisitos comuns
 
-- [ ] Teste humano final da 0.6.1 concluído: Tier 4, economia/anti-farm, card do
-      Workshop, HUD/results, migração de save v1→v2, tutorial, ads mock e
-      layout de portal. **Básico concluído em 2026-11-12; falta o teste focado
-      em portal.**
-- [ ] ZIP final 0.6.1 gerado pelo pipeline de release, com `index.html` e
-      `playgama-bridge-config.json` na raiz e Bridge local
-      (`./playgama-bridge.js`, sem request ao CDN da Playgama). **Gerado:
-      20 arquivos, 1.514.492 bytes, SHA-256
-      `3f3c409845aaa090ccada04435c47298db0e994ec76821b7f59e741009ee49f8`;
-      falta teste final.**
+- [ ] Teste humano final da 0.8.0 concluído: bridge nos portais Playgama/Y8/
+      Lagged/itch e clean no CrazyGames Basic/Kongregate.
+- [ ] ZIP final 0.8.0 gerado pelo pipeline de release. **Bridge:**
+      `index.html` + `playgama-bridge-config.json` + Bridge local. **Clean:**
+      `index.html` apenas, sem runtime/config da Playgama nem SDK do
+      CrazyGames. Confirme os dois ZIPs e manifestos.
+- [ ] Clean em aba anônima: sem requests a `playgama-bridge.js`,
+      `sdk.crazygames.com` ou hosts externos; save/settings persistem.
 - [ ] ZIP aberto em aba anônima, servido em subpasta, sem 404 e sem requests
       externas no boot. **Pendente de revisão humana.**
 - [ ] Título, descrição curta, descrição longa e controles revisados em
@@ -45,8 +43,8 @@ GameFlare bloqueado por acesso).
 - [ ] Menu leva ao gameplay em Campaign → card → Play (2 cliques). Para o Full
       Launch da CrazyGames seria necessário 1 clique/entrada direta.
       **Pendente de decisão.**
-- [x] Gates da 0.6.1: 396 testes unitários em 32 arquivos; 37 E2E em 10 spec
-      files; conteúdo com 7 níveis/22 ondas/743 blocos/1.809 XP.
+- [x] Gates da 0.8.0: 440 testes unitários em 37 arquivos; 46 E2E (bridge +
+      mobile + clean); conteúdo com 19 níveis/71 ondas/2.781 blocos/9.392 XP.
 
 ## Assets compartilhados
 
@@ -137,9 +135,9 @@ GameFlare bloqueado por acesso).
 | Tipo de submissão | **Basic Launch**, não Full Launch | pendente de revisão humana |
 | Histórico | 0.3.0 e 0.4.0 reprovadas com a mesma mensagem genérica | registrado |
 | 0.5.1 | Submetida em 2026-11-11 | submissão pausada até 2026-11-26 |
-| 0.6.1 | Ainda não submetida; local | pendente de teste humano |
+| 0.8.0 clean | Sem Playgama Bridge nem SDK nativo do CG; browser storage; sem ads | pendente de teste humano |
 | Feedback | Pedir detalhes no Support/technical-support após 2026-11-26 | pendente |
-| Upload | ZIP HTML5 final da 0.6.1 | pendente de teste humano |
+| Upload | `release/blockbreaker-web-clean.zip` | pendente de teste humano |
 | Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | 0.6.1; revisão humana |
 | Capa 2:3 | 800×1200, mesma linguagem visual | 0.6.1; revisão humana |
 | Capa 1:1 | 800×800, mesma linguagem visual | 0.6.1; revisão humana |
@@ -172,21 +170,22 @@ submissão está pausada até **2026-11-26**. A mensagem deve listar:
 - tutorial in-game pulável com coach marks e gate do level 1;
 - controles touch com edge assist e gate explícito do laser;
 - política de ads mantida da 0.5.1;
-- campanha de 20 ondas (22 com tutorial) e 7 cards;
-- 396 testes unitários e 37 E2E verdes;
-- assets revisados/regenerados para a 0.6.1.
+- campanha de 18 fases + tutorial, 71 ondas e 2.781 blocos;
+- 440 testes unitários e 46 E2E verdes;
+- ZIP **clean** sem Playgama Bridge nem SDK nativo do CrazyGames.
 
 **Ainda pendente:** aguardar 2026-11-26, testar em humano e revisar
 capas/screenshots/vídeo.
 
 ## Sequência manual acordada
 
-1. Testar a 0.6.1 manualmente e validar o ZIP final.
-2. Revisar screenshots, capas e vídeos regenerados para a 0.6.1.
-3. Publicar a 0.6.1 no itch.io, se aprovada.
+1. Testar a 0.8.0 manualmente e validar os dois ZIPs.
+2. Revisar screenshots, capas e vídeos regenerados para a 0.8.0.
+3. Publicar a 0.8.0 no itch.io (bridge), se aprovada.
 4. Publicar no GameFlare, se o acesso for desbloqueado.
-5. Submeter ao Playgama.
-6. Após 2026-11-26, pedir feedback à CrazyGames e decidir o reenvio da 0.6.1.
+5. Submeter o bridge ao Playgama.
+6. Após 2026-11-26, pedir feedback à CrazyGames e decidir o reenvio da 0.8.0
+   **clean**.
 7. Registrar URLs, datas e status de cada portal.
 8. Acompanhar o Basic Launch por 7 dias ou 500 plays antes de discutir Full
    Launch.

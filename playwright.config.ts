@@ -20,6 +20,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium-desktop',
+      testIgnore: /clean\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
     },
     {
@@ -28,11 +29,28 @@ export default defineConfig({
       grep: /boot:|controls:|ad mock/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true },
     },
+    {
+      name: 'chromium-clean',
+      testMatch: /clean\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 800 },
+        baseURL: 'http://127.0.0.1:4174',
+      },
+    },
   ],
-  webServer: {
-    command: 'npm run preview -- --port 4173 --strictPort',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !isCI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: 'npm run preview -- --port 4173 --strictPort',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: !isCI,
+      timeout: 120_000,
+    },
+    {
+      command: 'npm run preview:clean -- --port 4174 --strictPort',
+      url: 'http://127.0.0.1:4174',
+      reuseExistingServer: !isCI,
+      timeout: 120_000,
+    },
+  ],
 });

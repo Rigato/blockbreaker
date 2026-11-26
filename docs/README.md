@@ -13,9 +13,13 @@ usado como fonte de decisão.
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente na `main`.
 4. **[Mundos II/III — implementação](design/worlds-II-III-implementation.md)** —
    escopo, conteúdo, save v3, mapas e debug da linha 0.7.
-5. **[Guia único de publicação](spec-tecnica-publicacao.md)** — estratégia,
-   arquitetura de build único, requisitos de itch.io, GameFlare, Playgama e
-   CrazyGames, ads, save, metadata, QA e release.
+5. **[Spec de publicação web — 6 portais](spec_tecnica_portais_web.md)** —
+   mapa de builds `bridge` × `clean`, contrato de plataforma, requisitos de
+   Playgama, Y8, Lagged, itch.io, CrazyGames e Kongregate, ads, save e QA.
+   O guia anterior está em
+   [`old/spec-tecnica-publicacao.md`](old/spec-tecnica-publicacao.md).
+   Notas de implementação:
+   **[Build bridge × clean — playbook](build-bridge-clean-playbook.md)**.
 6. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo de 22
    perks, Tier 4, economia de Sparks e meta horizontal.
 7. **[Proposta — rework e expansão de perks](design/perks-rework-v0.7.md)** —

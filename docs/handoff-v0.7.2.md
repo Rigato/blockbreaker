@@ -3,8 +3,8 @@
 **Fonte de onboarding para a próxima sessão.**
 **Data:** 2026-11-26
 **Branch:** `main`
-**Versão do package:** `0.7.2`
-**Build:** local; **não publicada**, sem tag/release
+**Versão do package:** `0.8.0`
+**Build:** local; **não publicada**, sem tag/release — bridge × clean
 **Base publicada:** `0.6.1` no itch.io; jogo **aceito e publicado na Playgama**
 **Repositório:** <https://github.com/Rigato/blockbreaker>
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`
@@ -14,6 +14,11 @@
 > [`design/overhaul-direcoes.md`](design/overhaul-direcoes.md) e a
 > [`proposta de perks`](design/perks-rework-v0.7.md) seguem como fontes de
 > design.
+>
+> **Atualização 2026-11-26 — v0.8.0:** o gameplay/conteúdo abaixo continua sendo
+> a base da 0.7.2; a 0.8.0 adiciona os builds **bridge × clean**. Para o
+> pipeline, leia [`build-release.md`](build-release.md) e o
+> [`build-bridge-clean-playbook.md`](build-bridge-clean-playbook.md).
 
 ---
 
@@ -22,7 +27,7 @@
 | Item | Valor |
 |---|---|
 | Branch | `main` |
-| Versão local | `0.7.2` |
+| Versão local | `0.8.0` (gameplay da 0.7.2; builds bridge × clean) |
 | Versão publicada | `0.6.1` no itch.io; Playgama com o jogo aceito e a `0.7.1` em auto-certificação |
 | Mundos | I · Crystal Vale; II · Neon Lattice; III · Rustwake |
 | Campanha | 18 fases + tutorial; 69 ondas de campanha / 71 com tutorial |

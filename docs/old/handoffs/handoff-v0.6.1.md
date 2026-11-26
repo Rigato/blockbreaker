@@ -352,7 +352,7 @@ playtest humano da 0.6.1.
 - [`docs/gdd-gap-analysis.md`](gdd-gap-analysis.md) — implementado × pendente.
 - [`docs/perks-e-metaprogressao.md`](perks-e-metaprogressao.md) — catálogo,
   economia e Tier 4.
-- [`docs/spec-tecnica-publicacao.md`](spec-tecnica-publicacao.md) — guia de
+- [`docs/spec-tecnica-publicacao.md`](../spec-tecnica-publicacao.md) — guia de
   publicação, arquitetura, ads, save e QA.
 - [`docs/build-release.md`](build-release.md) — build, ZIP, CI e runbook.
 - [`docs/release/status.md`](release/status.md) — status/URLs de publicação.

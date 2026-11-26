@@ -4,7 +4,7 @@ import type {
   PhaseSelectInfo,
   PlatformService,
 } from '../game/contracts';
-import type { BootResult } from '../boot/bridgeBoot';
+import type { BootResult } from '../boot/platformBoot';
 import type { BlockBreakerGame } from '../game/Game';
 import { gameEvents } from '../game/events';
 import { en } from '../i18n/en';
@@ -60,9 +60,7 @@ export function mountUI(options: UIRootOptions): UIRootHandle {
   let phaseInfo: readonly PhaseSelectInfo[] = readPhaseInfo();
   let selectedPhaseId: string | null = null;
   let lastSnapshot: HudSnapshot = controller.getHudState();
-  const storageUnavailable =
-    options.platform.diagnostics.storageKind === 'memory' ||
-    options.platform.diagnostics.source === 'fallback';
+  const storageUnavailable = !options.boot.storagePersistent;
 
   const menu = new Menu({
     root: options.root,

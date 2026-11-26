@@ -1,9 +1,12 @@
 # Bricklike
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
-live URL and ZIP keep the technical slug `blockbreaker`. The current development
-line is **v0.7.2 — Playgama Bridge 2.4.4 and the tutorial last-block fix**: the
-**v0.2.0 campaign base**, the **v0.3.0 Endless mode**, the **v0.4.0
+live URL and ZIP keep the technical slug `blockbreaker`. The published line is
+**v0.7.2 — Playgama Bridge 2.4.4 and the tutorial last-block fix**; the current
+development line is **v0.8.0 — bridge × clean builds**: the same game ships as a
+Playgama Bridge ZIP for Playgama/Y8/Lagged/itch and a clean, SDK-free ZIP for
+CrazyGames Basic and Kongregate. The content history includes the **v0.2.0
+campaign base**, the **v0.3.0 Endless mode**, the **v0.4.0
 presentation/menu/HUD/ads** pass, the **v0.5.1 tutorial/touch/laser/ads** pass,
 the **v0.6.x metaprogression and Tier 4**, and the **v0.7 two new worlds**
 (Neon Lattice and Rustwake), 18 campaign phases + tutorial, 71 waves, 2,781
@@ -15,6 +18,26 @@ shipped Bridge 2.4.1; v0.7.2 updates to **2.4.4**, vendors the new runtime and
 fixes the tutorial's last-block magnet orbit. The v0.7.2 line is local and
 unpublished; CrazyGames is paused until 2026-11-26; GameFlare remains blocked.
 No tag or GitHub Release has been created.
+
+## v0.8.0 — Bridge × clean builds
+
+- **Two targets from one source.** `npm run build` produces `dist/` (Playgama
+  Bridge) and `dist-clean/` (no Playgama Bridge, no CrazyGames SDK); `npm run
+  package` produces `release/blockbreaker-web.zip` and
+  `release/blockbreaker-web-clean.zip` with separate manifests.
+- **Build-time boot split.** Vite resolves `@boot-target` to
+  `platformBootBridge` or `platformBootClean`; the clean bundle contains no
+  Bridge loader or portal SDK strings.
+- **Clean persistence.** The clean build uses browser storage through a
+  dedicated `BrowserStorage`, no ads and local visibility/focus pause. The
+  Playgama build is unchanged.
+- **Routing.** Playgama, Y8, Lagged and itch.io receive the bridge ZIP;
+  CrazyGames Basic and Kongregate receive the clean ZIP. GitHub Pages keeps the
+  bridge build.
+- **QA.** Playwright adds a clean project on port 4174 (no external requests,
+  save persistence, no storage warning). See
+  [the bridge × clean playbook](docs/build-bridge-clean-playbook.md).
+- **Status.** Local 0.8.0; no tag or GitHub Release has been created.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -205,11 +228,12 @@ npm run typecheck
 npm test
 npm run validate:content
 node scripts/validate-bridge-config.mjs
-npm run build
-npm run package   # release/blockbreaker-web.zip + manifest
-npm run test:e2e  # Playwright smoke/layout/endless/campaign (build first)
+npm run build        # dist/ (bridge) + dist-clean/ (clean)
+npm run package      # both ZIPs + manifests
+npm run test:e2e     # Playwright bridge 4173 + mobile + clean 4174
 npm run qa:runs -- --runs=10   # automated baseline, not human playtest
-npm run preview   # serves dist/ locally
+npm run preview       # serves dist/ (bridge) locally
+npm run preview:clean # serves dist-clean/ locally on another port
 ```
 
 ## v0.3.0 — Endless mode
@@ -328,11 +352,13 @@ v0.4.0, published on itch.io and in the Playgama sandbox.
   the documented breakpoints.
 - Validated Bridge 2.4.4 config: no Bridge loading logo, no analytics,
   safe-area adaptation and interstitial placement.
-- `npm run package` builds `release/blockbreaker-web.zip` with `index.html` at
-  the root, relative paths, manifest with SHA-256 and portal limits enforced
-  (≤ 1.000 files, ≤ 250 MB, paths ≤ 240 chars).
-- CI uploads `dist` and the ZIP; a `v*` tag workflow creates a GitHub Release
-  with the ZIP and manifest. GitHub Pages remains the review build.
+- `npm run package` builds `release/blockbreaker-web.zip` (bridge) and
+  `release/blockbreaker-web-clean.zip` (clean), each with `index.html` at the
+  root, relative paths, a manifest with SHA-256 and per-target portal limits.
+  The clean ZIP forbids Playgama/CrazyGames SDK files and strings.
+- CI uploads both `dist` folders and both ZIPs; a `v*` tag workflow creates a
+  GitHub Release with the four artifacts. GitHub Pages remains the bridge
+  review build.
 - Tested in a subfolder, with the Bridge blocked/fallback, mock/no-ads,
   failed/timed-out interstitial and no external requests to `api.playgama.com`.
   The current v0.7.2 build loads the Bridge **locally** and makes no request to
@@ -453,7 +479,8 @@ automatically after 2.5 s.
 
 ## Platform boot
 
-- The v0.6.1 build loads `./playgama-bridge.js` dynamically only outside CrazyGames; the CrazyGames host uses the direct native SDK adapter. There is no request to `bridge.playgama.com` at boot. Both paths keep a timeout and an in-memory fallback.
+- The bridge build loads `./playgama-bridge.js` dynamically only outside CrazyGames; the CrazyGames host uses the direct native SDK adapter. There is no request to `bridge.playgama.com` at boot. Both paths keep a timeout and an in-memory fallback.
+- The clean build never loads the Playgama runtime or the CrazyGames SDK. It persists `bb.save`/`bb.settings` through browser storage with a memory fallback, ships no ad buttons and pauses on visibility/blur.
 - The Bridge loading screen is disabled in `playgama-bridge-config.json`
   (`loadingScreenType: "none"`) so no Bridge branding is shown; the game uses
   its own boot screen and progress bar.
@@ -530,7 +557,9 @@ release/                   Generated ZIP + manifest (not committed)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
 - [Current handoff — v0.7.2](docs/handoff-v0.7.2.md)
 - [Historical handoffs](docs/old/handoffs/)
-- [Web publishing guide](docs/spec-tecnica-publicacao.md) — strategy, portals, architecture, ads, save and QA
+- [Web publishing spec — 6 portals](docs/spec_tecnica_portais_web.md) — bridge × clean builds, platform contract, portal limits, ads, save and QA
+- [Bridge × clean implementation playbook](docs/build-bridge-clean-playbook.md) — practical pitfalls for future projects
+- [Previous publishing guide](docs/old/spec-tecnica-publicacao.md) — historical
 - [Perk and metaprogression design](docs/perks-e-metaprogressao.md) — v0.6.1 catalog, Tier 4 and Sparks economy
 - [Build and release runbook](docs/build-release.md)
 - [Portal metadata](docs/release/portal-metadata.md)

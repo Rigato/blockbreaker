@@ -7,6 +7,11 @@
   `npm run test:e2e`, `npm run package`.
 - Rode a bateria completa antes de mudanças em gameplay, save, conteúdo ou
   plataforma.
+- `npm run build` gera **dois** targets: `dist/` (bridge) e `dist-clean/`
+  (clean). `npm run package` gera `blockbreaker-web.zip` (bridge) e
+  `blockbreaker-web-clean.zip` (clean) + manifestos.
+- CrazyGames Basic e Kongregate recebem o ZIP **clean**; Playgama, Y8, Lagged e
+  itch.io recebem o **bridge**. Nunca envie o bridge ao CrazyGames.
 
 ## Projeto
 

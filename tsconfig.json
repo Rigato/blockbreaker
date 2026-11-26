@@ -6,6 +6,9 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "moduleResolution": "Bundler",
     "moduleDetection": "force",
+    "paths": {
+      "@boot-target": ["./src/boot/platformBootBridge.ts"]
+    },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,

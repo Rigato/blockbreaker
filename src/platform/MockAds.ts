@@ -27,7 +27,8 @@ export function createMockAds(mode: MockAdMode): AdsService {
       if (!isRewardedMode(mode)) return 'skipped';
       console.info(`[ads:mock] rewarded ${mode} (${placement})`);
       await new Promise<void>((resolve) => {
-        setTimeout(resolve, 1200);
+        // Long enough for the E2E overlay assertion under parallel workers.
+        setTimeout(resolve, 2400);
       });
       return mode === 'rewarded' ? 'rewarded' : 'failed';
     },

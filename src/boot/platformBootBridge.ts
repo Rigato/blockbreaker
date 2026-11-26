@@ -7,13 +7,7 @@ import {
 import { createBridgeService } from '../platform/BridgeAdapter';
 import { createFallbackAdapter } from '../platform/FallbackAdapter';
 import { getBridge } from '../platform/bridgeGlobal';
-
-export interface BootResult {
-  readonly platform: PlatformService;
-  readonly elapsedMs: number;
-  /** True when the Bridge global existed but did not become ready. */
-  readonly bridgeFailed: boolean;
-}
+import type { BootResult } from './bootTypes';
 
 function browserLanguage(): string {
   if (typeof navigator === 'undefined') return 'en';
@@ -59,8 +53,23 @@ function loadPlaygamaBridge(timeoutMs: number): Promise<boolean> {
   });
 }
 
+function result(
+  platform: PlatformService,
+  startedAt: number,
+  bridgeFailed: boolean,
+): BootResult {
+  return {
+    platform,
+    elapsedMs: Math.round(performance.now() - startedAt),
+    bridgeFailed,
+    storagePersistent: platform.diagnostics.storageKind !== 'memory',
+    storageLabel: platform.diagnostics.storageKind,
+    buildTarget: 'bridge',
+  };
+}
+
 /**
- * Boots the platform layer. Never throws and never waits longer than the
+ * Boots the Playgama Bridge build. Never throws and never waits longer than the
  * configured Bridge timeout (10 s): the game must be playable without ads or
  * platform storage.
  */
@@ -72,43 +81,26 @@ export async function bootPlatform(): Promise<BootResult> {
     const crazyGames = await createCrazyGamesService(
       GAME_CONFIG.boot.bridgeInitTimeoutMs,
     );
-    if (crazyGames) {
-      return {
-        platform: crazyGames,
-        elapsedMs: Math.round(performance.now() - startedAt),
-        bridgeFailed: false,
-      };
-    }
-    return {
-      platform: createFallbackAdapter(browserLanguage()),
-      elapsedMs: Math.round(performance.now() - startedAt),
-      bridgeFailed: true,
-    };
+    if (crazyGames) return result(crazyGames, startedAt, false);
+    return result(createFallbackAdapter(browserLanguage()), startedAt, true);
   }
 
   const hadBridgeGlobal = getBridge() !== undefined;
   const loaded = await loadPlaygamaBridge(GAME_CONFIG.boot.bridgeInitTimeoutMs);
   if (!loaded) {
-    return {
-      platform: createFallbackAdapter(browserLanguage()),
-      elapsedMs: Math.round(performance.now() - startedAt),
-      bridgeFailed: hadBridgeGlobal,
-    };
+    return result(
+      createFallbackAdapter(browserLanguage()),
+      startedAt,
+      hadBridgeGlobal,
+    );
   }
 
   const bridge = await createBridgeService(GAME_CONFIG.boot.bridgeInitTimeoutMs);
+  if (bridge) return result(bridge, startedAt, false);
 
-  if (bridge) {
-    return {
-      platform: bridge,
-      elapsedMs: Math.round(performance.now() - startedAt),
-      bridgeFailed: false,
-    };
-  }
-
-  return {
-    platform: createFallbackAdapter(browserLanguage()),
-    elapsedMs: Math.round(performance.now() - startedAt),
-    bridgeFailed: hadBridgeGlobal || getBridge() !== undefined,
-  };
+  return result(
+    createFallbackAdapter(browserLanguage()),
+    startedAt,
+    hadBridgeGlobal || getBridge() !== undefined,
+  );
 }

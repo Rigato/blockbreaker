@@ -1,8 +1,8 @@
 # Status de publicação — Bricklike
 
 Versão publicada: **`0.6.1`** no **itch.io**; jogo **aceito e publicado na Playgama**  
-Build local: **`0.7.2`** (correções de SDK e tutorial; pronta para upload manual, sem tag ou GitHub Release)  
-CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**  
+Build local: **`0.8.0`** (bridge × clean; pronta para upload manual, sem tag ou GitHub Release)
+CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**; a `0.8.0` clean é a candidata ao Basic Launch
 Atualizado em: 2026-11-26  
 Responsável pela submissão: **usuário (manual)**
 
@@ -18,6 +18,37 @@ simplificado/assistido, Giant Ball maior, cor da bola por dano e pierce. O jogo
 foi **aceito e publicado no catálogo da Playgama**; a atualização da build para
 a `0.7.1` entrou na auto-certificação em 2026-11-26. O itch.io continua na
 `0.6.1`.
+
+## Atualização 2026-11-26 — 0.8.0 bridge × clean
+
+- O build agora tem **dois targets**: `bridge` (Playgama/Y8/Lagged/itch) e
+  `clean` (CrazyGames Basic/Kongregate). O clean não contém runtime/config da
+  Playgama nem o SDK nativo do CrazyGames.
+- O clean usa **browser storage** com fallback para memória, **sem ads** e com
+  pausa por `visibilitychange`/`blur`; o bridge continua igual.
+- `npm run build` gera `dist/` e `dist-clean/`; `npm run package` gera
+  `release/blockbreaker-web.zip` e `release/blockbreaker-web-clean.zip` com
+  manifestos separados.
+- O GitHub Pages continua publicando o **bridge** (`dist/`). O ZIP para o
+  CrazyGames é sempre o **clean**.
+- Nada foi publicado, tagueado ou enviado a portal por esta sessão; o upload e
+  a tag continuam manuais e dependem de aprovação.
+
+### Gates da 0.8.0
+
+| Gate | Resultado |
+|---|---|
+| `npm run typecheck` | ✅ |
+| `npm test` | ✅ 440 testes / 37 arquivos |
+| `npm run validate:content` | ✅ 19 fases / 71 ondas / 2.781 blocos / 9.392 XP |
+| Bridge config | ✅ schema 2.4.4, sem logo/analytics, sem URLs externas |
+| `npm run build` | ✅ `dist/` (bridge) + `dist-clean/` (clean) |
+| `npm run test:e2e` | ✅ 46 testes (bridge + mobile + clean) |
+| `npm run package` | ✅ bridge 20 arquivos / clean 17 arquivos |
+
+O bridge está em `release/blockbreaker-web.zip` + `release/manifest.json`; o
+clean em `release/blockbreaker-web-clean.zip` + `release/manifest-clean.json`.
+Confirme os hashes nos manifestos antes de qualquer upload.
 
 ## Atualização 2026-11-26 — Playgama e 0.7.2
 

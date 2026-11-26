@@ -1,6 +1,6 @@
 {
   "name": "blockbreaker",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "description": "Bricklike — portrait HTML5 arcade roguelite",
@@ -9,14 +9,19 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/build.mjs",
+    "build:bridge": "node scripts/build.mjs --bridge",
+    "build:clean": "node scripts/build.mjs --clean",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "qa:runs": "node scripts/qa-runs.mjs",
     "validate:content": "tsx scripts/validate-content.ts",
-    "package": "node scripts/package.mjs",
-    "preview": "vite preview --host"
+    "package": "node scripts/package.mjs --target all",
+    "package:bridge": "node scripts/package.mjs --target bridge",
+    "package:clean": "node scripts/package.mjs --target clean",
+    "preview": "vite preview --host",
+    "preview:clean": "vite preview --host --outDir dist-clean"
   },
   "dependencies": {
     "@playgama/bridge": "2.4.4",

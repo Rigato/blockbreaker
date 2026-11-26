@@ -3,6 +3,7 @@ node_modules/
 
 # Builds and local artifacts
 /dist/
+/dist-clean/
 /release/
 coverage/
 *.local

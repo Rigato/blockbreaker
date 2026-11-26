@@ -11,6 +11,12 @@ qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
 > **Atualização 2026-11-12:** a submissão da 0.5.1 está **pausada até
 > 2026-11-26**. A `0.6.1` é local e não foi submetida. Este documento permanece
 > como diagnóstico histórico da 0.5.1.
+>
+> **Atualização 2026-11-26:** a `0.8.0` separa as builds **bridge** e **clean**.
+> O clean não contém o runtime/config da Playgama **nem** o SDK nativo do
+> CrazyGames; usa browser storage e não tem ads. É o candidato ao Basic Launch.
+> O bridge continua para Playgama/Y8/Lagged/itch. Ver
+> [`../build-bridge-clean-playbook.md`](../build-bridge-clean-playbook.md).
 
 ## 0. Atualização 2026-11-11 — segunda reprovação da 0.4.0
 

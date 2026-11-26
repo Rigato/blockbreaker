@@ -342,7 +342,7 @@ playtest humano da 0.6.0.
   catálogo e da metaprogressão.
 - [`docs/old/plans/plano-v0.6.0-metaprogressao.md`](../plans/plano-v0.6.0-metaprogressao.md) —
   plano por fases e critérios de aceite.
-- [`docs/spec-tecnica-publicacao.md`](../../spec-tecnica-publicacao.md) — guia de
+- [`docs/spec-tecnica-publicacao.md`](../spec-tecnica-publicacao.md) — guia de
   publicação, arquitetura, ads, save e QA.
 - [`docs/build-release.md`](../../build-release.md) — build, ZIP, CI e runbook.
 - [`docs/release/status.md`](../../release/status.md) — status/URLs de publicação.

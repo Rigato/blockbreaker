@@ -341,7 +341,7 @@ describe('MockAds', () => {
     const success = createMockAds('rewarded');
     const rewarded = success.showRewarded('revive');
     const interstitial = success.showInterstitial('wave_completed');
-    await vi.advanceTimersByTimeAsync(1_200);
+    await vi.advanceTimersByTimeAsync(2_400);
     await expect(rewarded).resolves.toBe('rewarded');
     await vi.advanceTimersByTimeAsync(200);
     await expect(interstitial).resolves.toBe('shown');
@@ -349,7 +349,7 @@ describe('MockAds', () => {
     const failure = createMockAds('rewarded-fail');
     const failed = failure.showRewarded('revive');
     const failureInterstitial = failure.showInterstitial('wave_completed');
-    await vi.advanceTimersByTimeAsync(1_500);
+    await vi.advanceTimersByTimeAsync(2_400);
     await expect(failed).resolves.toBe('failed');
     await expect(failureInterstitial).resolves.toBe('shown');
 

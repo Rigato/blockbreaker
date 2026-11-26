@@ -1,5 +1,5 @@
 import type { GameCommands, HudSnapshot, PlatformService, SimTuning } from '../game/contracts';
-import type { BootResult } from '../boot/bridgeBoot';
+import type { BootResult } from '../boot/platformBoot';
 import type { BlockBreakerGame } from '../game/Game';
 import { GAME_CONFIG, SIM_TUNING_LIMITS } from '../game/config';
 import { gameEvents } from '../game/events';
@@ -145,7 +145,7 @@ export class DebugPanel {
     rows.append(platformRow.row);
 
     const storageRow = makeRow(en.debugStorage, 'debug-storage');
-    storageRow.value.textContent = this.platform.diagnostics.storageKind;
+    storageRow.value.textContent = this.boot.storageLabel;
     rows.append(storageRow.row);
 
     const adsRow = makeRow(en.debugAds, 'debug-ads');

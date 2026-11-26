@@ -1,4 +1,4 @@
-import { bootPlatform } from './boot/bridgeBoot';
+import { bootPlatform } from './boot/platformBoot';
 import { readBootOptions } from './boot/query';
 import type { BlockBreakerGame } from './game/Game';
 import type { PlatformService } from './game/contracts';
@@ -122,7 +122,7 @@ async function start(): Promise<void> {
     at: readyAt,
   });
   console.info(
-    `[boot] menu ready in ${Math.round(performance.now())} ms — platform=${platform.id} source=${platform.diagnostics.source}`,
+    `[boot] menu ready in ${Math.round(performance.now())} ms — platform=${platform.id} source=${platform.diagnostics.source} build=${boot.buildTarget}`,
   );
 
   // The menu is now painted and interactive. Send the platform signal only

@@ -2,7 +2,7 @@ import type { GameCommands, HudSnapshot, PhaseSelectInfo } from '../game/contrac
 import { en } from '../i18n/en';
 import '../styles/menu-footer.css';
 
-const APP_VERSION = '0.7.2';
+const APP_VERSION = '0.8.0';
 
 export interface MenuOptions {
   root: HTMLElement;
