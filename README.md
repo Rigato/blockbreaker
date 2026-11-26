@@ -559,6 +559,8 @@ release/                   Generated ZIP + manifest (not committed)
 - [Historical handoffs](docs/old/handoffs/)
 - [Web publishing spec — 6 portals](docs/spec_tecnica_portais_web.md) — bridge × clean builds, platform contract, portal limits, ads, save and QA
 - [Bridge × clean implementation playbook](docs/build-bridge-clean-playbook.md) — practical pitfalls for future projects
+- [Store assets spec](docs/store-assets-spec.md) — per-platform sizes, reuse matrix and QA
+- [Y8 store assets 0.8.0](store/y8/README.md) — standard/widescreen stills, promos, game cards and the continuous gameplay video
 - [Previous publishing guide](docs/old/spec-tecnica-publicacao.md) — historical
 - [Perk and metaprogression design](docs/perks-e-metaprogressao.md) — v0.6.1 catalog, Tier 4 and Sparks economy
 - [Build and release runbook](docs/build-release.md)

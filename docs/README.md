@@ -20,6 +20,9 @@ usado como fonte de decisão.
    [`old/spec-tecnica-publicacao.md`](old/spec-tecnica-publicacao.md).
    Notas de implementação:
    **[Build bridge × clean — playbook](build-bridge-clean-playbook.md)**.
+   Assets de loja por portal e reutilização:
+   **[Spec de assets de store](store-assets-spec.md)**; conjunto Y8 0.8.0 em
+   [`../store/y8/`](../store/y8/README.md).
 6. **[Perks e metaprogressão](perks-e-metaprogressao.md)** — catálogo de 22
    perks, Tier 4, economia de Sparks e meta horizontal.
 7. **[Proposta — rework e expansão de perks](design/perks-rework-v0.7.md)** —

@@ -2,6 +2,9 @@
 
 Arte de capa original gerada para o build `0.6.1`, pendente de revisão humana.
 
+> **Y8.com:** a capa 1920×1080 e a 1080×1920 são reutilizadas nos promos; os
+> cards 760×570 com still real estão em [`../y8/game-card/`](../y8/game-card/).
+
 ## Arquivos finais
 
 | Arquivo | Tamanho | Uso |

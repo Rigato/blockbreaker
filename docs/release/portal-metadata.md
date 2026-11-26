@@ -122,6 +122,38 @@ _(≈260 words.)_
 - Do not promise ads, achievements, leaderboards or cloud saves.
 - The game is free; itch.io HTML5 pages support donations only, not paid sales.
 
+## Y8.com
+
+**Title:** Bricklike
+
+**Short description:** Use the short description above.
+
+**Long description:** Use the long description above.
+
+**Genre / category:** Arcade
+
+**Controls:** Use the Controls section above.
+
+**Tags:** `arcade`, `block breaker`, `roguelite`, `pixel art`, `html5`,
+`single player`, `bosses`, `endless`
+
+**Assets:**
+- ZIP **bridge** `release/blockbreaker-web.zip`.
+- Standard 760×570: `store/y8/standard/` (6).
+- Widescreen 1280×720: `store/y8/widescreen/` (6).
+- Landscape Promo 1920×1080: `store/y8/landscape-promo/` (3).
+- Portrait Promo 1080×1920: `store/y8/portrait-promo/` (3).
+- Game Card Promo 760×570: `store/y8/game-card/` (3).
+- Gameplay Video: `store/y8/video/bricklike-gameplay-y8-1280x720.mp4`
+  (contínuo, 30 s, 1280×720). **Não** use o preview editado.
+
+**Notes for the submitter:**
+- Y8 exige gameplay contínuo, sem cortes; o preview de `store/video/` não
+  atende.
+- Confirmar no painel se o ZIP HTML5 é upload direto ou se o Y8 usa o fluxo de
+  URL; a Bridge já encapsula o SDK Y8.
+- Revalidar dimensões, limites e textos na data do upload.
+
 ## GameFlare
 
 **Title:** Bricklike
@@ -195,16 +227,19 @@ _(≈260 words.)_
 **Submission type:** Basic Launch only. Do **not** submit as Full Launch.
 
 **Notes for the submitter:**
-- Basic Launch uses the same HTML5 ZIP; ads are disabled on the CrazyGames side.
-  The build detects the CrazyGames host and uses the native SDK adapter, without
-  loading the Playgama runtime. The build must not wait for an ad that will not
-  arrive; every ad path treats `failed`/`skipped` as success.
+- Basic Launch uses the **clean** ZIP (`release/blockbreaker-web-clean.zip`),
+  not the bridge ZIP. The clean build has no Playgama runtime, no CrazyGames
+  SDK and no ads; save/settings use browser storage. The bridge ZIP is for
+  Playgama/Y8/Lagged/itch.io. Every ad path treats `failed`/`skipped` as success
+  and the clean build has no ad buttons.
 - **Ads policy:** the tutorial has no ads; campaign interstitials only when a
   next wave exists and the cleared wave is a multiple of 3; never at the end of a
   level; Endless every 4 waves; Results exits respect a 60-second cooldown. A
   pause-menu exit is suppressed after a rewarded revive in the last 60 seconds.
   The rewarded revive is once per run.
-- Upload all three covers and the preview video.
+- Upload all three covers and the preview video (or reuse the 1920×1080 key art
+  from `store/y8/landscape-promo/`; the 800×1200/800×800 still need the 0.8.0
+  regeneration/review).
 - English metadata is mandatory.
 - **Re-test the iframe sizes 907×510, 1216×684, 1280×720 and 1920×1080** before
   resubmitting; the portrait frame must remain readable. The portrait shell is
@@ -212,13 +247,13 @@ _(≈260 words.)_
   letterbox shell.
 - The 0.4.0 submission was rejected again with the same generic message. The
   0.5.1 was submitted on 2026-11-11; the submission is paused until
-  2026-11-26. The 0.6.1 is published; Bricklike was accepted and published on
-  Playgama. The 0.7.2 is the current local build and still needs a manual
-  upload; the 0.7.1 update stopped at SDK certification (Bridge 2.4.1 vs 2.4.4).
-- **Screenshots, covers and the preview video were regenerated from the 0.5.1
-  build** (tutorial, level 1 with two waves, touch controls). They still need
-  human review and regeneration for the **0.7.2** before submitting; do not
-  claim they are current.
+  2026-11-26. The 0.6.1 is published on itch.io; Bricklike was accepted and
+  published on Playgama. The **0.8.0 clean** is the current candidate for the
+  Basic Launch; the bridge line remains for the other portals.
+- **Screenshots, covers and the preview video in `store/` are from the 0.6.1
+  build** and still need human review/regeneration for the 0.8.0. The Y8 set
+  in `store/y8/` is already 0.8.0 and can supply the 1920×1080 key art and
+  1080×1920 stills; do not claim the old preview is the continuous Y8 video.
 - Full Launch requirements (Data/User modules, direct-to-gameplay landing,
   account-linked progress) are **out of scope** for this milestone.
 - Re-check CrazyGames' current Basic Launch rules on the submission date.
@@ -231,12 +266,12 @@ _(≈260 words.)_
   support, additional worlds or a level editor.
 - Do not use the technical name `blockbreaker` as player-facing marketing copy.
 - Keep the description, screenshots and covers in sync with the current build.
-- The store covers, screenshots and videos are from the **0.5.1** build and are
-  pending human review. Review and regenerate them against the **0.7.2**
-  before submitting.
+- The store covers, screenshots and preview videos are from the **0.6.1** build
+  and are pending human review. The Y8 set in `store/y8/` is **0.8.0**. Review
+  and regenerate the remaining store assets against the 0.8.0 before submitting.
 - Do not promise ads on itch.io or GameFlare: those portals do not serve the
   in-game interstitials used on Playgama/CrazyGames.
 - Do not claim CrazyGames approved the 0.5.1; the submission is paused until
   2026-11-26. The 0.6.1 is live on itch.io; Bricklike was accepted and published
-  on Playgama. The 0.7.2 is the current local build and still needs a manual
-  upload.
+  on Playgama. The **0.8.0** is the current local build: use the **clean** ZIP
+  for CrazyGames Basic/Kongregate and the **bridge** ZIP for the other portals.

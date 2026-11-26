@@ -22,7 +22,9 @@ publicada no itch.io em 2026-11-12; o jogo foi aceito e publicado na Playgama.
 6. `docs/research/crazygames-feedback.md` — canais de suporte e rascunho.
 7. `docs/build-release.md` — build, ZIPs, CI, ads QA e runbook de tag.
 8. `docs/build-bridge-clean-playbook.md` — decisões e armadilhas da separação.
-9. `store/README.md` — índice dos assets de loja.
+9. `docs/store-assets-spec.md` — assets de store por portal e reutilização.
+10. `store/y8/README.md` — conjunto Y8 0.8.0 (stills, promos, cards e vídeo).
+11. `store/README.md` — índice dos assets de loja.
 
 ## Pacote local atual (0.8.0)
 

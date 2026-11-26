@@ -2,6 +2,10 @@
 
 Nove capturas reais do build de produção, em 390×844 (portrait móvel).
 
+> **Y8.com:** o conjunto 0.8.0 está em [`../y8/standard/`](../y8/standard/)
+> (760×570) e [`../y8/widescreen/`](../y8/widescreen/) (1280×720); estas
+> capturas 390×844 são da 0.6.1 e servem de base/recorte, não como asset Y8.
+
 | Arquivo | Cena |
 |---|---|
 | `01-menu-390x844.png` | menu com a campanha em progresso e o card do Workshop (42 Sparks, 13/22, barra) |

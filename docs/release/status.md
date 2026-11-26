@@ -31,6 +31,11 @@ a `0.7.1` entrou na auto-certificação em 2026-11-26. O itch.io continua na
   manifestos separados.
 - O GitHub Pages continua publicando o **bridge** (`dist/`). O ZIP para o
   CrazyGames é sempre o **clean**.
+- O conjunto de store do **Y8.com** foi gerado da 0.8.0: 6 standard 760×570,
+  6 widescreen 1280×720, 3 landscape promo 1920×1080, 3 portrait promo
+  1080×1920, 3 game cards 760×570 e 1 vídeo contínuo 1280×720 (29,97 s). Ver
+  [`store/y8/`](../../store/y8/README.md) e a
+  [`spec de assets de store`](../store-assets-spec.md).
 - Nada foi publicado, tagueado ou enviado a portal por esta sessão; o upload e
   a tag continuam manuais e dependem de aprovação.
 

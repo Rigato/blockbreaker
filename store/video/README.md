@@ -1,5 +1,10 @@
 # Preview videos — Bricklike v0.6.1
 
+> **Y8.com:** estes arquivos são previews **editados**, com cortes e fecho de
+> capa; o Y8 exige gameplay **contínuo, sem cortes**. Use
+> [`../y8/video/bricklike-gameplay-y8-1280x720.mp4`](../y8/video/bricklike-gameplay-y8-1280x720.mp4)
+> para o Y8 e mantenha estes previews para CrazyGames/Playgama.
+
 Gerados a partir do build de produção `0.6.1` e das capas atuais, com gameplay
 real e sem áudio.
 

@@ -1,8 +1,15 @@
-# Store assets — Bricklike v0.6.1
+# Store assets — Bricklike
 
-Assets de loja regenerados a partir do build de produção `0.6.1`. Capas,
-screenshots, vídeos e painéis How to Play são drafts para revisão humana; a
-submissão nos portais continua manual.
+> **2026-11-26:** o conjunto **Y8.com** em [`y8/`](y8/README.md) foi gerado do
+> build **0.8.0** (6 standard, 6 widescreen, 3 landscape promo, 3 portrait
+> promo, 3 game cards e 1 vídeo contínuo). As capas, screenshots e previews
+> desta raiz ainda são da **0.6.1** e precisam de regeneração/revisão humana
+> antes de reutilizar nos outros portais. A especificação por plataforma está
+> em [`../docs/store-assets-spec.md`](../docs/store-assets-spec.md).
+
+Assets de loja regenerados a partir do build de produção `0.6.1` (com exceção
+do conjunto Y8 0.8.0). Capas, screenshots, vídeos e painéis How to Play são
+drafts para revisão humana; a submissão nos portais continua manual.
 
 ## Capas — `store/covers/`
 
@@ -71,10 +78,15 @@ para revisão e fontes HTML/CSS regeneráveis. Veja `vibetoplist/README.md`.
 
 - **itch.io:** ZIP HTML5, capa 16:9 ou 2:3, screenshots, descrição e controles.
 - **GameFlare:** ZIP/link, capa e screenshots, descrição e categoria.
-- **Playgama:** ZIP, capa portrait 1080×1920, screenshots, descrição; Bridge já
-  integrado.
-- **CrazyGames Basic:** ZIP, três capas, preview video e descrição ≥ 100
-  palavras. Não usar Full Launch.
+- **Playgama:** ZIP bridge, capa portrait 1080×1920, screenshots, descrição;
+  Bridge já integrado.
+- **Y8.com:** 6 standard 760×570, 6 widescreen 1280×720, 3 landscape promo
+  1920×1080, 3 portrait promo 1080×1920, 3 game cards 760×570 e 1 vídeo
+  contínuo 1280×720. Ver [`y8/README.md`](y8/README.md).
+- **CrazyGames Basic:** ZIP **clean** (`blockbreaker-web-clean.zip`), três
+  capas, preview video e descrição ≥ 100 palavras. Não usar Full Launch.
+- **Lagged / Kongregate:** ZIP bridge/clean conforme a spec; requisitos de
+  store ainda a confirmar.
 
 Os textos estão em `docs/release/portal-metadata.md`; o checklist manual está em
 `docs/release/submission-checklist.md`.

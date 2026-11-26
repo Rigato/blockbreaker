@@ -127,6 +127,21 @@ GameFlare bloqueado por acesso).
 5:42 vs meta 5:00; ad shows/play 1,70 vs meta 0,30; 116 launches, 31 plays,
 5m45s, 3/2 likes. Não concluir qualidade/retenção com essa amostra.
 
+## Y8.com
+
+- [ ] ZIP **bridge** `release/blockbreaker-web.zip` (Y8 SDK encapsulado na Bridge).
+- [ ] Standard Screenshot: 6 em `store/y8/standard/` (760×570, ≤2 MB).
+- [ ] Widescreen Screenshot: 6 em `store/y8/widescreen/` (1280×720, ≤5 MB).
+- [ ] Landscape Promo: 3 em `store/y8/landscape-promo/` (1920×1080, ≤5 MB).
+- [ ] Portrait Promo: 3 em `store/y8/portrait-promo/` (1080×1920, ≤5 MB).
+- [ ] Game Card Promo: 3 em `store/y8/game-card/` (760×570, ≤2 MB).
+- [ ] Gameplay Video: `store/y8/video/bricklike-gameplay-y8-1280x720.mp4`
+      (30 s contínuos, 1280×720, H.264, ~1,25 MB). **Não** use o preview
+      editado de `store/video/`.
+- [ ] Título/descrição/controles em inglês; confirmar os campos do painel Y8.
+- [ ] Revalidar as dimensões e limites na data do upload.
+- [ ] Spec de assets: [`docs/store-assets-spec.md`](../store-assets-spec.md).
+
 ## CrazyGames — Basic Launch
 
 | Item | Requisito / campo | Status |
