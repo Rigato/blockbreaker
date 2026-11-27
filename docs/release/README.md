@@ -13,7 +13,7 @@ publicada no itch.io em 2026-11-12; o jogo foi aceito e publicado na Playgama.
 
 ## Comece por aqui
 
-1. `docs/handoff-v0.7.2.md` — onboarding da sessão atual.
+1. `docs/handoff-v0.8.0.md` — onboarding da sessão atual.
 2. `docs/release/portal-metadata.md` — textos em inglês por portal.
 3. `docs/release/submission-checklist.md` — campos e passos de cada portal.
 4. `docs/release/status.md` — status/URLs de publicação.

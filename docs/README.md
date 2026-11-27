@@ -6,9 +6,9 @@ usado como fonte de decisão.
 
 ## Comece por aqui
 
-1. **[Handoff v0.7.2](handoff-v0.7.2.md)** — estado atual do jogo, arquitetura,
-   invariantes, gates, riscos e o backlog completo para as mudanças profundas
-   (densidade, progressão, público, perks).
+1. **[Handoff v0.8.0](handoff-v0.8.0.md)** — estado atual do jogo, builds
+   bridge × clean, arquitetura, invariantes, gates, portais, assets Y8 e o
+   backlog de densidade/progressão/público/perks.
 2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.14).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente na `main`.
 4. **[Mundos II/III — implementação](design/worlds-II-III-implementation.md)** —

@@ -191,6 +191,6 @@ skip, mortes por run, leitura de HP dos blocos, intenção de repetir.
 ## 8. Referências
 
 - [GDD](../GDD_Bricklike.md)
-- [Handoff v0.7.2](../handoff-v0.7.2.md)
+- [Handoff v0.8.0](../handoff-v0.8.0.md)
 - [Perks — proposta de rework](../design/perks-rework-v0.7.md)
 - [Spec de publicação](../spec_tecnica_portais_web.md)

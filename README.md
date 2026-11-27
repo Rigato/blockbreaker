@@ -555,7 +555,7 @@ release/                   Generated ZIP + manifest (not committed)
 - [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
-- [Current handoff — v0.7.2](docs/handoff-v0.7.2.md)
+- [Current handoff — v0.8.0](docs/handoff-v0.8.0.md)
 - [Historical handoffs](docs/old/handoffs/)
 - [Web publishing spec — 6 portals](docs/spec_tecnica_portais_web.md) — bridge × clean builds, platform contract, portal limits, ads, save and QA
 - [Bridge × clean implementation playbook](docs/build-bridge-clean-playbook.md) — practical pitfalls for future projects
