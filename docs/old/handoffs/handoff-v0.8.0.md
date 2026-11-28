@@ -1,18 +1,20 @@
 # Handoff — Bricklike v0.8.0
 
+> **Histórico:** substituído pelo [`handoff-v0.8.1.md`](../../handoff-v0.8.1.md).
+
 **Fonte de onboarding para a próxima sessão.**
 **Data:** 2026-11-27
 **Branch:** `main`
 **Commit:** `7975178 docs(store): add Y8 asset set and store spec`
 **Commit do build split:** `00eeb90 feat(build): add bridge and clean portal targets`
 **Versão do package:** `0.8.0`
-**Build:** local; **não publicada**, sem tag/release — bridge × clean
-**Base publicada:** `0.6.1` no itch.io; jogo **aceito e publicado na Playgama**
+**Build:** `0.8.0` publicado; sem tag/release — bridge × clean
+**Base publicada:** `0.8.0` no itch.io e na Playgama (catálogo, fora do sandbox); Y8 em análise; CrazyGames recusou a clean
 **Repositório:** <https://github.com/Rigato/blockbreaker>
 **Pasta local:** `/mnt/SSD-Secundario/Nextcloud/5-GameProjects/4-Blockbreaker-roguelite`
 
 > Este documento substitui o [`handoff-v0.7.2.md`](old/handoffs/handoff-v0.7.2.md)
-> como fonte atual. O GDD v1.14, o
+> como fonte atual. O GDD v1.15, o
 > [`design/overhaul-direcoes.md`](design/overhaul-direcoes.md) e a
 > [`proposta de perks`](design/perks-rework-v0.7.md) seguem como fontes de
 > design. A spec de publicação vigente é a
@@ -27,7 +29,9 @@
 |---|---|
 | Branch | `main` |
 | Versão local | `0.8.0` |
-| Versão publicada | `0.6.1` no itch.io; Playgama com o jogo aceito e publicado |
+| Versão publicada | `0.8.0` no itch.io e na Playgama (catálogo, fora do sandbox) |
+| Y8 | `0.8.0` enviada; aguardando resposta |
+| CrazyGames | `0.8.0` clean enviada e recusada, sem motivo específico |
 | Mundos | I · Crystal Vale; II · Neon Lattice; III · Rustwake |
 | Campanha | 18 fases + tutorial; 69 ondas de campanha / 71 com tutorial |
 | Tutorial | 2 ondas, 12 blocos, 15 XP, 1 level up, 2 coach marks, paddle 2× e ímã |
@@ -41,8 +45,8 @@
 | SDK bridge | Playgama Bridge **2.4.4**; runtime vendorizado local |
 | SDK clean | nenhum (sem Playgama, sem SDK nativo do CrazyGames) |
 | Builds | `dist/` + `blockbreaker-web.zip` (bridge); `dist-clean/` + `blockbreaker-web-clean.zip` (clean) |
-| Publicação | `0.8.0` **não publicada**; nenhuma tag/release |
-| Store Y8 | conjunto 0.8.0 pronto em `store/y8/`; upload pendente |
+| Publicação | `0.8.0` publicada no itch.io/Playgama; Y8 em análise; CrazyGames recusou a clean; nenhuma tag/release |
+| Store Y8 | conjunto 0.8.0 em `store/y8/`; upload do jogo enviado, aguardando resposta |
 
 ---
 
@@ -238,7 +242,7 @@ npm run package
 | `npm run test:e2e` | ✅ 46 testes (bridge + mobile + clean) |
 | `npm run package` | ✅ bridge 20 arquivos; clean 17 arquivos |
 
-Pacote local:
+Pacote 0.8.0:
 
 | Item | Bridge | Clean |
 |---|---|---|
@@ -293,31 +297,30 @@ Pacote local:
 
 | Área | Estado | Ação |
 |---|---|---|
-| Playgama | jogo aceito; `0.7.1` reprovada por SDK; `0.7.2` local | subir o bridge `0.8.0` e repetir a auto-certificação |
-| CrazyGames | `0.5.1` pausada até 2026-11-26; `0.8.0` clean candidata | reenviar o clean no Basic Launch; sem SDK/ads; revisar o preview e as capas antigas |
-| Y8 | assets 0.8.0 prontos | iniciar upload; confirmar se o shell portrait em 16:9 é aceito no vídeo contínuo |
+| Playgama | `0.8.0` publicada no catálogo, fora do sandbox | manter o bridge e repetir a auto-certificação em cada atualização |
+| CrazyGames | `0.8.0` clean enviada e recusada, sem motivo específico | pedir o requisito exato ao suporte; não reenviar a mesma build |
+| Y8 | `0.8.0` enviada; aguardando resposta | não reenviar enquanto estiver em análise; confirmar o shell portrait no vídeo contínuo |
 | Lagged | requisitos de store não documentados | confirmar no painel antes de gerar assets |
 | Kongregate | clean; requisitos não documentados | confirmar conta/aprovação, screenshots e vídeo |
 | Store antiga | capas/screenshots/previews 0.6.1 | regenerar/revisar para 0.8.0 antes de reutilizar |
 | Clean em iframe | localStorage funciona no preview | testar no QA do portal; se bloquear, o fallback de memória mostra o aviso |
 | Ads no clean | desligados por design | não prometer revive por anúncio no CrazyGames/Kongregate |
-| Publicação | `0.8.0` local | só após teste humano e aprovação explícita |
+| Publicação | `0.8.0` no itch.io/Playgama; Y8 em análise; CrazyGames recusada | manter as páginas e a metadata em sincronia com a 0.8.0 |
 | Tag/release | nenhuma | só após aprovação explícita |
 
 ---
 
 ## 8. Próximos passos imediatos
 
-1. Subir o **bridge 0.8.0** na Playgama e passar a auto-certificação com o
-   Bridge 2.4.4.
-2. Submeter o **clean 0.8.0** ao CrazyGames Basic e iniciar o Y8.com com o
-   conjunto `store/y8/`.
-3. Confirmar os requisitos de store de **Lagged** e **Kongregate** e montar os
+1. Atualizar a metadata de itch.io/Playgama com a nova descrição e controles
+   desta sessão; o Y8 e a CrazyGames usam a mesma copy.
+2. Pedir ao suporte da **CrazyGames** o requisito exato que falhou na `0.8.0`
+   clean e registrar a resposta antes de qualquer novo envio.
+3. Aguardar a resposta do **Y8** e, se aprovado, publicar a `0.8.0`.
+4. Confirmar os requisitos de store de **Lagged** e **Kongregate** e montar os
    assets específicos.
-4. Regenerar capas, screenshots 390×844 e previews para 0.8.0 antes de
-   atualizar itch.io/Playgama.
-5. Playtest humano do clean: save persistence, pausa, sem ads e leitura no
-   iframe do CrazyGames.
+5. Regenerar capas, screenshots 390×844 e previews para 0.8.0 antes de atualizar
+   as páginas que ainda usam assets da 0.6.1.
 6. Só depois de tudo verde: avaliar tag/release com aprovação explícita.
 
 O backlog profundo de densidade, progressão, público, pierce e perks está em

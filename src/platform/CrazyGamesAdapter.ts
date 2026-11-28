@@ -15,7 +15,8 @@ import { assertSameLength, MemoryStorage } from './MemoryStorage';
 export const CRAZYGAMES_SDK_URL =
   'https://sdk.crazygames.com/crazygames-sdk-v3.js';
 
-const AD_TIMEOUT_MS = 15_000;
+const AD_OPEN_TIMEOUT_MS = 15_000;
+const AD_PLAY_TIMEOUT_MS = 180_000;
 const SDK_POLL_INTERVAL_MS = 50;
 const DEFAULT_SDK_VERSION = '3.x';
 const CRAZYGAMES_HOSTS = ['crazygames.com', '1001juegos.com'] as const;
@@ -134,6 +135,7 @@ export class CrazyGamesAdapter implements PlatformService {
   private settings: CrazyGamesSettingsLike | null;
   private storageIsMemory = false;
   private warnedAboutStorage = false;
+  private adInFlight: CrazyGamesAdType | null = null;
 
   constructor(sdk: CrazyGamesSdkLike, options: CrazyGamesAdapterOptions = {}) {
     this.sdk = sdk;
@@ -322,12 +324,17 @@ export class CrazyGamesAdapter implements PlatformService {
 
   /**
    * CrazyGames exposes ad results only through callbacks. The reward is granted
-   * solely on `adFinished`; errors and the 15 s watchdog resolve as failures.
+   * solely on `adFinished`; errors and the open/play watchdogs resolve as
+   * failures. A creative may run longer than 15 s, so `adStarted` re-arms a
+   * long play timeout.
    */
   private requestAd<TResult extends 'shown' | 'rewarded'>(
     type: CrazyGamesAdType,
     success: TResult,
   ): Promise<TResult | 'failed'> {
+    if (this.adInFlight !== null) return Promise.resolve('failed');
+    this.adInFlight = type;
+
     return new Promise<TResult | 'failed'>((resolve) => {
       let settled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
@@ -335,14 +342,22 @@ export class CrazyGamesAdapter implements PlatformService {
       const finish = (result: TResult | 'failed'): void => {
         if (settled) return;
         settled = true;
+        this.adInFlight = null;
         if (timer !== undefined) clearTimeout(timer);
         resolve(result);
       };
 
-      timer = setTimeout(() => finish('failed'), AD_TIMEOUT_MS);
+      const arm = (ms: number): void => {
+        if (settled) return;
+        if (timer !== undefined) clearTimeout(timer);
+        timer = setTimeout(() => finish('failed'), ms);
+      };
+
+      arm(AD_OPEN_TIMEOUT_MS);
 
       try {
         this.sdk.ad.requestAd(type, {
+          adStarted: () => arm(AD_PLAY_TIMEOUT_MS),
           adFinished: () => finish(success),
           adError: () => finish('failed'),
         });

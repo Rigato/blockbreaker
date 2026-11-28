@@ -1,16 +1,18 @@
-# Bricklike — GDD × estado atual (2026-11-24)
+# Bricklike — GDD × estado atual (2026-11-28)
 
-Comparação entre o GDD v1.14 e o build de desenvolvimento `0.7.2` na `main`.
+Comparação entre o GDD v1.16 e o build de desenvolvimento `0.8.1` na `main`.
 Itens marcados **implementado** existem no código e têm cobertura de teste ou
 validação de conteúdo. Itens **pendente** são decisões/escopo ainda não
 implementados, não bugs.
 
 A `0.6.1` foi publicada no itch.io em 2026-11-12; não há tag nem GitHub
-Release. O jogo foi **aceito e publicado no catálogo da Playgama**; a
-atualização da build para a `0.7.1` entrou em auto-certificação em 2026-11-26 e
-reprovou o SDK desatualizado. A **v0.7.2** (2026-11-26) atualiza o Playgama
-Bridge para **2.4.4** e corrige o ímã do último bloco do tutorial; está
-implementada localmente, sem publicação.
+Release. O jogo foi **aceito e publicado no catálogo da Playgama**. A `0.7.1`
+reprovou na auto-certificação por SDK 2.4.1; a `0.7.2` atualizou o Playgama
+Bridge para **2.4.4**. A **v0.8.0** (2026-11-27) separa os builds **bridge ×
+clean**, adiciona `CleanAdapter`/browser storage com fallback e pacotes/ZIPs
+próprios. A `0.8.0` está publicada no **itch.io** e na **Playgama** (catálogo,
+fora do sandbox); o **Y8** está em análise e a **CrazyGames** recusou a clean.
+A **v0.8.1** (2026-11-28) corrige o rewarded revive e o cooldown de ads.
 
 ## Implementado
 
@@ -23,6 +25,11 @@ implementada localmente, sem publicação.
 | Assistências do tutorial | paddle 2×; ímã do último bloco com anel/tether | implementado e testado |
 | Ímã do último bloco | taxa de giro adaptativa perto do alvo impede órbita estável | implementado e testado |
 | Playgama Bridge | SDK 2.4.4, runtime vendorizado e config validada | implementado e validado |
+| Builds bridge × clean | `dist/` (bridge) e `dist-clean/` (clean), boot por alias `@boot-target` | implementado e testado |
+| Clean platform | `CleanAdapter` sem ads e sem SDK do CrazyGames; pausa por `visibilitychange`/`blur` | implementado e testado |
+| Clean storage | `BrowserStorage` com fallback para memória; aviso “Progress may not be saved” | implementado e testado |
+| Pacote por target | bridge 20 arquivos / clean 17 arquivos; manifestos separados | implementado e validado |
+| E2E clean | projeto `chromium-clean` em 4174, sem requests externas e com save persistindo | implementado e E2E |
 | Feedback de dano | bola branco → amarelo → laranja → vermelho → roxo; glow/rastro na cor | implementado |
 | Giant Ball | +40% de raio por nível, máx. 2 (+80%) | implementado |
 | Pierce | hit da bola com excesso ≥ 1 atravessa; igual/menor quica | implementado e testado |
@@ -63,7 +70,7 @@ implementada localmente, sem publicação.
 | Save v3 | `version: 3`, `unlockedPhase` 0..18, migração v1/v2→v3 | implementado e testado |
 | Encerramentos | epílogos, rank S/A/B, final de campanha e epílogo do tutorial | implementado |
 | Endless | run infinita, velocidade 660→1100, linhas 4→12, chefes a cada 5 ondas | implementado |
-| Save de campanha | `unlockedPhase` 0..6, `campaignComplete`, `endless`, `phases` | implementado |
+| Save de campanha | `unlockedPhase` 0..18, `campaignComplete`, `endless`, `phases` | implementado |
 | Settings | som, música e screen shake | implementado |
 | Aviso de storage | “Progress may not be saved” + popup em memória/fallback | implementado |
 | Desbloqueio do Endless | ao concluir a campanha; tutorial não conta | implementado |
@@ -73,10 +80,14 @@ implementada localmente, sem publicação.
 | HUD legível | compacto em iframes estreitos | implementado |
 | Controles touch | drag relativo 1:1; edge assist e ganho de swipe longo até 2,2× | implementado e testado |
 | Side art desktop | arte lateral em viewport landscape; mobile portrait inalterado | implementado |
-| CrazyGames | adapter nativo sem Playgama no host do portal | implementado |
+| CrazyGames | bridge mantém o adapter nativo; o clean não inclui SDK do CrazyGames nem Playgama | implementado; clean E2E |
 | Laser | exige lançamento explícito na onda; reset bloqueia; HUD explica | implementado e testado |
-| Ads | política 0.5.1 mantida (campanha só com próxima onda e múltiplo de 3; tutorial zero; exits com 60 s) | implementado e testado |
+| Ads | política 0.5.1 ajustada na 0.8.1 (campanha só com próxima onda e múltiplo de 3; tutorial zero; cooldown único de 60 s) | implementado e testado |
 | Ads reais | Bridge interstitial/rewarded + fallback/mock + testes | implementado |
+| Rewarded timeout | 15 s para abrir; 180 s com o anúncio aberto; reward só em `rewarded` | implementado e testado |
+| Ordem `closed → rewarded` | janela de 500 ms + `advertisement.rewardedState` | implementado e testado |
+| Cooldown único | 60 s após qualquer ad; wave, results, pause e rewarded | implementado e testado |
+| Lock de ads | Bridge/CrazyGames rejeitam um segundo ad em andamento | implementado e testado |
 | Direção visual dos blocos | revisão de materiais e legibilidade | implementado |
 | Inglês | UI e metadata | implementado |
 | Reduced motion / budgets | partículas e trails limitados | implementado |
@@ -116,33 +127,34 @@ implementada localmente, sem publicação.
 | Anti-farm em retry de onda | pendente em sessão real; coberto por unidade/E2E |
 | Balance de Momentum, Bombardier, Boss Slayer e Hot Streak | pendente |
 | Balance de Overkill, Shield Bash e Conductor | pendente; validar a sinergia Conductor + Prism Laser |
-| Migração de save v1→v2 em navegador real | pendente (parse coberto por testes); schema v2 não mudou na 0.6.1 |
+| Migração de save v1/v2→v3 em navegador real | pendente (parse coberto por testes) |
 | Workshop em iframe de portal | pendente (E2E cobre 320/390 e desktop) |
 | Card do Workshop em desktop/portal | pendente; barra, contagem e badge cobertos em 320/390 |
 | Legibilidade do zoom em telas pequenas reais | pendente |
+| Playtest do clean em iframe | pendente; testar save/settings, pausa por visibilidade, sem ads e leitura no QA do portal |
 | Performance em hardware real / 4 GB RAM | pendente; protocolo em `docs/qa/performance-testing.md` e script `scripts/perf-smoke.mjs` |
 | Aviso de storage em fallback real | pendente |
 | Mixagem final de áudio | pendente |
-| Screenshots/capas/vídeos da 0.6.1 | regenerados; revisão humana pendente antes de reutilizar |
-| Fill/limites reais de ads na Playgama/CrazyGames | pendente |
+| Screenshots/capas/vídeos da 0.6.1 | ainda da 0.6.1; regenerar/revisar para a 0.8.0 antes de reutilizar |
+| Conjunto Y8 0.8.0 | gerado; jogo enviado ao Y8, aguardando resposta |
+| Fill/limites reais de ads na Playgama/CrazyGames | pendente (clean não tem ads por design) |
+| Rewarded real na Playgama | pendente; validar o revive e o Menu pós-rewarded após subir a 0.8.1 |
 | Playgama sandbox stats | amostra pequena (17/100 qualifying plays; 5:42; 1,70 ad/play); não concluir qualidade/retenção |
-| CrazyGames | 0.3.0 e 0.4.0 reprovadas; 0.5.1 submetida em 2026-11-11; submissão pausada até 2026-11-26 |
+| CrazyGames | 0.3.0, 0.4.0, 0.5.1 e `0.8.0` clean recusadas; a 0.8.0 não trouxe motivo específico; pedir feedback ao suporte |
 | Tag e GitHub Release | nenhuma criada; decisão humana pendente |
-| Submissão manual nos portais | 0.6.1 publicada no itch.io; jogo aceito na Playgama; CrazyGames e GameFlare pendentes |
+| Submissão manual nos portais | `0.8.0` publicada no itch.io e na Playgama; Y8 em análise; CrazyGames recusada; GameFlare bloqueado |
 
 ## Leitura rápida
 
-O GDD v1.14 e o build local **estão alinhados**: 19 fases (tutorial + 3 mundos),
-71 ondas, 17 blocos, 10 elementos, 9 chefes, 22 perks, Endless, save v3 e
-metaprogressão horizontal. A `0.7.2` é um patch sobre a `0.7.1`: atualiza o
-Playgama Bridge para 2.4.4 (exigido pela auto-certificação) e corrige o ímã do
-último bloco do tutorial. Tudo está coberto por **431 testes unitários** + 43
-E2E.
+O GDD v1.16 e o build local **estão alinhados**: 19 fases (tutorial + 3 mundos),
+71 ondas, 17 blocos, 10 elementos, 9 chefes, 22 perks, Endless, save v3,
+metaprogressão horizontal e dois targets de build. A `0.8.0` está publicada no
+itch.io/Playgama; a `0.8.1` local corrige o rewarded revive e o cooldown de ads.
+Tudo está coberto por **447 testes unitários** + 48 E2E.
 
 O que falta é majoritariamente **validação humana** das 69 ondas de campanha,
 dos 6 chefes novos, do balance de Spark e do feel de belt/rail/gust, além de
-**distribuição** (itch.io na 0.6.1; Playgama aceito com a 0.7.1 em
-auto-certificação; a 0.7.2 precisa de upload manual) e **revisão de assets de
-loja**. A moldura desktop foi deliberadamente descartada; o risco de
-apresentação em iframe desktop continua registrado, mas não será resolvido por
-letterbox nesta linha.
+**distribuição** (0.8.0 publicada no itch.io e na Playgama; Y8 em análise;
+CrazyGames recusou a clean) e **revisão de assets de loja**. A moldura desktop
+foi deliberadamente descartada; o risco de apresentação em iframe desktop
+continua registrado, mas não será resolvido por letterbox nesta linha.

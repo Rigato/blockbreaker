@@ -1,7 +1,7 @@
 # CrazyGames — como obter feedback específico e o que provavelmente reprovou
 
 **Data da pesquisa:** 2026-11-11  
-**Builds reprovadas:** `0.3.0` e `0.4.0` (conforme informado pelo dono)  
+**Builds reprovadas:** `0.3.0`, `0.4.0`, `0.5.1` e `0.8.0` clean (conforme informado pelo dono)  
 **Mensagem recebida:** rejeição genérica por “abaixo dos padrões de qualidade”,
 sem detalhamento.  
 **Escopo:** pesquisa documental e auditoria do repositório. Nenhum código-fonte
@@ -21,6 +21,10 @@ revalide no build que for submetido.
 > tutorial in-game pulável. No build `0.5.0` o Bridge passou a
 > ser local-only, removendo o CDN da Playgama do caminho de boot; o único script
 > externo restante é o SDK nativo do CrazyGames, carregado no host do portal.
+>
+> **Atualização 2026-11-27:** a `0.8.0` clean também foi recusada, sem motivo
+> específico. O modelo da §4 continua válido; troque a build citada para
+> **0.8.0** e informe que a submissão usou o ZIP clean, sem Playgama e sem ads.
 
 ---
 
@@ -111,7 +115,7 @@ O Developer Terms & Conditions publica
 - <https://files.crazygames.com/documents/developer_terms_20250818.pdf> (§5.8)
 
 Use o mesmo texto do Portal, com o assunto:
-`Review feedback request — Bricklike (build 0.4.0)`.
+`Review feedback request — Bricklike (build 0.8.0)`.
 
 Não use `developer-relations@` para isso: esse endereço é para questões
 contratuais/terminação, não para QA.
@@ -212,15 +216,15 @@ Checklist mínimo:
 
 Use exatamente o que souber; substitua os campos entre `[ ]`. Mantenha curto.
 
-**Assunto:** `Review feedback request — Bricklike (build 0.4.0)`
+**Assunto:** `Review feedback request — Bricklike (build 0.8.0)`
 
 ```text
 Hi CrazyGames team,
 
 I'm the developer of Bricklike (game ID: [ID]; submission ID: [ID if any]).
-Build 0.4.0 was submitted on [date] and rejected with the message that the game
-is "below the quality standards", without further detail. Build 0.3.0 had been
-rejected earlier for the same reason.
+Build 0.8.0 (clean) was submitted on [date] and rejected with the message that
+the game is "below the quality standards", without further detail. Builds 0.3.0,
+0.4.0 and 0.5.1 had been rejected earlier for the same generic reason.
 
 I'm not disputing the decision. I want to make sure the next submission is a
 real improvement rather than another guess. Could you please confirm:
@@ -239,8 +243,8 @@ real improvement rather than another guess. Could you please confirm:
    resubmission?
 
 I can provide a fresh preview build, a short gameplay video, and a checklist of
-the changes since 0.4.0. If there is a better channel for review feedback,
-please point me to it.
+the changes since the previous submissions. If there is a better channel for
+review feedback, please point me to it.
 
 Thank you,
 [Name]
@@ -254,7 +258,7 @@ Thank you,
 ```text
 Hi CrazyGames team,
 
-Bricklike (game ID [ID]), build 0.4.0, was rejected for "below quality
+Bricklike (game ID [ID]), build 0.8.0 (clean), was rejected for "below quality
 standards" with no details. Was this the initial QA check or Basic Launch?
 Which specific requirements failed, and do you have QA notes or screenshots?
 What 2–3 changes would you need to see before a resubmission?

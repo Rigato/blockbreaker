@@ -51,7 +51,16 @@ A lógica do jogo **nunca** chama o SDK da Bridge, `localStorage` ou `if (platfo
 | `save(keys, vals)` / `load(keys)` | `bridge.storage.set(keys, vals)` / `get(keys)` | `localStorage` com `try/catch` | `keys` e `vals` **devem ser arrays de mesmo tamanho** (objetos falham na Bridge); chave ausente retorna `null` (sempre aplicar default). |
 | `canShowRewarded()` | `Boolean(bridge.advertisement.isRewardedSupported)` | `false` | Ocultar botões de rewarded se `false`; todo conteúdo precisa ter caminho sem anúncio. |
 | `showInterstitial(onDone)` | Exibe ad; trata `closed` e `failed` chamando `onDone()` | Chama `onDone()` imediato | `failed`/`adError` = "sem ad"; nunca travar transição de fase. |
-| `showRewarded(onReward, onDone)` | Só entrega recompensa se estado `rewarded` disparar; finaliza em `closed`/`failed` | Chama `onDone()` imediato | Nunca premiar no estado `closed` sem `rewarded`. |
+| `showRewarded(onReward, onDone)` | Só entrega recompensa se estado `rewarded` disparar; finaliza em `closed`/`failed`; timeout de abertura de 15 s e de anúncio aberto de 180 s | Chama `onDone()` imediato | Nunca premiar no estado `closed` sem `rewarded`. |
+
+### 2.1 Ciclo de vida de anúncios (v0.8.1)
+
+- **Rewarded:** a recompensa só é entregue no estado `rewarded`. `closed` sem `rewarded` não paga; o estado `opened` não pode ser tratado como falha.
+- **Timeout:** 15 s para o anúncio abrir; depois de `opened`, o timeout de segurança sobe para **180 s**. Um rewarded de 30 s não pode resolver `failed` enquanto ainda está na tela.
+- **Ordem dos eventos:** alguns SDKs emitem `closed` antes de `rewarded`. O adaptador mantém uma janela de **500 ms** após `closed` e consulta `bridge.advertisement.rewardedState` antes de decidir; se `rewarded` chegar nessa janela, a recompensa é paga.
+- **Cooldown único:** todo anúncio concluído (interstitial ou rewarded) grava `lastAdFinishedAt`. Nenhum outro anúncio começa nos **60 s** seguintes — vale para wave interstitial, results exit, pause exit e a oferta de revive por rewarded. `adBusy` continua sendo o lock de sobreposição.
+- **Overlay:** o `AdOverlay` tem safety de 300 s, acima do maior timeout de anúncio; ele só some quando o `Game` emite `ad:state finished`.
+- **Testes obrigatórios:** `opened → rewarded`, `opened → closed → rewarded` (janela de graça), `opened → closed` sem reward, anúncio aberto por >15 s, timeout sem evento, e E2E de Menu após rewarded sem segundo ad.
 
 ## 3. Requisitos Universais do Build HTML5
 

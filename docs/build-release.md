@@ -106,9 +106,11 @@ bridge. `node scripts/validate-bridge-config.mjs` confere o schema do Bridge
 
 O jogo pede interstitials em pausas naturais: na campanha, somente quando há
 próxima onda e a onda limpa é múltipla de 3; no Endless, a cada 4 ondas; o
-tutorial não tem ads. A saída dos results pede interstitial se não houve outro
-nos últimos 60 s; a saída pelo pause também é suprimida após rewarded revive. O
-Bridge aplica o mínimo de 60 s. No clean não há SDK nem ads: o fluxo retorna
+tutorial não tem ads. **Todo ad concluído inicia um cooldown único de 60 s**:
+results, pause, wave e rewarded compartilham o mesmo gate, então um Menu logo
+após um rewarded não toca outro anúncio. Um rewarded só abre com 15 s de espera
+e pode ficar até 180 s na tela sem virar falha. O Bridge também aplica o mínimo
+de 60 s entre interstitials. No clean não há SDK nem ads: o fluxo retorna
 `skipped` sem bloquear a navegação. O revive por anúncio não aparece no clean.
 
 ## Ads sem portal (QA)
@@ -122,8 +124,9 @@ os flags debug-only:
 - `?debug=1&adMock=rewarded-fail` — rewarded revive retorna `failed`.
 
 O proxy é debug-only: storage, lifecycle, mensagens e config continuam reais. O
-painel de debug mostra suporte a `interstitial / rewarded`. Ads reais exigem
-Playgama ou CrazyGames (Full Launch).
+mock é curto (1,4 s/2,4 s); o caso de rewarded aberto por >15 s é coberto pelos
+testes unitários do adapter, não pelo mock. O painel de debug mostra suporte a
+`interstitial / rewarded`. Ads reais exigem Playgama ou CrazyGames (Full Launch).
 
 ## Teste em subpasta
 
@@ -187,8 +190,10 @@ Bridge:
 - [ ] Storage via Bridge (`bb.save`/`bb.settings`), sem acesso direto do
       gameplay; reload preserva progresso e `?resetSave=1` limpa.
 - [ ] Ads: tutorial sem ads; campanha só em onda múltipla de 3 com próxima onda;
-      Endless a cada 4; exits com cooldown de 60 s; `failed`/`skipped`/timeout
-      de 15 s retomam o jogo; rewarded revive só em `rewarded`.
+      Endless a cada 4; cooldown único de 60 s após qualquer ad; `failed`/
+      `skipped`/timeout de abertura (15 s) retomam o jogo; rewarded só em
+      `rewarded` e aberto pode durar até 180 s; Menu após rewarded não toca
+      outro ad.
 
 Clean:
 
@@ -225,24 +230,27 @@ Conteúdo/economia (ambos):
 
 ## Pacote atual
 
-Referência de 2026-11-26, versão **0.8.0**, build local (sem tag ou GitHub
-Release). Confirme sempre o hash no manifesto antes de qualquer upload.
+Referência de 2026-11-28, versão **0.8.1** (patch de ads, local), com a
+**0.8.0** publicada no **itch.io** e na **Playgama**; Y8 em análise; CrazyGames
+recusou a clean. Sem tag ou GitHub Release. Confirme sempre o hash no manifesto
+antes de qualquer upload.
 
 | Item | Bridge | Clean |
 |---|---|---|
 | ZIP | `release/blockbreaker-web.zip` | `release/blockbreaker-web-clean.zip` |
 | Arquivos | 20 | 17 |
-| Tamanho | 1.545.986 bytes (~1.510 KiB) | 1.431.534 bytes (~1.398 KiB) |
-| SHA-256 | `ee17abbaf000a9872dd157ddbd51c6e2abc1f960d0ece9199608fbbcfe781b2f` | `918759c7809178aa511907cc6a611b6e666843dd583a723ee3893cac62450287` |
+| Tamanho | 1.546.174 bytes (~1.510 KiB) | 1.431.541 bytes (~1.398 KiB) |
+| SHA-256 | `0923f8eb0b9b77d1d6fcf6d8ea1888894361f791fe9f3ee346eba27917a07365` | `890e5419142d5f17ca34a1d3b15f293497bf3544f8f6616216a9e38b9fc9b6f7` |
 | Raiz | `index.html` + config | `index.html` |
 | Conteúdo | Bridge 2.4.4 local | sem SDK, sem ads |
 
 ## Release por tag — somente após aprovação humana
 
-**Não crie tag ou release sem decisão explícita.** A `0.8.0` é a linha local
-atual e ainda não foi tagueada nem publicada. A `0.6.1` é a build publicada no
-itch.io; o jogo foi aceito e publicado na Playgama. A submissão em itch.io,
-Playgama, Y8, Lagged, Kongregate e CrazyGames é manual e feita pelo responsável.
+**Não crie tag ou release sem decisão explícita.** A `0.8.1` é o patch local
+de ads; a `0.8.0` está publicada no itch.io e na Playgama, mas ainda não foi
+tagueada. O Y8 está em análise e a CrazyGames recusou a clean. A submissão em
+itch.io, Playgama, Y8, Lagged, Kongregate e CrazyGames é manual e feita pelo
+responsável.
 
 Pré-requisitos:
 

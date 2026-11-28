@@ -87,8 +87,8 @@ const MAX_SUBSTEPS = GAME_CONFIG.maxStepsPerFrame;
 const WAVE_TRANSITION_MS = 1200;
 const LEVEL_UP_REVEAL_MS = 450;
 const BALL_RESPAWN_MS = GAME_CONFIG.ball.respawnMs;
-/** Avoid stacking an exit ad immediately after a wave/rewarded ad. */
-const AD_EXIT_COOLDOWN_MS = 60_000;
+/** Avoid stacking any second ad right after a wave, exit or rewarded ad. */
+const AD_COOLDOWN_MS = 60_000;
 const INTERSTITIAL_PLACEMENT = 'phase_completed';
 const PAUSE_EXIT_INTERSTITIAL_PLACEMENT = 'pause_menu';
 const WAVE_INTERSTITIAL_PLACEMENT = 'wave_completed';
@@ -173,8 +173,7 @@ export class BlockBreakerGame implements GameCommands {
   private reviveUsed = false;
   private adReviveUsed = false;
   private tutorialStep: TutorialStep | null = null;
-  private lastInterstitialAt = Number.NEGATIVE_INFINITY;
-  private lastRewardedAt = Number.NEGATIVE_INFINITY;
+  private lastAdFinishedAt = Number.NEGATIVE_INFINITY;
   private readonly debug: boolean;
 
   constructor(
@@ -1182,7 +1181,7 @@ export class BlockBreakerGame implements GameCommands {
   private handleDefeat(): void {
     if (this.phase === 'revive-offer') return;
     if (this.tryRevive()) return;
-    if (!this.adReviveUsed && this.ads.isRewardedSupported) {
+    if (!this.adReviveUsed && this.ads.isRewardedSupported && this.canStartAd()) {
       this.openAdReviveOffer();
       return;
     }
@@ -1215,7 +1214,6 @@ export class BlockBreakerGame implements GameCommands {
   private async runRewardedRevive(): Promise<void> {
     if (this.phase !== 'revive-offer' || this.adBusy) return;
     this.adBusy = true;
-    this.lastRewardedAt = performance.now();
     this.audio.setBackground(true);
     gameEvents.emit('ad:state', { state: 'requested' });
 
@@ -1226,7 +1224,8 @@ export class BlockBreakerGame implements GameCommands {
       console.warn('[ads] rewarded revive failed', error);
     } finally {
       // Always release the overlay/mute lock, even if the ad service throws.
-      this.adBusy = false;
+      // The cooldown starts when the ad finishes, not when it opens.
+      this.markAdFinished();
       this.audio.setBackground(false);
       gameEvents.emit('ad:state', { state: 'finished' });
     }
@@ -1294,7 +1293,7 @@ export class BlockBreakerGame implements GameCommands {
 
   /** True when the just-cleared wave should trigger a mid-run interstitial. */
   private shouldShowWaveAd(): boolean {
-    if (!this.ads.isInterstitialSupported || this.adBusy) return false;
+    if (!this.ads.isInterstitialSupported || !this.canStartAd()) return false;
     if (this.currentPhase?.tutorial) return false;
     // Campaign ads only appear before a following wave. Endless has no final
     // wave, so its every-fourth-wave cadence remains unchanged.
@@ -1330,14 +1329,13 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   private showWaveInterstitial(placement: string, after: () => void): void {
-    if (this.adBusy) {
+    if (!this.canStartAd()) {
       after();
       return;
     }
 
     const phaseAtStart = this.phase;
     this.adBusy = true;
-    this.lastInterstitialAt = performance.now();
     this.audio.setBackground(true);
     gameEvents.emit('ad:state', { state: 'requested' });
 
@@ -1349,7 +1347,7 @@ export class BlockBreakerGame implements GameCommands {
         console.warn('[ads] wave interstitial failed', error);
       } finally {
         // Always release the overlay/mute lock, even if the ad service throws.
-        this.adBusy = false;
+        this.markAdFinished();
         this.audio.setBackground(false);
         gameEvents.emit('ad:state', { state: 'finished', result });
       }
@@ -1586,33 +1584,25 @@ export class BlockBreakerGame implements GameCommands {
   }
 
   /**
-   * True when an exit ad is supported and not stacked on a recent one.
-   * Pause-menu exits also avoid a rewarded revive that just happened; results
-   * exits only avoid another interstitial, so a second death can still offer
-   * the normal results ad.
+   * True when an exit ad is supported and no other ad finished in the last
+   * minute. The same guard covers rewarded ads, wave interstitials and
+   * results/pause exits, so a failure or a revive can never chain into a
+   * second ad on the next tap.
    */
-  private canShowExitAd(pauseExit: boolean): boolean {
-    if (!this.ads.isInterstitialSupported || this.adBusy) return false;
+  private canShowExitAd(): boolean {
+    if (!this.ads.isInterstitialSupported) return false;
     if (this.currentPhase?.tutorial) return false;
-    const now = performance.now();
-    if (now - this.lastInterstitialAt < AD_EXIT_COOLDOWN_MS) return false;
-    if (pauseExit && now - this.lastRewardedAt < AD_EXIT_COOLDOWN_MS) return false;
-    return true;
+    return this.canStartAd();
   }
 
-  private async showExitAd(
-    placement: string,
-    action: () => void,
-    pauseExit = false,
-  ): Promise<void> {
-    if (!this.canShowExitAd(pauseExit)) {
+  private async showExitAd(placement: string, action: () => void): Promise<void> {
+    if (!this.canShowExitAd()) {
       action();
       return;
     }
 
     const phaseAtStart = this.phase;
     this.adBusy = true;
-    this.lastInterstitialAt = performance.now();
     this.audio.setBackground(true);
     gameEvents.emit('ad:state', { state: 'requested' });
 
@@ -1623,7 +1613,7 @@ export class BlockBreakerGame implements GameCommands {
       console.warn('[ads] interstitial failed', error);
     } finally {
       // Always release the overlay/mute lock, even if the ad service throws.
-      this.adBusy = false;
+      this.markAdFinished();
       this.audio.setBackground(false);
       gameEvents.emit('ad:state', { state: 'finished', result });
     }
@@ -1642,7 +1632,19 @@ export class BlockBreakerGame implements GameCommands {
   /** Natural pause: leaving a live run through the pause menu. */
   private async runPauseExitAction(action: () => void): Promise<void> {
     if (this.adBusy) return;
-    await this.showExitAd(PAUSE_EXIT_INTERSTITIAL_PLACEMENT, action, true);
+    await this.showExitAd(PAUSE_EXIT_INTERSTITIAL_PLACEMENT, action);
+  }
+
+  /** Shared gate for every ad request (rewarded, wave and exit ads). */
+  private canStartAd(): boolean {
+    if (this.adBusy) return false;
+    return performance.now() - this.lastAdFinishedAt >= AD_COOLDOWN_MS;
+  }
+
+  /** Releases the ad lock and starts the post-ad cooldown. */
+  private markAdFinished(): void {
+    this.adBusy = false;
+    this.lastAdFinishedAt = performance.now();
   }
 
   private sendLevelMessage(message: 'level_paused' | 'level_resumed'): void {

@@ -1,10 +1,12 @@
 # Portal metadata — Bricklike
 
-Draft de metadata em inglês para revisão humana antes de qualquer submissão.
-A submissão é **manual**, feita pelo usuário. A `0.6.1` está publicada no
-itch.io; o jogo foi **aceito e publicado na Playgama**. A `0.7.2` é a linha
-local atual, com Bridge 2.4.4 e a correção do ímã do tutorial; a atualização da
-`0.7.1` parou na auto-certificação por SDK desatualizado.
+Metadata em inglês para revisão e submissão manual. Estado em 2026-11-28:
+a **0.8.0** está publicada no **itch.io** e na **Playgama** (catálogo, fora do
+sandbox); o **Y8** recebeu a 0.8.0 e está em análise; a **CrazyGames** recusou
+a 0.8.0 clean e precisa de feedback específico antes de um novo envio. A
+**0.8.1** é um patch local de ads (rewarded revive e cooldown) que ainda precisa
+de upload nos portais. O build é **bridge × clean**: bridge para
+Playgama/Y8/Lagged/itch.io, clean para CrazyGames Basic/Kongregate.
 
 ## Identidade
 
@@ -17,73 +19,72 @@ local atual, com Bridge 2.4.4 e a correção do ímã do tutorial; a atualizaç�
 - **Platform:** HTML5 (browser; desktop and mobile)
 - **Language:** English (UI and metadata)
 - **Price:** Free
-- **Business model:** No purchases. Interstitial ads at natural breaks where the hosting portal provides them (never in the tutorial) and an optional one-per-run rewarded revive; no ads on itch.io or GameFlare.
+- **Business model:** No purchases. Ads only where the portal provides them
+  (never in the tutorial); the clean build has no ads. An optional one-per-run
+  rewarded revive is available on bridge portals; itch.io and GameFlare run no
+  in-game ads.
 
 ## Short description
 
-> A portrait block breaker with roguelite perks. Learn the ropes in a short
-> playable tutorial, smash themed bricks, build game-changing synergies, beat
-> three bosses and survive Endless mode.
+> A fast portrait block breaker with roguelite perks. Smash three worlds,
+> stack ridiculous combos and topple nine bosses. Free in your browser.
 
-_(≈190 characters.)_
+_(≈140 characters.)_
 
 ## Long description (≥ 100 words)
 
-> Bricklike is a portrait block breaker that mixes arcade brick-smashing with
-> short roguelite runs. A short playable tutorial teaches you to move, launch,
-> break blocks and choose your first perk; it can be skipped at any time. Then
-> comes a six-level campaign with 20 hand-authored waves — 22 waves in total
-> including the tutorial: Crystal Grove, Ruined Halls, Arcane Depths, Frostbound
-> Spire, Emberforge and Void Threshold.
+> Bricklike is a fast, portrait brick breaker with roguelite perks. Break
+> bricks, earn XP and choose one of three random perks at every level-up.
+> Stack multiball, giant balls, lasers and explosive hits until the whole
+> screen melts.
 >
-> Every destroyed block earns XP. When you level up, the action pauses and you
-> choose one of three random perks. Stack Multiball, widen the paddle, add
-> damage, summon an Arcane Turret or fire the Prism Laser to build a different
-> run each time. Special blocks explode, regenerate, move, multiply XP, link
-> together or spawn new bricks, and the later levels add walls, deflectors,
-> portals, moving mechanisms, rotors and timed gates.
+> Start with a short, skippable tutorial, then blast through 19 levels and 71
+> waves across three worlds: Crystal Vale, Neon Lattice and Rustwake. Each
+> world ends with three bosses — nine in total — each with its own attack
+> pattern.
 >
-> The last three levels end in boss fights against the Frost Sentinel, Ember
-> Warden and Void Herald. Clear the campaign to unlock Endless mode, an infinite
-> run with escalating speed, procedural waves and a boss every five waves.
+> What's inside:
+> - 17 brick types, including explosive, regenerative, moving, linked, phased
+>   and plated bricks.
+> - 10 stage elements: walls, obstacles, deflectors, portals, movers, rotors,
+>   gates, presses, belts and rails.
+> - 22 perks, from Multiball and Giant Ball to Overkill, Shield Bash and
+>   Conductor.
+> - Endless mode: infinite waves, rising speed and a boss every five waves.
+> - Sparks and the Workshop: unlock 12 extra perks between runs. No paid
+>   advantages and no permanent stat boosts.
 >
-> Sparks earned from waves, combos and bosses unlock extra perks in the
-> Workshop, including the Tier 4 Overkill, Shield Bash and Conductor. The
-> catalog has 22 perks across 10 starters and 12 unlocks, with no permanent
-> stat bonuses.
->
-> Runs last a few minutes and progress is saved between sessions on the device.
-> Play with touch, mouse or keyboard. No account, download or install is
-> required — the game runs directly in the browser.
+> Clear the first world to unlock Endless. Runs last a few minutes, progress
+> saves on your device, and there is no account or download. Play with touch,
+> mouse or keyboard. Free in your browser.
 
-_(≈260 words.)_
+_(≈190 words.)_
 
 ## Controls
 
 **Touch**
-- Drag horizontally to move the paddle. The drag is 1:1 in the centre and
-  gently accelerates near the side edges so the paddle can reach the wall
-  without triggering the browser's edge gesture.
+- Drag left or right to move the paddle. The drag is 1:1 in the center and
+  speeds up near the side edges so you can reach the wall.
 - Tap to launch the ball.
-- Tap a perk card to choose it.
-- Use the on-screen Prism Laser button when the perk is active and a ball has
-  been launched.
-- Tap the pause button for settings, restart or menu.
+- Tap a perk card to pick it.
+- Tap the laser button when Prism Laser is ready.
+- Tap pause for settings, restart or menu.
 
 **Mouse**
-- Move the mouse horizontally to move the paddle.
-- Click to launch the ball.
-- Click a perk card to choose it.
-- Click the pause button for settings, restart or menu.
+- Move the mouse to steer the paddle; click to launch the ball.
+- Click a perk card to pick it.
+- Click pause for settings, restart or menu.
 
 **Keyboard**
 - `←` / `→`: move the paddle.
 - `V`: launch the ball.
-- `Space` / `E`: fire the Prism Laser when the perk is active.
+- `Space` / `E`: fire Prism Laser when the perk is active.
 - `P`: pause or resume.
-- `1` / `2` / `3`: choose a perk card.
+- `1` / `2` / `3`: pick a perk card.
 
-**Workshop:** open the Workshop card in the menu to spend Sparks on new perks.
+**Workshop**
+- Open the Workshop card in the main menu and spend Sparks to unlock new
+  perks.
 
 ## Tags
 
@@ -100,6 +101,9 @@ _(≈260 words.)_
 **Long description:** Use the long description above.
 
 **Project kind:** HTML5
+
+**Current build:** `0.8.0` published on 2026-11-27; `0.8.1` local patch (ads)
+pending upload.
 
 **Release status:** Released
 
@@ -118,13 +122,18 @@ _(≈260 words.)_
 **Made with:** Phaser
 
 **Notes for the submitter:**
-- Upload the final HTML5 ZIP produced by the build/release pipeline.
+- The **0.8.0 bridge** ZIP is live; re-upload only when the build or metadata
+  changes.
+- Keep the description and controls in sync with the text above.
 - Do not promise ads, achievements, leaderboards or cloud saves.
 - The game is free; itch.io HTML5 pages support donations only, not paid sales.
 
 ## Y8.com
 
 **Title:** Bricklike
+
+**Status:** `0.8.0` submitted; awaiting review. `0.8.1` local if the portal asks
+for an update.
 
 **Short description:** Use the short description above.
 
@@ -148,15 +157,19 @@ _(≈260 words.)_
   (contínuo, 30 s, 1280×720). **Não** use o preview editado.
 
 **Notes for the submitter:**
-- Y8 exige gameplay contínuo, sem cortes; o preview de `store/video/` não
-  atende.
-- Confirmar no painel se o ZIP HTML5 é upload direto ou se o Y8 usa o fluxo de
-  URL; a Bridge já encapsula o SDK Y8.
-- Revalidar dimensões, limites e textos na data do upload.
+- The **0.8.0** ZIP is in review; wait for the portal response before
+  resubmitting or changing the live page.
+- Y8 requires continuous gameplay, without cuts; the preview in `store/video/`
+  does not qualify.
+- The panel may ask for either the HTML5 ZIP or a URL flow; the Bridge already
+  wraps the Y8 SDK. Confirm which flow the submission used.
+- Revalidate dimensions, limits and text on the upload date.
 
 ## GameFlare
 
 **Title:** Bricklike
+
+**Status:** Account access blocked; the 0.8.0 has not been submitted.
 
 **Short description:** Use the short description above.
 
@@ -178,6 +191,9 @@ _(≈260 words.)_
 ## Playgama
 
 **Title:** Bricklike
+
+**Status:** `0.8.0` published in the public catalog (out of sandbox); `0.8.1`
+local patch pending upload.
 
 **Short description:** Use the short description above.
 
@@ -205,13 +221,18 @@ _(≈260 words.)_
   offered once per run and only pays out on the `rewarded` state. Second Chance
   and the rewarded revive may coexist by design (two revives per run, one each).
 - Storage and audio lifecycle go through the Bridge; no analytics are enabled.
-- Review the final Bridge behavior in the Playgama environment before submitting.
-- The sandbox requires milestones; track session length, wave completion and
-  retention before promoting to the public catalog.
+- The **0.8.0** bridge is live in the public catalog. Keep the same save keys
+  and Bridge config on future updates; re-run the auto-certification for each
+  new bridge build.
+- Monitor retention, session length, wave completion and ad limits with the
+  live build before changing the monetization.
 
 ## CrazyGames — Basic Launch
 
 **Title:** Bricklike
+
+**Status:** `0.8.0` clean submitted and rejected. The rejection did not include
+a specific reason.
 
 **Short description:** Use the short description above.
 
@@ -232,11 +253,12 @@ _(≈260 words.)_
   SDK and no ads; save/settings use browser storage. The bridge ZIP is for
   Playgama/Y8/Lagged/itch.io. Every ad path treats `failed`/`skipped` as success
   and the clean build has no ad buttons.
-- **Ads policy:** the tutorial has no ads; campaign interstitials only when a
-  next wave exists and the cleared wave is a multiple of 3; never at the end of a
-  level; Endless every 4 waves; Results exits respect a 60-second cooldown. A
-  pause-menu exit is suppressed after a rewarded revive in the last 60 seconds.
-  The rewarded revive is once per run.
+- **Ads policy (bridge only):** the tutorial has no ads; campaign interstitials
+  only when a next wave exists and the cleared wave is a multiple of 3; never
+  at the end of a level; Endless every 4 waves. **No second ad starts within
+  60 seconds of any ad finishing** (wave, results, pause or rewarded); rewarded
+  pays only on the `rewarded` state. The clean build has no ads, so this policy
+  is for reference only.
 - Upload all three covers and the preview video (or reuse the 1920×1080 key art
   from `store/y8/landscape-promo/`; the 800×1200/800×800 still need the 0.8.0
   regeneration/review).
@@ -245,11 +267,17 @@ _(≈260 words.)_
   resubmitting; the portrait frame must remain readable. The portrait shell is
   intentional; landscape desktop viewports get procedural side art, not a
   letterbox shell.
-- The 0.4.0 submission was rejected again with the same generic message. The
-  0.5.1 was submitted on 2026-11-11; the submission is paused until
-  2026-11-26. The 0.6.1 is published on itch.io; Bricklike was accepted and
-  published on Playgama. The **0.8.0 clean** is the current candidate for the
-  Basic Launch; the bridge line remains for the other portals.
+- **Current status:** the **0.8.0 clean** was submitted and rejected; the
+  rejection did not provide a specific reason, same as the 0.3.0/0.4.0/0.5.1
+  cycles. Do not resubmit the same build blindly.
+- **Next step:** open one Support/technical-support ticket referencing the 0.8.0
+  clean submission and ask which Basic Launch requirement failed (quality,
+  desktop presentation, onboarding, content or build). Record the answer here
+  before another upload.
+- **Before any resubmission:** run the clean ZIP in an anonymous window and in
+  the CrazyGames QA iframe; confirm no external requests, save/settings
+  persistence, no ads, readable portrait at 907×510 and 1920×1080, and updated
+  covers/preview (the store assets are still mostly 0.6.1).
 - **Screenshots, covers and the preview video in `store/` are from the 0.6.1
   build** and still need human review/regeneration for the 0.8.0. The Y8 set
   in `store/y8/` is already 0.8.0 and can supply the 1920×1080 key art and
@@ -268,10 +296,14 @@ _(≈260 words.)_
 - Keep the description, screenshots and covers in sync with the current build.
 - The store covers, screenshots and preview videos are from the **0.6.1** build
   and are pending human review. The Y8 set in `store/y8/` is **0.8.0**. Review
-  and regenerate the remaining store assets against the 0.8.0 before submitting.
+  and regenerate the remaining store assets against the 0.8.0 before updating
+  any live page.
 - Do not promise ads on itch.io or GameFlare: those portals do not serve the
   in-game interstitials used on Playgama/CrazyGames.
-- Do not claim CrazyGames approved the 0.5.1; the submission is paused until
-  2026-11-26. The 0.6.1 is live on itch.io; Bricklike was accepted and published
-  on Playgama. The **0.8.0** is the current local build: use the **clean** ZIP
-  for CrazyGames Basic/Kongregate and the **bridge** ZIP for the other portals.
+- Do not claim CrazyGames approved the game: the **0.8.0 clean was rejected**.
+  The **0.8.0** is live on itch.io and Playgama and in review on Y8; use the
+  **clean** ZIP for CrazyGames Basic/Kongregate and the **bridge** ZIP for the
+  other portals.
+- Lead with the fantasy: fast runs, wild perk combos, three worlds and nine
+  bosses. Keep the numbers factual: 19 levels, 71 waves, 17 brick types,
+  10 stage elements and 22 perks.

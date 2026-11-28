@@ -376,6 +376,37 @@ describe('CrazyGamesAdapter rewarded ads', () => {
     await expect(failed).resolves.toBe('failed');
   });
 
+  it('keeps a rewarded ad alive after adStarted', async () => {
+    vi.useFakeTimers();
+    const fake = createFakeSdk();
+    const adapter = new CrazyGamesAdapter(fake.sdk);
+
+    const rewarded = adapter.ads.showRewarded('revive');
+    let settled = false;
+    void rewarded.then(() => {
+      settled = true;
+    });
+    lastAdCallbacks(fake).adStarted?.();
+    await vi.advanceTimersByTimeAsync(30_000);
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    lastAdCallbacks(fake).adFinished?.();
+    await expect(rewarded).resolves.toBe('rewarded');
+  });
+
+  it('does not start a second ad while one is in flight', async () => {
+    const fake = createFakeSdk();
+    const adapter = new CrazyGamesAdapter(fake.sdk);
+
+    const first = adapter.ads.showRewarded('revive');
+    await expect(adapter.ads.showInterstitial('results')).resolves.toBe('failed');
+    expect(fake.requestAd).toHaveBeenCalledTimes(1);
+
+    lastAdCallbacks(fake).adFinished?.();
+    await expect(first).resolves.toBe('rewarded');
+  });
+
   it('fails when requestAd throws', async () => {
     const fake = createFakeSdk({
       requestAd: () => {
@@ -389,17 +420,19 @@ describe('CrazyGamesAdapter rewarded ads', () => {
 });
 
 describe('CrazyGamesAdapter ad watchdog', () => {
-  it('fails interstitial and rewarded requests after 15 s', async () => {
+  it('fails an ad request after 15 s without adStarted', async () => {
     vi.useFakeTimers();
     const adapter = new CrazyGamesAdapter(createFakeSdk().sdk);
 
     const interstitial = adapter.ads.showInterstitial('results');
-    const rewarded = adapter.ads.showRewarded('revive');
-    expect(vi.getTimerCount()).toBe(2);
-
+    expect(vi.getTimerCount()).toBe(1);
     await vi.advanceTimersByTimeAsync(15_000);
-
     await expect(interstitial).resolves.toBe('failed');
+    expect(vi.getTimerCount()).toBe(0);
+
+    const rewarded = adapter.ads.showRewarded('revive');
+    expect(vi.getTimerCount()).toBe(1);
+    await vi.advanceTimersByTimeAsync(15_000);
     await expect(rewarded).resolves.toBe('failed');
     expect(vi.getTimerCount()).toBe(0);
   });

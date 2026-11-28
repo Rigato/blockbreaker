@@ -174,6 +174,22 @@ describe('BridgeAdapter', () => {
     expect(adapter.ads.isRewardedSupported).toBe(true);
   });
 
+  it('skips a second ad request while one is in flight', async () => {
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isRewardedSupported = true;
+    fake.raw.advertisement.isInterstitialSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const first = adapter.ads.showRewarded('revive');
+    await expect(adapter.ads.showInterstitial('phase_completed')).resolves.toBe('skipped');
+    await expect(adapter.ads.showRewarded('revive')).resolves.toBe('skipped');
+    expect(fake.raw.advertisement.showInterstitial).not.toHaveBeenCalled();
+    expect(fake.raw.advertisement.showRewarded).toHaveBeenCalledTimes(1);
+
+    fake.emit('rewarded_state_changed', 'rewarded');
+    await expect(first).resolves.toBe('rewarded');
+  });
+
   it('rewards only after the rewarded state and cleans up', async () => {
     const fake = createFakeBridge();
     fake.raw.advertisement.isRewardedSupported = true;
@@ -189,6 +205,7 @@ describe('BridgeAdapter', () => {
   });
 
   it('maps closed without a reward to closed and cleans up', async () => {
+    vi.useFakeTimers();
     const fake = createFakeBridge();
     fake.raw.advertisement.isRewardedSupported = true;
     const adapter = new BridgeAdapter(fake.bridge);
@@ -196,8 +213,24 @@ describe('BridgeAdapter', () => {
     const result = adapter.ads.showRewarded('revive');
     fake.emit('rewarded_state_changed', 'opened');
     fake.emit('rewarded_state_changed', 'closed');
+    await vi.advanceTimersByTimeAsync(500);
 
     await expect(result).resolves.toBe('closed');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
+  });
+
+  it('accepts a rewarded event that arrives just after closed', async () => {
+    vi.useFakeTimers();
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isRewardedSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showRewarded('revive');
+    fake.emit('rewarded_state_changed', 'opened');
+    fake.emit('rewarded_state_changed', 'closed');
+    fake.emit('rewarded_state_changed', 'rewarded');
+
+    await expect(result).resolves.toBe('rewarded');
     expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
   });
 
@@ -217,6 +250,39 @@ describe('BridgeAdapter', () => {
     });
     await expect(adapter.ads.showRewarded('revive')).resolves.toBe('failed');
     expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
+  });
+
+  it('keeps waiting while a rewarded ad is open', async () => {
+    vi.useFakeTimers();
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isRewardedSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showRewarded('revive');
+    fake.emit('rewarded_state_changed', 'opened');
+    await vi.advanceTimersByTimeAsync(60_000);
+
+    // The load timeout must not fire while the creative is still playing.
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(1);
+    fake.emit('rewarded_state_changed', 'rewarded');
+    await expect(result).resolves.toBe('rewarded');
+    expect(fake.listenerCount('rewarded_state_changed')).toBe(0);
+  });
+
+  it('keeps waiting while an interstitial is open', async () => {
+    vi.useFakeTimers();
+    const fake = createFakeBridge();
+    fake.raw.advertisement.isInterstitialSupported = true;
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showInterstitial('phase_completed');
+    fake.emit('interstitial_state_changed', 'opened');
+    await vi.advanceTimersByTimeAsync(60_000);
+
+    expect(fake.listenerCount('interstitial_state_changed')).toBe(1);
+    fake.emit('interstitial_state_changed', 'closed');
+    await expect(result).resolves.toBe('shown');
+    expect(fake.listenerCount('interstitial_state_changed')).toBe(0);
   });
 
   it('times out rewarded ads after 15 s and cleans up the listener', async () => {

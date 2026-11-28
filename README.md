@@ -2,8 +2,8 @@
 
 Portrait HTML5 block breaker with roguelite progression. The repository, package,
 live URL and ZIP keep the technical slug `blockbreaker`. The published line is
-**v0.7.2 — Playgama Bridge 2.4.4 and the tutorial last-block fix**; the current
-development line is **v0.8.0 — bridge × clean builds**: the same game ships as a
+**v0.8.0** on itch.io and Playgama (catalog); the current local patch is
+**v0.8.1 — rewarded-ad revive and unified ad cooldown**. The game ships as a
 Playgama Bridge ZIP for Playgama/Y8/Lagged/itch and a clean, SDK-free ZIP for
 CrazyGames Basic and Kongregate. The content history includes the **v0.2.0
 campaign base**, the **v0.3.0 Endless mode**, the **v0.4.0
@@ -12,12 +12,25 @@ the **v0.6.x metaprogression and Tier 4**, and the **v0.7 two new worlds**
 (Neon Lattice and Rustwake), 18 campaign phases + tutorial, 71 waves, 2,781
 blocks, 9,392 XP, 9 bosses, 17 block types, 10 elements and per-world trail maps.
 
-The game is **live on itch.io (v0.6.1)** and **accepted and published on
-Playgama**. The 0.7.1 build update failed Playgama auto-certification because it
-shipped Bridge 2.4.1; v0.7.2 updates to **2.4.4**, vendors the new runtime and
-fixes the tutorial's last-block magnet orbit. The v0.7.2 line is local and
-unpublished; CrazyGames is paused until 2026-11-26; GameFlare remains blocked.
-No tag or GitHub Release has been created.
+The game is **live on itch.io and Playgama at v0.8.0**; **Y8 has the 0.8.0 in
+review** and **CrazyGames rejected the 0.8.0 clean build** without a specific
+reason. GameFlare remains blocked. No tag or GitHub Release has been created.
+GitHub Pages follows `main` with the bridge build.
+
+## v0.8.1 — Rewarded revive and ad cooldown
+
+- **Rewarded timeout fixed.** The adapter now uses 15 s to open and 180 s while
+  the creative is on screen, so a 15–30 s rewarded ad no longer resolves as
+  failed mid-play.
+- **Ordering safe.** A 500 ms grace after `closed` accepts a late `rewarded`
+  event, backed by `advertisement.rewardedState`.
+- **One ad at a time.** Bridge and CrazyGames adapters reject a second request
+  while an ad is in flight.
+- **Unified 60 s cooldown.** Wave, results, pause and rewarded paths share
+  `lastAdFinishedAt`; a Menu tap right after a rewarded ad does not start
+  another ad.
+- **Status.** Local 0.8.1; not uploaded to itch.io/Playgama yet. No tag or
+  GitHub Release.
 
 ## v0.8.0 — Bridge × clean builds
 
@@ -37,7 +50,8 @@ No tag or GitHub Release has been created.
 - **QA.** Playwright adds a clean project on port 4174 (no external requests,
   save persistence, no storage warning). See
   [the bridge × clean playbook](docs/build-bridge-clean-playbook.md).
-- **Status.** Local 0.8.0; no tag or GitHub Release has been created.
+- **Status.** Published on itch.io and Playgama on 2026-11-27; Y8 in review;
+  CrazyGames rejected the clean build; no tag or GitHub Release.
 
 **Live review build:** <https://rigato.github.io/blockbreaker/>  
 **Debug build:** <https://rigato.github.io/blockbreaker/?debug=1>
@@ -555,7 +569,7 @@ release/                   Generated ZIP + manifest (not committed)
 - [Docs index](docs/README.md)
 - [GDD](docs/GDD_Bricklike.md)
 - [GDD × current state gap](docs/gdd-gap-analysis.md)
-- [Current handoff — v0.8.0](docs/handoff-v0.8.0.md)
+- [Current handoff — v0.8.1](docs/handoff-v0.8.1.md)
 - [Historical handoffs](docs/old/handoffs/)
 - [Web publishing spec — 6 portals](docs/spec_tecnica_portais_web.md) — bridge × clean builds, platform contract, portal limits, ads, save and QA
 - [Bridge × clean implementation playbook](docs/build-bridge-clean-playbook.md) — practical pitfalls for future projects

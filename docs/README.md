@@ -6,10 +6,10 @@ usado como fonte de decisão.
 
 ## Comece por aqui
 
-1. **[Handoff v0.8.0](handoff-v0.8.0.md)** — estado atual do jogo, builds
-   bridge × clean, arquitetura, invariantes, gates, portais, assets Y8 e o
-   backlog de densidade/progressão/público/perks.
-2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.14).
+1. **[Handoff v0.8.1](handoff-v0.8.1.md)** — estado atual do jogo, patch de
+   ads, builds bridge × clean, arquitetura, invariantes, gates, portais, assets
+   Y8 e o backlog de densidade/progressão/público/perks.
+2. **[GDD](GDD_Bricklike.md)** — design vigente (v1.16).
 3. **[GAP do GDD](gdd-gap-analysis.md)** — implementado × pendente na `main`.
 4. **[Mundos II/III — implementação](design/worlds-II-III-implementation.md)** —
    escopo, conteúdo, save v3, mapas e debug da linha 0.7.
@@ -32,8 +32,8 @@ usado como fonte de decisão.
    mapa + parallax e expansão multi-mundo; **implementado**, gates verdes.
    Backup do estado anterior em [`design/phase-select-map-backup-v1.md`](design/phase-select-map-backup-v1.md).
 9. **[Overhaul — direções e próximos passos](design/overhaul-direcoes.md)** —
-   tutorial novo implementado; pierce, densidade, progressão e público
-   registrados para decisão. Nada além do tutorial está implementado.
+   tutorial e pierce implementados; densidade, progressão e público em aberto,
+   registrados para decisão.
 
 ## Operação e release
 
@@ -67,15 +67,17 @@ usado como fonte de decisão.
 - `bad-decision-games-logo/` — fontes originais da logomarca do estúdio.
 - Assets usados pelo jogo: `../public/bad-decision-games/` e
   `../public/how-to-play/`.
-- Assets de loja: `../store/` — regenerados da 0.6.1; revisão humana pendente
-  antes de qualquer upload.
+- Assets de loja: `../store/` — o conjunto Y8 é 0.8.0 (jogo enviado, aguardando
+  resposta); capas, screenshots e previews antigos são da 0.6.1 e precisam de
+  regeneração/revisão humana antes de qualquer upload.
 
 ## Histórico
 
 Todo o material abaixo é histórico e não substitui os documentos acima.
 
 - [Índice do arquivo](old/README.md).
-- `old/handoffs/` — handoffs v0.3.0, v0.4.0, v0.5.0, v0.5.1 e v0.6.0.
+- `old/handoffs/` — handoffs v0.3.0, v0.4.0, v0.5.0, v0.5.1, v0.6.0, v0.6.1,
+  v0.7.0, v0.7.1, v0.7.2 e v0.8.0.
 - `old/plans/` — planos MVP, v0.2.0, Endless, revisão visual v0.4.0,
   metaprogressão v0.6.0 e plano de baixa fricção (absorvido pelo guia único).
 - `old/qa/` — relatórios de QA, device matrix, performance e baseline do MVP.

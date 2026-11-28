@@ -1,8 +1,12 @@
 import { gameEvents } from '../game/events';
 import { en } from '../i18n/en';
 
-/** Local safety net; the Game owns the authoritative 15 s interstitial timeout. */
-const SAFETY_TIMEOUT_MS = 16_000;
+/**
+ * Last-resort safety net only. The Game owns the authoritative ad lifecycle
+ * (15 s to open, then up to 180 s while the rewarded creative is playing), so
+ * this must stay well above the longest supported ad.
+ */
+const SAFETY_TIMEOUT_MS = 300_000;
 
 export interface AdOverlayOptions {
   /** Focus fallback when the element focused before the ad no longer exists. */

@@ -1,6 +1,6 @@
 # Spec de assets de store — Bricklike
 
-Documento vivo. Portais cobertos: **Playgama, Y8.com, Lagged, itch.io, CrazyGames, Kongregate**. Y8 é a plataforma nova; Playgama já tem assets publicados. O jogo é **portrait no mobile** e usa **shell portrait no desktop**, então os formatos landscape precisam acomodar o jogo por composição, não por esticamento. Build local atual: **0.8.0**; o conjunto **Y8 em `store/y8/` foi gerado da 0.8.0**. As capas, screenshots e previews antigos de `store/covers/`, `store/screenshots/` e `store/video/` ainda vêm da **0.6.1** e precisam de regeneração/revisão humana antes de outros uploads. Revalidar as regras de cada portal na data do upload.
+Documento vivo. Portais cobertos: **Playgama, Y8.com, Lagged, itch.io, CrazyGames, Kongregate**. Y8 é a plataforma nova. O jogo é **portrait no mobile** e usa **shell portrait no desktop**, então os formatos landscape precisam acomodar o jogo por composição, não por esticamento. Build **0.8.0** publicado no itch.io e na Playgama; **0.8.1** é o patch local de ads; Y8 enviado e aguardando resposta; CrazyGames recusou a clean. O conjunto **Y8 em `store/y8/` foi gerado da 0.8.0**. As capas, screenshots e previews antigos de `store/covers/`, `store/screenshots/` e `store/video/` ainda vêm da **0.6.1** e precisam de regeneração/revisão humana antes de outros uploads. Revalidar as regras de cada portal na data do upload.
 
 Legenda da matriz: **D** = reuso direto · **C** = reuso com crop/recorte/recomposição · **E** = asset específico (novo) · **?** = confirmar no portal (dimensão ou necessidade não documentada neste repositório).
 
@@ -48,6 +48,9 @@ Notas: `?` não autoriza presumir que o portal não exige o asset — confirma n
 
 Os limites abaixo são os fornecidos para o Y8 e devem ser usados exatamente.
 
+**Status 2026-11-27:** o conjunto `store/y8/` da 0.8.0 foi gerado e o jogo foi
+enviado; aguardando resposta do portal.
+
 | Categoria Y8 | Dimensão | Limite | Natureza | Origem / ação |
 |---|---|---|---|---|
 | Standard Screenshot | 760×570 | até 6, JPG/PNG, máx 2 MB | **still real de gameplay** | novo: captura do build, sem debug |
@@ -86,13 +89,14 @@ Detalhes e comandos de regeneração: [`store/y8/README.md`](../store/y8/README.
 
 ## 4. Playgama
 
-- **Já existe:** capa portrait **1080×1920**; 9 screenshots **390×844**; ZIP **bridge** `release/blockbreaker-web.zip` (Bridge 2.4.4 local + `playgama-bridge-config.json` na raiz); jogo aceito e publicado.
+- **Já existe:** capa portrait **1080×1920**; 9 screenshots **390×844**; ZIP **bridge** `release/blockbreaker-web.zip` (Bridge 2.4.4 local + `playgama-bridge-config.json` na raiz); `0.8.0` publicada no catálogo, fora do sandbox.
 - **Reuso do Y8:** a key art 1080×1920 e os stills 1080×1920 de `store/y8/portrait-promo/` são candidatos à capa/screenshots do Playgama; confirmar no portal as dimensões exigidas de screenshots.
-- **Falta / validar:** regenerar capa e screenshots a partir da **0.8.0** (os atuais são da 0.6.1); revisão humana; confirmar se há requisito de vídeo; enviar o ZIP **bridge**, nunca o clean. A `0.8.0` (Bridge 2.4.4) é a linha atual; a `0.7.2` continua como build anterior e a `0.7.1` falhou na auto-certificação por SDK 2.4.1.
+- **Falta / validar:** regenerar capa e screenshots a partir da **0.8.0** (os atuais são da 0.6.1) antes de atualizar a página publicada; revisão humana; confirmar se há requisito de vídeo. A `0.8.0` (Bridge 2.4.4) é a linha atual; a `0.7.2` continua como build anterior e a `0.7.1` falhou na auto-certificação por SDK 2.4.1.
 
 ## 5. CrazyGames — Basic Launch
 
-- **Três capas obrigatórias:** `1920×1080`, `800×1200`, `800×800` — existem, sem bordas, selos ou screenshot puro. A `1920×1080` pode reutilizar a key art de `store/y8/landscape-promo/01-key-art-1920x1080.png`; as `800×1200` e `800×800` continuam as da 0.6.1 e precisam de regeneração/revisão antes do upload.
+- **Status:** a `0.8.0` **clean** foi enviada e **recusada** em 2026-11-27, sem motivo específico. Não reenviar a mesma build; pedir o requisito exato ao suporte.
+- **Três capas obrigatórias:** `1920×1080`, `800×1200`, `800×800` — existem, sem bordas, selos ou screenshot puro. A `1920×1080` pode reutilizar a key art de `store/y8/landscape-promo/01-key-art-1920x1080.png`; as `800×1200` e `800×800` continuam as da 0.6.1 e precisam de regeneração/revisão antes de um novo upload.
 - **Preview video:** `bricklike-preview.mp4` (1920×1080) e `bricklike-preview-portrait.mp4` (1080×1620), 15–20 s; são previews editados (não o gameplay contínuo do Y8); revalidar as regras atuais na data do upload.
 - **ZIP:** desde a **0.8.0** o arquivo enviado é o **clean** (`release/blockbreaker-web-clean.zip`): sem Playgama Bridge, sem SDK nativo do CrazyGames e sem ads. **Nunca enviar o bridge ao CrazyGames.** Submissão é Basic Launch, não Full Launch.
 - Conferir os iframes 907×510, 1216×684, 1280×720 e 1920×1080; o shell portrait é intencional, sem letterbox. Descrição em inglês com ≥100 palavras.
@@ -101,7 +105,7 @@ Detalhes e comandos de regeneração: [`store/y8/README.md`](../store/y8/README.
 
 | Portal | O que a spec documenta | Ainda confirmar |
 |---|---|---|
-| **itch.io** | ZIP bridge (`mock`); capa **16:9 ou 2:3**; screenshots; descrição e controles; **Mobile Friendly** ligado. `0.6.1` publicada. | Dimensões exigidas de screenshots; se há vídeo; se 1080×1920 (9:16) é aceito como capa. |
+| **itch.io** | ZIP bridge (`mock`); capa **16:9 ou 2:3**; screenshots; descrição e controles; **Mobile Friendly** ligado. `0.8.0` publicada em 2026-11-27. | Dimensões exigidas de screenshots; se há vídeo; se 1080×1920 (9:16) é aceito como capa. |
 | **Lagged** | ZIP bridge; SDK encapsulado na Bridge; exige **AdSense Publisher ID** no cadastro. | Todos os requisitos de capa, screenshots e vídeo — a spec técnica não os detalha. |
 | **Kongregate** | ZIP clean; aprovação prévia de conta dev; proíbe SDKs de ads terceiros e contas próprias; exige **screenshots, instruções, classificação etária voluntária e declaração de uso de IA**. | Dimensões/quantidade de screenshots; capa e vídeo. |
 

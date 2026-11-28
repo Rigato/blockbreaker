@@ -1,11 +1,11 @@
 # Submission checklist — Bricklike
 
-**Versão publicada:** `0.6.1` no itch.io; jogo **aceito e publicado na Playgama**.  
-**Linha local:** `0.8.0` (2026-11-26), bridge × clean; sem tag/release.
-**Build anterior:** `0.7.2` (Bridge 2.4.4 + correção do ímã do tutorial).
-**CrazyGames:** `0.5.1` submetida em 2026-11-11; submissão pausada até 2026-11-26; a `0.8.0` **clean** é a candidata ao Basic Launch.
-**Status global:** testes básicos ok; assets de loja regenerados da 0.6.1;
-revisão humana pendente. Nenhuma tag ou GitHub Release foi criada.  
+**Versão publicada:** `0.8.0` no **itch.io** e na **Playgama** (catálogo, fora do sandbox).  
+**Linha local:** `0.8.1` (2026-11-28), patch de ads; bridge × clean; não enviada aos portais; sem tag/release.
+**Build anterior:** `0.8.0` (bridge × clean, publicada no itch.io/Playgama).
+**Y8:** `0.8.0` enviada; aguardando resposta do portal.
+**CrazyGames:** `0.8.0` **clean** enviada e recusada, sem motivo específico; pedir feedback antes de reenviar.
+**Status global:** `0.8.0` publicada no itch.io/Playgama, em análise no Y8 e recusada na CrazyGames; `0.8.1` local corrige o rewarded revive e o encadeamento de ads; assets de loja antigos ainda são da 0.6.1. Nenhuma tag ou GitHub Release foi criada.  
 **Quem submete:** o usuário, manualmente, em cada portal.
 
 Revalidar as regras de cada portal **na data da submissão**; elas mudam com
@@ -15,9 +15,11 @@ GameFlare bloqueado por acesso).
 
 ## Pré-requisitos comuns
 
-- [ ] Teste humano final da 0.8.0 concluído: bridge nos portais Playgama/Y8/
+- [ ] Teste humano final da 0.8.1 concluído: bridge nos portais Playgama/Y8/
       Lagged/itch e clean no CrazyGames Basic/Kongregate.
-- [ ] ZIP final 0.8.0 gerado pelo pipeline de release. **Bridge:**
+- [ ] Rewarded real na Playgama: assistir ao ad, confirmar o revive; depois
+      forçar outra derrota e clicar Menu — nenhum ad novo em 60 s.
+- [ ] ZIP final 0.8.1 gerado pelo pipeline de release. **Bridge:**
       `index.html` + `playgama-bridge-config.json` + Bridge local. **Clean:**
       `index.html` apenas, sem runtime/config da Playgama nem SDK do
       CrazyGames. Confirme os dois ZIPs e manifestos.
@@ -26,9 +28,8 @@ GameFlare bloqueado por acesso).
 - [ ] ZIP aberto em aba anônima, servido em subpasta, sem 404 e sem requests
       externas no boot. **Pendente de revisão humana.**
 - [ ] Título, descrição curta, descrição longa e controles revisados em
-      `docs/release/portal-metadata.md` para Tier 4 + economia de Sparks +
-      Workshop + 6 níveis/20 ondas (22 com tutorial).
-      **Pendente de revisão humana.**
+      `docs/release/portal-metadata.md` para 3 mundos/18 fases (19 com tutorial)
+      e 69 ondas (71 com tutorial). **Pendente de revisão humana.**
 - [ ] Capas revisadas e aprovadas em `store/covers/`. **Regeneradas da 0.6.1;
       revisão humana pendente.**
 - [x] Screenshots, capas e vídeos **da 0.6.1** (tutorial, campanha, controles
@@ -43,7 +44,7 @@ GameFlare bloqueado por acesso).
 - [ ] Menu leva ao gameplay em Campaign → card → Play (2 cliques). Para o Full
       Launch da CrazyGames seria necessário 1 clique/entrada direta.
       **Pendente de decisão.**
-- [x] Gates da 0.8.0: 440 testes unitários em 37 arquivos; 46 E2E (bridge +
+- [x] Gates da 0.8.1: 447 testes unitários em 37 arquivos; 48 E2E (bridge +
       mobile + clean); conteúdo com 19 níveis/71 ondas/2.781 blocos/9.392 XP.
 
 ## Assets compartilhados
@@ -73,25 +74,25 @@ GameFlare bloqueado por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto HTML5 criado pelo usuário | pendente de revisão humana |
-| Versão publicada | `0.6.1` atualizada manualmente | 0.6.1 publicado |
-| Upload 0.6.1 | ZIP HTML5 final + assets revisados | publicado em 2026-11-12; teste básico ok |
-| Embed | Mobile Friendly ligado; fullscreen; click-to-play | pendente de revisão humana |
-| Título | Bricklike | pendente de revisão humana |
-| Descrição | Curta + longa em inglês, Tier 4 + economia + Workshop + 20 ondas | pendente de revisão humana |
-| Controles | Campo de controles preenchido, incluindo touch | pendente de revisão humana |
-| Tags | arcade, brick-breaker, roguelite, pixel-art, html5, mobile | pendente de revisão humana |
-| Preço | Free + doação opcional; sem venda no embed HTML5 | pendente de revisão humana |
+| Versão publicada | `0.8.0` atualizada manualmente | 0.8.0 publicado em 2026-11-27 |
+| Upload 0.8.0 | ZIP bridge final + metadata revisada | publicado; assets antigos ainda da 0.6.1 |
+| Embed | Mobile Friendly ligado; fullscreen; click-to-play | publicado |
+| Título | Bricklike | publicado |
+| Descrição | Curta + longa em inglês, 3 mundos/18 fases (19 com tutorial) e 69 ondas (71 com tutorial) | publicada; texto novo em `portal-metadata.md` |
+| Controles | Campo de controles preenchido, incluindo touch | publicado; texto novo em `portal-metadata.md` |
+| Tags | arcade, brick-breaker, roguelite, pixel-art, html5, mobile | publicado |
+| Preço | Free + doação opcional; sem venda no embed HTML5 | publicado |
 | Capa | 16:9 ou 2:3 aprovada | 0.6.1; revisão humana |
 | Screenshots | 9 imagens, incluindo Workshop/Tier 4 | 0.6.1; revisão humana |
-| Ads | Nenhum ad interno no itch.io; não prometer ads na página | pendente de revisão humana |
-| Publicação | Usuário clica em publicar após aprovação | 0.6.1 publicado |
+| Ads | Nenhum ad interno no itch.io; não prometer ads na página | publicado |
+| Publicação | Usuário clica em publicar após aprovação | 0.8.0 publicado |
 
 ## GameFlare
 
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário | bloqueado por acesso |
-| Upload | ZIP HTML5 ou link do build | pendente de desbloqueio; 0.6.1 não enviada |
+| Upload | ZIP HTML5 ou link do build | pendente de desbloqueio; 0.8.0 não enviada |
 | SDK | SDK opcional do GameFlare não é necessário | pendente de revisão humana |
 | Título | Bricklike | pendente de revisão humana |
 | Descrição | Curta + longa em inglês | pendente de revisão humana |
@@ -107,8 +108,8 @@ GameFlare bloqueado por acesso).
 | Item | Requisito / campo | Status |
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário no Playgama | pendente de revisão humana |
-| Versão no sandbox | `0.7.2` pronta para upload manual | pendente de upload |
-| Upload | ZIP com `index.html`, config e Bridge 2.4.4 local na raiz | 0.7.2 local |
+| Versão publicada | `0.8.0` bridge no catálogo, fora do sandbox | publicado em 2026-11-27 |
+| Upload | ZIP com `index.html`, config e Bridge 2.4.4 local na raiz | `0.8.0` publicado |
 | Bridge | Config validado; sem logo/analytics; safe area ligada | ok nos gates |
 | Eventos | `game_ready`, `level_started/paused/resumed/completed/failed` | pendente de revisão humana |
 | Storage | `bb.save` v3 e `bb.settings` via Bridge; reload preserva | pendente de revisão humana |
@@ -121,13 +122,15 @@ GameFlare bloqueado por acesso).
 | Orientação | Portrait | pendente de revisão humana |
 | Assets | Capa portrait **1080×1920** e screenshots aprovadas | 0.6.1; revisão humana |
 | Review | Acompanhar a review do portal (~24 h) | pendente de revisão humana |
-| Publicação | Usuário sobe a `0.7.2` e acompanha a auto-certificação | jogo publicado; atualização pendente |
+| Publicação | `0.8.0` publicada; próximas atualizações passam por auto-certificação | publicado em 2026-11-27 |
 
 **Amostra do sandbox (0.4.0, pequena):** 17/100 qualifying plays; avg play time
 5:42 vs meta 5:00; ad shows/play 1,70 vs meta 0,30; 116 launches, 31 plays,
 5m45s, 3/2 likes. Não concluir qualidade/retenção com essa amostra.
 
 ## Y8.com
+
+**Status em 2026-11-27:** `0.8.0` enviada; aguardando resposta do portal.
 
 - [ ] ZIP **bridge** `release/blockbreaker-web.zip` (Y8 SDK encapsulado na Bridge).
 - [ ] Standard Screenshot: 6 em `store/y8/standard/` (760×570, ≤2 MB).
@@ -148,17 +151,16 @@ GameFlare bloqueado por acesso).
 |---|---|---|
 | Conta e projeto | Projeto criado pelo usuário | pendente de revisão humana |
 | Tipo de submissão | **Basic Launch**, não Full Launch | pendente de revisão humana |
-| Histórico | 0.3.0 e 0.4.0 reprovadas com a mesma mensagem genérica | registrado |
-| 0.5.1 | Submetida em 2026-11-11 | submissão pausada até 2026-11-26 |
-| 0.8.0 clean | Sem Playgama Bridge nem SDK nativo do CG; browser storage; sem ads | pendente de teste humano |
-| Feedback | Pedir detalhes no Support/technical-support após 2026-11-26 | pendente |
-| Upload | `release/blockbreaker-web-clean.zip` | pendente de teste humano |
+| Histórico | 0.3.0, 0.4.0, 0.5.1 e 0.8.0 reprovadas; a 0.8.0 não trouxe motivo específico | registrado |
+| 0.8.0 clean | Sem Playgama Bridge nem SDK nativo do CG; browser storage; sem ads | enviada e recusada em 2026-11-27 |
+| Feedback | Pedir ao Support/technical-support o requisito exato que falhou na 0.8.0 | pendente |
+| Upload | `release/blockbreaker-web-clean.zip` | enviado; aguardando feedback |
 | Capa 16:9 | 1920×1080, sem bordas/texto extra/logos | 0.6.1; revisão humana |
 | Capa 2:3 | 800×1200, mesma linguagem visual | 0.6.1; revisão humana |
 | Capa 1:1 | 800×800, mesma linguagem visual | 0.6.1; revisão humana |
 | Preview video | MP4 15–20 s, gameplay real, 1920×1080 + 1080×1620 | 0.6.1; revisão humana |
-| Descrição | Inglês, ≥ 100 palavras, Tier 4 + economia + Workshop + 20 ondas | pendente de revisão humana |
-| Controles | Campo de controles preenchido | pendente de revisão humana |
+| Descrição | Inglês, ≥ 100 palavras, 3 mundos/18 fases (19 com tutorial) e 69 ondas (71 com tutorial) | atualizada em `portal-metadata.md`; publicar |
+| Controles | Campo de controles preenchido | atualizado em `portal-metadata.md`; publicar |
 | Título | Bricklike | pendente de revisão humana |
 | Ads | Desligados no Basic; jogo não trava esperando ad | implementado |
 | Inglês | UI e metadata em inglês | ok |
@@ -169,41 +171,44 @@ GameFlare bloqueado por acesso).
 | Qualidade | Sem artefatos, texto cortado, controles ambíguos ou áudio estourado | pendente de teste humano |
 | Revalidação | Conferir regras atuais do Basic Launch | pendente de revisão humana |
 | Full Launch | Fora do escopo deste ciclo | pendente de decisão |
-| Publicação | Usuário submete e acompanha 7 dias/500 plays se aprovado | pendente |
+| Publicação | Basic Launch não aprovado; pedir feedback antes de nova submissão | recusado em 2026-11-27 |
 
 ## Reenvio ao CrazyGames
 
 Antes de reenviar, ler `docs/release/crazygames-review.md` e
-`docs/research/crazygames-feedback.md`. A 0.4.0 foi recusada de novo com a mesma
-mensagem genérica; o FAQ só aceita reenvio se houver melhoria clara. A
-submissão está pausada até **2026-11-26**. A mensagem deve listar:
+`docs/research/crazygames-feedback.md`. A `0.8.0` clean foi recusada em
+**2026-11-27**, sem motivo específico. Abrir um ticket no
+Support/technical-support citando a submissão da 0.8.0 e pedir o requisito exato
+que falhou. A mensagem deve listar:
 
 - perks reworkadas: Momentum, Bombardier, Boss Slayer e Hot Streak;
 - Tier 4: Overkill, Shield Bash e Conductor;
 - 10 starters, 12 unlocks em quatro tiers, economia de Sparks e Workshop;
-- save v2 com migração v1→v2 e ofertas filtradas;
+- save v3 com migração v1/v2→v3 e ofertas filtradas;
 - tutorial in-game pulável com coach marks e gate do level 1;
 - controles touch com edge assist e gate explícito do laser;
-- política de ads mantida da 0.5.1;
+- bridge mantém a política de ads da 0.5.1 (o clean não exibe ads);
 - campanha de 18 fases + tutorial, 71 ondas e 2.781 blocos;
-- 440 testes unitários e 46 E2E verdes;
+- 447 testes unitários e 48 E2E verdes;
 - ZIP **clean** sem Playgama Bridge nem SDK nativo do CrazyGames.
 
-**Ainda pendente:** aguardar 2026-11-26, testar em humano e revisar
-capas/screenshots/vídeo.
+**Ainda pendente:** obter o motivo específico da recusa, testar em humano e
+revisar capas/screenshots/vídeo antes de qualquer novo envio da `0.8.0` clean.
 
-## Sequência manual acordada
+## Sequência manual — estado em 2026-11-28
 
-1. Testar a 0.8.0 manualmente e validar os dois ZIPs.
-2. Revisar screenshots, capas e vídeos regenerados para a 0.8.0.
-3. Publicar a 0.8.0 no itch.io (bridge), se aprovada.
-4. Publicar no GameFlare, se o acesso for desbloqueado.
-5. Submeter o bridge ao Playgama.
-6. Após 2026-11-26, pedir feedback à CrazyGames e decidir o reenvio da 0.8.0
-   **clean**.
-7. Registrar URLs, datas e status de cada portal.
-8. Acompanhar o Basic Launch por 7 dias ou 500 plays antes de discutir Full
+1. [x] Testar a 0.8.0 manualmente, publicar no itch.io e na Playgama e enviar
+   ao Y8.
+2. [ ] Subir o bridge `0.8.1` no itch.io e na Playgama.
+3. [ ] Testar o rewarded real na Playgama: revive concedido e nenhum ad novo no
+   Menu após o rewarded (60 s).
+4. [ ] Revisar screenshots, capas e vídeos para a 0.8.1 (os atuais são da 0.6.1).
+5. [ ] Publicar no GameFlare, se o acesso for desbloqueado.
+6. [ ] CrazyGames: obter o motivo específico da recusa da `0.8.0` clean e decidir
+   se há uma nova tentativa.
+7. [ ] Registrar URLs, datas e status de cada portal.
+8. [ ] Acompanhar o Basic Launch por 7 dias ou 500 plays antes de discutir Full
    Launch.
-9. Só criar tag/release depois de aprovação humana.
+9. [ ] Só criar tag/release depois de aprovação humana.
 
 **Nenhum passo desta sequência foi executado automaticamente.**

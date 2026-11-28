@@ -20,7 +20,7 @@ const elapsed = (page: import('@playwright/test').Page): Promise<number> =>
 test.describe('rewarded revive and results ads', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('offers one rewarded revive, resumes the run and shows the results Menu ad', async ({
+  test('offers one rewarded revive, resumes the run and suppresses the results Menu ad', async ({
     page,
   }) => {
     await page.goto('/?debug=1&adMock=rewarded&resetSave=1');
@@ -64,10 +64,10 @@ test.describe('rewarded revive and results ads', () => {
       )
       .toBe(true);
 
-    // Leaving results via Menu also requests the results interstitial.
+    // Leaving results via Menu must not chain a second ad right after the
+    // rewarded revive.
     await page.locator('.overlay--results').getByRole('button', { name: 'Menu' }).click();
-    await expect(ad).toBeVisible();
-    await expect(ad).toBeHidden({ timeout: 10_000 });
+    await expect(ad).toBeHidden();
     await expect(page.locator('#campaign-button')).toBeVisible();
   });
 

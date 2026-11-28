@@ -1,9 +1,10 @@
 # Status de publicação — Bricklike
 
-Versão publicada: **`0.6.1`** no **itch.io**; jogo **aceito e publicado na Playgama**  
-Build local: **`0.8.0`** (bridge × clean; pronta para upload manual, sem tag ou GitHub Release)
-CrazyGames: **`0.5.1` submetida** em 2026-11-11; submissão **pausada até 2026-11-26**; a `0.8.0` clean é a candidata ao Basic Launch
-Atualizado em: 2026-11-26  
+Versão publicada: **`0.8.0`** no **itch.io** e na **Playgama** (catálogo, fora do sandbox)  
+Build local: **`0.8.1`** (patch de ads; não enviado aos portais; sem tag ou GitHub Release)
+Y8: **`0.8.0`** enviada; **aguardando resposta** do portal
+CrazyGames: **`0.8.0` clean** enviada e **recusada**; sem motivo específico; pedir feedback antes de reenviar
+Atualizado em: 2026-11-28  
 Responsável pela submissão: **usuário (manual)**
 
 Este arquivo é o registro de publicação. O `0.1.0-mvp` foi a primeira versão
@@ -13,11 +14,40 @@ A `0.6.1` foi publicada manualmente no **itch.io** e no **sandbox da Playgama**
 em 2026-11-12; o responsável fez testes básicos e considerou tudo ok. Nenhuma
 tag ou GitHub Release foi criada.
 
-A **0.7.1** é a linha atual, com Mundos II/III, save v3, tutorial
-simplificado/assistido, Giant Ball maior, cor da bola por dano e pierce. O jogo
-foi **aceito e publicado no catálogo da Playgama**; a atualização da build para
-a `0.7.1` entrou na auto-certificação em 2026-11-26. O itch.io continua na
-`0.6.1`.
+A **0.8.0** é a linha atual, com Mundos II/III, save v3, tutorial
+simplificado/assistido, Giant Ball maior, cor da bola por dano, pierce e builds
+**bridge × clean**. A `0.8.0` foi publicada no **itch.io** e na **Playgama**
+(catálogo, fora do sandbox) em **2026-11-27**. A `0.7.1` havia sido reprovada
+na auto-certificação por SDK 2.4.1; a `0.7.2` (Bridge 2.4.4) ficou local. O Y8
+recebeu a `0.8.0` e ainda não respondeu. A CrazyGames recusou a `0.8.0` clean
+sem detalhar o motivo. Nenhuma tag ou GitHub Release foi criada.
+
+## Atualização 2026-11-28 — 0.8.1 (ads)
+
+- **Causa raiz:** o rewarded revive armava um timeout de 15 s a partir do
+  pedido; um criativo de 15–30 s resolvia `failed` enquanto ainda estava aberto.
+  O listener era removido e o `rewarded` posterior era ignorado. O Menu dos
+  results também não consultava o rewarded recente e pedia um interstitial.
+- **Correção:** 15 s para abrir e 180 s com o anúncio aberto; janela de 500 ms
+  para `closed → rewarded`; consulta a `advertisement.rewardedState`; lock de
+  anúncio em andamento; `lastAdFinishedAt` único com cooldown de 60 s para
+  wave, results, pause e rewarded; `AdOverlay` com safety de 300 s;
+  `CrazyGamesAdapter` re-arma o timeout em `adStarted`.
+- **Gates:** 447 testes / 37 arquivos; 48 E2E; conteúdo 19 fases / 71 ondas /
+  2.781 blocos / 9.392 XP; bridge config ok; pacote bridge 20 arquivos
+  (1.546.174 bytes) e clean 17 arquivos (1.431.541 bytes).
+- **Publicação:** `0.8.1` local; ainda **não** enviada ao itch.io/Playgama.
+  O GitHub Pages acompanha a `main` com o bridge.
+
+## Atualização 2026-11-27 — 0.8.0 publicada
+
+- **itch.io:** `0.8.0` bridge publicada em 2026-11-27.
+- **Playgama:** `0.8.0` bridge publicada no catálogo, fora do sandbox.
+- **Y8:** `0.8.0` enviada; aguardando resposta do portal.
+- **CrazyGames:** `0.8.0` clean enviada e recusada, sem motivo específico. Não
+  reenviar sem pedir feedback detalhado ao suporte.
+- **GameFlare:** continua bloqueado por acesso; a `0.8.0` não foi enviada.
+- **Tag/release:** nenhuma criada.
 
 ## Atualização 2026-11-26 — 0.8.0 bridge × clean
 
@@ -197,7 +227,7 @@ Números do sandbox da 0.4.0, registrados sem conclusão de qualidade/retenção
 
 A amostra é pequena demais para concluir qualidade ou retenção. O jogo foi
 aceito e publicado na Playgama; medir novamente a política de ads e a retenção
-com a build atualizada (`0.7.1` em certificação; `0.7.2` local).
+com a `0.8.0` já publicada no catálogo.
 
 ## Modo Endless
 
@@ -211,10 +241,11 @@ com a build atualizada (`0.7.1` em certificação; `0.7.2` local).
 
 | Portal | Versão | Status | URL pública | Data | Observação |
 |---|---|---|---|---|---|
-| itch.io | **0.6.1** | **publicado** | — | 2026-11-12 | atualização manual; testes básicos ok; `0.5.1` anterior |
-| Playgama | **0.6.1** (0.7.1 em certificação) | **publicado** | — | 2026-11-26 | jogo aceito; `0.7.1` reprovada por SDK 2.4.1; subir `0.7.2` |
-| CrazyGames Basic | 0.5.1 | **pausado** | — | 2026-11-11 | submissão pausada/bloqueada até 2026-11-26 |
-| GameFlare | 0.6.1 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login |
+| itch.io | **0.8.0** (0.8.1 local) | **publicado** | — | 2026-11-27 | bridge; `0.8.1` com a correção de ads aguarda upload manual |
+| Playgama | **0.8.0** (0.8.1 local) | **publicado** | — | 2026-11-27 | catálogo, fora do sandbox; subir `0.8.1` e validar o rewarded real |
+| Y8.com | **0.8.0** | **em análise** | — | — | enviada; aguardando resposta do portal |
+| CrazyGames Basic | 0.8.0 clean | **recusado** | — | 2026-11-27 | recusa sem motivo específico; pedir feedback antes de reenviar |
+| GameFlare | 0.8.0 (não publicada) | **bloqueado** | — | — | sem resposta do suporte sobre login |
 
 ### CrazyGames — como pedir detalhes e reenviar
 
@@ -225,8 +256,10 @@ Fonte: <https://docs.crazygames.com/faq/> e
   mesma mensagem genérica. Não há relatório público de QA; o caminho é o
   **Support do Developer Portal** (<https://developer.crazygames.com/support>)
   ou **technical-support@crazygames.com**.
-- A `0.5.1` foi submetida em 2026-11-11. A submissão está pausada até
-  **2026-11-26**; não reenviar antes dessa data.
+- A `0.5.1` foi submetida em 2026-11-11; a pausa venceu em **2026-11-26**. A
+  `0.8.0` **clean** foi enviada e recusada sem motivo específico. Não reenviar a
+  mesma build: abrir um ticket no Support/technical-support citando a submissão
+  da 0.8.0 e pedir o requisito exato que falhou.
 - O dono decidiu **não fazer moldura/letterbox desktop**. A próxima tentativa
   deve usar teste humano e assets atualizados.
 - Não criar conta duplicada nem abrir tickets repetidos.
@@ -240,7 +273,7 @@ Fonte: <https://docs.crazygames.com/faq/> e
 - [ ] Descrição, controles e tags revisados para Tier 4 + economia de Sparks +
       Workshop.
 - [x] Publicar 0.6.1 manualmente no itch.io e no sandbox da Playgama.
-- [ ] CrazyGames: aguardar 2026-11-26 e decidir o reenvio.
+- [ ] CrazyGames: `0.8.0` clean recusada; pedir feedback específico antes de reenviar.
 - [ ] Resolver GameFlare com o suporte.
 - [ ] Acompanhar milestones da Playgama com amostra maior.
 - [ ] Nenhum portal recebeu URL com `?debug=1` ou `?resetSave=1`.
@@ -249,8 +282,10 @@ Fonte: <https://docs.crazygames.com/faq/> e
 
 ## Acompanhamento pós-launch
 
-- Registrar plays/feedback aos 7 dias.
-- CrazyGames Basic: avaliar 7 dias/500 plays se for aprovado.
+- Registrar plays/feedback aos 7 dias no itch.io e na Playgama.
+- Y8: acompanhar a review e registrar a resposta.
+- CrazyGames: obter feedback específico e decidir se há nova tentativa; se for
+  aprovado, avaliar 7 dias/500 plays.
 - Não iniciar Full Launch, Poki, GameDistribution ou Famobi sem decisão.
 - Revalidar regras dos portais antes de cada novo upload.
 - Só criar tag/release depois de aprovação humana.

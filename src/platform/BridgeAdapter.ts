@@ -20,7 +20,11 @@ const STORAGE_EVENT_GET = 'bridge.storage.get';
 const STORAGE_EVENT_SET = 'bridge.storage.set';
 const STORAGE_EVENT_DELETE = 'bridge.storage.delete';
 const INTERSTITIAL_TIMEOUT_MS = 15_000;
+const INTERSTITIAL_OPEN_TIMEOUT_MS = 90_000;
 const REWARDED_TIMEOUT_MS = 15_000;
+const REWARDED_OPEN_TIMEOUT_MS = 180_000;
+/** Some SDKs emit `closed` just before `rewarded`; wait briefly for the reward. */
+const REWARDED_CLOSE_GRACE_MS = 500;
 
 export interface BridgeAdapterOptions {
   initDurationMs?: number;
@@ -55,6 +59,7 @@ export class BridgeAdapter implements PlatformService {
   private readonly initDurationMs: number | null;
   private storageIsMemory = false;
   private warnedAboutStorage = false;
+  private adInFlight: 'interstitial' | 'rewarded' | null = null;
 
   constructor(bridge: PlaygamaBridge, options: BridgeAdapterOptions = {}) {
     this.bridge = bridge;
@@ -214,19 +219,28 @@ export class BridgeAdapter implements PlatformService {
     if (!this.bridge.advertisement.isInterstitialSupported) {
       return Promise.resolve('skipped');
     }
+    if (this.adInFlight !== null) return Promise.resolve('skipped');
+    this.adInFlight = 'interstitial';
 
     return new Promise<InterstitialResult>((resolve) => {
       let settled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
 
       const onState = (state: unknown): void => {
-        if (state === 'closed') finish('shown');
+        if (state === 'opened') armTimer(INTERSTITIAL_OPEN_TIMEOUT_MS);
+        else if (state === 'closed') finish('shown');
         else if (state === 'failed') finish('failed');
+      };
+
+      const armTimer = (ms: number): void => {
+        if (timer !== undefined) clearTimeout(timer);
+        timer = setTimeout(() => finish('failed'), ms);
       };
 
       const finish = (result: InterstitialResult): void => {
         if (settled) return;
         settled = true;
+        this.adInFlight = null;
         if (timer !== undefined) clearTimeout(timer);
         try {
           this.bridge.off('interstitial_state_changed', onState);
@@ -239,11 +253,11 @@ export class BridgeAdapter implements PlatformService {
       try {
         this.bridge.on('interstitial_state_changed', onState);
       } catch {
-        resolve('failed');
+        finish('failed');
         return;
       }
 
-      timer = setTimeout(() => finish('failed'), INTERSTITIAL_TIMEOUT_MS);
+      armTimer(INTERSTITIAL_TIMEOUT_MS);
 
       try {
         this.bridge.advertisement.showInterstitial(placement);
@@ -257,27 +271,29 @@ export class BridgeAdapter implements PlatformService {
     if (!this.bridge.advertisement.isRewardedSupported) {
       return Promise.resolve('skipped');
     }
+    if (this.adInFlight !== null) return Promise.resolve('skipped');
+    this.adInFlight = 'rewarded';
 
     return new Promise<RewardedResult>((resolve) => {
       let settled = false;
       let rewarded = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
+      let closeTimer: ReturnType<typeof setTimeout> | undefined;
 
-      const onState = (state: unknown): void => {
-        if (state === 'rewarded') {
-          rewarded = true;
-          finish('rewarded');
-        } else if (state === 'closed') {
-          finish(rewarded ? 'rewarded' : 'closed');
-        } else if (state === 'failed') {
-          finish('failed');
+      const currentRewardedState = (): unknown => {
+        try {
+          return this.bridge.advertisement.rewardedState;
+        } catch {
+          return undefined;
         }
       };
 
       const finish = (result: RewardedResult): void => {
         if (settled) return;
         settled = true;
+        this.adInFlight = null;
         if (timer !== undefined) clearTimeout(timer);
+        if (closeTimer !== undefined) clearTimeout(closeTimer);
         try {
           this.bridge.off('rewarded_state_changed', onState);
         } catch {
@@ -286,14 +302,49 @@ export class BridgeAdapter implements PlatformService {
         resolve(result);
       };
 
+      const armTimer = (ms: number): void => {
+        if (timer !== undefined) clearTimeout(timer);
+        timer = setTimeout(() => {
+          // Some portals only expose the reward through the state getter.
+          finish(currentRewardedState() === 'rewarded' ? 'rewarded' : 'failed');
+        }, ms);
+      };
+
+      const scheduleClose = (): void => {
+        if (closeTimer !== undefined) clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => {
+          finish(
+            rewarded || currentRewardedState() === 'rewarded' ? 'rewarded' : 'closed',
+          );
+        }, REWARDED_CLOSE_GRACE_MS);
+      };
+
+      const onState = (state: unknown): void => {
+        if (state === 'opened') {
+          // Rewarded creatives often run 15-30 s. Do not fail while the ad is
+          // open; keep only a long safety timeout for a stuck SDK.
+          armTimer(REWARDED_OPEN_TIMEOUT_MS);
+        } else if (state === 'rewarded') {
+          rewarded = true;
+          finish('rewarded');
+        } else if (state === 'closed') {
+          // Do not treat `closed` as final immediately: a few SDK/portal
+          // combinations emit it just before `rewarded`.
+          if (currentRewardedState() === 'rewarded') rewarded = true;
+          scheduleClose();
+        } else if (state === 'failed') {
+          finish('failed');
+        }
+      };
+
       try {
         this.bridge.on('rewarded_state_changed', onState);
       } catch {
-        resolve('failed');
+        finish('failed');
         return;
       }
 
-      timer = setTimeout(() => finish('failed'), REWARDED_TIMEOUT_MS);
+      armTimer(REWARDED_TIMEOUT_MS);
 
       try {
         this.bridge.advertisement.showRewarded(placement);

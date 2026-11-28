@@ -1,6 +1,6 @@
 > **Arquivado em 2026-11-27.** Documento histórico; links relativos foram
 > preservados como no original e podem não resolver nesta pasta. Handoff atual:
-> [`handoff-v0.8.0.md`](../../handoff-v0.8.0.md).
+> [`handoff-v0.8.0.md`](handoff-v0.8.0.md).
 
 # Handoff — Bricklike v0.7.2
 
@@ -234,8 +234,8 @@ npm run package
 6. Reavaliar o rework de perks/economia em fluxo separado.
 
 O backlog profundo de densidade, progressão, público, pierce e perks está em
-[`design/overhaul-direcoes.md`](design/overhaul-direcoes.md) e
-[`design/perks-rework-v0.7.md`](design/perks-rework-v0.7.md). Nada disso começa
+[`design/overhaul-direcoes.md`](../../design/overhaul-direcoes.md) e
+[`design/perks-rework-v0.7.md`](../../design/perks-rework-v0.7.md). Nada disso começa
 sem decisão explícita do dono.
 
 ---

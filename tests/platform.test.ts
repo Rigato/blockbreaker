@@ -217,13 +217,27 @@ describe('BridgeAdapter ads', () => {
     expect(fake.listenerCount('interstitial_state_changed')).toBe(0);
   });
 
-  it('fails instead of hanging after the 15 s timeout', async () => {
+  it('keeps the interstitial alive while the ad is open', async () => {
     vi.useFakeTimers();
     const fake = createFakeBridge({ supported: true });
     const adapter = new BridgeAdapter(fake.bridge);
 
     const result = adapter.ads.showInterstitial('results');
     fake.emit('interstitial_state_changed', 'opened');
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    expect(fake.listenerCount('interstitial_state_changed')).toBe(1);
+    fake.emit('interstitial_state_changed', 'closed');
+    await expect(result).resolves.toBe('shown');
+    expect(fake.listenerCount('interstitial_state_changed')).toBe(0);
+  });
+
+  it('fails instead of hanging when the ad never opens', async () => {
+    vi.useFakeTimers();
+    const fake = createFakeBridge({ supported: true });
+    const adapter = new BridgeAdapter(fake.bridge);
+
+    const result = adapter.ads.showInterstitial('results');
     await vi.advanceTimersByTimeAsync(15_000);
 
     await expect(result).resolves.toBe('failed');
@@ -287,11 +301,13 @@ describe('BridgeAdapter rewarded ads', () => {
   });
 
   it('maps closed without a reward to closed', async () => {
+    vi.useFakeTimers();
     const fake = createFakeBridge({ rewardedSupported: true });
     const adapter = new BridgeAdapter(fake.bridge);
 
     const result = adapter.ads.showRewarded('revive');
     fake.emit('rewarded_state_changed', 'closed');
+    await vi.advanceTimersByTimeAsync(500);
 
     await expect(result).resolves.toBe('closed');
     expect(fake.listenerCount('rewarded_state_changed')).toBe(0);

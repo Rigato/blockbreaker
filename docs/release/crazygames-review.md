@@ -14,9 +14,15 @@ qualidade do portal”, com a mesma mensagem genérica, sem detalhamento.
 >
 > **Atualização 2026-11-26:** a `0.8.0` separa as builds **bridge** e **clean**.
 > O clean não contém o runtime/config da Playgama **nem** o SDK nativo do
-> CrazyGames; usa browser storage e não tem ads. É o candidato ao Basic Launch.
-> O bridge continua para Playgama/Y8/Lagged/itch. Ver
+> CrazyGames; usa browser storage e não tem ads. Foi o candidato ao Basic
+> Launch. O bridge continua para Playgama/Y8/Lagged/itch. Ver
 > [`../build-bridge-clean-playbook.md`](../build-bridge-clean-playbook.md).
+>
+> **Atualização 2026-11-27:** a `0.8.0` **clean** foi submetida e **recusada**,
+> sem motivo específico. A próxima ação é abrir um ticket no Support citando a
+> submissão da 0.8.0 e pedir o requisito exato que falhou; as hipóteses seguem
+> as desta página. Não reenviar a mesma build sem resposta. A `0.8.1` é um patch
+> de ads do bridge e não altera a build clean.
 
 ## 0. Atualização 2026-11-11 — segunda reprovação da 0.4.0
 

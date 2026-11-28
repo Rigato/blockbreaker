@@ -3,16 +3,16 @@
 **Nome oficial:** Bricklike. O repositório, o pacote e os identificadores
 técnicos continuam `blockbreaker` para preservar URLs e builds.
 **Documento de design para orientar a campanha e as próximas fases do jogo**  
-**Versão:** 1.14  
-**Data:** 2026-11-26  
-**Status:** linha **0.7.2** local na `main`: Mundos II/III, save v3, tutorial simplificado, pierce, Bridge 2.4.4 e correção do ímã do último bloco. Jogo aceito na Playgama; build em auto-certificação. Sem tag/release.  
+**Versão:** 1.16  
+**Data:** 2026-11-28  
+**Status:** linha **0.8.1** local (patch de ads): a `0.8.0` está publicada no **itch.io** e na **Playgama**; Y8 em análise; CrazyGames recusou a clean. A 0.8.1 corrige o rewarded revive e o encadeamento de anúncios. Mundos II/III, save v3, tutorial simplificado, pierce, Bridge 2.4.4 e builds **bridge × clean**. Sem tag/release.  
 **Plataforma-alvo:** Web HTML5, orientação portrait
 
 ## Resumo do projeto
 
 Um block breaker arcade clássico, em formato portrait, com progressão roguelite. O jogador move o rebatedor, controla a trajetória das bolinhas e destrói formações de blocos. Blocos concedem XP; ao subir de nível, a partida pausa e apresenta três perks aleatórios para escolher um. As combinações mudam a run e criam alta rejogabilidade em sessões curtas.
 
-A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutorial: **19 fases e 71 ondas**), **17 tipos de bloco**, **10 elementos de fase**, **9 chefes** e **22 perks**. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica. A **linha 0.7** (fechada como **0.7.1**) adiciona os Mundos **II · Neon Lattice** e **III · Rustwake**, save v3, 9 chefes, blocos/elementos novos, kit físico de belt/rail/gust e debug de ondas; está implementada localmente, sem publicação. Em 2026-11-23 o **tutorial foi simplificado**: 2 ondas, 12 blocos, 15 XP, uma perk e dois coach marks, com botões e texto maiores, paddle 2× e ímã no último bloco. No mesmo dia, **Giant Ball** passou a +40% de raio por nível e a bola ganhou uma rampa de cor por dano (branco → amarelo → laranja → vermelho → roxo). Em 2026-11-24 entrou o **pierce**: um hit direto da bola que destrói o bloco com pelo menos 1 de dano excedente atravessa em vez de quicar. A linha foi fechada como **0.7.1** local, sem publicação. Em 2026-11-26 o jogo foi **aceito e publicado no catálogo da Playgama**; a auto-certificação da atualização para a 0.7.1 reprovou o Bridge 2.4.1. A **0.7.2** atualiza o SDK para **2.4.4** e corrige o **ímã do último bloco** do tutorial, que podia deixar a bola em órbita sem atingir o alvo.
+A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutorial: **19 fases e 71 ondas**), **17 tipos de bloco**, **10 elementos de fase**, **9 chefes** e **22 perks**. A v0.3.0 adicionou o **modo Endless**: uma fase infinita com ondas procedurais, progressão de dificuldade e chefes recorrentes, sem alterar a campanha. A v0.4.0 adicionou a revisão visual/menu, o HUD compacto, How to Play/About Us, settings completos e o sistema de ads com rewarded revive. A v0.5.1 adicionou o **tutorial jogável e pulável**, o **edge assist do toque**, o **gate explícito do laser** e uma **nova política de ads**. A v0.6.0 adicionou a **metaprogressão horizontal**: 10 perks iniciais, 9 unlocks compráveis com **Sparks**, **Workshop** no menu, **save v2** e quatro perks reworkadas — **Momentum**, **Bombardier**, **Boss Slayer** e **Hot Streak**. A v0.6.1 adiciona o **Tier 4** — **Overkill**, **Shield Bash** e **Conductor** —, reequilibra a **economia de Sparks** (fórmula por onda, marcos de combo, clear/first clear e teto de 250) e promove o **Workshop** a card de progressão com contagem e barra. A `0.6.1` foi publicada no itch.io e no sandbox da Playgama em 2026-11-12, após testes básicos; a `0.5.1` é a build anterior e `0.1.0-mvp` é histórica. A **linha 0.7** (fechada como **0.7.1**) adiciona os Mundos **II · Neon Lattice** e **III · Rustwake**, save v3, 9 chefes, blocos/elementos novos, kit físico de belt/rail/gust e debug de ondas; está implementada localmente, sem publicação. Em 2026-11-23 o **tutorial foi simplificado**: 2 ondas, 12 blocos, 15 XP, uma perk e dois coach marks, com botões e texto maiores, paddle 2× e ímã no último bloco. No mesmo dia, **Giant Ball** passou a +40% de raio por nível e a bola ganhou uma rampa de cor por dano (branco → amarelo → laranja → vermelho → roxo). Em 2026-11-24 entrou o **pierce**: um hit direto da bola que destrói o bloco com pelo menos 1 de dano excedente atravessa em vez de quicar. A linha foi fechada como **0.7.1** local, sem publicação. Em 2026-11-26 o jogo foi **aceito e publicado no catálogo da Playgama**; a auto-certificação da atualização para a 0.7.1 reprovou o Bridge 2.4.1. A **0.7.2** atualiza o SDK para **2.4.4** e corrige o **ímã do último bloco** do tutorial, que podia deixar a bola em órbita sem atingir o alvo. A **0.8.0** separa o build em dois targets — **bridge** (Playgama/Y8/Lagged/itch.io) e **clean** (CrazyGames Basic/Kongregate), sem Playgama nem SDK do CrazyGames no clean — e adiciona browser storage com fallback para memória, pausa por visibilidade e o conjunto de assets do Y8. A **0.8.0** foi publicada no itch.io e na Playgama em 2026-11-27; o Y8 está em análise e a CrazyGames recusou a build clean. Em 2026-11-28, a **0.8.1** corrige o rewarded revive da Playgama (o timeout de carregamento de 15 s disparava com o anúncio ainda aberto) e unifica o cooldown de 60 s para qualquer anúncio, impedindo um segundo ad na sequência.
 
 ### Como ler os status
 
@@ -20,6 +20,8 @@ A campanha atual tem **3 mundos, 18 fases e 69 ondas** de campanha (mais o tutor
 - **v0.7.0-dev:** implementado localmente (Mundos II/III, save v3, kit físico, mapas por mundo e debug de ondas); não publicado.
 - **v0.7.1:** linha fechada localmente em 2026-11-24; adiciona tutorial simplificado/assistido, Giant Ball maior, cor da bola por dano e pierce. Não publicada.
 - **v0.7.2:** patch de 2026-11-26; Playgama Bridge **2.4.4**, correção do ímã do último bloco e bump de versão. Jogo aceito na Playgama; build em auto-certificação. Sem tag/release.
+- **v0.8.0:** linha atual de 2026-11-27; separa **bridge** e **clean** por build, adiciona boot por alias, browser storage com fallback no clean, pausa por visibilidade, sem ads no clean e pacotes/ZIPs distintos. Publicada no itch.io e na Playgama; Y8 em análise; CrazyGames recusou a clean. Sem tag/release.
+- **v0.8.1:** patch de 2026-11-28; corrige o rewarded revive (timeout e ordem de eventos) e unifica o cooldown de 60 s para qualquer anúncio. Local, sem tag/release.
 - **v0.6.1:** implementado e validado no ciclo anterior (Tier 4, economia de Sparks, feedback de HUD e card do Workshop).
 - **v0.6.0:** implementado e validado no ciclo anterior (perks reworkadas, primeira economia de Sparks, Workshop e save v2).
 - **v0.5.1:** implementado e validado no ciclo anterior (tutorial, controles touch e política de ads).
@@ -556,6 +558,29 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 | Gates | 428 unit / 35 arquivos; 43 E2E / 12 specs; 2.781 blocos / 9.392 XP |
 | Publicação | Nenhuma; linha local, sem tag/release |
 
+### O que entrou na v0.8.0
+
+| Item | Entrega |
+|---|---|
+| Targets de build | `dist/` (bridge) + `dist-clean/` (clean); `npm run package` gera dois ZIPs e dois manifestos |
+| Boot | alias `@boot-target` escolhe `platformBootBridge` ou `platformBootClean`; `PlatformService` inalterado |
+| Clean | `CleanAdapter` sem ads, `BrowserStorage` com fallback para memória, pausa por `visibilitychange`/`blur` |
+| Pacote | bridge 20 arquivos; clean 17 arquivos; o clean proíbe termos/runtime da Playgama e do CrazyGames |
+| Testes | 440 unitários / 37 arquivos; 46 E2E (bridge desktop + mobile + clean) |
+| Store | conjunto Y8 0.8.0 (6 standard, 6 widescreen, 3 landscape promo, 3 portrait promo, 3 game cards e vídeo contínuo de ~30 s) |
+| Publicação | bridge no itch.io e na Playgama (2026-11-27); Y8 em análise; CrazyGames recusou a clean; sem tag/release |
+
+### O que entrou na v0.8.1
+
+| Item | Entrega |
+|---|---|
+| Rewarded revive | O timeout de 15 s não dispara mais com o anúncio aberto; `opened` arma um timeout de 180 s e a recompensa só é paga em `rewarded`. |
+| Ordem dos eventos | `closed` antes de `rewarded` ganha uma janela de 500 ms; o adaptador também consulta `advertisement.rewardedState` antes de decidir. |
+| Cooldown | `lastAdFinishedAt` compartilhado: nenhum rewarded, wave ou exit ad começa nos 60 s seguintes a outro anúncio. |
+| Exits | Results e pause usam o mesmo gate; Menu após rewarded/exit não toca outro ad. |
+| Testes | 447 unitários / 37 arquivos; 48 E2E; casos novos para anúncio aberto >15 s, `closed → rewarded` e Menu após rewarded. |
+| Publicação | Patch local 0.8.1; sem tag/release. |
+
 ### O que continua fora
 
 - Bônus permanentes de atributos, leaderboards e conquistas.
@@ -570,15 +595,16 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 
 ### Distribuição
 
-- Portais pretendidos: **itch.io, GameFlare, Playgama e CrazyGames**.
-- **Um build, 3 mundos:** o mesmo HTML5/ZIP serve os quatro portais, com a Playgama Bridge como camada de integração. O Bridge é **local** no boot (`./playgama-bridge.js`), sem request ao CDN da Playgama.
-- O **itch.io recebeu a `0.6.1`** manualmente em 2026-11-12; `0.1.0-mvp` é histórica.
-- A **0.7.2 é a linha atual** e está implementada localmente; o jogo foi aceito e publicado na Playgama, com a `0.7.1` em auto-certificação.
-- **Playgama:** jogo aceito; a `0.7.1` foi reprovada na auto-certificação por usar Bridge 2.4.1. A `0.7.2` usa 2.4.4 e precisa de upload manual.
-- **CrazyGames:** a 0.3.0 e a 0.4.0 foram reprovadas com a mesma mensagem genérica; a 0.5.1 foi submetida em 2026-11-11. A submissão está **pausada até 2026-11-26**. Decisão: **não fazer moldura/letterbox desktop**.
+- Portais pretendidos: **itch.io, GameFlare, Playgama, Y8, Lagged, Kongregate e CrazyGames**.
+- **Dois builds, 3 mundos:** `dist/` é o **bridge** (Playgama Bridge 2.4.4 local em `./playgama-bridge.js`, sem request ao CDN) para Playgama, Y8, Lagged e itch.io; `dist-clean/` é o **clean**, sem Playgama, sem SDK/strings do CrazyGames e sem ads, para CrazyGames Basic e Kongregate. O `PlatformService` é o mesmo; o boot escolhe o adapter no build (`@boot-target`).
+- O **itch.io recebeu a `0.8.0`** manualmente em 2026-11-27; a `0.6.1` é a build anterior e `0.1.0-mvp` é histórica.
+- A **0.8.0 é a linha atual** e está publicada no itch.io e na Playgama. A `0.7.1` foi reprovada na auto-certificação por usar Bridge 2.4.1; o bridge `0.8.0` usa 2.4.4.
+- **Playgama:** `0.8.0` publicada no catálogo, fora do sandbox; futuras atualizações passam pela auto-certificação.
+- **CrazyGames:** a 0.3.0, a 0.4.0, a 0.5.1 e a **0.8.0 clean** foram recusadas; a 0.8.0 não trouxe motivo específico. Não reenviar sem pedir feedback ao suporte. Decisão: **não fazer moldura/letterbox desktop**.
+- **Y8:** `0.8.0` enviada; aguardando resposta do portal.
 - **GameFlare:** conta criada, acesso bloqueado; suporte acionado e sem resposta.
 - Os portais restantes continuam com submissão **manual**; revalidar requisitos na data.
-- **Assets de loja:** capas, 9 screenshots, 2 vídeos e 5 painéis How to Play regenerados a partir da 0.6.1; revisão humana pendente antes de reutilizar em portal.
+- **Assets de loja:** o conjunto Y8 foi gerado da 0.8.0; capas, screenshots 390×844, previews e painéis How to Play antigos continuam da 0.6.1 e precisam de regeneração/revisão antes de reutilizar em portal.
 
 ### Stack de desenvolvimento
 
@@ -591,15 +617,18 @@ Com as três, o catálogo vai a **22 perks**: 10 iniciais e **12 bloqueadas**
 
 - Jogo totalmente gratuito; receita somente de publicidade.
 - Modelo escolhido: anúncios convencionais conforme cada portal e anúncios recompensados opcionais que concedem uma vantagem ao jogador.
-- **Interstitials em pausas naturais (política 0.5.1, mantida na 0.6.1):**
+- **Interstitials em pausas naturais (política 0.5.1, ajustada na 0.8.1):**
   - campanha: somente quando há próxima onda e a onda limpa é múltipla de 3 — em qualquer mundo, nunca no fim da fase; o tutorial não tem ads;
   - Endless: a cada 4 ondas;
   - tutorial: nenhum ad;
-  - saída dos results (Next/Retry/Menu): se não houve outro interstitial nos últimos 60 s; após rewarded revive, o ad dos results ainda pode aparecer na segunda morte;
-  - saída pelo menu do pause: suprimida se houve interstitial **ou** rewarded revive nos últimos 60 s.
+  - saída dos results (Next/Retry/Menu): se nenhum ad terminou nos últimos 60 s;
+  - saída pelo menu do pause: se nenhum ad terminou nos últimos 60 s;
+  - **cooldown único:** rewarded, wave e exits compartilham o mesmo intervalo de 60 s; nenhum ad novo começa enquanto outro está aberto.
 - **Rewarded revive:** ao ser derrotado, o jogador pode assistir um ad uma vez por
-  run para continuar com uma bola nova. O caminho sem ad continua existindo: a
-  run termina normalmente e o jogador pode tentar de novo.
+  run para continuar com uma bola nova. A recompensa só é entregue no estado
+  `rewarded`; depois de `opened`, o anúncio pode ficar aberto até 180 s sem ser
+  tratado como falha. O caminho sem ad continua existindo: a run termina
+  normalmente e o jogador pode tentar de novo.
 - **Second Chance + rewarded revive** coexistem de propósito: são dois revives por run, um de cada mecânica.
 - **Sparks não são vendidos nem vêm de ads:** a metaprogressão é ganha apenas jogando; não há loot box, compra de vantagem ou refund.
 - Sem compras, microtransações, cosméticos pagos ou opção paga para remover anúncios.
@@ -627,23 +656,24 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | Conteúdo | A campanha de 3 mundos / 18 fases / 69 ondas está fechada; com o tutorial, são 19 fases / 71 ondas. O Endless é gerado proceduralmente. |
 | Tutorial | Implementado com 2 ondas, 12 blocos, 15 XP, 1 level up e 2 coach marks; skip e textos grandes cobertos por testes. Falta validar compreensão e tempo até a primeira perk em teste humano. |
 | Endless | Uma fase infinita implementada; balanceamento das ondas altas e dos chefes ainda depende de playtest humano. |
-| Ondas | Distribuição decidida: tutorial 2; campanha 2/3/3/3/4/5. A fase 1 encurtada e as ondas 4–6 estão implementadas e validadas. |
+| Ondas | Tutorial 2; Mundo I 2/3/3/3/4/5 (20); Mundo II 22; Mundo III 27; total de 69 ondas de campanha + 2 do tutorial. |
 | Perks | Catálogo fechado em 22 perks, com níveis, pré-requisitos e fallback interno; Momentum, Bombardier, Boss Slayer e Hot Streak foram reworkadas na 0.6.0, e Overkill, Shield Bash e Conductor entraram na 0.6.1. Balanceamento fino ainda depende de playtest humano. |
 | Metaprogressão | Implementada na 0.6.1: 10 starters, 12 unlocks em quatro tiers, Sparks e Workshop. Falta calibrar economia e tempo até o primeiro unlock em playtest. |
-| Save v2 | Implementado com `meta: { sparks, unlocks }` e inalterado na 0.6.1; migração v1→v2 coberta por testes. Falta validar save antigo real no navegador. |
+| Save v3 | Implementado (`version: 3`, `unlockedPhase` 0..18, `meta`, `endless`, `phases`); migração v1/v2→v3 coberta por testes. Falta validar save antigo real no navegador. |
 | Workshop | Implementado com card de progressão, quatro tiers, 12 cards, custos, compra, persistência, contagem e barra; E2E e layout 320/390 cobertos. Falta teste em iframe de portal. |
-| Chefes | Três chefes definidos (Frost Sentinel, Ember Warden, Void Herald) com HP, padrão, shards e corrosão. Ajuste de dificuldade segue aberto para playtest. |
+| Chefes | Nove chefes, três por mundo, com HP, padrão, shards e corrosão. Ajuste de dificuldade segue aberto para playtest. |
 | Regras de onda | `timeLimit`, `noLaser`, `noMultiball` e `gust` implementados nas ondas definidas. Novas regras ficam para o futuro. |
 | Zoom | Escala 0,68–1,0 implementada e validada no conteúdo. Testar legibilidade em telas pequenas reais. |
 | Balanceamento | Ainda depende de playtest humano; o bot de QA não substitui jogador. |
-| Rewarded ads | Revive uma vez por run implementado; outros usos ficam para o futuro. |
+| Rewarded ads | Revive uma vez por run implementado; a 0.8.1 corrige a entrega na Playgama (timeout/ordem de eventos). Outros usos ficam para o futuro. |
 | Próximo ciclo | Decidir entre conteúdo (novo mundo), retenção (cosméticos/desafios/reroll) ou plataforma (localização/landscape). |
 | Localização | Fora do escopo; o catálogo de strings precisa ser separado por locale antes. |
 | Performance real | Protocolo e script prontos (`docs/qa/performance-testing.md`, `scripts/perf-smoke.mjs`); resultados da 0.6.1 pendentes. |
-| Distribuição | itch.io e Playgama sandbox com `0.6.1`; CrazyGames pausado até 2026-11-26; GameFlare bloqueado. |
+| Distribuição | `0.8.0` publicada no itch.io e na Playgama (catálogo); Y8 em análise; CrazyGames recusou a 0.8.0 clean; GameFlare bloqueado. |
+| Clean em iframe | `localStorage` funciona no preview local; testar no QA do portal e, se bloquear, o fallback de memória mostra o aviso. |
 | Apresentação desktop | Side art adicionada em landscape; o campo continua portrait e sem moldura. Risco residual de legibilidade em iframe desktop. |
-| Ads | Política 0.5.1 mantida na 0.6.1 e testada com mock; acompanhar fill/limites reais na Playgama e CrazyGames. |
-| Store assets | Capas, 9 screenshots, 2 vídeos e 5 painéis How to Play regenerados da 0.6.1; revisão humana pendente. |
+| Ads | Política 0.5.1 ajustada na 0.8.1: rewarded só em `rewarded`, 15 s para abrir / 180 s aberto, janela de 500 ms e cooldown único de 60 s para qualquer ad; clean sem ads. Validar o rewarded real na Playgama após o upload. |
+| Store assets | Conjunto Y8 0.8.0 pronto; capas, 9 screenshots, 2 vídeos e 5 painéis How to Play ainda da 0.6.1, com regeneração/revisão pendente. |
 | Áudio | Novos elementos e chefes usam SFX existentes; mixagem final ainda pode ser refinada. |
 
 ### Checklist de coerência
@@ -655,10 +685,11 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 - O laser exige lançamento explícito na onda e pelo menos uma bola solta; reset, Sticky e a bola inicial presa bloqueiam o disparo.
 - O toque é relativo 1:1 no centro, com ganho até 2,2× na zona externa de 22%; mouse é absoluto e a velocidade do paddle não mudou.
 - O zoom é escala de layout, não de câmera; o input não muda.
-- Metaprogressão desbloqueia perks, não bônus permanentes de atributos; são 10 starters + 12 unlocks = 22 perks, as starters são implícitas e as compradas ficam no save v2. A run ativa não é salva.
+- Metaprogressão desbloqueia perks, não bônus permanentes de atributos; são 10 starters + 12 unlocks = 22 perks, as starters são implícitas e as compradas ficam no save v3. A run ativa não é salva.
 - O Endless é uma run separada: não desbloqueia fases, não substitui a campanha e mantém seus próprios recordes no save.
-- A monetização é somente publicidade; o rewarded revive é opcional e tem caminho sem ad; tutorial não tem ads.
-- O build `0.1.0-mvp` é histórico; a `0.6.1` está publicada no itch.io e no sandbox da Playgama; a `0.5.1` é a build anterior.
+- A monetização é somente publicidade; o rewarded revive é opcional e tem caminho sem ad; tutorial não tem ads. O clean (CrazyGames Basic/Kongregate) não tem ads nem revive por anúncio.
+- O bridge e o clean compartilham o mesmo `PlatformService`; o gameplay não pergunta a plataforma. O clean não contém Playgama nem SDK do CrazyGames e usa browser storage com fallback para memória.
+- O build `0.1.0-mvp` é histórico; a `0.6.1` é a build anterior; a `0.8.0` está publicada no itch.io e na Playgama, com bridge e clean.
 
 ---
 
@@ -680,6 +711,8 @@ Itens já implementados na v0.2.0 (blocos especiais, elementos, chefes, mais per
 | `1.12` | 2026-11-24 | Pierce: hit direto da bola com pelo menos 1 de dano excedente destrói e atravessa sem quicar; igual ou menor quica. Só bola; chefes/elementos/ferramentas ficam de fora. Overkill continua com o mesmo excesso. Evento/SFX/FX próprios. Gates com 428 unit e 43 E2E. |
 | `1.13` | 2026-11-24 | Fechamento da linha **0.7.1** local: GDD consolidado, escopo da versão e handoff novo para mudanças profundas (densidade, progressão, público). Sem publicação/tag/release. |
 | `1.14` | 2026-11-26 | **0.7.2**: Playgama Bridge 2.4.4, runtime vendorizado e correção do ímã do último bloco (taxa de giro adaptativa). Jogo aceito na Playgama; build em auto-certificação. Sem tag/release. |
+| `1.15` | 2026-11-27 | **0.8.0**: builds **bridge × clean**, boot por alias `@boot-target`, `CleanAdapter` + browser storage com fallback, pausa por visibilidade, dois ZIPs/manifestos e conjunto Y8 0.8.0. Gates com 440 unitários e 46 E2E. Publicada no itch.io e na Playgama; Y8 em análise; CrazyGames recusou a clean. Sem tag/release. |
+| `1.16` | 2026-11-28 | **0.8.1**: rewarded revive (15 s para abrir / 180 s aberto, janela `closed → rewarded` de 500 ms e `rewardedState`), lock de anúncio, cooldown único de 60 s para wave/results/pause/rewarded e `AdOverlay` com safety de 300 s. Gates com 447 unitários e 48 E2E. Patch local; sem tag/release. |
 | `0.1.0-mvp` | 2026-11-08 | Build publicado no itch.io; ZIP congelado. |
 | `0.2.0-dev` | 2026-11-08 | Expansão da campanha em desenvolvimento; ainda não publicada nos portais. |
 | `0.3.0-dev` | 2026-11-09 | Modo Endless em desenvolvimento; campanha e build publicado permanecem intactos. |

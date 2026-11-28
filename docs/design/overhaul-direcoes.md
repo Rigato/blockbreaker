@@ -2,8 +2,8 @@
 
 **Status:** documento de trabalho; tutorial e pierce implementados; densidade,
 progressão e público seguem em aberto.
-**Data:** 2026-11-23 · **Atualizado:** 2026-11-24
-**Base:** `0.7.2` local, 18 fases + tutorial, save v3, 22 perks.
+**Data:** 2026-11-23 · **Atualizado:** 2026-11-27
+**Base:** `0.8.0` publicado no itch.io/Playgama (bridge × clean), 18 fases + tutorial, save v3, 22 perks.
 **Objetivo:** registrar as conversas de overhaul para não perdê-las e permitir
 decidir uma frente por vez.
 
@@ -29,8 +29,8 @@ decidir uma frente por vez.
   se aproxima; há teste de regressão e fuzz de 500 cenários.
 - Totais: 12 blocos, 15 XP, 1 level up; totais do conteúdo: 2.781 blocos /
   9.392 XP.
-- Gates: 428 unitários / 35 arquivos; 43 E2E / 12 specs; validação de conteúdo
-  verde.
+- Gates na época: 428 unitários / 35 arquivos; 43 E2E / 12 specs; validação de
+  conteúdo verde. A 0.8.0 fechou em 440 unitários / 37 arquivos e 46 E2E.
 
 ### 1.1 Feedback visual de dano (2026-11-23)
 
@@ -124,9 +124,10 @@ conteúdo: `unlockedPhase` 0..18 e estatísticas por `phase-N`.
 | Mundos selecionáveis / mapa ramificado | save v4 + UI | alto |
 | Run contínua entre fases | fluxo + talvez save v4 | muito alto |
 
-**Janela:** a `0.7.2` não foi publicada; só existem saves v1/v2 reais da
-`0.6.1`. Se a progressão mudar de modelo, este é o momento mais barato para um
-save v4 — migrar v1/v2 direto e não carregar uma população v3.
+**Janela:** a `0.8.0` foi publicada em 2026-11-27, então a partir de agora
+começam a existir saves v3 reais. A janela mais barata para um save v4 (migrar
+só v1/v2 e não carregar uma população v3) está se fechando; qualquer mudança de
+modelo precisa planejar a migração v1/v2/v3 e assumir custo maior.
 
 **Modelos possíveis:** linear reescrito; linear reindexado; mundos
 selecionáveis; mapa ramificado; run contínua. O modelo precisa ser decidido
@@ -181,7 +182,7 @@ skip, mortes por run, leitura de HP dos blocos, intenção de repetir.
 
 1. Tutorial e pierce estão implementados; medir os dois em playtest.
 2. Decidir o spine de progressão no papel; se mudar, planejar save v4 antes de
-   publicar a 0.7.1.
+   publicar a 0.8.0.
 3. Testar densidade (8×10/8×12; depois 9 colunas) com o pierce já ativo.
 4. Só então autorar conteúdo em massa.
 5. Reavaliar layout desktop se o público-alvo justificar.
@@ -191,6 +192,6 @@ skip, mortes por run, leitura de HP dos blocos, intenção de repetir.
 ## 8. Referências
 
 - [GDD](../GDD_Bricklike.md)
-- [Handoff v0.8.0](../handoff-v0.8.0.md)
+- [Handoff v0.8.1](../handoff-v0.8.1.md)
 - [Perks — proposta de rework](../design/perks-rework-v0.7.md)
 - [Spec de publicação](../spec_tecnica_portais_web.md)
